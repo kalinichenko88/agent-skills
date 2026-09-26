@@ -1,0 +1,15 @@
+{
+  "name": "kalinichenko",
+  "owner": {
+    "name": "Ivan Kalinichenko",
+    "url": "https://github.com/kalinichenko88"
+  },
+  "plugins": [
+    {
+      "name": "kalinichenko",
+      "source": "./",
+      "description": "Engineering rules as an always-on base prompt, plus the github, docker and typescript-conventions skills."
+    }
+  ],
+  "description": "Ivan Kalinichenko's engineering rules and skills for Claude Code and Codex."
+}
