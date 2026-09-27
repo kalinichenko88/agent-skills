@@ -120,9 +120,9 @@ Scout fix; it is an issue. Cleaner than you found it is not the same as rebuilt.
 A commit message, a pull request, an issue, a workflow file — anything that
 touches a repository's GitHub surface goes through the `kalinichenko:github`
 skill. Invoke it before the first `git commit`, `gh` call or workflow edit, not
-after: it carries
-commit trailers, PR ownership and merge style, issue filing, keeping issues true
-as the code moves, which open issues ride along with a task, and action pinning.
+after: it carries commit trailers, PR ownership and merge style, issue filing,
+keeping issues true as the code moves, which open issues ride along with a task,
+and action pinning.
 
 Two rules stay here in full, because they have to fire when nobody is thinking
 about GitHub at all.
