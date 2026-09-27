@@ -8,7 +8,5 @@
   },
   "homepage": "https://github.com/kalinichenko88/agent-skills",
   "repository": "https://github.com/kalinichenko88/agent-skills",
-  "license": "MIT",
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "license": "MIT"
 }
