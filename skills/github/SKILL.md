@@ -1,6 +1,6 @@
 ---
 name: github
-description: Use when touching a repository's GitHub surface — writing a commit message, running `gh pr create` or merging a pull request, filing or updating an issue, picking an issue up to work on, checking whether a finding is already filed, or creating or editing a GitHub Actions workflow.
+description: Use when touching a repository's GitHub surface — writing a commit message, running `gh pr create` or merging a pull request, filing or updating an issue, picking an issue up to work on (including a bare `#91` or issue URL as the whole message), checking whether a finding is already filed, or creating or editing a GitHub Actions workflow.
 ---
 
 # Working with GitHub
@@ -16,7 +16,7 @@ so in the final report rather than inventing a substitute.
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch |
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description. Otherwise file an issue — search by identifier first |
 | Filing next to an existing issue | Name the relation, and correct the other side |
-| Picking an issue up — `#91` or its URL | Close its duplicates; worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; take along settled issues on the same code |
+| Picking an issue up — `#91` or its URL | Close its duplicates; unless told otherwise, a worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; take along settled issues on the same code |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host |
 
 ## Commits
@@ -129,21 +129,23 @@ the survivor, never left standing as a second opinion.
 
 **Taking one into work.** An issue named on its own — `#91`, "take #91", its
 URL — as the session's first message, or after a talk about which task is next,
-is the request to take it into work. Read it first: closed, or assigned to
-someone else — say so and wait. An issue URL from another repository than this
+is the request to take it into work; a mention inside other work is not. Read it
+first: closed, or assigned to someone else — say so and wait. An issue URL from another repository than this
 checkout's `origin`: say so and stop.
 
 **Its duplicates close first.** Read every open issue's title once — `gh issue
-list --state open --limit 500 --json number,title` — and search by identifier
-for every file and symbol the issue names. A word search finds only the
-duplicates that share a word with it; the titles find the rest. A duplicate —
-the same report, in other words, about the same place — closes against the issue
-in hand before the work starts, once anything it adds (a repro, an error
-message, a surface) is carried into a comment on the survivor. A report that
-gives only what someone saw — no cause, no code — matches by symptom alone: it
-waits for the reproduction, run in the task's worktree, and closes the same way
-once that shows the same cause; otherwise it stays open, with a comment naming
-what else could explain it. Name every one closed in the final report.
+list --state open --limit 500 --json number,title`, and a higher limit if 500
+come back — and search by identifier for every file and symbol the issue names.
+A word search finds only the duplicates that share a word with it; the titles
+find the rest. A duplicate — the same report, in other words, about the same
+place — closes against the issue in hand before the work starts, once anything
+it adds (a repro, an error message, a surface) is carried into a comment on the
+survivor. One with its own assignee or linked branch stays open: say so. A
+report that gives only what someone saw — no cause, no code — matches by
+symptom alone: it waits for the reproduction, run in the task's worktree, and
+closes the same way once that shows the same cause; otherwise it stays open,
+with a comment naming what else could explain it. Name every one closed in the
+final report.
 
 ```bash
 gh issue close 96 --duplicate-of 91 --comment "Same report as #91; what it adds is copied there."
@@ -163,28 +165,33 @@ English — `fix/91-electron-binary-in-lanes`, never `issue-91` or the whole
 title.
 
 ```bash
-gh issue develop --list 91   # a linked branch: the work started, reuse it
-gh issue develop 91 --name fix/91-electron-binary-in-lanes \
-  --checkout --worktree .claude/worktrees/fix/91-electron-binary-in-lanes
+gh issue develop --list 91   # a linked branch: pass its name to --name, gh reuses it
+git worktree list            # that branch already checked out somewhere: work there
+gh issue develop 91 --name fix/91-electron-binary-in-lanes --checkout \
+  --worktree "$(git rev-parse --show-toplevel)/.claude/worktrees/fix/91-electron-binary-in-lanes"
+ex="$(git rev-parse --git-common-dir)/info/exclude"; grep -qxF .claude/worktrees/ "$ex" || echo .claude/worktrees/ >>"$ex"
 ```
 
-`gh issue develop` branches from the default branch on the remote and links the
-branch to the issue, so the issue shows where its work lives. `--worktree` needs
-gh 2.99 or newer. For a branch already linked, or on an older gh after `gh issue
-develop 91 --name <branch>`: `git fetch origin <branch> && git worktree add
-.claude/worktrees/<branch> <branch>`. Already in a linked worktree — a Codex
-`--worktree` session starts in one, on a detached HEAD — stay there and check
-the branch out in it: `gh issue develop 91 --name <branch> --checkout`.
+`gh issue develop` branches from the remote's default branch and links the branch
+to the issue. `--worktree` needs gh 2.99 or newer; on an older one, drop
+`--checkout --worktree` and run `git fetch origin <branch> && git worktree add
+<path> <branch>`. The last line keeps `git add -A` in the main checkout from
+recording the worktree as an embedded repository.
+
+Already in a worktree — `git rev-parse --path-format=absolute --git-dir
+--git-common-dir` prints two different paths, as in a session started with
+`codex --worktree` (on a detached HEAD) or `claude --worktree` — stay there and
+check the branch out in it: `gh issue develop 91 --name <branch> --checkout`.
 
 Then move into the worktree. Claude Code: `EnterWorktree` with that `path`.
-Codex cannot move a running session, so every command runs with that directory
-as its working directory.
+Codex cannot move a running session: every command takes the worktree as
+`workdir`, and every file path, read or patched, is written under it.
 
 Then list what points at it — the timeline carries every cross-reference,
 including the ones its own body never mentions:
 
 ```bash
-gh api repos/{owner}/{repo}/issues/12/timeline --paginate \
+gh api repos/{owner}/{repo}/issues/91/timeline --paginate \
   --jq '.[] | select(.event == "cross-referenced")
         | "\(if .source.issue.pull_request then "PR" else "issue" end) \(.source.issue.number) \(.source.issue.state) \(.source.issue.title)"'
 ```
@@ -228,8 +235,9 @@ test, it is assigned like the task, and the PR description closes it under
 **Also closes**, one line per issue with its own keyword — `Closes #15` —
 because GitHub closes only the numbers a keyword precedes.
 
-**Finishing.** The PR closes it and every ride-along, and the same pass updates
-every sibling issue whose text the change just falsified.
+**Finishing.** The PR closes it and every ride-along; a duplicate still held for
+the reproduction is closed or commented on; and the same pass updates every
+sibling issue whose text the change just falsified.
 
 Measured on a live tracker: of the 100 newest issues, 4 bodies had ever been
 edited; 5 open issues still cited a file the schema migration had deleted; one
