@@ -81,8 +81,8 @@ ones now say something false.
 
 ## Handling code-review findings (always)
 
-After any code review — `/code-review`, a review subagent, or a human's
-comments — follow this order, without being asked:
+After any code review — `/code-review` in Claude Code, `/review` in Codex, a
+review subagent, or a human's comments — follow this order, without being asked:
 
 1. **Verify each finding yourself before acting on it.** Reproduce it against
    the real code or in a browser. Reviewers report findings that are wrong,
