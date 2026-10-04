@@ -10,7 +10,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   `CLAUDE.md` or `AGENTS.md`, so `hooks/rules.sh` injects it at the start of
   every session and every subagent.
 - **`kalinichenko:github`** — commits, pull requests, issues and Actions. An
-  issue named on its own — `#91` or its URL — starts the work in a worktree.
+  issue named on its own — `#91` or its URL — starts the work: its duplicates
+  closed, then a worktree named for what the work does.
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
