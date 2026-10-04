@@ -139,8 +139,11 @@ for every file and symbol the issue names. A word search finds only the
 duplicates that share a word with it; the titles find the rest. A duplicate —
 the same report, in other words, about the same place — closes against the issue
 in hand before the work starts, once anything it adds (a repro, an error
-message, a surface) is carried into a comment on the survivor. Name it in the
-final report.
+message, a surface) is carried into a comment on the survivor. A report that
+gives only what someone saw — no cause, no code — matches by symptom alone: it
+waits for the reproduction, run in the task's worktree, and closes the same way
+once that shows the same cause; otherwise it stays open, with a comment naming
+what else could explain it. Name every one closed in the final report.
 
 ```bash
 gh issue close 96 --duplicate-of 91 --comment "Same report as #91; what it adds is copied there."
