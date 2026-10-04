@@ -20,7 +20,9 @@ Each command runs in a fresh shell, so `$last` and `$version` below stand for
 values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
 
 1. **Start from `main`.** Run `git fetch origin --tags`. Stop and say why if the
-   branch is not `main`, the tree is dirty, or `HEAD` is not `origin/main`.
+   branch is not `main` or the tree is dirty. Behind `origin/main`: `git merge
+   --ff-only origin/main`. Stop if that fails, or if `HEAD` is still not
+   `origin/main` — local commits the remote does not have.
 2. **Read what is unreleased.** `last=$(git describe --tags --abbrev=0 --match 'v[0-9]*')`, then
    `git log --format=%s "$last"..HEAD` and `git diff --name-only "$last"..HEAD`.
    No commits since the tag: stop, there is nothing to release. If
