@@ -1,6 +1,6 @@
 {
   "name": "kalinichenko",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Engineering rules as an always-on base prompt, plus the github, docker and typescript-conventions skills.",
   "author": {
     "name": "Ivan Kalinichenko",

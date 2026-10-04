@@ -51,8 +51,9 @@ under `/plugin` → Marketplaces → `kalinichenko`, or update by hand:
 claude plugin update kalinichenko@kalinichenko
 ```
 
-Codex caches the plugin by the `version` in `.codex-plugin/plugin.json`, so a
-release for Codex bumps that field. Users then run:
+Codex installs the plugin under the `version` in `.codex-plugin/plugin.json` and
+reinstalls it when a release moves that field. It upgrades the marketplace in
+the background at startup; to upgrade now:
 
 ```sh
 codex plugin marketplace upgrade kalinichenko
@@ -64,3 +65,10 @@ codex plugin marketplace upgrade kalinichenko
 through the hook to prove the JSON it prints carries the file byte for byte.
 
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
+
+## Release
+
+Pull requests leave `version` alone. Once the work is on `main`, run `/release`
+in Claude Code from this repository, or `/release minor` to pick the level. It
+bumps `.codex-plugin/plugin.json`, tags `vX.Y.Z` and pushes both. The skill
+lives in `.claude/skills/`, not `skills/`, so it does not ship with the plugin.
