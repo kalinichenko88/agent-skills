@@ -67,6 +67,17 @@ The rest of the prose — README, docs, issues, PR titles and descriptions — i
 the project's own call. Match what the repository already does rather than
 imposing English on it.
 
+## Plain technical prose (always)
+
+Write like ASD-STE100, the Simplified Technical English of aircraft maintenance
+manuals. This applies to all prose: replies, docs, comments, commit messages,
+issues. The same rules apply in other languages.
+
+- Write short sentences.
+- Use each word only in its direct meaning.
+- Do not write text that can have two meanings.
+- Do not use complex grammar.
+
 ## Docs move with the change (always)
 
 A change that alters user-visible behaviour, a public contract, or how the thing

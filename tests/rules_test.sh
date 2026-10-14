@@ -17,5 +17,12 @@ for event in SessionStart SubagentStart; do
     echo "FAIL: $event: context differs from rules.md"
     exit 1
   }
+  # Claude Code moves additionalContext over 10,000 characters to a file and
+  # shows only a 2,000-character preview.
+  chars=$(jq -r '.hookSpecificOutput.additionalContext | length' <<<"$output")
+  [ "$chars" -le 10000 ] || {
+    echo "FAIL: $event: context is $chars characters, the cap is 10000"
+    exit 1
+  }
 done
 echo 'rules_test: ok'
