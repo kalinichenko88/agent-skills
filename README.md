@@ -5,10 +5,10 @@ prompt of engineering rules, plus the skills those rules lean on.
 
 - **`rules.md`** — the base prompt: run the repository's own check before
   calling work done, ship every bug fix with its test, use the platform before
-  a dependency, keep code and commits in English, move docs with the change,
-  verify review findings before acting on them. A plugin has no slot for a
-  `CLAUDE.md` or `AGENTS.md`, so `hooks/rules.sh` injects it at the start of
-  every session and every subagent.
+  a dependency, keep code and commits in English, write prose in Simplified
+  Technical English, move docs with the change, verify review findings before
+  acting on them. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
+  `hooks/rules.sh` injects it at the start of every session and every subagent.
 - **`kalinichenko:github`** — commits, pull requests, issues and Actions. An
   issue named on its own — `#91` or its URL — starts the work: its duplicates
   closed, then a worktree named for what the work does.
@@ -62,7 +62,8 @@ codex plugin marketplace upgrade kalinichenko
 ## Develop
 
 `make check` validates the manifests, runs shellcheck and replays `rules.md`
-through the hook to prove the JSON it prints carries the file byte for byte.
+through the hook to prove the JSON it prints carries the file byte for byte and
+stays within Claude Code's 10,000-character cap on hook context.
 
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
