@@ -14,7 +14,7 @@ so in the final report rather than inventing a substitute.
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` |
 | `gh pr create` | `--assignee @me`; assign every issue it closes too |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch |
-| Reading the tracker | From 30 open issues, a Haiku scout reads it; you decide and write |
+| Reading the tracker | From 30 open issues in Claude Code, a Haiku scout reads it; otherwise you run `scout.md`. You decide and write |
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description. Otherwise add it to an open issue on the same code, or file a new one |
 | Filing next to an existing issue | Name the relation, and correct the other side |
 | Picking an issue up — `#91` or its URL | Close its duplicates; unless told otherwise, a worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code |
@@ -104,9 +104,9 @@ finding with its `path:line`.
 Send it when the tracker has 30 open issues or more: `gh issue list --state
 open --limit 30 --json number --jq length` prints `30`. Below that, and in
 Codex, read `scout.md` and run it yourself: on a small tracker the reading
-costs less than a subagent's start. Run by you, its *Read* and *Sort* apply;
-keep the groups as your notes and go on with this skill. Its *Return* is for a
-subagent.
+costs less than a subagent's start. Run by you, all of it applies: write its
+groups and entries, `status:` and `also:` included, as your notes, and go on
+with this skill. Only the first sentence of its *Return* is for a subagent.
 
 The scout only reads. Every close, edit, comment and new issue is yours, and
 so is every verdict. Its lists include doubtful candidates on purpose: drop
@@ -133,9 +133,10 @@ more than the fix. Fails any of the three — a design choice, a behaviour chang
 a fix that needs its own test — and it is an issue, however small it looks.
 
 **Search by identifier, not by your title.** `gh issue list --search "Parser"
---state all` finds every issue that names the symbol; the prose you were about
-to write finds only issues someone happened to phrase your way — and on a
-tracker written in another language, nothing at all. Closed counts too: a
+--state all --limit 500` finds every issue that names the symbol (without
+`--limit`, `gh` stops at 30); the prose you were about to write finds only
+issues someone happened to phrase your way — and on a tracker written in
+another language, nothing at all. Closed counts too: a
 finding already filed and rejected does not need filing again. The scout runs
 these searches and reads the titles; run it before you file.
 
@@ -150,17 +151,21 @@ than it closes. Per finding, the scout's report decides:
   starts `Regression of #12`, and name the commit or the run that shows it
   again.
 - **A host** — an open issue whose fix changes the same code, or that decides
-  something about the same function. It takes the finding if nobody works on
-  it — no assignee other than you (`gh api user --jq .login`), and the scout's
-  `status:` is `free`: no linked branch, no pull request that closes it — and
-  if it holds fewer than two added findings: the scout's `also:` is `0` or `1`.
-  One PR must still close every problem in it. Then:
+  something about the same function. It takes the finding only if both hold:
+  - Nobody else works on it. The scout's `status:` is `free`, or its only
+    entry is `assigned to` you (`gh api user --jq .login`).
+  - It holds fewer than two added findings. Count its `## Also:` headings in
+    its body as it is now, with the scout's `jq` line: the findings you added
+    in this run count too. One PR must still close every problem in it.
+
+  Then:
   1. Add a section to its body that starts `## Also: <the problem>`, with
      where it is (`path:line`), how it shows up, and why it was out of scope
-     here. The heading is what the scout counts. `gh issue edit --body`
+     here. The heading is what the count reads. `gh issue edit --body`
      replaces the whole body, so write the old body and the new section to a
-     file first: `gh issue view 12 --json body --jq .body > body.md`, add the
-     section at the end, then `gh issue edit 12 --body-file body.md`.
+     file outside the checkout: `f=$(mktemp)`, `gh issue view 12 --json body
+     --jq .body > "$f"`, add the section at the end, then `gh issue edit 12
+     --body-file "$f"`.
   2. Change the title so it names every problem in the issue.
   3. Add the finding's label if the issue does not have it.
   4. Leave a one-line comment that says what was added. A body edit notifies
@@ -188,7 +193,9 @@ reference automatically, but nothing corrects the text on either side.
 same breath: edit its body so the next agent reads something true, and leave a
 one-line comment saying what moved and why. GitHub keeps the edit history, so
 nothing is lost by correcting the text in place. A duplicate is closed against
-the survivor, never left standing as a second opinion.
+the survivor, never left standing as a second opinion. When the other side is
+a host that someone works on, or that holds two added findings, it gets the
+one-line comment only (*Filing an issue*): its body stays as it is.
 
 **Taking one into work.** An issue named on its own — `#91`, "take #91", its
 URL — as the session's first message, or after a talk about which task is next,
@@ -200,18 +207,19 @@ another repository than this checkout's `origin`: say so and stop.
 issue and the files and symbols it names. While a subagent runs it, you can set
 up the worktree below: the worktree is not the work, so the duplicates can
 still close before the work starts. Its report holds the duplicates, the bugs
-and debt in the same area, the neighbours, and the linked issues and history;
-the rest of this section works from it.
+and debt in the same area, the neighbours, and the linked issues, open work and
+history; the rest of this section works from it. An issue with `## Also:`
+sections is one task: its own problem and every added one.
 
-**Its duplicates close first.** A duplicate — the same report, in other words,
-about the same place — closes against the issue in hand before the work starts,
-once anything it adds (a repro, an error message, a surface) is carried into a
-comment on the survivor. One with its own assignee or linked branch stays open:
-say so. A report that gives only what someone saw — no cause, no code — matches
-by symptom alone: it waits for the reproduction, run in the task's worktree,
-and closes the same way once that shows the same cause; otherwise it stays
-open, with a comment naming what else could explain it. Name every one closed
-in the final report.
+**Its duplicates close first.** A duplicate — the same report, in different
+words or not, about the same place — closes against the issue in hand before
+the work starts, once anything it adds (a repro, an error message, a surface)
+is carried into a comment on the survivor. One with its own assignee or linked
+branch stays open: say so. A report that gives only what someone saw — no
+cause, no code — matches by symptom alone: it waits for the reproduction, run
+in the task's worktree, and closes the same way once that shows the same cause;
+otherwise it stays open, with a comment naming what else could explain it.
+Name every one closed in the final report.
 
 ```bash
 gh issue close 96 --duplicate-of 91 --comment "Same report as #91; what it adds is copied there."
@@ -253,12 +261,13 @@ Then move into the worktree. Claude Code: `EnterWorktree` with that `path`.
 Codex cannot move a running session: every command takes the worktree as
 `workdir`, and every file path, read or patched, is written under it.
 
-Then read what points at it: the scout's **Linked and history** group. It
-holds every cross-reference from the timeline, including the ones the issue's
-own body never mentions, and the closed issues and merged PRs that changed the
-same code. Read in full the open issues, the PRs that touched the same
-code, and any closed issue whose outcome the task leans on; the scout's line is
-enough for the rest.
+Then read what points at it: the scout's **Linked, open work and history**
+group. It holds every cross-reference from the timeline, including the ones
+the issue's own body never mentions, the open PRs that change the same code,
+and the closed issues and merged PRs that changed it. An open PR there is work
+under way: say so before you start on the same code. Read in full the open
+issues, the PRs that touched the same code, and any closed issue whose outcome
+the task leans on; the scout's line is enough for the rest.
 
 Then check the issue's own `path:line` citations against the current tree before
 believing them — a line number is the first thing to rot — and correct them in
@@ -270,7 +279,7 @@ code the task will change. The issue in hand stays the task throughout.
 1. **Search.** The scout's report holds the hits, found by identifier and by
    title, so a report that names no file still shows up. When the work reaches
    a file or symbol the scout did not get, search it yourself:
-   `gh issue list --state open --search "verify_target"`.
+   `gh issue list --state open --limit 500 --search "verify_target"`.
 2. **Pull in the task's own defect.** A hit reporting the same wrong behaviour,
    fixed the same way, in another function or file is not a ride-along: it is
    the task, because a bug fix guards every surface the bug shows on (the
@@ -278,14 +287,17 @@ code the task will change. The issue in hand stays the task throughout.
    and the PR title names the defect rather than the one place reported.
 3. **Check every open bug and every debt issue in the same area first**,
    whatever the task is — a feature too. Bug and debt are the labels `bug` and
-   `debt`, or the repository's own names for them in `gh label list`. They
-   cost least to close while their code is being rewritten. So one PR can
-   deliver the task, fix a bug in the same code and remove the debt there.
+   `debt`, or the repository's own names for them in `gh label list`. An
+   unlabelled issue that the scout marked `bug` or `debt` on its `why:` line
+   counts too. They cost least to close while their code is being rewritten.
+   So one PR can deliver the task, fix a bug in the same code and remove the
+   debt there.
    Check each one against the code, and run a bug's reproduction when it gives
    one. Each ends in one of four ways:
    - **Already gone** — a commit on the default branch removed its cause: the
      debt's code is gone, or the bug's cause is fixed and its reproduction now
-     passes. Close it with a comment that names that commit and that run. A
+     passes. Close it with a comment that names that commit, and for a bug
+     that run. A
      bug that gives no reproduction, or that shows only sometimes, is not
      already gone because one run passes: it stays open, with a comment that
      says what the code now does.
@@ -318,6 +330,12 @@ debt the change removes — is a whole issue, not a Boy Scout fix: a bug brings
 its own test, it is assigned like the task, and the PR description closes it
 under **Also closes**, one line per issue with its own keyword — `Closes #15` —
 because GitHub closes only the numbers a keyword precedes.
+
+An issue with `## Also:` sections closes only when every problem in it is
+fixed: its own problem and each added one. Each verdict above covers all of
+them. A change that fixes only some does not close it: the PR description
+says `Part of #15` instead of `Closes #15`, and *Finishing* adds the line
+`Done in #<PR>.` under each problem it fixed.
 
 **Finishing.** The PR closes it, every ride-along and every issue the change
 removes; a duplicate still held for the reproduction is closed or commented on;
