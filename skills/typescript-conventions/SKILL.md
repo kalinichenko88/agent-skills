@@ -35,6 +35,20 @@ review is a type hole, not a shortcut.
 No implicit arrow returns in callbacks and handlers, no one-line braced `if`.
 The body goes on its own line, even when it is one statement.
 
+## A blank line goes before `return`
+
+```ts
+if (!user) {
+  return null;               // only statement in the block — no blank line
+}
+
+const name = user.name.trim();
+
+return name;
+```
+
+A `return` that is the only statement in its block takes no blank line.
+
 ## Render conditions are named constants
 
 ```tsx

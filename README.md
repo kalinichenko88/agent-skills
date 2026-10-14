@@ -59,6 +59,20 @@ the background at startup; to upgrade now:
 codex plugin marketplace upgrade kalinichenko
 ```
 
+## Recommended lint rules
+
+`kalinichenko:typescript-conventions` asks for a blank line before `return`. To
+make ESLint enforce it in a project, add this rule from `@stylistic`:
+
+```js
+'@stylistic/padding-line-between-statements': [
+  'error',
+  { blankLine: 'always', prev: '*', next: 'return' },
+],
+```
+
+It does not touch a `return` that is the only statement in its block.
+
 ## Develop
 
 `make check` validates the manifests, runs shellcheck and replays `rules.md`
