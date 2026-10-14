@@ -14,10 +14,10 @@ so in the final report rather than inventing a substitute.
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` |
 | `gh pr create` | `--assignee @me`; assign every issue it closes too |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch |
-| Reading the tracker | A Haiku scout reads it; you decide and write |
+| Reading the tracker | From 30 open issues, a Haiku scout reads it; you decide and write |
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description. Otherwise add it to an open issue on the same code, or file a new one |
 | Filing next to an existing issue | Name the relation, and correct the other side |
-| Picking an issue up — `#91` or its URL | Close its duplicates; unless told otherwise, a worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; check every open bug in the same area; take along settled issues on the same code |
+| Picking an issue up — `#91` or its URL | Close its duplicates; unless told otherwise, a worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host |
 
 ## Commits
@@ -98,7 +98,10 @@ Repository: <owner/repo>, checked out at <path>.
 Files and symbols: <every one the issue or the findings name, and any you know the work touches>.
 ```
 
-In Codex, read `scout.md` and run it yourself.
+Send it when the tracker has 30 open issues or more: `gh issue list --state
+open --limit 30 --json number --jq length` prints `30`. Below that, and in
+Codex, read `scout.md` and run it yourself: on a small tracker the reading
+costs less than a subagent's start.
 
 The scout only reads. Every close, edit, comment and new issue is yours, and
 so is every verdict: its lists are wide on purpose, so drop what does not hold,
@@ -129,7 +132,7 @@ a fix that needs its own test — and it is an issue, however small it looks.
 to write finds only issues someone happened to phrase your way — and on a
 tracker written in another language, nothing at all. Closed counts too: a
 finding already filed and rejected does not need filing again. The scout runs
-these searches and reads the titles; send it before you file.
+these searches and reads the titles; run it before you file.
 
 **Add to an open issue before you open a new one.** Two issues on one piece of
 code become two PRs that edit the same lines, and the tracker grows faster
@@ -177,11 +180,11 @@ is the request to take it into work; a mention inside other work is not. Read it
 first: closed, or assigned to someone else — say so and wait. An issue URL from
 another repository than this checkout's `origin`: say so and stop.
 
-**The scout reads the tracker next.** Send it (*The scout* above) with the
-issue and the files and symbols it names, and set up the worktree below while
-it runs. Its report holds the duplicates, the bugs in the same area, the
-neighbours and the timeline's cross-references; the rest of this section works
-from it.
+**The scout reads the tracker next.** Run it (*The scout* above) with the
+issue and the files and symbols it names; while a subagent runs it, set up the
+worktree below. Its report holds the duplicates, the bugs and debt in the same
+area, the neighbours and the timeline's cross-references; the rest of this
+section works from it.
 
 **Its duplicates close first.** A duplicate — the same report, in other words,
 about the same place — closes against the issue in hand before the work starts,
@@ -255,15 +258,22 @@ code the task will change. The issue in hand stays the task throughout.
    the task, because a bug fix guards every surface the bug shows on (the
    global prompt). Its fix joins the diff, it closes next to the task's issue,
    and the PR title names the defect rather than the one place reported.
-3. **Check every open bug in the same area**, whatever the task is — a feature
-   too. Code that is being rewritten is where a bug costs least to close. Check
-   each one against the code, and run its reproduction when it gives one. Each
-   ends in one of four ways:
-   - **Already gone** — it does not reproduce on the default branch: close it
-     with a comment that names the commit or the run that shows it.
-   - **The change removes it** — the work takes out its cause. Its test joins
-     the diff, and it closes with the PR.
-   - **Rides along** — it passes the four tests in step 4.
+3. **Check every open bug and every debt issue in the same area first**,
+   whatever the task is — a feature too. Bug and debt are the labels `bug` and
+   `debt`, or the repository's own names for them in `gh label list`. Code that
+   is being rewritten is where they cost least to close, so one PR can deliver
+   the task, fix a bug beside it and pay off the debt there. Check each one
+   against the code, and run a bug's reproduction when it gives one. Each ends
+   in one of four ways:
+   - **Already gone** — the bug does not reproduce, or the debt is already paid,
+     on the default branch: close it with a comment that names the commit or
+     the run that shows it.
+   - **The change removes it** — the work takes out its cause: the code it
+     cites is rewritten or deleted. A bug's test joins the diff. It closes with
+     the PR.
+   - **Rides along** — it passes the four tests in step 4, with *Same file*
+     widened to the same area: its fix changes a file of the screen, window or
+     command the task changes.
    - **Stays open** — none of these. If the change moves the code it cites,
      *Finishing* corrects its text.
 4. **Check every other hit.** It rides along only if it passes all four,
@@ -277,17 +287,17 @@ code the task will change. The issue in hand stays the task throughout.
      for it to be split out and lose nothing but a line in the description.
 5. **Total the ones that passed.** While the total is not smaller than that
    fix, drop the largest, one at a time. Past that line the ride-alongs
-   outweigh the issue the PR is named for. A bug the change removes adds only
-   its test, and does not count toward the total.
+   outweigh the issue the PR is named for. An issue the change removes adds at
+   most a test, and does not count toward the total.
 
 Nothing passes: ship the task alone — that is the usual case, not a failure to
-look. Every issue the PR closes beside the task — a ride-along, or a bug the
-change removes — is a whole issue, not a Boy Scout fix: a bug brings its own
-test, it is assigned like the task, and the PR description closes it under
-**Also closes**, one line per issue with its own keyword — `Closes #15` —
+look. Every issue the PR closes beside the task — a ride-along, or a bug or
+debt the change removes — is a whole issue, not a Boy Scout fix: a bug brings
+its own test, it is assigned like the task, and the PR description closes it
+under **Also closes**, one line per issue with its own keyword — `Closes #15` —
 because GitHub closes only the numbers a keyword precedes.
 
-**Finishing.** The PR closes it, every ride-along and every bug the change
+**Finishing.** The PR closes it, every ride-along and every issue the change
 removes; a duplicate still held for the reproduction is closed or commented on;
 and the same pass updates every sibling issue whose text the change just
 falsified.
