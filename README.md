@@ -14,8 +14,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   close first. Then the work gets a worktree named for what it does. Then every
   open bug and debt issue in the same area is checked, so one PR can close them
   with the task. A finding joins an open issue on the same code before a new
-  one is filed. In Claude Code a Haiku subagent reads a tracker with 30 or more
-  open issues, so the main model gets only the candidates.
+  one is filed, up to two added findings per issue. In Claude Code a Haiku
+  subagent reads a tracker with 30 or more open issues, so the main model gets
+  only the candidates.
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.

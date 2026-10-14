@@ -151,10 +151,13 @@ than it closes. Per finding, the scout's report decides:
   again.
 - **A host** — an open issue whose fix changes the same code, or that decides
   something about the same function. It takes the finding if nobody works on
-  it: no assignee other than you (`gh api user --jq .login`), and the scout's
-  `status:` is `free` — no linked branch, no pull request that closes it. Then:
-  1. Add a section to its body with the finding — where it is (`path:line`),
-     how it shows up, and why it was out of scope here. `gh issue edit --body`
+  it — no assignee other than you (`gh api user --jq .login`), and the scout's
+  `status:` is `free`: no linked branch, no pull request that closes it — and
+  if it holds fewer than two added findings: the scout's `also:` is `0` or `1`.
+  One PR must still close every problem in it. Then:
+  1. Add a section to its body that starts `## Also: <the problem>`, with
+     where it is (`path:line`), how it shows up, and why it was out of scope
+     here. The heading is what the scout counts. `gh issue edit --body`
      replaces the whole body, so write the old body and the new section to a
      file first: `gh issue view 12 --json body --jq .body > body.md`, add the
      section at the end, then `gh issue edit 12 --body-file body.md`.
@@ -168,9 +171,9 @@ than it closes. Per finding, the scout's report decides:
   - Label it from the labels the repository already has — `gh label list`
     first, then `--label` with the ones that fit. Never invent a new label; if
     nothing fits, file it unlabelled.
-  - A host that someone works on: write `Related to #12` in the new body, and
-    leave a one-line comment on the host that names the new issue. Its body
-    stays theirs: do not edit it.
+  - A host that someone works on, or that holds two added findings: write
+    `Related to #12` in the new body, and leave a one-line comment on the host
+    that names the new issue. Do not edit its body.
 
 List every issue you filed or added to, with its number, in the final report.
 

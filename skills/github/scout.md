@@ -94,7 +94,10 @@ For **filing**:
 - **Already decided** — a closed issue or a merged pull request whose text
   settles the finding: it was raised and kept on purpose.
 - **Hosts** — open issues whose fix changes the same code as the finding, or
-  that decide something about the same function.
+  that decide something about the same function. Give each one an `also:`
+  line: the number of findings added to it, which `gh issue view <n> --json
+  body --jq '[.body | split("\n")[] | select(startswith("## Also:"))] | length'`
+  prints.
 
 ## Return
 
@@ -109,9 +112,11 @@ Each group under its name, then one entry per issue:
   fix in: apps/runner/src/launch-agent.ts, or "not said"
   status: free | assigned to <login> | branch <name> | PR #<n>
   settled: yes | no — waits on <the decision>
+  also: 0
 ```
 
 `quote:` is the line in its body that ties it to the issue or the finding;
-for **Already decided** it is the line that settles the finding. Write `none`
+for **Already decided** it is the line that settles the finding. `also:` goes
+on **Hosts** only. Write `none`
 under an empty group. End with one line: how many titles and how many bodies
 you read, and every body you read only in part.
