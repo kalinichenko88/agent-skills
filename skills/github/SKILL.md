@@ -14,9 +14,10 @@ so in the final report rather than inventing a substitute.
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` |
 | `gh pr create` | `--assignee @me`; assign every issue it closes too |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch |
-| Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description. Otherwise file an issue — search by identifier first |
+| Reading the tracker | A Haiku scout reads it; you decide and write |
+| Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description. Otherwise add it to an open issue on the same code, or file a new one |
 | Filing next to an existing issue | Name the relation, and correct the other side |
-| Picking an issue up — `#91` or its URL | Close its duplicates; unless told otherwise, a worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; take along settled issues on the same code |
+| Picking an issue up — `#91` or its URL | Close its duplicates; unless told otherwise, a worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; check every open bug in the same area; take along settled issues on the same code |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host |
 
 ## Commits
@@ -83,6 +84,28 @@ left to say once it is in. Its subject is the PR title — by default a
 one-commit branch gives that commit's subject instead — so both take the same
 `type: sentence` shape.
 
+## The scout
+
+Reading the tracker is long and needs no knowledge of the task: every open
+title, the bodies of the candidates, a paginated timeline. A small model reads
+it in a context of its own and returns only the candidates. In Claude Code,
+one `Agent` call with `model: "haiku"` and this prompt:
+
+```
+Read <this skill's base directory>/scout.md and do what it says.
+Job: take-in #91 | filing, then one line per finding with its path:line.
+Repository: <owner/repo>, checked out at <path>.
+Files and symbols: <every one the issue or the findings name, and any you know the work touches>.
+```
+
+In Codex, read `scout.md` and run it yourself.
+
+The scout only reads. Every close, edit, comment and new issue is yours, and
+so is every verdict: its lists are wide on purpose, so drop what does not hold,
+and read in full each issue before you act on it. Its report is your search of
+the tracker: search yourself only for a name it did not get. One run covers
+every finding you have at that moment.
+
 ## Filing an issue
 
 Anything worth fixing that is **not** part of the current task — a bug, a latent
@@ -105,14 +128,35 @@ a fix that needs its own test — and it is an issue, however small it looks.
 --state all` finds every issue that names the symbol; the prose you were about
 to write finds only issues someone happened to phrase your way — and on a
 tracker written in another language, nothing at all. Closed counts too: a
-finding already filed and rejected does not need filing again.
+finding already filed and rejected does not need filing again. The scout runs
+these searches and reads the titles; send it before you file.
 
-- One issue per finding. Title states the problem, body says where it is
-  (`path:line`), how it shows up, and why it was out of scope here.
-- Label it from the labels the repository already has — `gh label list` first,
-  then `--label` with the ones that fit. Never invent a new label; if nothing
-  fits, file it unlabelled.
-- List every issue you filed (with numbers) in the final report.
+**Add to an open issue before you open a new one.** Two issues on one piece of
+code become two PRs that edit the same lines, and the tracker grows faster
+than it closes. Per finding, the scout's report decides:
+
+- **Already filed** or **Already decided** — file nothing. If an open issue has
+  the same report and the finding adds something — a surface, a reproduction —
+  add that as a comment.
+- **A host** — an open issue whose fix changes the same code, or that decides
+  something about the same function. It takes the finding if nobody works on
+  it: no assignee but you, no linked branch, no open PR. Then:
+  1. Edit its body: add a section with the finding — where it is
+     (`path:line`), how it shows up, and why it was out of scope here. Keep the
+     text that was there.
+  2. Change the title so it names both problems.
+  3. Add the finding's label if the issue does not have it.
+  4. Leave a one-line comment that says what was added. A body edit notifies
+     nobody.
+- **Nothing**, or every host has someone working on it — file a new issue,
+  with `Related to #12` for a host it could not join:
+  - One issue per finding. Title states the problem, body says where it is
+    (`path:line`), how it shows up, and why it was out of scope here.
+  - Label it from the labels the repository already has — `gh label list`
+    first, then `--label` with the ones that fit. Never invent a new label; if
+    nothing fits, file it unlabelled.
+
+List every issue you filed or added to, with its number, in the final report.
 
 ## An issue is a document too
 
@@ -130,22 +174,24 @@ the survivor, never left standing as a second opinion.
 **Taking one into work.** An issue named on its own — `#91`, "take #91", its
 URL — as the session's first message, or after a talk about which task is next,
 is the request to take it into work; a mention inside other work is not. Read it
-first: closed, or assigned to someone else — say so and wait. An issue URL from another repository than this
-checkout's `origin`: say so and stop.
+first: closed, or assigned to someone else — say so and wait. An issue URL from
+another repository than this checkout's `origin`: say so and stop.
 
-**Its duplicates close first.** Read every open issue's title once — `gh issue
-list --state open --limit 500 --json number,title`, and a higher limit if 500
-come back — and search by identifier for every file and symbol the issue names.
-A word search finds only the duplicates that share a word with it; the titles
-find the rest. A duplicate — the same report, in other words, about the same
-place — closes against the issue in hand before the work starts, once anything
-it adds (a repro, an error message, a surface) is carried into a comment on the
-survivor. One with its own assignee or linked branch stays open: say so. A
-report that gives only what someone saw — no cause, no code — matches by
-symptom alone: it waits for the reproduction, run in the task's worktree, and
-closes the same way once that shows the same cause; otherwise it stays open,
-with a comment naming what else could explain it. Name every one closed in the
-final report.
+**The scout reads the tracker next.** Send it (*The scout* above) with the
+issue and the files and symbols it names, and set up the worktree below while
+it runs. Its report holds the duplicates, the bugs in the same area, the
+neighbours and the timeline's cross-references; the rest of this section works
+from it.
+
+**Its duplicates close first.** A duplicate — the same report, in other words,
+about the same place — closes against the issue in hand before the work starts,
+once anything it adds (a repro, an error message, a surface) is carried into a
+comment on the survivor. One with its own assignee or linked branch stays open:
+say so. A report that gives only what someone saw — no cause, no code — matches
+by symptom alone: it waits for the reproduction, run in the task's worktree,
+and closes the same way once that shows the same cause; otherwise it stays
+open, with a comment naming what else could explain it. Name every one closed
+in the final report.
 
 ```bash
 gh issue close 96 --duplicate-of 91 --comment "Same report as #91; what it adds is copied there."
@@ -187,19 +233,10 @@ Then move into the worktree. Claude Code: `EnterWorktree` with that `path`.
 Codex cannot move a running session: every command takes the worktree as
 `workdir`, and every file path, read or patched, is written under it.
 
-Then list what points at it — the timeline carries every cross-reference,
-including the ones its own body never mentions:
-
-```bash
-gh api repos/{owner}/{repo}/issues/91/timeline --paginate \
-  --jq '.[] | select(.event == "cross-referenced")
-        | "\(if .source.issue.pull_request then "PR" else "issue" end) \(.source.issue.number) \(.source.issue.state) \(.source.issue.title)"'
-```
-
-`--paginate` is not optional: the timeline pages at 30 events, and on a
-well-linked issue the newest references are exactly the ones that fall off the
-first page. Read in full the open issues, the PRs that touched the same code,
-and any closed issue whose outcome the task leans on; titles and state are
+Then read what points at it: the scout's **Linked** group, from the timeline,
+which carries every cross-reference, including the ones the issue's own body
+never mentions. Read in full the open issues, the PRs that touched the same
+code, and any closed issue whose outcome the task leans on; the scout's line is
 enough for the rest.
 
 Then check the issue's own `path:line` citations against the current tree before
@@ -209,14 +246,27 @@ the issue as the first act of the work.
 **Taking neighbours along.** Before the first edit, sort the open issues on the
 code the task will change. The issue in hand stays the task throughout.
 
-1. **Search** by identifier, as for a finding — every file and symbol the task
-   will change: `gh issue list --state open --search "verify_target"`.
+1. **Search.** The scout's report holds the hits, found by identifier and by
+   title, so a report that names no file still shows up. When the work reaches
+   a file or symbol the scout did not get, search it yourself:
+   `gh issue list --state open --search "verify_target"`.
 2. **Pull in the task's own defect.** A hit reporting the same wrong behaviour,
    fixed the same way, in another function or file is not a ride-along: it is
    the task, because a bug fix guards every surface the bug shows on (the
    global prompt). Its fix joins the diff, it closes next to the task's issue,
    and the PR title names the defect rather than the one place reported.
-3. **Check every other hit.** It rides along only if it passes all four,
+3. **Check every open bug in the same area**, whatever the task is — a feature
+   too. Code that is being rewritten is where a bug costs least to close. Check
+   each one against the code, and run its reproduction when it gives one. Each
+   ends in one of four ways:
+   - **Already gone** — it does not reproduce on the default branch: close it
+     with a comment that names the commit or the run that shows it.
+   - **The change removes it** — the work takes out its cause. Its test joins
+     the diff, and it closes with the PR.
+   - **Rides along** — it passes the four tests in step 4.
+   - **Stays open** — none of these. If the change moves the code it cites,
+     *Finishing* corrects its text.
+4. **Check every other hit.** It rides along only if it passes all four,
    measured against the fix for the issue in hand alone:
    - **Same file** — it changes a file the task already changes, in any
      function. The same topic in another file is another PR.
@@ -225,19 +275,22 @@ code the task will change. The issue in hand stays the task throughout.
    - **Smaller** — its share of the diff is smaller than that fix.
    - **Separable** — dropping it leaves the task whole, so a reviewer can ask
      for it to be split out and lose nothing but a line in the description.
-4. **Total the ones that passed.** While the total is not smaller than that
+5. **Total the ones that passed.** While the total is not smaller than that
    fix, drop the largest, one at a time. Past that line the ride-alongs
-   outweigh the issue the PR is named for.
+   outweigh the issue the PR is named for. A bug the change removes adds only
+   its test, and does not count toward the total.
 
 Nothing passes: ship the task alone — that is the usual case, not a failure to
-look. A ride-along is a whole issue, not a Boy Scout fix: a bug brings its own
+look. Every issue the PR closes beside the task — a ride-along, or a bug the
+change removes — is a whole issue, not a Boy Scout fix: a bug brings its own
 test, it is assigned like the task, and the PR description closes it under
 **Also closes**, one line per issue with its own keyword — `Closes #15` —
 because GitHub closes only the numbers a keyword precedes.
 
-**Finishing.** The PR closes it and every ride-along; a duplicate still held for
-the reproduction is closed or commented on; and the same pass updates every
-sibling issue whose text the change just falsified.
+**Finishing.** The PR closes it, every ride-along and every bug the change
+removes; a duplicate still held for the reproduction is closed or commented on;
+and the same pass updates every sibling issue whose text the change just
+falsified.
 
 Measured on a live tracker: of the 100 newest issues, 4 bodies had ever been
 edited; 5 open issues still cited a file the schema migration had deleted; one

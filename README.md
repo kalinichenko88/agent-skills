@@ -11,7 +11,10 @@ prompt of engineering rules, plus the skills those rules lean on.
   `hooks/rules.sh` injects it at the start of every session and every subagent.
 - **`kalinichenko:github`** — commits, pull requests, issues and Actions. An
   issue named on its own — `#91` or its URL — starts the work: its duplicates
-  closed, then a worktree named for what the work does.
+  closed, then a worktree named for what the work does, then every open bug in
+  the same area checked. A finding joins an open issue on the same code before
+  a new one is filed. In Claude Code a Haiku subagent reads the tracker, so the
+  main model gets only the candidates.
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.

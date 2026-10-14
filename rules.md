@@ -144,9 +144,10 @@ later — gets filed as an issue instead of being fixed inline or dropped in the
 chat. Do not derail the task to fix it; do not ask first. If it is small, safe
 and needs no decision, it goes into the current PR instead — the Boy Scout Rule
 above — listed in the description as not part of the task. The skill draws that
-line and carries the how: searching for duplicates first, one issue per finding, existing labels
-only, and every number listed in the final report. Where there is no GitHub
-remote or `gh auth status` fails, name the finding in the final report instead.
+line and carries the how: a scout that searches the tracker first, adding to an
+open issue on the same code before opening a new one, existing labels only, and
+every number listed in the final report. Where there is no GitHub remote or
+`gh auth status` fails, name the finding in the final report instead.
 
 **Never add a `Co-Authored-By:` trailer** to a commit message — no Claude, no
 model name, no `noreply@anthropic.com`.
