@@ -104,9 +104,9 @@ finding with its `path:line`.
 Send it when the tracker has 30 open issues or more: `gh issue list --state
 open --limit 30 --json number --jq length` prints `30`. Below that, and in
 Codex, read `scout.md` and run it yourself: on a small tracker the reading
-costs less than a subagent's start. Run by you, all of it applies: write its
-groups and entries, `status:` and `also:` included, as your notes, and go on
-with this skill. Only the first sentence of its *Return* is for a subagent.
+costs less than a subagent's start. Run by you, its *Read*, its *Sort* and the
+entry shape in its *Return* apply: write its groups and entries, `status:` and
+`also:` included, as your notes, and go on with this skill.
 
 The scout only reads. Every close, edit, comment and new issue is yours, and
 so is every verdict. Its lists include doubtful candidates on purpose: drop
@@ -136,20 +136,25 @@ a fix that needs its own test — and it is an issue, however small it looks.
 --state all --limit 500` finds every issue that names the symbol (without
 `--limit`, `gh` stops at 30); the prose you were about to write finds only
 issues someone happened to phrase your way — and on a tracker written in
-another language, nothing at all. Closed counts too: a
-finding already filed and rejected does not need filing again. The scout runs
-these searches and reads the titles; run it before you file.
+another language, nothing at all. Closed counts too: a finding already filed
+and rejected does not need filing again. The scout runs these searches and
+reads the titles; run it before you file.
 
 **Add to an open issue before you open a new one.** Two issues on one piece of
 code become two PRs that edit the same lines, and the tracker grows faster
 than it closes. Per finding, the scout's report decides:
 
-- **Already filed** or **Already decided** — file nothing. If an open issue has
+- **Already decided** or **Already filed** — file nothing. If an open issue has
   the same report and the finding adds something — a surface, a reproduction —
   add that as a comment.
-- **Fixed before** — the bug came back after a fix. File a new issue that
-  starts `Regression of #12`, and name the commit or the run that shows it
-  again.
+- **Fixed before** — a pull request fixed this before, and the finding shows it
+  again. File a new issue that starts `Regression of #12`, name the pull
+  request that fixed it, and name the commit or the run that shows it again.
+  The scout checks **Already decided** first, so a behaviour kept on purpose
+  never comes here.
+- **Open work** — an open pull request already changes this code. Read it
+  before you file: it may fix the finding. If it does not, name it in what you
+  file, so its author sees the overlap.
 - **A host** — an open issue whose fix changes the same code, or that decides
   something about the same function. It takes the finding only if both hold:
   - Nobody else works on it. The scout's `status:` is `free`, or its only
@@ -200,8 +205,11 @@ one-line comment only (*Filing an issue*): its body stays as it is.
 **Taking one into work.** An issue named on its own — `#91`, "take #91", its
 URL — as the session's first message, or after a talk about which task is next,
 is the request to take it into work; a mention inside other work is not. Read it
-first: closed, or assigned to someone else — say so and wait. An issue URL from
-another repository than this checkout's `origin`: say so and stop.
+first, with `gh issue view 91 --json
+state,assignees,closedByPullRequestsReferences`: closed, assigned to someone
+else, or closed by an open pull request someone else wrote — say so and wait.
+An issue URL from another repository than this checkout's `origin`: say so and
+stop.
 
 **The scout reads the tracker next.** Run it (*The scout* above) with the
 issue and the files and symbols it names. While a subagent runs it, you can set
@@ -214,8 +222,8 @@ sections is one task: its own problem and every added one.
 **Its duplicates close first.** A duplicate — the same report, in different
 words or not, about the same place — closes against the issue in hand before
 the work starts, once anything it adds (a repro, an error message, a surface)
-is carried into a comment on the survivor. One with its own assignee or linked
-branch stays open: say so. A report that gives only what someone saw — no
+is carried into a comment on the survivor. One whose `status:` is not `free`
+stays open: say so. A report that gives only what someone saw — no
 cause, no code — matches by symptom alone: it waits for the reproduction, run
 in the task's worktree, and closes the same way once that shows the same cause;
 otherwise it stays open, with a comment naming what else could explain it.
@@ -274,7 +282,9 @@ believing them — a line number is the first thing to rot — and correct them 
 the issue as the first act of the work.
 
 **Taking neighbours along.** Before the first edit, sort the open issues on the
-code the task will change. The issue in hand stays the task throughout.
+code the task will change. The issue in hand stays the task throughout. A hit
+whose `status:` is not `free`, and not only `assigned to` you, is someone
+else's work: it gets no verdict below and stays as it is. Say so.
 
 1. **Search.** The scout's report holds the hits, found by identifier and by
    title, so a report that names no file still shows up. When the work reaches
@@ -291,19 +301,16 @@ code the task will change. The issue in hand stays the task throughout.
    unlabelled issue that the scout marked `bug` or `debt` on its `why:` line
    counts too. They cost least to close while their code is being rewritten.
    So one PR can deliver the task, fix a bug in the same code and remove the
-   debt there.
-   Check each one against the code, and run a bug's reproduction when it gives
-   one. Each ends in one of four ways:
+   debt there. Check each one against the code, and run a bug's reproduction
+   when it gives one. Each ends in one of four ways:
    - **Already gone** — a commit on the default branch removed its cause: the
      debt's code is gone, or the bug's cause is fixed and its reproduction now
      passes. Close it with a comment that names that commit, and for a bug
-     that run. A
-     bug that gives no reproduction, or that shows only sometimes, is not
-     already gone because one run passes: it stays open, with a comment that
-     says what the code now does.
-   - **The change removes it** — the work takes out its cause: the code it
-     cites is rewritten or deleted. A bug's test joins the diff. It closes with
-     the PR.
+     that run. A bug that gives no reproduction, or that shows only sometimes,
+     is not already gone because one run passes: it stays open, with a comment
+     that says what the code now does.
+   - **The change removes it** — the task's own diff takes out its cause, with
+     no code added for it but a bug's test. It closes with the PR.
    - **Rides along** — it passes the four tests in step 4, with *Same file*
      widened to the same area: its fix changes a file of the screen, window or
      command the task changes.
@@ -332,15 +339,16 @@ under **Also closes**, one line per issue with its own keyword — `Closes #15` 
 because GitHub closes only the numbers a keyword precedes.
 
 An issue with `## Also:` sections closes only when every problem in it is
-fixed: its own problem and each added one. Each verdict above covers all of
-them. A change that fixes only some does not close it: the PR description
-says `Part of #15` instead of `Closes #15`, and *Finishing* adds the line
-`Done in #<PR>.` under each problem it fixed.
+fixed: its own problem and each added one. Give a verdict to each problem in
+it, not one to the issue. When the change fixes some of them, their tests join
+the diff, the issue stays open, and the PR description says `Part of #15`
+instead of `Closes #15`.
 
 **Finishing.** The PR closes it, every ride-along and every issue the change
-removes; a duplicate still held for the reproduction is closed or commented on;
-and the same pass updates every sibling issue whose text the change just
-falsified.
+removes; under each problem it fixed in an issue that stays open, it adds the
+line `Done in #<PR>.`; a duplicate still held for the reproduction is closed or
+commented on; and the same pass updates every sibling issue whose text the
+change just falsified.
 
 Measured on a live tracker: of the 100 newest issues, 4 bodies had ever been
 edited; 5 open issues still cited a file the schema migration had deleted; one
