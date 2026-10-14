@@ -10,12 +10,12 @@ prompt of engineering rules, plus the skills those rules lean on.
   acting on them. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
   `hooks/rules.sh` injects it at the start of every session and every subagent.
 - **`kalinichenko:github`** — commits, pull requests, issues and Actions. An
-  issue named on its own — `#91` or its URL — starts the work: its duplicates
-  closed, then a worktree named for what the work does, then every open bug and
-  debt issue in the same area checked, so one PR can close them with the task.
-  A finding joins an open issue on the same code before a new one is filed. In
-  Claude Code a Haiku subagent reads a tracker with 30 or more open issues, so
-  the main model gets only the candidates.
+  issue named on its own — `#91` or its URL — starts the work. Its duplicates
+  close first. Then the work gets a worktree named for what it does. Then every
+  open bug and debt issue in the same area is checked, so one PR can close them
+  with the task. A finding joins an open issue on the same code before a new
+  one is filed. In Claude Code a Haiku subagent reads a tracker with 30 or more
+  open issues, so the main model gets only the candidates.
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
