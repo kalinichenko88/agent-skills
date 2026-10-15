@@ -31,7 +31,8 @@ Its sections start with `==`:
 An entry starts with `==> #41 <title> [labels] <state>`, or
 `==> PR #42 <title> <state>` for a pull request. On an open issue, `status:`
 follows: `free`, or every one of `assigned to <login>`, `branch <name>` and
-`PR #<n>` that applies. Then `also:`, the number of findings added to it.
+`PR #<n> by <login>` that applies, with `you` for the agent's own account.
+Then `also:`, the number of findings added to it.
 `closed by:` names the merged pull requests that closed an issue, and
 `duplicate of:` the issue it duplicates. The body comes next, then each
 comment after a line `-- comment by <login>`. A body can hold `#` headings of

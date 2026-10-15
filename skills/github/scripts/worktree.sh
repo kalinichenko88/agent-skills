@@ -4,7 +4,8 @@
 #
 #   worktree.sh <n> <branch>
 #
-# A branch already linked to the issue wins over <branch>. A branch already
+# A branch already linked to the issue wins over a <branch> that is not
+# linked: the first one that gh lists. A branch already
 # checked out somewhere is worked on there. A session already in a worktree,
 # as one started with claude --worktree or codex --worktree, checks the branch
 # out where it is.
@@ -21,11 +22,14 @@ n=$1 branch=$2
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
-linked=$(gh issue develop --list "$n" | cut -f1 | sed -n 1p)
-if [ -n "$linked" ] && [ "$linked" != "$branch" ]; then
-  echo "#$n is linked to the branch $linked already: using it"
-  branch=$linked
-fi
+linked=$(gh issue develop --list "$n" | cut -f1)
+case $'\n'$linked$'\n' in
+  *$'\n'"$branch"$'\n'* | $'\n\n') ;;
+  *)
+    branch=${linked%%$'\n'*}
+    echo "#$n is linked to the branch $branch already: using it"
+    ;;
+esac
 
 path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
 if [ -n "$path" ]; then

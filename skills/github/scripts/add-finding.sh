@@ -5,9 +5,10 @@
 #   add-finding.sh <n> <section-file> <title> [label]
 #
 # The section file starts with the line "## Also: <the problem>". The host must
-# be open, free or assigned only to you, and hold fewer than two added
-# findings; all three are read again just before the write. Otherwise it
-# prints why and exits 1, and writes nothing.
+# be an open issue that nobody else works on (collect.sh status says taken: no)
+# and that holds fewer than two added findings. All of this is read again just
+# before the write. Otherwise it prints why and exits 1, and writes nothing.
+# Run it for one host at a time: it reads the body and writes it back whole.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
 # new body in the file that the printed command names.
@@ -19,7 +20,7 @@ set -euo pipefail
   echo 'usage: add-finding.sh <n> <section-file> <title> [label]' >&2
   exit 2
 }
-n=$1 section=$2 title=$3 label=${4:-}
+n=${1#\#} section=$2 title=$3 label=${4:-}
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 refuse() {
@@ -33,12 +34,12 @@ problem=$(sed -n '1s/^## Also: //p' "$section")
   exit 2
 }
 
-me=$(gh api user --jq .login)
 host=$(bash "$(dirname "$0")/collect.sh" status "$n")
-{ read -r _ state; read -r _ status; read -r _ also; } <<<"$host"
+# A pull request gives the state: line only.
+{ read -r _ state; read -r _ status; read -r _ also; read -r _ taken; } <<<"$host" || true
 
 [ "$state" = open ] || refuse "it is $state"
-[ "$status" = free ] || [ "$status" = "assigned to $me" ] || refuse "someone works on it: $status"
+[ "$taken" = no ] || refuse "someone works on it: $status"
 [ "$also" -lt 2 ] || refuse "it holds $also added findings already"
 
 tmp=${TMPDIR:-/tmp}

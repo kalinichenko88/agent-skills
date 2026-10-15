@@ -1,7 +1,7 @@
 #!/bin/bash
-# Runs the github skill's scripts against a fake gh. The fake answers GraphQL
-# from a payload recorded on this repository's issue #5, filtered through jq
-# as gh's own --jq does, and logs every call, so no test reaches GitHub.
+# Runs the github skill's scripts against a fake gh. The fake answers from
+# payloads recorded on this repository, filtered through jq as gh's own --jq
+# does, and logs every call, so no test reaches GitHub.
 
 set -eu
 
@@ -15,14 +15,27 @@ mkdir "$tmp/bin"
 cat >"$tmp/bin/gh" <<'EOF'
 #!/bin/bash
 echo "$*" >>"$FAKE/calls"
-filter=.
+filter=. search=''
 for ((i = 1; i <= $#; i++)); do
-  if [ "${!i}" = --jq ]; then j=$((i + 1)); filter=${!j}; fi
+  j=$((i + 1))
+  case ${!i} in --jq) filter=${!j} ;; --search) search=${!j} ;; esac
 done
+# A list answers from issues-<search>.json or prs-<search>.json, and the open
+# issues from open-issues.json, in $FAKE first.
+list() {
+  local f=$1-$search.json
+  [ -n "$search" ] || f=open-issues.json
+  if [ -f "$FAKE/$f" ]; then f=$FAKE/$f; else f=$FIXTURES/$f; fi
+  if [ -f "$f" ]; then jq -r "$filter" "$f"; else echo '[]' | jq -r "$filter"; fi
+}
 case "$1 $2" in
   'api repos/{owner}/{repo}') echo kalinichenko88/agent-skills ;;
   'api user') echo kalinichenko88 ;;
-  'api graphql') jq -r "$filter" "$FAKE/graphql.json" ;;
+  'api graphql')
+    case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1 ;; esac
+    jq -r "$filter" "$FAKE/graphql.json" ;;
+  'issue list') list issues ;;
+  'pr list') list prs ;;
   'issue view') jq -r '.data.repository[].body' "$FAKE/graphql.json" ;;
   'issue edit') while [ "$1" != --body-file ]; do shift; done; cp "$2" "$FAKE/body" ;;
   'issue comment') ;;
@@ -35,7 +48,7 @@ case "$1 $2" in
 esac
 EOF
 chmod +x "$tmp/bin/gh"
-export PATH="$tmp/bin:$PATH" FAKE="$tmp"
+export PATH="$tmp/bin:$PATH" FAKE="$tmp" FIXTURES="$fixtures" TMPDIR="$tmp"
 
 fail() {
   printf 'FAIL: %s\n' "$1"
@@ -47,21 +60,30 @@ check() { [ "$2" = "$3" ] || fail "$1" "$(printf 'want: %s\ngot:  %s' "$2" "$3")
 answer() { jq "${2:-.data.repository.n5} |= ($1)" "$fixtures/${3:-status-5.json}" >"$tmp/graphql.json"; }
 writes() { grep -E '^issue (edit|comment)|^issue develop [0-9]+ --name' "$tmp/calls" || true; }
 
-# status: and also: of a host.
+# status: and also: of a host. As recorded, #5's one open pull request is #9,
+# which you wrote and which only names #5: the issue is not taken.
 answer .
-check 'status of a free issue' "$(printf 'state: open\nstatus: free\nalso: 0')" \
+check 'status of an issue whose one open PR is yours' "$(printf 'state: open\nstatus: PR #9 by you\nalso: 0\ntaken: no')" \
+  "$(bash "$scripts/collect.sh" status 5)"
+check 'status takes the number with its #' "$(bash "$scripts/collect.sh" status 5)" \
+  "$(bash "$scripts/collect.sh" status '#5')"
+
+answer '.timelineItems.nodes = []'
+check 'status of a free issue' "$(printf 'state: open\nstatus: free\nalso: 0\ntaken: no')" \
   "$(bash "$scripts/collect.sh" status 5)"
 
 answer '.assignees.nodes = [{login: "someone"}]
   | .linkedBranches.nodes = [{ref: {name: "fix/5-citations"}}, {ref: null}]
-  | .closedByPullRequestsReferences.nodes = [{number: 12, state: "OPEN"}, {number: 11, state: "MERGED"}]
+  | .closedByPullRequestsReferences.nodes = [{number: 12, state: "OPEN", author: {login: "someone"}},
+      {number: 11, state: "MERGED", author: {login: "someone"}}]
   | .timelineItems.nodes += [
-      {isCrossRepository: false, source: {__typename: "PullRequest", number: 12, title: "t", state: "OPEN"}},
-      {isCrossRepository: false, source: {__typename: "PullRequest", number: 13, title: "t", state: "OPEN"}},
-      {isCrossRepository: true, source: {__typename: "PullRequest", number: 14, title: "t", state: "OPEN"}},
+      {isCrossRepository: false, source: {__typename: "PullRequest", number: 12, title: "t", state: "OPEN", author: {login: "someone"}}},
+      {isCrossRepository: false, source: {__typename: "PullRequest", number: 13, title: "t", state: "OPEN", author: null}},
+      {isCrossRepository: true, source: {__typename: "PullRequest", number: 14, title: "t", state: "OPEN", author: {login: "someone"}}},
       {isCrossRepository: false, source: {__typename: "Issue", number: 15, title: "t", state: "OPEN"}}]'
-check 'status of a busy issue' 'status: assigned to someone, branch fix/5-citations, PR #12, PR #13' \
-  "$(bash "$scripts/collect.sh" status 5 | sed -n '/^status: /p')"
+check 'status of a busy issue' \
+  "$(printf 'status: assigned to someone, branch fix/5-citations, PR #9 by you, PR #12 by someone, PR #13 by ghost\nalso: 0\ntaken: yes')" \
+  "$(bash "$scripts/collect.sh" status 5 | sed 1d)"
 
 answer '.body += "\n\n## Also: one\r\n\r\nx\n\n## Also: two\n\nNot a heading: ## Also: three\n### Also: four\n"'
 check 'also: counts the added sections' 'also: 2' \
@@ -75,13 +97,48 @@ case $out in 'already in the file: #5'*) ;; *) fail 'bodies with a number alread
 check 'bodies adds nothing for a number already in the file' 3 "$(wc -l <"$tmp/collected" | tr -d ' ')"
 check 'bodies queries nothing for a number already in the file' '' "$(grep graphql "$tmp/calls" || true)"
 
+# bodies gives no entry to the issue that a duplicate duplicates, when the
+# file holds it already.
+answer '{n7: (.n5 | .number = 7 | .state = "CLOSED" | .stateReason = "DUPLICATE" | .duplicateOf = {number: 5})}' .data.repository
+: >"$tmp/calls"
+bash "$scripts/collect.sh" bodies "$tmp/collected" 7 >/dev/null
+check 'bodies does not fetch an issue already in the file' '' "$(grep 'n5: issueOrPullRequest' "$tmp/calls" || true)"
+check 'bodies counts only the new entries' '== end: 1 entries' "$(tail -1 "$tmp/collected")"
+
+# A failed query stops bodies before it writes, the duplicateOf one too.
+answer .
+printf '== Bodies\n' >"$tmp/collected"
+for failing in 'Issue { duplicateOf' 'repository('; do
+  FAKE_FAIL=$failing bash "$scripts/collect.sh" bodies "$tmp/collected" 5 >/dev/null 2>&1 &&
+    fail "bodies exits 0 when the query with \"$failing\" fails"
+  check "bodies writes nothing when the query with \"$failing\" fails" '== Bodies' "$(cat "$tmp/collected")"
+done
+
+# filing writes the open titles, each search, and the bodies of its open hits.
+answer . .data.repository entries-scout.md.json
+out=$(bash "$scripts/collect.sh" filing scout.md)
+collected=${out%%: *}
+check 'filing lists every open issue' 5 "$(sed -n '/^== Open issues/,/^== Search/p' "$collected" | grep -c ' open$')"
+check 'filing gives a body to each open hit' \
+  "$(printf '==> #5 \n==> #8 \n==> PR #9 \n==> #10 \n== end: 4 entries')" \
+  "$(grep -E '^==> |^== end' "$collected" | sed -E 's/^(==> (PR )?#[0-9]+ ).*/\1/')"
+out=$(bash "$scripts/collect.sh" filing typescript)
+check 'filing ends the bodies with no open hit' '== end: 0 entries' "$(tail -1 "${out%%: *}")"
+jq '[range(1000) as $i | .[0] | .number = $i + 1]' "$fixtures/open-issues.json" >"$tmp/open-issues.json"
+out=$(bash "$scripts/collect.sh" filing typescript)
+rm "$tmp/open-issues.json"
+grep -q "^GitHub's list stops at 1,000" "${out%%: *}" || fail 'filing says when the open titles reach 1,000'
+
+check 'usage names every job' 4 "$(bash "$scripts/collect.sh" 2>&1 | grep -c '^usage: collect.sh ')"
+
 # add-finding.sh refuses a busy host and a full one, and writes nothing.
 printf '## Also: the scout misses a cited line\n\nWhere: scout.md:26.\n' >"$tmp/section.md"
 add() { bash "$scripts/add-finding.sh" 5 "$tmp/section.md" 'New title' "$@"; }
 
 for case in 'busy|.assignees.nodes = [{login: "someone"}]|someone works on it: assigned to someone' \
   'full|.body += "\n## Also: one\n## Also: two\n"|it holds 2 added findings already' \
-  'closed|.state = "CLOSED"|it is closed'; do
+  'closed|.state = "CLOSED"|it is closed' \
+  'pull request|{__typename: "PullRequest", number: 5, title: "t", state: "OPEN", body: ""}|it is a pull request'; do
   IFS='|' read -r name change reason <<<"$case"
   answer "$change"
   : >"$tmp/calls"
@@ -90,7 +147,8 @@ for case in 'busy|.assignees.nodes = [{login: "someone"}]|someone works on it: a
   check "add-finding.sh writes nothing to a $name host" '' "$(writes)"
 done
 
-# DRY_RUN=1 prints the writes and runs none.
+# A host whose every entry is yours takes the finding. DRY_RUN=1 prints the
+# writes and runs none.
 answer '.assignees.nodes = [{login: "kalinichenko88"}]'
 : >"$tmp/calls"
 out=$(DRY_RUN=1 add bug)
@@ -137,6 +195,13 @@ printf 'feat/5-linked\thttps://github.com/kalinichenko88/agent-skills/tree/feat/
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
 case $out in *'using it'*'--name feat/5-linked --checkout'*) ;;
   *) fail 'worktree.sh reuses the linked branch' "$out" ;;
+esac
+
+printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *'using it'*) fail 'worktree.sh leaves a linked branch it was given' "$out" ;; esac
+case $out in *'--name feat/5-scout-citations --checkout'*) ;;
+  *) fail 'worktree.sh checks out the linked branch it was given' "$out" ;;
 esac
 
 echo 'github_scripts_test: ok'

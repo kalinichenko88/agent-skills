@@ -134,6 +134,11 @@ each one that is wrong, and read in full each issue before you act on it. Its
 report replaces your own search of the tracker: for a name it did not get, run
 `collect.sh filing <name>` yourself.
 
+An open issue's `status:` is `free`, or it names who works on it: `assigned to
+<login>`, `branch <name>`, `PR #<n> by <login>`, with `you` for your own
+account. One entry that is not yours makes the issue **someone else's work**.
+A linked branch counts as not yours: GitHub does not say whose it is.
+
 ## Filing an issue
 
 Anything worth fixing that is **not** part of the current task — a bug, a latent
@@ -175,10 +180,9 @@ than it closes. Per finding, the scout's groups decide:
   before you file: it may fix the finding. If it does not, name it in what you
   file, so its author sees the overlap.
 - **A host** — an open issue whose fix changes the same code, or that decides
-  something about the same function. It takes the finding only if nobody else
-  works on it — its `status:` is `free`, or only `assigned to` you — and it
-  holds fewer than two added findings, its `also:`. One PR must still close
-  every problem in it. Write the section to a file outside the checkout. It
+  something about the same function. It takes the finding only if it is not
+  someone else's work (*Reading the tracker*) and holds fewer than two added
+  findings, its `also:`. One PR must still close every problem in it. Write the section to a file outside the checkout. It
   starts `## Also: <the problem>`, then says where it is (`path:line`), how it
   shows up, and why it was out of scope here. Then:
 
@@ -191,7 +195,8 @@ than it closes. Per finding, the scout's groups decide:
   before it writes, so the findings you added in this run count too. It adds
   the section to the end of the body, sets the title, adds the label, and
   leaves a one-line comment, because a body edit notifies nobody. A busy host
-  or a full one it refuses, and writes nothing.
+  or a full one it refuses, and writes nothing. Run it for one host at a time,
+  never two at once: it reads the body and writes it back whole.
 - **No free host** — file a new issue:
   - One issue per finding. Title states the problem, body says where it is
     (`path:line`), how it shows up, and why it was out of scope here.
@@ -239,7 +244,7 @@ added one.
 **Its duplicates close first.** A duplicate — the same report, in different
 words or not, about the same place — closes against the issue in hand before
 the work starts, once anything it adds (a repro, an error message, a surface)
-is carried into a comment on the survivor. One whose `status:` is not `free`
+is carried into a comment on the survivor. One that is someone else's work
 stays open: say so. A report that gives only what someone saw — no
 cause, no code — matches by symptom alone: it waits for the reproduction, run
 in the task's worktree, and closes the same way once that shows the same cause;
@@ -291,8 +296,8 @@ the issue as the first act of the work.
 
 **Taking neighbours along.** Before the first edit, sort the open issues on the
 code the task will change. The issue in hand stays the task throughout. A hit
-whose `status:` is not `free`, and not only `assigned to` you, is someone
-else's work: it gets no verdict below and stays as it is. Say so.
+that is someone else's work (*Reading the tracker*) gets no verdict below and
+stays as it is. Say so.
 
 1. **Search.** The scout's groups hold the hits, found by identifier and by
    title, so a report that names no file still shows up. When the work reaches
