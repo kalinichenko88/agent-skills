@@ -46,11 +46,13 @@ number() {
 fields='__typename
 ... on Issue {
   number title state stateReason body
+  repository { nameWithOwner }
   labels(first: 20) { nodes { name } }
   assignees(first: 10) { nodes { login } }
   linkedBranches(first: 10) { nodes { ref { name } } }
   closedByPullRequestsReferences(first: 100, includeClosedPrs: true) { nodes { number state author { login } } }
   timelineItems(last: 100, itemTypes: [CROSS_REFERENCED_EVENT]) {
+    totalCount
     nodes { ... on CrossReferencedEvent { isCrossRepository source {
       __typename
       ... on Issue { number title state repository { nameWithOwner } }
@@ -58,7 +60,7 @@ fields='__typename
     } } }
   }
   comments(first: 100) { totalCount nodes { author { login } body } }
-  duplicateOf { number }
+  duplicateOf { number repository { nameWithOwner } }
 }
 ... on PullRequest { number title state body }'
 
@@ -94,7 +96,8 @@ def entry($me):
     | (select(.state == "OPEN") | "status: \(status($me))", "also: \(also)"),
       ( [.closedByPullRequestsReferences.nodes[] | select(.state == "MERGED") | "PR #\(.number)"]
         | select(length > 0) | "closed by: " + join(", ") ),
-      (.duplicateOf | select(.) | "duplicate of: #\(.number)"),
+      ( .repository.nameWithOwner as $here | .duplicateOf | select(.)
+        | "duplicate of: \(if .repository.nameWithOwner == $here then "" else .repository.nameWithOwner end)#\(.number)" ),
       (select(.comments.totalCount > 100) | "comments: the first 100 of \(.comments.totalCount)") ),
   "", (.body | text),
   ( select(.__typename == "Issue") | .comments.nodes[]
@@ -137,8 +140,9 @@ entries() {
   nums=$(sort -un)
   if [ -n "$nums" ]; then
     # shellcheck disable=SC2086 # one number per word
-    nums=$({ echo "$nums"; each '... on Issue { duplicateOf { number } }' \
-      '.data.repository[] | .duplicateOf.number // empty' $nums; } | sort -un)
+    nums=$({ echo "$nums"; each '... on Issue { repository { nameWithOwner } duplicateOf { number repository { nameWithOwner } } }' \
+      '.data.repository[] | select(.duplicateOf and .duplicateOf.repository.nameWithOwner == .repository.nameWithOwner)
+        | .duplicateOf.number' $nums; } | sort -un)
     nums=$(for num in $nums; do has "$num" || echo "$num"; done)
   fi
   # shellcheck disable=SC2086
@@ -159,36 +163,35 @@ size() {
 # Appends every open title, and a section of hits for each name, to $file;
 # adds the numbers of the hits to $hits.
 titles_and_searches() {
-  local name issues prs titles
-  titles=$(gh issue list --state open --limit 1000 --json number,title,labels,state \
-    --jq "$defs"'.[] | line')
+  local name issues prs
   {
     echo "== Open issues"
     echo
-    echo "$titles"
-    [ "$(echo "$titles" | wc -l)" -lt 1000 ] ||
-      echo "GitHub's list stops at 1,000 open issues: this list can be cut."
+    # Without --search, gh pages past 1,000: the limit only has to be high.
+    gh issue list --state open --limit 100000 --json number,title,labels,state \
+      --jq "$defs"'.[] | line'
   } >>"$file"
-  for name in "$@"; do
-    case $name in */*) set -- "$@" "${name##*/}" ;; esac
-  done
-  printf '%s\n' "$@" | awk '!seen[$0]++' | while IFS= read -r name; do
-    issues=$(gh issue list --state all --limit 1000 --search "$name" \
-      --json number,title,labels,state,stateReason --jq "$defs"'.[] | line')
-    prs=$(gh pr list --state all --limit 1000 --search "$name" --json number,title,state \
-      --jq '.[] | "PR #\(.number) \(.title) \(.state | ascii_downcase)"')
-    {
-      echo
-      echo "== Search: $name"
-      echo
-      [ -z "$issues$prs" ] && echo "none"
-      [ -z "$issues" ] || echo "$issues"
-      [ -z "$prs" ] || echo "$prs"
-      [ "$(echo "$issues" | wc -l)" -lt 1000 ] && [ "$(echo "$prs" | wc -l)" -lt 1000 ] ||
-        echo "GitHub's search stops at 1,000 hits: this list can be cut. Search a narrower name."
-    } >>"$file"
-    printf '%s\n%s\n' "$issues" "$prs" | numbers open >>"$hits"
-  done
+  # Each name once, and the base name of a path. An empty name would search
+  # for everything.
+  printf '%s\n' "$@" | sed 's:/*$::' |
+    awk -F/ 'NF && !seen[$0]++ { print } NF > 1 && !seen[$NF]++ { print $NF }' |
+    while IFS= read -r name; do
+      issues=$(gh issue list --state all --limit 1000 --search "$name" \
+        --json number,title,labels,state,stateReason --jq "$defs"'.[] | line')
+      prs=$(gh pr list --state all --limit 1000 --search "$name" --json number,title,state \
+        --jq '.[] | "PR #\(.number) \(.title) \(.state | ascii_downcase)"')
+      {
+        echo
+        echo "== Search: $name"
+        echo
+        [ -z "$issues$prs" ] && echo "none"
+        [ -z "$issues" ] || echo "$issues"
+        [ -z "$prs" ] || echo "$prs"
+        [ "$(echo "$issues" | wc -l)" -lt 1000 ] && [ "$(echo "$prs" | wc -l)" -lt 1000 ] ||
+          echo "GitHub's search stops at 1,000 hits: this list can be cut. Search a narrower name."
+      } >>"$file"
+      printf '%s\n%s\n' "$issues" "$prs" | numbers open >>"$hits"
+    done
 }
 
 [ $# -ge 1 ] || usage
@@ -235,7 +238,13 @@ esac
 tmp=${TMPDIR:-/tmp}
 file=$(mktemp "${tmp%/}/collect.XXXXXX")
 hits=$(mktemp)
-trap 'rm -f "$hits"' EXIT
+# A failed run leaves no half-written file behind.
+clean() {
+  local code=$?
+  rm -f "$hits"
+  [ "$code" = 0 ] || rm -f "$file"
+}
+trap clean EXIT
 echo "# collect.sh $job in $repo" >"$file"
 echo >>"$file"
 
@@ -243,7 +252,8 @@ if [ "$job" = take-in ]; then
   number "$1"
   labels=$2
   shift 2
-  timeline=$(each "$fields" "$defs"'.data.repository[] | .timelineItems.nodes[] | ref' "$n")
+  timeline=$(each "$fields" "$defs"'.data.repository[] | (.timelineItems.nodes[] | ref),
+    (.timelineItems.totalCount | select(. > 100) | "Only the newest 100 of \(.) references are here.")' "$n")
   {
     echo "Labels for bug and debt: ${labels:-none}"
     echo
@@ -256,9 +266,9 @@ if [ "$job" = take-in ]; then
     echo
   } >>"$file"
   echo "$timeline" | numbers >>"$hits"
-  printf '%s\n' "$labels" | tr , '\n' | while IFS= read -r label; do
+  printf '%s\n' "$labels" | tr , '\n' | sed 's/^ *//; s/ *$//' | while IFS= read -r label; do
     if [ -n "$label" ]; then
-      gh issue list --state open --limit 1000 --label "$label" --json number --jq '.[].number'
+      gh issue list --state open --limit 100000 --label "$label" --json number --jq '.[].number'
     fi
   done >>"$hits"
 fi

@@ -33,10 +33,14 @@ case "$1 $2" in
   'api user') echo kalinichenko88 ;;
   'api graphql')
     case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1 ;; esac
-    jq -r "$filter" "$FAKE/graphql.json" ;;
+    # As GitHub, only the issues that the query asks for.
+    asked=$(grep -oE 'n[0-9]+: issueOrPullRequest' <<<"$*" | cut -d: -f1 | jq -Rsc 'split("\n") - [""]')
+    jq --argjson asked "$asked" 'if $asked == [] then . else
+      .data.repository |= with_entries(select(.key as $k | any($asked[]; . == $k))) end' \
+      "$FAKE/graphql.json" | jq -r "$filter" ;;
   'issue list') list issues ;;
   'pr list') list prs ;;
-  'issue view') jq -r '.data.repository[].body' "$FAKE/graphql.json" ;;
+  'issue view') jq -r ".data.repository.n$3.body" "$FAKE/graphql.json" ;;
   'issue edit') while [ "$1" != --body-file ]; do shift; done; cp "$2" "$FAKE/body" ;;
   'issue comment') ;;
   'issue develop')
@@ -56,8 +60,9 @@ fail() {
   exit 1
 }
 check() { [ "$2" = "$3" ] || fail "$1" "$(printf 'want: %s\ngot:  %s' "$2" "$3")"; }
-# Sets the GraphQL answer: the recorded issue #5, changed by the jq filter $1.
-answer() { jq "${2:-.data.repository.n5} |= ($1)" "$fixtures/${3:-status-5.json}" >"$tmp/graphql.json"; }
+# Sets the GraphQL answer: issues and PRs #4 to #10 as recorded, with #5, or
+# the path $2, changed by the jq filter $1.
+answer() { jq "${2:-.data.repository.n5} |= ($1)" "$fixtures/${3:-tracker.json}" >"$tmp/graphql.json"; }
 writes() { grep -E '^issue (edit|comment)|^issue develop [0-9]+ --name' "$tmp/calls" || true; }
 
 # status: and also: of a host. As recorded, #5's one open pull request is #9,
@@ -98,24 +103,32 @@ check 'bodies adds nothing for a number already in the file' 3 "$(wc -l <"$tmp/c
 check 'bodies queries nothing for a number already in the file' '' "$(grep graphql "$tmp/calls" || true)"
 
 # bodies gives no entry to the issue that a duplicate duplicates, when the
-# file holds it already.
-answer '{n7: (.n5 | .number = 7 | .state = "CLOSED" | .stateReason = "DUPLICATE" | .duplicateOf = {number: 5})}' .data.repository
+# file holds it already, nor to one in another repository.
+here='{nameWithOwner: "kalinichenko88/agent-skills"}'
+answer "{n7: (.n5 | .number = 7 | .state = \"CLOSED\" | .stateReason = \"DUPLICATE\" | .duplicateOf = {number: 5, repository: $here})}" .data.repository
 : >"$tmp/calls"
 bash "$scripts/collect.sh" bodies "$tmp/collected" 7 >/dev/null
 check 'bodies does not fetch an issue already in the file' '' "$(grep 'n5: issueOrPullRequest' "$tmp/calls" || true)"
 check 'bodies counts only the new entries' '== end: 1 entries' "$(tail -1 "$tmp/collected")"
+answer '{n7: (.n5 | .number = 7 | .state = "CLOSED" | .stateReason = "DUPLICATE"
+  | .duplicateOf = {number: 3, repository: {nameWithOwner: "other/repo"}})}' .data.repository
+printf '== Bodies\n' >"$tmp/collected"
+: >"$tmp/calls"
+bash "$scripts/collect.sh" bodies "$tmp/collected" 7 >/dev/null
+check 'bodies does not fetch a duplicate of another repository here' '' "$(grep 'n3: issueOrPullRequest' "$tmp/calls" || true)"
+grep -q '^duplicate of: other/repo#3$' "$tmp/collected" || fail 'an entry names the other repository of its duplicate'
 
-# A failed query stops bodies before it writes, the duplicateOf one too.
+# A failed query stops bodies before it writes: the duplicateOf query, and the
+# one that reads the entries.
 answer .
 printf '== Bodies\n' >"$tmp/collected"
-for failing in 'Issue { duplicateOf' 'repository('; do
+for failing in '{ ... on Issue { repository { nameWithOwner } duplicateOf' 'comments(first'; do
   FAKE_FAIL=$failing bash "$scripts/collect.sh" bodies "$tmp/collected" 5 >/dev/null 2>&1 &&
     fail "bodies exits 0 when the query with \"$failing\" fails"
   check "bodies writes nothing when the query with \"$failing\" fails" '== Bodies' "$(cat "$tmp/collected")"
 done
 
 # filing writes the open titles, each search, and the bodies of its open hits.
-answer . .data.repository entries-scout.md.json
 out=$(bash "$scripts/collect.sh" filing scout.md)
 collected=${out%%: *}
 check 'filing lists every open issue' 5 "$(sed -n '/^== Open issues/,/^== Search/p' "$collected" | grep -c ' open$')"
@@ -124,10 +137,38 @@ check 'filing gives a body to each open hit' \
   "$(grep -E '^==> |^== end' "$collected" | sed -E 's/^(==> (PR )?#[0-9]+ ).*/\1/')"
 out=$(bash "$scripts/collect.sh" filing typescript)
 check 'filing ends the bodies with no open hit' '== end: 0 entries' "$(tail -1 "${out%%: *}")"
-jq '[range(1000) as $i | .[0] | .number = $i + 1]' "$fixtures/open-issues.json" >"$tmp/open-issues.json"
-out=$(bash "$scripts/collect.sh" filing typescript)
-rm "$tmp/open-issues.json"
-grep -q "^GitHub's list stops at 1,000" "${out%%: *}" || fail 'filing says when the open titles reach 1,000'
+
+# A path is searched by its base name too; an empty name is not searched.
+: >"$tmp/calls"
+bash "$scripts/collect.sh" filing skills/github/scout.md/ '' >/dev/null
+check 'filing searches each name and base name once' \
+  "$(printf 'skills/github/scout.md\nscout.md')" \
+  "$(sed -n 's/^issue list --state all --limit 1000 --search \(.*\) --json.*/\1/p' "$tmp/calls")"
+
+# A failed query leaves no file behind.
+collects() { find "$tmp" -maxdepth 1 -name 'collect.*' | wc -l | tr -d ' '; }
+before=$(collects)
+FAKE_FAIL='comments(first' bash "$scripts/collect.sh" filing scout.md >/dev/null 2>&1 &&
+  fail 'filing exits 0 when a query fails'
+check 'a failed filing leaves no file behind' "$before" "$(collects)"
+
+# take-in starts with the issue and its timeline, then the bodies of the
+# timeline, of each issue with a bug or debt label, and of the open hits.
+: >"$tmp/calls"
+out=$(bash "$scripts/collect.sh" take-in '#5' 'enhancement, bug ' scout.md)
+collected=${out%%: *}
+check 'take-in lists the timeline' \
+  "$(printf 'PR #4 \n#8 \nPR #9 \n#10 ')" \
+  "$(sed -n '/^== Its timeline/,/^== Open issues/p' "$collected" | sed -n -E 's/^((PR )?#[0-9]+ ).*/\1/p')"
+check 'take-in gives the issue one entry, and a body to each hit' \
+  "$(printf '==> #5 \n==> PR #4 \n==> #6 \n==> #7 \n==> #8 \n==> PR #9 \n==> #10 \n== end: 6 entries')" \
+  "$(grep -E '^==> |^== end' "$collected" | sed -E 's/^(==> (PR )?#[0-9]+ ).*/\1/')"
+check 'take-in reads each bug and debt label, its spaces cut' \
+  "$(printf 'enhancement\nbug')" "$(sed -n 's/.*--label \(.*\) --json.*/\1/p' "$tmp/calls")"
+answer '.timelineItems.totalCount = 150'
+out=$(bash "$scripts/collect.sh" take-in 5 '' scout.md)
+grep -q '^Only the newest 100 of 150 references are here\.$' "${out%%: *}" ||
+  fail 'take-in says when the timeline is cut'
 
 check 'usage names every job' 4 "$(bash "$scripts/collect.sh" 2>&1 | grep -c '^usage: collect.sh ')"
 
@@ -165,7 +206,7 @@ check 'add-finding.sh edits and comments' \
   "$(printf 'issue edit 5 --title New title --body-file %s\nissue comment 5 --body Added to the body: the scout misses a cited line.' \
     "$(sed -n 's/^issue edit 5 --title New title --body-file //p' "$tmp/calls")")" "$(writes)"
 check 'the new body is the old one and the section' \
-  "$(jq -r .data.repository.n5.body "$fixtures/status-5.json"; echo; cat "$tmp/section.md")" "$(cat "$tmp/body")"
+  "$(jq -r .data.repository.n5.body "$fixtures/tracker.json"; echo; cat "$tmp/section.md")" "$(cat "$tmp/body")"
 
 # take-in-check.sh
 take() { bash "$scripts/take-in-check.sh" "$@" 2>&1 || echo "exit $?"; }

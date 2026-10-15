@@ -283,8 +283,9 @@ printed. Codex cannot move a running session: every command takes the worktree
 as `workdir`, and every file path, read or patched, is written under it.
 
 Then read what points at it: the scout's **Linked, open work and history**
-group. It holds every cross-reference from the timeline, including the ones
-the issue's own body never mentions, the open PRs that change the same code,
+group. It holds the timeline's cross-references, including the ones the
+issue's own body never mentions — the newest 100, and the file says when
+there are more — the open PRs that change the same code,
 and the closed issues and merged PRs that changed it. An open PR there is work
 under way: say so before you start on the same code. Read in full the open
 issues, the PRs that touched the same code, and any closed issue whose outcome
