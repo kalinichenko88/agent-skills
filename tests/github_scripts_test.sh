@@ -15,6 +15,7 @@ mkdir "$tmp/bin"
 cat >"$tmp/bin/gh" <<'EOF'
 #!/bin/bash
 echo "$*" >>"$FAKE/calls"
+case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1 ;; esac
 filter=. search=''
 for ((i = 1; i <= $#; i++)); do
   j=$((i + 1))
@@ -32,7 +33,6 @@ case "$1 $2" in
   'api repos/{owner}/{repo}') echo kalinichenko88/agent-skills ;;
   'api user') echo kalinichenko88 ;;
   'api graphql')
-    case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1 ;; esac
     # As GitHub, only the issues that the query asks for.
     asked=$(grep -oE 'n[0-9]+: issueOrPullRequest' <<<"$*" | cut -d: -f1 | jq -Rsc 'split("\n") - [""]')
     jq --argjson asked "$asked" 'if $asked == [] then . else
@@ -151,7 +151,7 @@ check 'filing ends the bodies with no open hit' '== end: 0 entries' "$(tail -1 "
 
 # A path is searched by its base name too; an empty name is not searched.
 : >"$tmp/calls"
-bash "$scripts/collect.sh" filing skills/github/scout.md/ '' >/dev/null
+bash "$scripts/collect.sh" filing '' skills/github/scout.md/ >/dev/null
 check 'filing searches each name and base name once' \
   "$(printf 'skills/github/scout.md\nscout.md')" \
   "$(sed -n 's/^issue list --state all --limit 1000 --search \(.*\) --json.*/\1/p' "$tmp/calls")"
@@ -257,6 +257,9 @@ case $out in *'warning: #5 has a linked branch and nobody is assigned'*) ;;
   *) fail 'worktree.sh warns about a linked branch with no assignee' "$out" ;;
 esac
 case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue whose linked branch can be someone else'"'"'s' "$out" ;; esac
+out=$(cd "$tmp/repo" && FAKE_FAIL='issue view' DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations 2>&1) &&
+  fail 'worktree.sh goes on when it cannot read the assignees' "$out"
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue whose assignees it could not read' "$out" ;; esac
 answer '.assignees.nodes = [{login: "kalinichenko88"}]'
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
 case $out in *warning*) fail 'worktree.sh warns about a linked branch on an issue assigned to you' "$out" ;; esac

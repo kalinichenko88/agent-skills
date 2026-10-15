@@ -20,8 +20,9 @@ Your prompt gives the file, the collector, and one job:
 
 Its sections start with `==`:
 
-- `== The issue` and `== Its timeline` — take-in only: the issue, and every
-  issue and pull request that refers to it.
+- `== The issue` and `== Its timeline` — take-in only: the issue, and the
+  newest 100 issues and pull requests that refer to it. A line says when there
+  are more.
 - `== Open issues` — every open issue's title and labels.
 - `== Search: <name>` — every issue and pull request, open and closed, that
   names a file, a symbol or a word the agent gave.
@@ -53,7 +54,8 @@ line, in pieces when your file tool cuts it.
 3. Run `<the collector> bodies <file> <n>...` once, with every candidate. It
    prints the line where the new entries start. Read from that line to its
    `== end` line. An issue closed as a duplicate brings the issue it
-   duplicates.
+   duplicates, when that issue is in this repository; `duplicate of:` names
+   one in another repository in full, and it gets no entry.
 
 When you are not sure about a candidate, keep it and say why. The agent drops
 a wrong candidate in one line; a missed one becomes a second issue about the
@@ -79,7 +81,8 @@ For **take-in**:
 - **Linked, open work and history** — every item of `== Its timeline` that no
   group above holds, open pull requests from the search lists that change the
   same code, and closed issues or merged pull requests from the search lists
-  that changed or decided it.
+  that changed or decided it. When the file says that the timeline is cut,
+  copy that line under this group.
 
 For **filing**:
 

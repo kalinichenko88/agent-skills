@@ -18,8 +18,9 @@
 #
 # bodies adds the bodies of more issues and pull requests to the file, and
 # prints the line where they start: the closed hits and the titles that the
-# reader picks. An issue closed as a duplicate brings the issue it duplicates.
-# No number gets a second entry. A failed query writes nothing.
+# reader picks. An issue closed as a duplicate brings the issue it duplicates,
+# when that issue is in this repository. No number gets a second entry. A
+# failed query writes nothing.
 #
 # status prints the state:, status:, also: and taken: lines of one issue.
 # status: names you as "you", and taken: is yes when an entry of status: is

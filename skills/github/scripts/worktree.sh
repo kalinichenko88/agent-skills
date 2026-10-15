@@ -30,7 +30,12 @@ linked=$(gh issue develop --list "$n" | cut -f1)
 # Assigned to you, the issue's linked branch counts as yours (collect.sh).
 # GitHub does not say whose a branch is: one that is linked while nobody is
 # assigned can be someone else's, so you decide.
-if [ -n "$linked" ] && [ "$(gh issue view "$n" --json assignees --jq '.assignees | length')" = 0 ]; then
+# Read outside the if, so that a failed read stops the script.
+assignees=1
+if [ -n "$linked" ]; then
+  assignees=$(gh issue view "$n" --json assignees --jq '.assignees | length')
+fi
+if [ "$assignees" = 0 ]; then
   echo "warning: #$n has a linked branch and nobody is assigned: it can be someone else's."
   echo "It is not assigned to you. If the branch is yours: gh issue edit $n --add-assignee @me"
 else
