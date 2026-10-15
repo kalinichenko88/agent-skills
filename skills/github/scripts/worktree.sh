@@ -5,11 +5,13 @@
 #
 #   worktree.sh <n> <branch>
 #
+# An issue with a linked branch and no assignee gets a warning instead: the
+# branch can be someone else's.
+#
 # A branch already linked to the issue wins over a <branch> that is not
-# linked: the first one that gh lists. A branch already
-# checked out somewhere is worked on there. A session already in a worktree,
-# as one started with claude --worktree or codex --worktree, checks the branch
-# out where it is.
+# linked: the first one that gh lists. A branch already checked out somewhere
+# is worked on there. A session already in a worktree, as one started with
+# claude --worktree or codex --worktree, checks the branch out where it is.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none.
 
@@ -23,10 +25,17 @@ n=$1 branch=$2
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
-# Assigned to you, the issue's linked branch counts as yours (collect.sh).
-run gh issue edit "$n" --add-assignee @me
-
 linked=$(gh issue develop --list "$n" | cut -f1)
+
+# Assigned to you, the issue's linked branch counts as yours (collect.sh).
+# GitHub does not say whose a branch is: one that is linked while nobody is
+# assigned can be someone else's, so you decide.
+if [ -n "$linked" ] && [ "$(gh issue view "$n" --json assignees --jq '.assignees | length')" = 0 ]; then
+  echo "warning: #$n has a linked branch and nobody is assigned: it can be someone else's."
+  echo "It is not assigned to you. If the branch is yours: gh issue edit $n --add-assignee @me"
+else
+  run gh issue edit "$n" --add-assignee @me
+fi
 case $'\n'$linked$'\n' in
   *$'\n'"$branch"$'\n'* | $'\n\n') ;;
   *)

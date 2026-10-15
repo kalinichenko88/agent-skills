@@ -40,7 +40,8 @@ case "$1 $2" in
       "$FAKE/graphql.json" | jq -r "$filter" ;;
   'issue list') list issues ;;
   'pr list') list prs ;;
-  'issue view') jq -r ".data.repository.n$3.body" "$FAKE/graphql.json" ;;
+  'issue view')
+    jq ".data.repository.n$3 | {body, assignees: [.assignees.nodes[]?]}" "$FAKE/graphql.json" | jq -r "$filter" ;;
   'issue edit') while [ "$1" != --body-file ]; do shift; done; cp "$2" "$FAKE/body" ;;
   'issue comment') ;;
   'issue develop')
@@ -231,7 +232,9 @@ check 'take-in-check.sh on an issue of another repository' \
   "$(printf '#179 is in selgeo/magos, and this checkout is kalinichenko88/agent-skills: stop\nexit 1')" \
   "$(take https://github.com/selgeo/magos/issues/179)"
 
-# worktree.sh in a main checkout, with DRY_RUN=1.
+# worktree.sh in a main checkout, with DRY_RUN=1. As recorded, #5 has no
+# assignee.
+answer .
 git init -q "$tmp/repo"
 top=$(git -C "$tmp/repo" rev-parse --show-toplevel)
 : >"$tmp/calls"
@@ -246,6 +249,19 @@ printf 'feat/5-linked\thttps://github.com/kalinichenko88/agent-skills/tree/feat/
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
 case $out in *'using it'*'--name feat/5-linked --checkout'*) ;;
   *) fail 'worktree.sh reuses the linked branch' "$out" ;;
+esac
+
+# A linked branch on an issue that nobody is assigned to can be someone
+# else's: worktree.sh warns, and does not assign the issue to you.
+case $out in *'warning: #5 has a linked branch and nobody is assigned'*) ;;
+  *) fail 'worktree.sh warns about a linked branch with no assignee' "$out" ;;
+esac
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue whose linked branch can be someone else'"'"'s' "$out" ;; esac
+answer '.assignees.nodes = [{login: "kalinichenko88"}]'
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *warning*) fail 'worktree.sh warns about a linked branch on an issue assigned to you' "$out" ;; esac
+case $out in *'dry run: gh issue edit 5 --add-assignee @me'*) ;;
+  *) fail 'worktree.sh assigns an issue that is already yours' "$out" ;;
 esac
 
 printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"

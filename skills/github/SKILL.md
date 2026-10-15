@@ -279,6 +279,11 @@ the issue wins over the name you gave. A branch already checked out is worked
 on where it is. A session already in a worktree, as one started with `claude
 --worktree` or `codex --worktree`, checks the branch out where it is.
 
+A linked branch on an issue that nobody is assigned to can be someone else's:
+the script warns, and does not assign the issue to you. Find out whose the
+branch is before you push to it. Someone else's: say so and wait. Yours: run
+the command the warning gives, which assigns the issue to you.
+
 Then move into the worktree. Claude Code: `EnterWorktree` with the path it
 printed. Codex cannot move a running session: every command takes the worktree
 as `workdir`, and every file path, read or patched, is written under it.
