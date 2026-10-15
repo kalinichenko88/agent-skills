@@ -14,10 +14,10 @@ so in the final report rather than inventing a substitute.
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` |
 | `gh pr create` | `--assignee @me`; assign every issue it closes too |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch |
-| Reading the tracker | From 30 open issues in Claude Code, a Haiku scout reads it; otherwise you run `scout.md`. You decide and write |
-| Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description. Otherwise add it to an open issue on the same code, or file a new one |
+| Reading the tracker | `collect.sh` writes it to one file. From 20 KB in Claude Code, a Haiku scout reads the file; otherwise you read it with `scout.md`. You decide and write |
+| Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one |
 | Filing next to an existing issue | Name the relation, and correct the other side |
-| Picking an issue up — `#91` or its URL | Close its duplicates; unless told otherwise, a worktree `fix/91-what-it-does` via `gh issue develop`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code |
+| Picking an issue up — `#91` or its URL | `take-in-check.sh`; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host |
 
 ## Commits
@@ -84,35 +84,55 @@ left to say once it is in. Its subject is the PR title — by default a
 one-commit branch gives that commit's subject instead — so both take the same
 `type: sentence` shape.
 
-## The scout
+## Scripts
 
-Reading the tracker is long and needs no knowledge of the task: every open
-title, the bodies of the candidates, a paginated timeline. A small model reads
-it in a context of its own and returns only the candidates. In Claude Code,
-one `Agent` call with `model: "haiku"` and this prompt:
+The steps with one correct result are scripts in `scripts/`, next to this
+file. Run each one as `bash <dir>/scripts/<name>.sh`, where `<dir>` is this
+skill's base directory: a plugin packager can drop the executable bit. They
+need only `bash` and `gh`. A script that writes takes `DRY_RUN=1`: it prints
+its write commands and runs none.
+
+## Reading the tracker
+
+`collect.sh` reads the tracker into one file, and prints its path and size:
+
+```bash
+bash <dir>/scripts/collect.sh take-in 91 bug,debt src/main/lanes.ts spawnLane lane
+bash <dir>/scripts/collect.sh filing src/parser.ts verify_target
+```
+
+Give it every file and symbol that the issue or the findings name, any you
+know the work touches, and the one or two words they use for what the person
+sees — `lane`, `error alert`. For take-in, the second argument is the
+repository's names for bug and debt in `gh label list`, comma-separated, or
+`''`. One run covers every finding you have at that moment.
+
+In Claude Code, a file of 20 KB or more goes to a scout, a small model that
+reads it in a context of its own and returns only the candidates. The size
+that `collect.sh` prints first decides; the reader adds the bodies it needs
+later, and the file often grows to three times that size. Send one `Agent`
+call with `model: "haiku"` and this prompt:
 
 ```
-Read <this skill's base directory>/scout.md and do what it says.
+Read <dir>/scout.md and do what it says.
 Job: take-in #91.
-Repository: <owner/repo>, checked out at <path>.
-Files and symbols: <every one the issue names, and any you know the work touches>.
+File: <the path collect.sh printed>.
+Collector: bash <dir>/scripts/collect.sh
 ```
 
 For findings, the `Job:` line is `Job: filing.`, and under it one line per
 finding with its `path:line`.
 
-Send it when the tracker has 30 open issues or more: `gh issue list --state
-open --limit 30 --json number --jq length` prints `30`. Below that, and in
-Codex, read `scout.md` and run it yourself: on a small tracker the reading
-costs less than a subagent's start. Run by you, its *Read*, its *Sort* and the
-entry shape in its *Return* apply: write its groups and entries, `status:` and
-`also:` included, as your notes, and go on with this skill.
+Read a smaller file yourself, and every file in Codex: it costs less than a
+subagent's start and its report. Follow `scout.md` — its *The file*, *Read*,
+*Sort* and the entry shape in its *Return* — write its groups and entries as
+your notes, and go on with this skill.
 
 The scout only reads. Every close, edit, comment and new issue is yours, and
 so is every verdict. Its lists include doubtful candidates on purpose: drop
 each one that is wrong, and read in full each issue before you act on it. Its
-report replaces your own search of the tracker: search yourself only for a
-name it did not get. One run covers every finding you have at that moment.
+report replaces your own search of the tracker: for a name it did not get, run
+`collect.sh filing <name>` yourself.
 
 ## Filing an issue
 
@@ -132,17 +152,16 @@ reviewer knows which changes are not the task. An issue for a two-line fix costs
 more than the fix. Fails any of the three — a design choice, a behaviour change,
 a fix that needs its own test — and it is an issue, however small it looks.
 
-**Search by identifier, not by your title.** `gh issue list --search "Parser"
---state all --limit 500` finds every issue that names the symbol (without
-`--limit`, `gh` stops at 30); the prose you were about to write finds only
-issues someone happened to phrase your way — and on a tracker written in
-another language, nothing at all. Closed counts too: a finding already filed
-and rejected does not need filing again. The scout runs these searches and
-reads the titles; run it before you file.
+**Search by identifier, not by your title.** A search for the symbol finds
+every issue that names it; the prose you were about to write finds only issues
+someone happened to phrase your way — and on a tracker written in another
+language, nothing at all. Closed counts too: a finding already filed and
+rejected does not need filing again. `collect.sh filing` runs these searches;
+run it, and read its file, before you file.
 
 **Add to an open issue before you open a new one.** Two issues on one piece of
 code become two PRs that edit the same lines, and the tracker grows faster
-than it closes. Per finding, the scout's report decides:
+than it closes. Per finding, the scout's groups decide:
 
 - **Already decided** or **Already filed** — file nothing. If an open issue has
   the same report and the finding adds something — a surface, a reproduction —
@@ -156,25 +175,23 @@ than it closes. Per finding, the scout's report decides:
   before you file: it may fix the finding. If it does not, name it in what you
   file, so its author sees the overlap.
 - **A host** — an open issue whose fix changes the same code, or that decides
-  something about the same function. It takes the finding only if both hold:
-  - Nobody else works on it. The scout's `status:` is `free`, or its only
-    entry is `assigned to` you (`gh api user --jq .login`).
-  - It holds fewer than two added findings. Count its `## Also:` headings in
-    its body as it is now, with the scout's `jq` line: the findings you added
-    in this run count too. One PR must still close every problem in it.
+  something about the same function. It takes the finding only if nobody else
+  works on it — its `status:` is `free`, or only `assigned to` you — and it
+  holds fewer than two added findings, its `also:`. One PR must still close
+  every problem in it. Write the section to a file outside the checkout. It
+  starts `## Also: <the problem>`, then says where it is (`path:line`), how it
+  shows up, and why it was out of scope here. Then:
 
-  Then:
-  1. Add a section to its body that starts `## Also: <the problem>`, with
-     where it is (`path:line`), how it shows up, and why it was out of scope
-     here. The heading is what the count reads. `gh issue edit --body`
-     replaces the whole body, so write the old body and the new section to a
-     file outside the checkout: `f=$(mktemp)`, `gh issue view 12 --json body
-     --jq .body > "$f"`, add the section at the end, then `gh issue edit 12
-     --body-file "$f"`.
-  2. Change the title so it names every problem in the issue.
-  3. Add the finding's label if the issue does not have it.
-  4. Leave a one-line comment that says what was added. A body edit notifies
-     nobody.
+  ```bash
+  bash <dir>/scripts/add-finding.sh 12 "$section_file" "<a title that names every problem in it>" [label]
+  ```
+
+  `[label]` is the finding's label from `gh label list`, if one fits and the
+  host does not have it. The script reads `status:` and `also:` again just
+  before it writes, so the findings you added in this run count too. It adds
+  the section to the end of the body, sets the title, adds the label, and
+  leaves a one-line comment, because a body edit notifies nobody. A busy host
+  or a full one it refuses, and writes nothing.
 - **No free host** — file a new issue:
   - One issue per finding. Title states the problem, body says where it is
     (`path:line`), how it shows up, and why it was out of scope here.
@@ -204,20 +221,20 @@ one-line comment only (*Filing an issue*): its body stays as it is.
 
 **Taking one into work.** An issue named on its own — `#91`, "take #91", its
 URL — as the session's first message, or after a talk about which task is next,
-is the request to take it into work; a mention inside other work is not. Read it
-first, with `gh issue view 91 --json
-state,assignees,closedByPullRequestsReferences`: closed, assigned to someone
-else, or closed by an open pull request someone else wrote — say so and wait.
-An issue URL from another repository than this checkout's `origin`: say so and
-stop.
+is the request to take it into work; a mention inside other work is not. Check
+it first: `bash <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints
+`take #91`, or each reason why not. Closed, assigned to someone else, or closed
+by an open pull request someone else wrote — say so and wait. An issue of
+another repository than this checkout's — say so and stop.
 
-**The scout reads the tracker next.** Run it (*The scout* above) with the
-issue and the files and symbols it names. While a subagent runs it, you can set
-up the worktree below: the worktree is not the work, so the duplicates can
-still close before the work starts. Its report holds the duplicates, the bugs
-and debt in the same area, the neighbours, and the linked issues, open work and
-history; the rest of this section works from it. An issue with `## Also:`
-sections is one task: its own problem and every added one.
+**The tracker is read next.** Run `collect.sh take-in` (*Reading the tracker*
+above) with the issue's number and the names it gives. While a subagent reads
+the file, you can set up the worktree below: the worktree is not the work, so
+the duplicates can still close before the work starts. The scout's groups hold
+the duplicates, the bugs and debt in the same area, the neighbours, and the
+linked issues, open work and history; the rest of this section works from
+them. An issue with `## Also:` sections is one task: its own problem and every
+added one.
 
 **Its duplicates close first.** A duplicate — the same report, in different
 words or not, about the same place — closes against the issue in hand before
@@ -247,27 +264,18 @@ English — `fix/91-electron-binary-in-lanes`, never `issue-91` or the whole
 title.
 
 ```bash
-gh issue develop --list 91   # a linked branch: pass its name to --name, gh reuses it
-git worktree list            # that branch already checked out somewhere: work there
-gh issue develop 91 --name fix/91-electron-binary-in-lanes --checkout \
-  --worktree "$(git rev-parse --show-toplevel)/.claude/worktrees/fix/91-electron-binary-in-lanes"
-ex="$(git rev-parse --git-common-dir)/info/exclude"; grep -qxF .claude/worktrees/ "$ex" || echo .claude/worktrees/ >>"$ex"
+bash <dir>/scripts/worktree.sh 91 fix/91-electron-binary-in-lanes
 ```
 
-`gh issue develop` branches from the remote's default branch and links the branch
-to the issue. `--worktree` needs gh 2.99 or newer; on an older one, drop
-`--checkout --worktree` and run `git fetch origin <branch> && git worktree add
-<path> <branch>`. The last line keeps `git add -A` in the main checkout from
-recording the worktree as an embedded repository.
+It branches from the remote's default branch, links the branch to the issue,
+and prints the path to work in as its last line. A branch already linked to
+the issue wins over the name you gave. A branch already checked out is worked
+on where it is. A session already in a worktree, as one started with `claude
+--worktree` or `codex --worktree`, checks the branch out where it is.
 
-Already in a worktree — `git rev-parse --path-format=absolute --git-dir
---git-common-dir` prints two different paths, as in a session started with
-`codex --worktree` (on a detached HEAD) or `claude --worktree` — stay there and
-check the branch out in it: `gh issue develop 91 --name <branch> --checkout`.
-
-Then move into the worktree. Claude Code: `EnterWorktree` with that `path`.
-Codex cannot move a running session: every command takes the worktree as
-`workdir`, and every file path, read or patched, is written under it.
+Then move into the worktree. Claude Code: `EnterWorktree` with the path it
+printed. Codex cannot move a running session: every command takes the worktree
+as `workdir`, and every file path, read or patched, is written under it.
 
 Then read what points at it: the scout's **Linked, open work and history**
 group. It holds every cross-reference from the timeline, including the ones
@@ -286,10 +294,10 @@ code the task will change. The issue in hand stays the task throughout. A hit
 whose `status:` is not `free`, and not only `assigned to` you, is someone
 else's work: it gets no verdict below and stays as it is. Say so.
 
-1. **Search.** The scout's report holds the hits, found by identifier and by
+1. **Search.** The scout's groups hold the hits, found by identifier and by
    title, so a report that names no file still shows up. When the work reaches
-   a file or symbol the scout did not get, search it yourself:
-   `gh issue list --state open --limit 500 --search "verify_target"`.
+   a file or symbol that `collect.sh` did not get, run
+   `collect.sh filing verify_target` and read its file.
 2. **Pull in the task's own defect.** A hit reporting the same wrong behaviour,
    fixed the same way, in another function or file is not a ride-along: it is
    the task, because a bug fix guards every surface the bug shows on (the
