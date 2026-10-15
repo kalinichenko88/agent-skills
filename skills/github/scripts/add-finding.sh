@@ -21,15 +21,7 @@ set -euo pipefail
 }
 n=$1 section=$2 title=$3 label=${4:-}
 
-run() {
-  if [ "${DRY_RUN:-}" = 1 ]; then
-    printf 'dry run:'
-    printf ' %q' "$@"
-    echo
-  else
-    "$@"
-  fi
-}
+run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 refuse() {
   echo "#$n: $1: file a new issue that says Related to #$n, and comment on #$n"
   exit 1
@@ -43,9 +35,7 @@ problem=$(sed -n '1s/^## Also: //p' "$section")
 
 me=$(gh api user --jq .login)
 host=$(bash "$(dirname "$0")/collect.sh" status "$n")
-state=$(echo "$host" | sed -n 's/^state: //p')
-status=$(echo "$host" | sed -n 's/^status: //p')
-also=$(echo "$host" | sed -n 's/^also: //p')
+{ read -r _ state; read -r _ status; read -r _ also; } <<<"$host"
 
 [ "$state" = open ] || refuse "it is $state"
 [ "$status" = free ] || [ "$status" = "assigned to $me" ] || refuse "someone works on it: $status"
@@ -56,10 +46,7 @@ body=$(mktemp "${tmp%/}/body.XXXXXX")
 # A dry run keeps the new body to be read.
 [ "${DRY_RUN:-}" = 1 ] || trap 'rm -f "$body"' EXIT
 gh issue view "$n" --json body --jq .body >"$body"
-{
-  echo
-  cat "$section"
-} >>"$body"
+{ echo; cat "$section"; } >>"$body"
 
 args=(issue edit "$n" --title "$title" --body-file "$body")
 [ -z "$label" ] || args+=(--add-label "$label")

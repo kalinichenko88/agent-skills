@@ -54,11 +54,11 @@ fields='__typename
 # shellcheck disable=SC2016 # jq, not shell
 defs='
 def lower: ascii_downcase;
-def labels: [.labels.nodes[].name] | if length > 0 then " [" + join(", ") + "]" else "" end;
+def labels: [(.labels | .nodes? // .)[].name] | if length > 0 then " [" + join(", ") + "]" else "" end;
 def line:
   if .__typename == "PullRequest" then "PR #\(.number) \(.title) \(.state | lower)"
   else "#\(.number) \(.title)\(labels) \(.state | lower)"
-    + (if .state == "CLOSED" and .stateReason then " " + (.stateReason | lower) else "" end)
+    + (if .state == "CLOSED" and (.stateReason // "") != "" then " " + (.stateReason | lower) else "" end)
   end;
 def status:
   [ (.assignees.nodes[] | "assigned to \(.login)"),
@@ -128,8 +128,6 @@ size() {
     "$(wc -l <"$file" | tr -d ' ')"
 }
 
-issue_line='"#\(.number) \(.title)" + ([.labels[].name] | if length > 0 then " [" + join(", ") + "]" else "" end)'
-
 # Appends every open title, and a section of hits for each name, to $file;
 # adds the numbers of the hits to $hits.
 titles_and_searches() {
@@ -137,16 +135,15 @@ titles_and_searches() {
   {
     echo "== Open issues"
     echo
-    gh issue list --state open --limit 1000 --json number,title,labels \
-      --jq ".[] | $issue_line"
+    gh issue list --state open --limit 1000 --json number,title,labels,state \
+      --jq "$defs"'.[] | line'
   } >>"$file"
   for name in "$@"; do
     case $name in */*) set -- "$@" "${name##*/}" ;; esac
   done
   printf '%s\n' "$@" | awk '!seen[$0]++' | while IFS= read -r name; do
     issues=$(gh issue list --state all --limit 1000 --search "$name" \
-      --json number,title,labels,state,stateReason \
-      --jq ".[] | $issue_line"' + " \(.state | ascii_downcase)" + (if .stateReason != "" and .state == "CLOSED" then " " + (.stateReason | ascii_downcase) else "" end)')
+      --json number,title,labels,state,stateReason --jq "$defs"'.[] | line')
     prs=$(gh pr list --state all --limit 1000 --search "$name" --json number,title,state \
       --jq '.[] | "PR #\(.number) \(.title) \(.state | ascii_downcase)"')
     {

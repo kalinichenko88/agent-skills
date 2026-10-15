@@ -17,7 +17,7 @@ set -euo pipefail
   exit 2
 }
 repo=$(gh api 'repos/{owner}/{repo}' --jq .full_name)
-lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+shopt -s nocasematch # GitHub's owner and repository names ignore case
 
 case $1 in
   http*/issues/*)
@@ -25,7 +25,7 @@ case $1 in
     there=${there%%/issues/*}
     n=${1##*/issues/}
     n=${n%%[!0-9]*}
-    if [ "$(lower "$there")" != "$(lower "$repo")" ]; then
+    if [[ $there != "$repo" ]]; then
       echo "#$n is in $there, and this checkout is $repo: stop"
       exit 1
     fi

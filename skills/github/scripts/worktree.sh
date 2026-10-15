@@ -19,15 +19,7 @@ set -euo pipefail
 }
 n=$1 branch=$2
 
-run() {
-  if [ "${DRY_RUN:-}" = 1 ]; then
-    printf 'dry run:'
-    printf ' %q' "$@"
-    echo
-  else
-    "$@"
-  fi
-}
+run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
 linked=$(gh issue develop --list "$n" | cut -f1 | sed -n 1p)
 if [ -n "$linked" ] && [ "$linked" != "$branch" ]; then
