@@ -1,6 +1,7 @@
 #!/bin/bash
-# Checks out the branch of an issue in a worktree of its own, links the branch
-# to the issue, and prints the path to work in as its last line.
+# Assigns an issue to you, checks out its branch in a worktree of its own,
+# links the branch to the issue, and prints the path to work in as its last
+# line.
 #
 #   worktree.sh <n> <branch>
 #
@@ -21,6 +22,9 @@ set -euo pipefail
 n=$1 branch=$2
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
+
+# Assigned to you, the issue's linked branch counts as yours (collect.sh).
+run gh issue edit "$n" --add-assignee @me
 
 linked=$(gh issue develop --list "$n" | cut -f1)
 case $'\n'$linked$'\n' in

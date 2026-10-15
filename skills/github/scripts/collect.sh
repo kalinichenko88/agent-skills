@@ -23,7 +23,8 @@
 #
 # status prints the state:, status:, also: and taken: lines of one issue.
 # status: names you as "you", and taken: is yes when an entry of status: is
-# not yours. A linked branch counts as not yours: GitHub does not say whose.
+# not yours. GitHub does not say whose a linked branch is: it counts as yours
+# when the issue is assigned to you alone, as worktree.sh leaves it.
 #
 # Needs only bash and gh: every filter is gh's own --jq.
 
@@ -84,9 +85,10 @@ def status($me):
     (prs | "PR #\(.number) by \(.author | who($me))") ]
   | if length > 0 then join(", ") else "free" end;
 def taken($me):
-  [ (.assignees.nodes[] | select(.login != $me)),
-    (.linkedBranches.nodes[] | select(.ref)),
-    (prs | select(.author != $me)) ]
+  ([.assignees.nodes[].login] | length > 0 and all(. == $me)) as $yours
+  | [ (.assignees.nodes[] | select(.login != $me)),
+      (.linkedBranches.nodes[] | select(.ref and ($yours | not))),
+      (prs | select(.author != $me)) ]
   | if length > 0 then "yes" else "no" end;
 def also: [.body | split("\n")[] | select(startswith("## Also:"))] | length;
 def text: if . == "" then "(empty)" else gsub("\r"; "") end;

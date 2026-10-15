@@ -137,7 +137,8 @@ report replaces your own search of the tracker: for a name it did not get, run
 An open issue's `status:` is `free`, or it names who works on it: `assigned to
 <login>`, `branch <name>`, `PR #<n> by <login>`, with `you` for your own
 account. One entry that is not yours makes the issue **someone else's work**.
-A linked branch counts as not yours: GitHub does not say whose it is.
+GitHub does not say whose a linked branch is: it counts as yours when the
+issue is assigned to you alone, as `worktree.sh` leaves it.
 
 ## Filing an issue
 
@@ -272,8 +273,8 @@ title.
 bash <dir>/scripts/worktree.sh 91 fix/91-electron-binary-in-lanes
 ```
 
-It branches from the remote's default branch, links the branch to the issue,
-and prints the path to work in as its last line. A branch already linked to
+It assigns the issue to you, branches from the remote's default branch, links
+the branch to the issue, and prints the path to work in as its last line. A branch already linked to
 the issue wins over the name you gave. A branch already checked out is worked
 on where it is. A session already in a worktree, as one started with `claude
 --worktree` or `codex --worktree`, checks the branch out where it is.

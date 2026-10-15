@@ -90,6 +90,16 @@ check 'status of a busy issue' \
   "$(printf 'status: assigned to someone, branch fix/5-citations, PR #9 by you, PR #12 by someone, PR #13 by ghost\nalso: 0\ntaken: yes')" \
   "$(bash "$scripts/collect.sh" status 5 | sed 1d)"
 
+# A linked branch is yours when the issue is assigned to you alone, as
+# worktree.sh leaves it; otherwise GitHub does not say whose it is.
+answer '.assignees.nodes = [{login: "kalinichenko88"}] | .linkedBranches.nodes = [{ref: {name: "fix/5-citations"}}]'
+check 'a branch on an issue assigned to you alone is yours' \
+  "$(printf 'status: assigned to you, branch fix/5-citations, PR #9 by you\nalso: 0\ntaken: no')" \
+  "$(bash "$scripts/collect.sh" status 5 | sed 1d)"
+answer '.linkedBranches.nodes = [{ref: {name: "fix/5-citations"}}]'
+check 'a branch on an issue with no assignee is not yours' 'taken: yes' \
+  "$(bash "$scripts/collect.sh" status 5 | sed -n '/^taken: /p')"
+
 answer '.body += "\n\n## Also: one\r\n\r\nx\n\n## Also: two\n\nNot a heading: ## Also: three\n### Also: four\n"'
 check 'also: counts the added sections' 'also: 2' \
   "$(bash "$scripts/collect.sh" status 5 | sed -n '/^also: /p')"
@@ -227,7 +237,7 @@ top=$(git -C "$tmp/repo" rev-parse --show-toplevel)
 : >"$tmp/calls"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
 check 'worktree.sh with DRY_RUN=1 prints its writes and the path' \
-  "$(printf 'dry run: gh issue develop 5 --name feat/5-scout-citations --checkout --worktree %s\ndry run: echo .claude/worktrees/ >>%s\n%s' \
+  "$(printf 'dry run: gh issue edit 5 --add-assignee @me\ndry run: gh issue develop 5 --name feat/5-scout-citations --checkout --worktree %s\ndry run: echo .claude/worktrees/ >>%s\n%s' \
     "$top/.claude/worktrees/feat/5-scout-citations" "$top/.git/info/exclude" "$top/.claude/worktrees/feat/5-scout-citations")" "$out"
 check 'worktree.sh with DRY_RUN=1 runs no write' '' "$(writes)"
 grep -q .claude/worktrees/ "$top/.git/info/exclude" && fail 'worktree.sh with DRY_RUN=1 wrote info/exclude'
