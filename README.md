@@ -14,9 +14,15 @@ prompt of engineering rules, plus the skills those rules lean on.
   close before the work starts, and the work gets a worktree named for what it
   does. Every open bug and debt issue in the same area is checked, so one PR
   can close them with the task. A finding joins an open issue on the same code
-  before a new one is filed, up to two added findings per issue. In Claude Code
-  a Haiku subagent reads a tracker with 30 or more open issues, so the main
-  model gets only the candidates.
+  before a new one is filed, up to two added findings per issue. Scripts do
+  the steps with one correct result: they read the tracker into one file, add
+  a finding to an issue, check an issue before it is taken, and set up its
+  worktree. In Claude Code a Haiku subagent reads a file of 20 KB or more, so
+  the main model gets only the candidates. Four posters show each case step by
+  step: [take an issue into work](docs/github/01-take-in.webp),
+  [file a finding](docs/github/02-filing.webp),
+  [finish the task](docs/github/03-finishing.webp),
+  [edit a workflow](docs/github/04-workflow.webp).
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
@@ -82,7 +88,13 @@ It does not touch a `return` that is the only statement in its block.
 
 `make check` validates the manifests, runs shellcheck and replays `rules.md`
 through the hook to prove the JSON it prints carries the file byte for byte and
-stays within Claude Code's 10,000-character cap on hook context.
+stays within Claude Code's 10,000-character cap on hook context. It also runs
+the github skill's scripts against a fake `gh` that answers from payloads
+recorded in `tests/fixtures/github/`.
+
+To try a script that writes on a real tracker without writing to it, set
+`DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`
+and `add-finding.sh` at another repository than the checkout's.
 
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
