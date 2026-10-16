@@ -18,7 +18,11 @@ prompt of engineering rules, plus the skills those rules lean on.
   the steps with one correct result: they read the tracker into one file, add
   a finding to an issue, check an issue before it is taken, and set up its
   worktree. In Claude Code a Haiku subagent reads a file of 20 KB or more, so
-  the main model gets only the candidates.
+  the main model gets only the candidates. Four posters show each case step by
+  step: [take an issue into work](docs/github/01-take-in.webp),
+  [file a finding](docs/github/02-filing.webp),
+  [finish the task](docs/github/03-finishing.webp),
+  [edit a workflow](docs/github/04-workflow.webp).
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
