@@ -92,6 +92,12 @@ skill's base directory: a plugin packager can drop the executable bit. They
 need only `bash` and `gh`. A script that writes takes `DRY_RUN=1`: it prints
 its write commands and runs none.
 
+A script can stop with an error, from `gh` or from its own usage check. Then
+its step is not done: report the error and stop at that step. Do not do the
+step by hand with `gh`: that skips the checks the script makes. A refusal from
+`take-in-check.sh` or `add-finding.sh` is not an error; the sections below say
+what to do with it.
+
 ## Reading the tracker
 
 `collect.sh` reads the tracker into one file, and prints its path and size:
@@ -142,21 +148,15 @@ issue is assigned to you alone, as `worktree.sh` leaves it.
 
 ## Filing an issue
 
-Anything worth fixing that is **not** part of the current task — a bug, a latent
-defect, an improvement worth making later — gets filed as an issue instead of
-being fixed inline or dropped in the chat. Do not derail the task to fix it; do
-not ask first.
+The global prompt says when a finding becomes an issue; this section says how.
 
-**If it is small, safe and needs no decision, it goes into this PR instead** —
-the Boy Scout Rule from the global prompt. All three, checked against the diff
-you would write, not the feeling: it stays within a few lines, it changes
-nothing another caller or user relies on, and there is only one way to do it — a
-typo, a stale comment, a dead variable, a wrong `path:line` in a doc, a broken
-link. Fix it now, in its own commit if it touches a file the task does not, and
-list it in the PR description under **Also fixed** with a line per item, so the
-reviewer knows which changes are not the task. An issue for a two-line fix costs
-more than the fix. Fails any of the three — a design choice, a behaviour change,
-a fix that needs its own test — and it is an issue, however small it looks.
+**Small, safe and needs no decision: it goes into this PR instead** — the Boy
+Scout Rule. Check all three against the diff you would write: it stays within a
+few lines, it changes nothing another caller or user relies on, and there is
+only one way to do it. Fix it in its own commit if it touches a file the task
+does not, and list it in the PR description under **Also fixed**, one line per
+item. Fails any of the three — a design choice, a behaviour change, a fix that
+needs its own test — and it is an issue, however small it looks.
 
 **Search by identifier, not by your title.** A search for the symbol finds
 every issue that names it; the prose you were about to write finds only issues
@@ -369,11 +369,6 @@ removes; under each problem it fixed in an issue that stays open, it adds the
 line `Done in #<PR>.`; a duplicate still held for the reproduction is closed or
 commented on; and the same pass updates every sibling issue whose text the
 change just falsified.
-
-Measured on a live tracker: of the 100 newest issues, 4 bodies had ever been
-edited; 5 open issues still cited a file the schema migration had deleted; one
-pointed 23 lines away from the code it described, at a closing brace. Every one
-of them was correctly cross-linked — the graph was never the problem.
 
 ## GitHub Actions
 
