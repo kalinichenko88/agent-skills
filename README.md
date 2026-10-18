@@ -9,8 +9,11 @@ prompt of engineering rules, plus the skills those rules lean on.
   Technical English, move docs with the change, verify review findings before
   acting on them. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
   `hooks/rules.sh` injects it at the start of every session and every subagent.
-- **`kalinichenko:github`** — commits, pull requests, issues and Actions. An
-  issue named on its own — `#91` or its URL — starts the work. Its duplicates
+- **`kalinichenko:github`** — commits, pull requests, issues and Actions.
+
+  ![The GitHub skill: start a task, find something outside it, finish it](docs/github/00-overview.webp)
+
+  An issue named on its own — `#91` or its URL — starts the work. Its duplicates
   close before the work starts, and the work gets a worktree named for what it
   does. Every open bug and debt issue in the same area is checked, so one PR
   can close them with the task. A finding joins an open issue on the same code
@@ -18,11 +21,10 @@ prompt of engineering rules, plus the skills those rules lean on.
   the steps with one correct result: they read the tracker into one file, add
   a finding to an issue, check an issue before it is taken, and set up its
   worktree. In Claude Code a Haiku subagent reads a file of 20 KB or more, so
-  the main model gets only the candidates. Four posters show each case step by
-  step: [take an issue into work](docs/github/01-take-in.webp),
-  [file a finding](docs/github/02-filing.webp),
-  [finish the task](docs/github/03-finishing.webp),
-  [edit a workflow](docs/github/04-workflow.webp).
+  the main model gets only the candidates. Each scenario step by step:
+  [start a task](docs/github/01-start.webp),
+  [find something outside the task](docs/github/02-during.webp),
+  [finish the task](docs/github/03-finish.webp).
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
