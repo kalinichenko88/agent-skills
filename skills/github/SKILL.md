@@ -12,7 +12,7 @@ so in the final report rather than inventing a substitute.
 | Moment | What must happen | Read first |
 | --- | --- | --- |
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` | *Commits* below |
-| `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15` from a linked branch: `unlink-branch.sh` first | *Pull requests* below |
+| `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15`: `keep-open.sh` after it | *Pull requests* below |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch; then *Finishing* | *Pull requests* below |
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
@@ -78,17 +78,16 @@ do not reassign.
 Every issue the PR closes beside the task — a ride-along, or a bug or debt the
 change removes (`take-in.md`) — gets its own line under **Also closes** in the
 description, with its own keyword — `Closes #15` — because GitHub closes only
-the numbers a keyword precedes, and the issue that the PR's branch is linked
-to. An issue with `## Also:` sections closes only when every problem in it is
-fixed; when the change fixes some of them, the description says `Part of #15`
-instead of `Closes #15`.
+the numbers a keyword precedes, and the issues linked to the PR. An issue with
+`## Also:` sections closes only when every problem in it is fixed; when the
+change fixes some of them, the description says `Part of #15` instead of
+`Closes #15`.
 
-A `Part of #15` PR from a branch linked to #15 — `worktree.sh` links every
-branch it makes — removes that link before `gh pr create`: `bash
-<dir>/scripts/unlink-branch.sh 15 <branch>`, where `<dir>` is this skill's base
-directory. When the PR opens, GitHub turns the branch's link into a link of the
-PR, which closes #15 on merge whatever the description says, and no API
-removes it.
+A `Part of #15` PR still closes #15 on merge when its branch is linked to #15,
+and `worktree.sh` links every branch it makes: when the PR opens, GitHub turns
+the branch's link into a link of the PR. So right after `gh pr create`, remove
+that link: `bash <dir>/scripts/keep-open.sh <PR> 15`, where `<dir>` is this
+skill's base directory.
 
 The title and description follow the language the project already uses — read
 the recent merged PRs and issues before writing, and match them. English is the
@@ -108,9 +107,10 @@ GitHub does not notice: nothing corrects its text. So the PR closes the task,
 every ride-along and every issue the change removes; under each problem it
 fixed in an issue that stays open, it adds the line `Done in #<PR>.`; an issue
 the description says `Part of` and the merge closed anyway is reopened, with a
-comment that names the PR; a duplicate still held for the reproduction is closed or commented on, by *Its
-duplicates close first* in `take-in.md`; and the same pass updates every
-sibling issue whose text the change just falsified.
+comment that names the PR; a duplicate still held for the reproduction is
+closed or commented on, by *Its duplicates close first* in `take-in.md`; and
+the same pass updates every sibling issue whose text the change just
+falsified.
 
 ## GitHub Actions
 

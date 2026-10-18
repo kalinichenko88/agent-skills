@@ -293,20 +293,24 @@ case $out in *'--name feat/5-scout-citations --checkout'*) ;;
   *) fail 'worktree.sh checks out the linked branch it was given' "$out" ;;
 esac
 
-# unlink-branch.sh removes the link to the one branch it is given.
-echo '{"data": {"repository": {"issue": {"linkedBranches": {"nodes": [
-  {"id": "LB_a", "ref": {"name": "fix/5-a"}}, {"id": "LB_b", "ref": {"name": "fix/5-b"}}]}}}}}' >"$tmp/graphql.json"
-unlinks() { grep 'deleteLinkedBranch' "$tmp/calls" | grep -oE 'id=LB_[a-z]+' || true; }
+# keep-open.sh removes the pull request's link to the one issue it is given.
+echo '{"data": {"repository": {"pullRequest": {"id": "PR_21", "closingIssuesReferences": {"nodes": [
+  {"id": "I_5", "number": 5}, {"id": "I_15", "number": 15}]}}}}}' >"$tmp/graphql.json"
+removed() { grep 'removeCloseIssueReferences' "$tmp/calls" | grep -oE 'pr=PR_[0-9]+ -f issue=I_[0-9]+' || true; }
 : >"$tmp/calls"
-check 'unlink-branch.sh names the link it removed' '#5 is no longer linked to fix/5-b' \
-  "$(bash "$scripts/unlink-branch.sh" '#5' fix/5-b)"
-check 'unlink-branch.sh removes only the link to the branch it is given' 'id=LB_b' "$(unlinks)"
+check 'keep-open.sh says what it removed' 'PR #21 no longer closes #15' "$(bash "$scripts/keep-open.sh" '#21' 15)"
+check 'keep-open.sh removes only the link to the issue it is given' 'pr=PR_21 -f issue=I_15' "$(removed)"
 : >"$tmp/calls"
-out=$(DRY_RUN=1 bash "$scripts/unlink-branch.sh" 5 fix/5-a)
-case $out in 'dry run: gh api graphql --silent -f id=LB_a '*) ;; *) fail 'unlink-branch.sh prints its write in a dry run' "$out" ;; esac
-check 'unlink-branch.sh writes nothing in a dry run' '' "$(unlinks)"
-check 'unlink-branch.sh on a branch with no link' '#5 has no link to fix/5-c: nothing to do' \
-  "$(bash "$scripts/unlink-branch.sh" 5 fix/5-c)"
-check 'unlink-branch.sh writes nothing for a branch with no link' '' "$(unlinks)"
+out=$(DRY_RUN=1 bash "$scripts/keep-open.sh" 21 '#5')
+case $out in 'dry run: gh api graphql --silent -f pr=PR_21 -f issue=I_5 '*) ;; *) fail 'keep-open.sh prints its write in a dry run' "$out" ;; esac
+check 'keep-open.sh writes nothing in a dry run' '' "$(removed)"
+check 'keep-open.sh on an issue the pull request does not close' 'PR #21 does not close #7: nothing to do' \
+  "$(bash "$scripts/keep-open.sh" 21 7)"
+check 'keep-open.sh writes nothing for an issue the pull request does not close' '' "$(removed)"
+FAKE_FAIL=closingIssuesReferences bash "$scripts/keep-open.sh" 21 15 >/dev/null 2>&1 &&
+  fail 'keep-open.sh exits 0 when it cannot read the links'
+check 'keep-open.sh writes nothing when it cannot read the links' '' "$(removed)"
+FAKE_FAIL=removeCloseIssueReferences bash "$scripts/keep-open.sh" 21 15 >/dev/null 2>&1 &&
+  fail 'keep-open.sh exits 0 when the removal fails'
 
 echo 'github_scripts_test: ok'
