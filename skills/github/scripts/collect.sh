@@ -11,10 +11,11 @@
 # take-in and filing write every open title and the hits of a search for each
 # name, open and closed, then the body and comments of every open hit. take-in
 # starts with the issue and its timeline, and also writes the body of every
-# issue and pull request in the timeline and of every open issue with one of
-# <bug-labels>: the repository's names for bug and debt, comma-separated, such
-# as bug,debt, or ''. A name is a file, a symbol or a word for what the person
-# sees; a path is searched by its base name too.
+# issue and pull request in the timeline. <bug-labels> are the repository's
+# names for bug and debt, comma-separated, such as bug,debt, or '': the file
+# names them, and the reader picks those issues by their open titles. A name is
+# a file, a symbol or a word for what the person sees; a path is searched by
+# its base name too.
 #
 # bodies adds the bodies of more issues and pull requests to the file, and
 # prints the line where they start: the closed hits and the titles that the
@@ -269,11 +270,6 @@ if [ "$job" = take-in ]; then
     echo
   } >>"$file"
   echo "$timeline" | numbers >>"$hits"
-  printf '%s\n' "$labels" | tr , '\n' | sed 's/^ *//; s/ *$//' | while IFS= read -r label; do
-    if [ -n "$label" ]; then
-      gh issue list --state open --limit 100000 --label "$label" --json number --jq '.[].number'
-    fi
-  done >>"$hits"
 fi
 
 titles_and_searches "$@"
