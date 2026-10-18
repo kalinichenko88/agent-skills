@@ -15,7 +15,8 @@
 # names for bug and debt, comma-separated, such as bug,debt, or '': the file
 # names them, and the reader picks those issues by their open titles. A name is
 # a file, a symbol or a word for what the person sees; a path is searched by
-# its base name too.
+# its base name too. The file stops at about 150 KB: past that, the hits that
+# the fewest names found get no body, and == Left out names them.
 #
 # bodies adds the bodies of more issues and pull requests to the file, and
 # prints the line where they start: the closed hits and the titles that the
@@ -239,13 +240,16 @@ case $job in
   *) usage ;;
 esac
 
+# The size the file stops at, in bytes, about: in Claude Code the scout's
+# context holds it and the bodies it adds. COLLECT_LIMIT is for the tests.
+limit=${COLLECT_LIMIT:-153600}
 tmp=${TMPDIR:-/tmp}
 file=$(mktemp "${tmp%/}/collect.XXXXXX")
-hits=$(mktemp)
+hits=$(mktemp) part=$(mktemp)
 # A failed run leaves no half-written file behind.
 clean() {
   local code=$?
-  rm -f "$hits"
+  rm -f "$hits" "$part"
   [ "$code" = 0 ] || rm -f "$file"
 }
 trap clean EXIT
@@ -274,11 +278,38 @@ fi
 
 titles_and_searches "$@"
 
+# The bodies fill what is left of the limit: the timeline first, then the open
+# hits that the most names found. The first one that does not fit, and every
+# one after it, is left out and named. The titles stay whole: a duplicate is
+# found by its title.
+# ponytail: the titles alone pass the limit at about 1,500 open issues; cap
+# them too if a tracker gets there.
+order=$({ [ -z "${timeline:-}" ] || echo "$timeline" | numbers
+  sort "$hits" | uniq -c | sort -k1,1nr -k2,2nr | awk '{ print $2 }'; } | awk '!seen[$0]++' | tr '\n' ' ')
+entries <"$hits" >"$part"
+left=$((limit - $(wc -c <"$file")))
 {
   echo
   echo "== Bodies"
   echo
-  entries <"$hits"
+  LC_ALL=C awk -v left="$left" -v order="$order" -v kb=$((limit / 1024)) '
+    /^==> / { num = $0; sub(/^==> (PR )?#/, "", num); sub(/ .*/, "", num); nums[++k] = num }
+    /^== end: / { next }
+    { text[num] = text[num] $0 "\n" }
+    function pick(x) {
+      if (x in done || !(x in text)) return
+      done[x] = 1
+      if (out == "" && used + length(text[x]) <= left) { keep[x] = 1; used += length(text[x]); kept++ }
+      else out = out " #" x
+    }
+    END {
+      n = split(order, o, " ")
+      for (i = 1; i <= n; i++) pick(o[i])
+      for (j = 1; j <= k; j++) pick(nums[j])
+      for (j = 1; j <= k; j++) if (nums[j] in keep) printf "%s", text[nums[j]]
+      print "== end: " kept + 0 " entries"
+      if (out != "") print "\n== Left out\n\nThe file reached its limit of " kb " KB. These hits have no entry, the timeline first, then the ones the most names found:" out
+    }' "$part"
 } >>"$file"
 size
 echo

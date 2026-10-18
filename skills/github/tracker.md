@@ -18,7 +18,9 @@ step by hand with `gh`: that skips the checks the script makes. A refusal from
 
 ## Reading the tracker
 
-`collect.sh` reads the tracker into one file, and prints its path and size:
+`collect.sh` reads the tracker into one file, and prints its path and size. The
+file stops at about 150 KB: past that, it gives no body to the hits that the
+fewest names found, and lists them for the reader to add.
 
 ```bash
 bash <dir>/scripts/collect.sh take-in 91 bug,debt src/main/lanes.ts spawnLane lane

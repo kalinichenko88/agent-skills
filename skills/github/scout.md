@@ -28,6 +28,8 @@ Its sections start with `==`:
   names a file, a symbol or a word the agent gave.
 - `== Bodies` — one entry for each open hit. For take-in, also one for each
   item in the timeline.
+- `== Left out` — only when the file reached its size limit: the hits that got
+  no entry, the timeline first, then the ones the most names found.
 
 An entry starts with `==> #41 <title> [labels] <state>`, or
 `==> PR #42 <title> <state>` for a pull request. On an open issue, `status:`
@@ -46,6 +48,8 @@ line, in pieces when your file tool cuts it.
 
 1. Read the whole file.
 2. Pick the candidates that have no entry yet:
+   - Every hit in `== Left out` that the issue or the findings can need. Find
+     its title in the timeline or the search lists.
    - Open titles. Read them for meaning, not for shared words: a title that
      names the same behaviour, screen, command or part of the code in other
      words is a candidate.
