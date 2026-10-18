@@ -27,7 +27,7 @@ Its sections start with `==`:
 - `== Search: <name>` — every issue and pull request, open and closed, that
   names a file, a symbol or a word the agent gave.
 - `== Bodies` — one entry for each open hit. For take-in, also one for each
-  item in the timeline and for each open issue labelled as a bug or as debt.
+  item in the timeline.
 
 An entry starts with `==> #41 <title> [labels] <state>`, or
 `==> PR #42 <title> <state>` for a pull request. On an open issue, `status:`
@@ -49,6 +49,9 @@ line, in pieces when your file tool cuts it.
    - Open titles. Read them for meaning, not for shared words: a title that
      names the same behaviour, screen, command or part of the code in other
      words is a candidate.
+   - For take-in, every open title with a label from the file's `Labels for
+     bug and debt:` line whose bug or debt can be in the same screen, window,
+     command or part of the code as the issue.
    - Closed issues and pull requests in the search lists whose titles say
      that they changed, fixed or decided the same code or behaviour.
 3. Run `<the collector> bodies <file> <n>...` once, with every candidate. It

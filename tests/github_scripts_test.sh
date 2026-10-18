@@ -164,7 +164,8 @@ FAKE_FAIL='comments(first' bash "$scripts/collect.sh" filing scout.md >/dev/null
 check 'a failed filing leaves no file behind' "$before" "$(collects)"
 
 # take-in starts with the issue and its timeline, then the bodies of the
-# timeline, of each issue with a bug or debt label, and of the open hits.
+# timeline and of the open hits. An issue with a bug or debt label that
+# nothing else brings, as #6 and #7 here, has its open title only.
 : >"$tmp/calls"
 out=$(bash "$scripts/collect.sh" take-in '#5' 'enhancement, bug ' scout.md)
 collected=${out%%: *}
@@ -172,10 +173,11 @@ check 'take-in lists the timeline' \
   "$(printf 'PR #4 \n#8 \nPR #9 \n#10 ')" \
   "$(sed -n '/^== Its timeline/,/^== Open issues/p' "$collected" | sed -n -E 's/^((PR )?#[0-9]+ ).*/\1/p')"
 check 'take-in gives the issue one entry, and a body to each hit' \
-  "$(printf '==> #5 \n==> PR #4 \n==> #6 \n==> #7 \n==> #8 \n==> PR #9 \n==> #10 \n== end: 6 entries')" \
+  "$(printf '==> #5 \n==> PR #4 \n==> #8 \n==> PR #9 \n==> #10 \n== end: 4 entries')" \
   "$(grep -E '^==> |^== end' "$collected" | sed -E 's/^(==> (PR )?#[0-9]+ ).*/\1/')"
-check 'take-in reads each bug and debt label, its spaces cut' \
-  "$(printf 'enhancement\nbug')" "$(sed -n 's/.*--label \(.*\) --json.*/\1/p' "$tmp/calls")"
+check 'take-in names the bug and debt labels for the reader' \
+  'Labels for bug and debt: enhancement, bug ' "$(grep '^Labels for bug and debt:' "$collected")"
+grep -q '^#6 .* \[enhancement\] open$' "$collected" || fail 'take-in lists a bug or debt issue by its open title'
 answer '.timelineItems.totalCount = 150'
 out=$(bash "$scripts/collect.sh" take-in 5 '' scout.md)
 grep -q '^Only the newest 100 of 150 references are here\.$' "${out%%: *}" ||
