@@ -149,6 +149,23 @@ check 'filing gives a body to each open hit' \
 out=$(bash "$scripts/collect.sh" filing typescript)
 check 'filing ends the bodies with no open hit' '== end: 0 entries' "$(tail -1 "${out%%: *}")"
 
+# Past the limit, the bodies of the hits that the most names found come first:
+# #8 is found by both names here, and the ties go newest first.
+jq '[.[] | select(.number == 8)]' "$fixtures/issues-scout.md.json" >"$tmp/issues-sheet.json"
+out=$(COLLECT_LIMIT=1 bash "$scripts/collect.sh" filing scout.md sheet)
+check 'past the limit, the file names the hits it left out, in rank order' \
+  "$(printf '== end: 0 entries\n\n== Left out\n\nThe file reached its limit of 0 KB. These hits have no entry, the timeline first, then the ones the most names found: #8 #10 #9 #5')" \
+  "$(sed -n '/^== end/,$p' "${out%%: *}")"
+whole=$(bash "$scripts/collect.sh" filing scout.md sheet)
+whole=${whole%%: *}
+head=$(sed '/^== Bodies$/,$d' "$whole" | wc -c)
+eight=$(awk '/^==> / { p = /^==> #8 / } /^== end/ { p = 0 } p' "$whole" | wc -c)
+out=$(COLLECT_LIMIT=$((head + eight + 10)) bash "$scripts/collect.sh" filing scout.md sheet)
+check 'the limit keeps the first hits that fit, and leaves out the rest' \
+  "$(printf '==> #8 \n== end: 1 entries\nhave no entry, the timeline first, then the ones the most names found: #10 #9 #5')" \
+  "$(grep -E '^==> |^== end|have no entry' "${out%%: *}" | sed -E 's/^(==> (PR )?#[0-9]+ ).*/\1/; s/.*(have no entry)/\1/')"
+rm "$tmp/issues-sheet.json"
+
 # A path is searched by its base name too; an empty name is not searched.
 : >"$tmp/calls"
 bash "$scripts/collect.sh" filing '' skills/github/scout.md/ >/dev/null
