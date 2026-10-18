@@ -19,7 +19,7 @@ case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1
 filter=. search=''
 for ((i = 1; i <= $#; i++)); do
   j=$((i + 1))
-  case ${!i} in --jq) filter=${!j} ;; --search) search=${!j} ;; esac
+  case ${!i} in --jq) filter=${!j} ;; --search) search=${!j} ;; --silent) exec >/dev/null ;; esac
 done
 # A list answers from issues-<search>.json or prs-<search>.json, and the open
 # issues from open-issues.json, in $FAKE first.
@@ -292,5 +292,21 @@ case $out in *'using it'*) fail 'worktree.sh leaves a linked branch it was given
 case $out in *'--name feat/5-scout-citations --checkout'*) ;;
   *) fail 'worktree.sh checks out the linked branch it was given' "$out" ;;
 esac
+
+# unlink-branch.sh removes the link to the one branch it is given.
+echo '{"data": {"repository": {"issue": {"linkedBranches": {"nodes": [
+  {"id": "LB_a", "ref": {"name": "fix/5-a"}}, {"id": "LB_b", "ref": {"name": "fix/5-b"}}]}}}}}' >"$tmp/graphql.json"
+unlinks() { grep 'deleteLinkedBranch' "$tmp/calls" | grep -oE 'id=LB_[a-z]+' || true; }
+: >"$tmp/calls"
+check 'unlink-branch.sh names the link it removed' '#5 is no longer linked to fix/5-b' \
+  "$(bash "$scripts/unlink-branch.sh" '#5' fix/5-b)"
+check 'unlink-branch.sh removes only the link to the branch it is given' 'id=LB_b' "$(unlinks)"
+: >"$tmp/calls"
+out=$(DRY_RUN=1 bash "$scripts/unlink-branch.sh" 5 fix/5-a)
+case $out in 'dry run: gh api graphql --silent -f id=LB_a '*) ;; *) fail 'unlink-branch.sh prints its write in a dry run' "$out" ;; esac
+check 'unlink-branch.sh writes nothing in a dry run' '' "$(unlinks)"
+check 'unlink-branch.sh on a branch with no link' '#5 has no link to fix/5-c: nothing to do' \
+  "$(bash "$scripts/unlink-branch.sh" 5 fix/5-c)"
+check 'unlink-branch.sh writes nothing for a branch with no link' '' "$(unlinks)"
 
 echo 'github_scripts_test: ok'

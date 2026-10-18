@@ -19,8 +19,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   can close them with the task. A finding joins an open issue on the same code
   before a new one is filed, up to two added findings per issue. Scripts do
   the steps with one correct result: they read the tracker into one file, add
-  a finding to an issue, check an issue before it is taken, and set up its
-  worktree. In Claude Code a Haiku subagent reads a file of 20 KB or more, so
+  a finding to an issue, check an issue before it is taken, set up its
+  worktree, and unlink its branch before a pull request that fixes only part
+  of it. In Claude Code a Haiku subagent reads a file of 20 KB or more, so
   the main model gets only the candidates. Each scenario step by step:
   [start a task](docs/github/01-start.webp),
   [find something outside the task](docs/github/02-during.webp),
