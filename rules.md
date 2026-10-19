@@ -30,9 +30,9 @@ pretty-printing and all — not a string typed to make the assertion pass.
 
 In Claude Code, a Haiku subagent does the counting: one `Agent` call with
 `subagent_type: "Explore"` and `model: "haiku"`, given the source, the sample
-size and the shape. It returns the count, the ids that carry the shape, and one
-or two of them verbatim. Check the shape on those, and write the case against
-one of them.
+size and the shape. It returns the count and the ids that carry the shape. Fetch
+one or two of those payloads yourself, check the shape on them, and write the
+case against one.
 
 Measured, the one time this was skipped: a "list items run together" bug, filed
 off a hand-written `<li>a</li><li>b</li>`, tested green, shipped. The sources
@@ -95,8 +95,8 @@ ones now say something false.
   with a one-line why. Saying nothing is not an answer.
 - In Claude Code, the same kind of subagent finds them: give it what the
   change alters — behaviour, names, commands, install steps — and the files it
-  changed. It returns each passage that is now false as `file:line`, or "none"
-  with the files it read. The edits are yours.
+  changed. It returns each passage that is now false as `file:line`, the
+  sentence and why, or "none" with the files it read. The edits are yours.
 - A follow-up is allowed only for a broader sweep the change merely brushes
   against — never for the document that describes the very behaviour changed.
 
