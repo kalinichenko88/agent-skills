@@ -114,10 +114,11 @@ For **filing**:
 ## Citations
 
 For **citations**, skip *Read* and *Sort*. The issues are the ones the prompt
-names, or, when it names none, every open issue that has an entry and every
-open one in `== Left out`. Add the ones with no entry with one `bodies` run
-first. Find each issue's entry: the one under `== The issue`, or the one that
-starts `==> #<n>`.
+names. When it names none, they are the open issues that have an entry, and
+the open ones in `== Left out`; a title in `== Open issues` or in a search list
+does not make an issue one of them. No issue: answer `none`, and run nothing.
+Add the issues with no entry with one `bodies` run first. Find each issue's
+entry: the one under `== The issue`, or the one that starts `==> #<n>`.
 
 A citation is a path with a line or a range, as `src/server/log.ts:12-14`, or
 a line alone, as `:18`, after a path that its sentence names, or the line that
