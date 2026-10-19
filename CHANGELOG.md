@@ -1,7 +1,7 @@
 # Changelog
 
-Every release of the kalinichenko plugin, newest first. A line is one pull
-request on `main`: the commit subject without its type, and the PR number. The
+Every release of the kalinichenko plugin, newest first. A line is one commit on
+`main`: its subject without the type, and the PR number when it has one. The
 `/release` skill writes the section; pull requests leave this file alone.
 
 ## 0.4.0 - 2026-10-19
@@ -46,5 +46,5 @@ request on `main`: the commit subject without its type, and the PR number. The
 
 ### Changed
 
-- Drop what Codex already discovers on its own
 - rules: rewrap the GitHub paragraph split mid-sentence
+- Drop what Codex already discovers on its own
