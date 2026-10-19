@@ -139,4 +139,5 @@ closes** (*Pull requests* in `SKILL.md`).
 An issue with `## Also:` sections closes only when every problem in it is
 fixed: its own problem and each added one. Give a verdict to each problem in
 it, not one to the issue. When the change fixes some of them, their tests join
-the diff and the issue stays open: the PR says `Part of #15`.
+the diff and the issue stays open: the PR says `Part of #15`, and
+`keep-open.sh` removes its link to #15 (*Pull requests* in `SKILL.md`).
