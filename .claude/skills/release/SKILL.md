@@ -72,10 +72,12 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    step 4 writes it again. Never rebase or amend the release commit — the tag
    points at it.
 7. **Publish the GitHub release** with the new section, heading left out, as
-   its notes. One shell line, so the empty check guards the create:
+   its notes. One shell line, so the empty check guards the create. Nothing in
+   this file may read as a dollar sign followed by a digit: Claude Code
+   replaces those with the skill's arguments before the model reads it.
 
    ```sh
-   notes=$(awk -v h="## $version " 'index($0, h) == 1 {p = 1; next} /^## / {p = 0} p && (NF || n) {print; n = 1}' CHANGELOG.md) \
+   notes=$(sed -n "/^## $version /,/^## /{/^## /d;p;}" CHANGELOG.md | sed '1{/^$/d;}') \
      && [ -n "$notes" ] && gh release create "v$version" --title "v$version" --notes "$notes"
    ```
 
