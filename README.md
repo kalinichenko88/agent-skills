@@ -105,6 +105,11 @@ and `add-finding.sh` at another repository than the checkout's.
 
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
+The pictures in `docs/` are drawn by Codex from the brief next to them, as
+`docs/github/brief.md`. To change a picture, change its brief and run
+`/infographic` in Claude Code from this repository. Like `/release`, it lives
+in `.claude/skills/` and does not ship with the plugin.
+
 ## Release
 
 Pull requests leave `version` alone. Once the work is on `main`, run `/release`
