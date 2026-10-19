@@ -4,6 +4,12 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 `main`: its subject without the type, and the PR number when it has one. The
 `/release` skill writes the section; pull requests leave this file alone.
 
+## 0.4.1 - 2026-10-19
+
+### Changed
+
+- Add a changelog and publish a GitHub release from the release skill (#29)
+
 ## 0.4.0 - 2026-10-19
 
 ### Added
