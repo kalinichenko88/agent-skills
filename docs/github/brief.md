@@ -57,7 +57,7 @@ Trigger box: "WHEN: the code is ready."
 1. "A clear commit" — THE AGENT holds a card whose only text is "fix(auth): stop the session expiring early", with a few grey list lines under it. Caption: "One sentence that says what changed, and a short list under it."
 2. "A PR with an owner" — THE AGENT clips a name tag "you" onto a plain card, with tickets "#91" and "#15" attached. Caption: "The PR and every issue it closes are assigned to you."
 3. "One commit on main" — THE AGENT presses several blank small cards into one card that drops into a box labelled "main". Caption: "Squash merge with one summary. The branch is deleted."
-4. "The tracker tells the truth" — tickets "#91" and "#15" have green checks; THE AGENT corrects a third, blank ticket with a pencil. Caption: "The PR closes its issues. Other issues the change made wrong are corrected."
+4. "The tracker tells the truth" — tickets "#91" and "#15" have green checks; THE AGENT corrects a third ticket "#12", which has no check, with a pencil. Caption: "The PR closes only the issues it finishes. Other issues the change made wrong are corrected."
 Result box: "YOU GET: a clean history on main and a tracker that matches the code."
 </image>
 
