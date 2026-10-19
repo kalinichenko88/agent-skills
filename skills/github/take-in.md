@@ -77,7 +77,9 @@ scout's line is enough for the rest.
 
 Then check the issue's own `path:line` citations against the current tree before
 believing them — a line number is the first thing to rot — and correct them in
-the issue as the first act of the work.
+the issue as the first act of the work. A scout checks them: `Job: citations
+#91.` with the worktree as `Tree:` (`tracker.md`). A citation that holds needs
+no look of yours; check each one that moved or is gone before you edit.
 
 ## Taking neighbours along
 
