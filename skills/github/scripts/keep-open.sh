@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-[ $# -eq 2 ] || {
+[ $# -eq 2 ] && [[ ${1#\#} =~ ^[0-9]+$ && ${2#\#} =~ ^[0-9]+$ ]] || {
   echo 'usage: keep-open.sh <pr> <n>' >&2
   exit 2
 }
@@ -19,15 +19,26 @@ pr=${1#\#} n=${2#\#}
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
-# The pull request's id and the issue's, when the pull request closes it.
-# shellcheck disable=SC2016 # GraphQL and jq, not shell
-ids=$(N=$n gh api graphql -F owner='{owner}' -F name='{repo}' -F pr="$pr" -f query='
-  query($owner: String!, $name: String!, $pr: Int!) {
-    repository(owner: $owner, name: $name) { pullRequest(number: $pr) {
-      id closingIssuesReferences(first: 50) { nodes { id number } }
-    } }
-  }' --jq '.data.repository.pullRequest | .id as $pr | .closingIssuesReferences.nodes[]
-    | select(.number == ($ENV.N | tonumber)) | "\($pr) \(.id)"')
+# The pull request's id and the issue's, when the pull request closes that
+# issue of this repository.
+closing() {
+  # shellcheck disable=SC2016 # GraphQL and jq, not shell
+  N=$n gh api graphql -F owner='{owner}' -F name='{repo}' -F pr="$pr" -f query='
+    query($owner: String!, $name: String!, $pr: Int!) {
+      repository(owner: $owner, name: $name) { id pullRequest(number: $pr) {
+        id closingIssuesReferences(first: 100) { nodes { id number repository { id } } }
+      } }
+    }' --jq '.data.repository | .id as $repo | .pullRequest | .id as $pr | .closingIssuesReferences.nodes[]
+      | select(.number == ($ENV.N | tonumber) and .repository.id == $repo) | "\($pr) \(.id)"'
+}
+# GitHub adds a linked branch's link about a second after the pull request
+# opens, so an empty answer is read again, for about ten seconds.
+# KEEP_OPEN_TRIES is for the tests.
+for ((try = ${KEEP_OPEN_TRIES:-6}; ; try--)); do
+  ids=$(closing)
+  [ -z "$ids" ] && [ "$try" -gt 1 ] || break
+  sleep 2
+done
 if [ -z "$ids" ]; then
   echo "PR #$pr does not close #$n: nothing to do"
   exit 0

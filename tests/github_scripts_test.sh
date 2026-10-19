@@ -37,7 +37,9 @@ case "$1 $2" in
     asked=$(grep -oE 'n[0-9]+: issueOrPullRequest' <<<"$*" | cut -d: -f1 | jq -Rsc 'split("\n") - [""]')
     jq --argjson asked "$asked" 'if $asked == [] then . else
       .data.repository |= with_entries(select(.key as $k | any($asked[]; . == $k))) end' \
-      "$FAKE/graphql.json" | jq -r "$filter" ;;
+      "$FAKE/graphql.json" | jq -r "$filter"
+    # graphql.next.json, when there, answers from the next call on.
+    [ ! -f "$FAKE/graphql.next.json" ] || mv "$FAKE/graphql.next.json" "$FAKE/graphql.json" ;;
   'issue list') list issues ;;
   'pr list') list prs ;;
   'issue view')
@@ -294,23 +296,39 @@ case $out in *'--name feat/5-scout-citations --checkout'*) ;;
 esac
 
 # keep-open.sh removes the pull request's link to the one issue it is given.
-echo '{"data": {"repository": {"pullRequest": {"id": "PR_21", "closingIssuesReferences": {"nodes": [
-  {"id": "I_5", "number": 5}, {"id": "I_15", "number": 15}]}}}}}' >"$tmp/graphql.json"
-removed() { grep 'removeCloseIssueReferences' "$tmp/calls" | grep -oE 'pr=PR_[0-9]+ -f issue=I_[0-9]+' || true; }
+# keep-open-21.json is PR #21's answer, with its link to #14; the cases add a
+# link to #5, and one to another repository's #14.
+export KEEP_OPEN_TRIES=1
+refs=.data.repository.pullRequest.closingIssuesReferences.nodes
+pr21=$(jq -r .data.repository.pullRequest.id "$fixtures/keep-open-21.json")
+i14=$(jq -r "${refs}[0].id" "$fixtures/keep-open-21.json")
+jq "$refs |= [{id: \"I_5\", number: 5, repository: .[0].repository},
+  {id: \"I_other\", number: 14, repository: {id: \"R_other\"}}] + ." "$fixtures/keep-open-21.json" >"$tmp/graphql.json"
+removed() { grep 'removeCloseIssueReferences' "$tmp/calls" | grep -oE 'pr=[^ ]+ -f issue=[^ ]+' || true; }
 : >"$tmp/calls"
-check 'keep-open.sh says what it removed' 'PR #21 no longer closes #15' "$(bash "$scripts/keep-open.sh" '#21' 15)"
-check 'keep-open.sh removes only the link to the issue it is given' 'pr=PR_21 -f issue=I_15' "$(removed)"
+check 'keep-open.sh says what it removed' 'PR #21 no longer closes #14' "$(bash "$scripts/keep-open.sh" '#21' 14)"
+check 'keep-open.sh removes only the link to the issue it is given, in this repository' \
+  "pr=$pr21 -f issue=$i14" "$(removed)"
 : >"$tmp/calls"
 out=$(DRY_RUN=1 bash "$scripts/keep-open.sh" 21 '#5')
-case $out in 'dry run: gh api graphql --silent -f pr=PR_21 -f issue=I_5 '*) ;; *) fail 'keep-open.sh prints its write in a dry run' "$out" ;; esac
+case $out in "dry run: gh api graphql --silent -f pr=$pr21 -f issue=I_5 "*) ;;
+  *) fail 'keep-open.sh prints its write in a dry run' "$out" ;;
+esac
 check 'keep-open.sh writes nothing in a dry run' '' "$(removed)"
 check 'keep-open.sh on an issue the pull request does not close' 'PR #21 does not close #7: nothing to do' \
   "$(bash "$scripts/keep-open.sh" 21 7)"
 check 'keep-open.sh writes nothing for an issue the pull request does not close' '' "$(removed)"
-FAKE_FAIL=closingIssuesReferences bash "$scripts/keep-open.sh" 21 15 >/dev/null 2>&1 &&
+FAKE_FAIL=closingIssuesReferences bash "$scripts/keep-open.sh" 21 14 >/dev/null 2>&1 &&
   fail 'keep-open.sh exits 0 when it cannot read the links'
 check 'keep-open.sh writes nothing when it cannot read the links' '' "$(removed)"
-FAKE_FAIL=removeCloseIssueReferences bash "$scripts/keep-open.sh" 21 15 >/dev/null 2>&1 &&
+FAKE_FAIL=removeCloseIssueReferences bash "$scripts/keep-open.sh" 21 14 >/dev/null 2>&1 &&
   fail 'keep-open.sh exits 0 when the removal fails'
+jq "$refs = []" "$fixtures/keep-open-21.json" >"$tmp/graphql.json"
+bash "$scripts/keep-open.sh" 21 abc >/dev/null 2>&1 && fail 'keep-open.sh takes a word for an issue number'
+# GitHub adds a linked branch's link about a second after the pull request
+# opens, as the timelines of #16 and #22 show: keep-open.sh reads again.
+cp "$fixtures/keep-open-21.json" "$tmp/graphql.next.json"
+check 'keep-open.sh waits for the link GitHub adds after the pull request opens' 'PR #21 no longer closes #14' \
+  "$(KEEP_OPEN_TRIES=2 bash "$scripts/keep-open.sh" 21 14)"
 
 echo 'github_scripts_test: ok'

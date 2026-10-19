@@ -93,13 +93,15 @@ Then read what the merge will close. Read it again after each edit of the
 description:
 
 ```bash
-gh pr view <PR> --json closingIssuesReferences --jq '.closingIssuesReferences[].number'
+gh pr view <PR> --json closingIssuesReferences --jq '.closingIssuesReferences[].url'
 ```
 
-It must print only the issues that the description closes on purpose. Another
-number has one of two causes. A closing word in the prose before the number —
-`closed #11`, `does not close #5` — is a keyword too: write that sentence
-without it. Or the description says `Part of` that issue: run `keep-open.sh`.
+It must print only the issues that the description closes on purpose. A
+closing word in the description before a number — `closed #11`, `does not
+close #5` — is a keyword too: write that sentence without it. Any other issue
+in the list is a link: the branch's, or one made by hand in the issue's
+*Development* panel. When the description does not close that issue, run
+`keep-open.sh` for it.
 
 The title and description follow the language the project already uses — read
 the recent merged PRs and issues before writing, and match them. English is the
@@ -112,17 +114,19 @@ commit from a repository setting, by default every branch commit's full message
 in turn. One commit per PR keeps `main` readable, and the branch has nothing
 left to say once it is in. Its subject is the PR title — by default a
 one-commit branch gives that commit's subject instead — so both take the same
-`type: sentence` shape.
+`type: sentence` shape. A closing word before a number in the title or the
+`--body` closes that issue when the commit lands, and `closingIssuesReferences`
+does not show it: write both without one.
 
 **Finishing.** An issue goes stale the moment the code moves under it, and
 GitHub does not notice: nothing corrects its text. So the PR closes the task,
 every ride-along and every issue the change removes; under each problem it
 fixed in an issue that stays open, it adds the line `Done in #<PR>.`; an issue
-the description says `Part of` and the merge closed anyway is reopened, with a
-comment that names the PR; a duplicate still held for the reproduction is
-closed or commented on, by *Its duplicates close first* in `take-in.md`; and
-the same pass updates every sibling issue whose text the change just
-falsified.
+the description says `Part of` and the merge closed anyway — `gh issue view 15
+--json state` shows it — is reopened, with a comment that names the PR; a
+duplicate still held for the reproduction is closed or commented on, by *Its
+duplicates close first* in `take-in.md`; and the same pass updates every
+sibling issue whose text the change just falsified.
 
 ## GitHub Actions
 
