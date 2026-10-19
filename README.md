@@ -22,7 +22,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   a finding to an issue, check an issue before it is taken, set up its
   worktree, and keep it open when a pull request fixes only part of it. In
   Claude Code a Haiku subagent reads a file of 20 KB or more, so the main
-  model gets only the candidates. Each scenario step by step:
+  model gets only the candidates. A Haiku subagent also checks the
+  `path:line` citations in issues against the code. Each scenario step by
+  step:
   [start a task](docs/github/01-start.webp),
   [find something outside the task](docs/github/02-during.webp),
   [finish the task](docs/github/03-finish.webp).

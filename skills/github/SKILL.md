@@ -128,6 +128,12 @@ duplicate still held for the reproduction is closed or commented on, by *Its
 duplicates close first* in `take-in.md`; and the same pass updates every
 sibling issue whose text the change just falsified.
 
+To find the citations that the change moved, run `collect.sh filing`
+(`tracker.md`) with every file that `gh pr diff <PR> --name-only` prints, and
+the old path of each file the PR renamed. In Claude Code a scout then checks
+the open issues in its file: `Job: citations.`, with a checkout of the merged
+code as `Tree:`. Check each citation that moved or is gone, and correct it.
+
 ## GitHub Actions
 
 When creating or editing CI workflows, in any project:
