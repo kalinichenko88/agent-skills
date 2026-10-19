@@ -50,7 +50,8 @@ For findings, the `Job:` line is `Job: filing.`, and under it one line per
 finding with its `path:line`.
 
 For citations, the `Job:` line is `Job: citations #91.`, or `Job: citations.`
-for every open issue in the file, and under it `Tree: <the worktree>`. In
+for the open issues that have an entry in the file, and under it `Tree: <the
+worktree>`. In
 Claude Code this job goes to a scout whatever the size of the file: the
 reading it saves is in the code, not in the file.
 

@@ -131,8 +131,9 @@ sibling issue whose text the change just falsified.
 To find the citations that the change moved, run `collect.sh filing`
 (`tracker.md`) with every file that `gh pr diff <PR> --name-only` prints, and
 the old path of each file the PR renamed. In Claude Code a scout then checks
-the open issues in its file: `Job: citations.`, with a checkout of the merged
-code as `Tree:`. Check each citation that moved or is gone, and correct it.
+the open issues that have an entry in its file: `Job: citations.`, with a
+checkout of the merged code as `Tree:`. Check each citation that moved or is
+gone, and correct it.
 
 ## GitHub Actions
 
