@@ -12,7 +12,7 @@ so in the final report rather than inventing a substitute.
 | Moment | What must happen | Read first |
 | --- | --- | --- |
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` | *Commits* below |
-| `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15`: `keep-open.sh` after it | *Pull requests* below |
+| `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15`: `keep-open.sh` after it; then read what it closes | *Pull requests* below |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch; then *Finishing* | *Pull requests* below |
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
@@ -88,6 +88,18 @@ and `worktree.sh` links every branch it makes: when the PR opens, GitHub turns
 the branch's link into a link of the PR. So right after `gh pr create`, remove
 that link: `bash <dir>/scripts/keep-open.sh <PR> 15`, where `<dir>` is this
 skill's base directory.
+
+Then read what the merge will close. Read it again after each edit of the
+description:
+
+```bash
+gh pr view <PR> --json closingIssuesReferences --jq '.closingIssuesReferences[].number'
+```
+
+It must print only the issues that the description closes on purpose. Another
+number has one of two causes. A closing word in the prose before the number —
+`closed #11`, `does not close #5` — is a keyword too: write that sentence
+without it. Or the description says `Part of` that issue: run `keep-open.sh`.
 
 The title and description follow the language the project already uses — read
 the recent merged PRs and issues before writing, and match them. English is the
