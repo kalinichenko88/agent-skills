@@ -7,7 +7,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   calling work done, ship every bug fix with its test, use the platform before
   a dependency, keep code and commits in English, write prose in Simplified
   Technical English, move docs with the change, verify review findings before
-  acting on them. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
+  acting on them. In Claude Code a Haiku subagent does the reading for two of
+  them: it counts the real payloads before a bug fix, and finds the docs a
+  change made false. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
   `hooks/rules.sh` injects it at the start of every session and every subagent.
 - **`kalinichenko:github`** — commits, pull requests, issues and Actions.
 
