@@ -54,10 +54,11 @@ for every open issue in the file, and under it `Tree: <the worktree>`. In
 Claude Code this job goes to a scout whatever the size of the file: the
 reading it saves is in the code, not in the file.
 
-Read a smaller file yourself, and every file in Codex: it costs less than a
-subagent's start and its report. Follow `scout.md` — its *The file*, *Read*,
-*Sort*, *Citations* and the entry shape in its *Return* — write its groups and
-entries as your notes, and go back to the file that sent you here.
+For take-in and filing, read a smaller file yourself: it costs less than a
+subagent's start and its report. In Codex, do every job yourself. Follow
+`scout.md` — its *The file*, *Read*, *Sort*, *Citations* and the entry shape in
+its *Return* — write its groups and entries as your notes, and go back to the
+file that sent you here.
 
 The scout only reads. Every close, edit, comment and new issue is yours, and
 so is every verdict. Its lists include doubtful candidates on purpose: drop

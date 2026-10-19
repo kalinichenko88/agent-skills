@@ -129,10 +129,10 @@ duplicates close first* in `take-in.md`; and the same pass updates every
 sibling issue whose text the change just falsified.
 
 To find the citations that the change moved, run `collect.sh filing`
-(`tracker.md`) with every file that `git diff --name-only
-origin/<default>...HEAD` prints. A scout then checks the open issues in its
-file: `Job: citations.`, with the worktree as `Tree:`. Check each citation that
-moved or is gone, and correct it.
+(`tracker.md`) with every file that `gh pr diff <PR> --name-only` prints, and
+the old path of each file the PR renamed. In Claude Code a scout then checks
+the open issues in its file: `Job: citations.`, with a checkout of the merged
+code as `Tree:`. Check each citation that moved or is gone, and correct it.
 
 ## GitHub Actions
 
