@@ -18,8 +18,8 @@ Your prompt gives the file, the collector, and one job:
   to record them.
 - **citations** — the agent wants to know which `path:line` citations in
   issues still point at what the issue says. The prompt names the issues, or
-  none for the open issues of the file (*Citations* below), and gives `Tree:`,
-  the directory with the code to check them in.
+  none for the open issues that have an entry (*Citations* below), and gives
+  `Tree:`, the directory with the code to check them in.
 
 ## The file
 
@@ -116,7 +116,8 @@ For **filing**:
 For **citations**, skip *Read* and *Sort*. The issues are the ones the prompt
 names. When it names none, they are the open issues that have an entry, and
 the open ones in `== Left out`; a title in `== Open issues` or in a search list
-does not make an issue one of them. No issue: answer `none`, and run nothing.
+does not make an issue one of them. No issue: answer `none` and the count line
+of *Return*, and run nothing.
 Add the issues with no entry with one `bodies` run first. Find each issue's
 entry: the one under `== The issue`, or the one that starts `==> #<n>`.
 
