@@ -11,47 +11,20 @@ prompt of engineering rules, plus the skills those rules lean on.
   them: it counts the real payloads before a bug fix, and finds the docs a
   change made false. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
   `hooks/rules.sh` injects it at the start of every session and every subagent.
-- **`kalinichenko:github`** — commits, pull requests, issues and Actions.
+- **[`kalinichenko:github`](skills/github/README.md)** — commits, pull
+  requests, issues and Actions.
+- **[`kalinichenko:roadmap`](skills/roadmap/README.md)** — a project manager on
+  top of GitHub.
+- **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
+  image, pinned exactly, on the smallest base that runs the app.
+- **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
+  — house TypeScript style.
+- **[`kalinichenko:react-conventions`](skills/react-conventions/README.md)** —
+  layer and feature boundaries in a React app, request state as one union, and
+  no `ref.current` in render.
 
-  ![The GitHub skill: start a task, find something outside it, finish it](docs/github/00-overview.webp)
-
-  An issue named on its own — `#91` or its URL — starts the work. Its duplicates
-  close before the work starts, and the work gets a worktree named for what it
-  does. Every open bug and debt issue in the same area is checked, so one PR
-  can close them with the task. A finding joins an open issue on the same code
-  before a new one is filed, up to two added findings per issue. Scripts do
-  the steps with one correct result: they read the tracker into one file, add
-  a finding to an issue, check an issue before it is taken, set up its
-  worktree, and keep it open when a pull request fixes only part of it. In
-  Claude Code a Haiku subagent reads a file of 20 KB or more, so the main
-  model gets only the candidates. A Haiku subagent also checks the
-  `path:line` citations in issues against the code. Each scenario step by
-  step:
-  [start a task](docs/github/01-start.webp),
-  [find something outside the task](docs/github/02-during.webp),
-  [finish the task](docs/github/03-finish.webp).
-- **`kalinichenko:roadmap`** — a project manager on top of GitHub.
-
-  ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
-
-  It answers "what can I take now", "what can run in parallel" and "what is
-  left to close M1", builds the roadmap with you from the project's `docs/`,
-  and puts a task off to `Later` when you agree to. The plan lives in GitHub:
-  milestones in order, "blocked by" links and sub-issues, so it cannot go
-  stale. Scripts read it through the GitHub API and rank the free tasks on the
-  main path, among bugs and the rest. In Claude Code a Haiku subagent reads the
-  code to find which tasks would change the same functions. A GitHub Project
-  with saved views, which the skill sets up, shows the plan. Each scenario step
-  by step:
-  [plan the roadmap](docs/roadmap/01-plan.webp),
-  [pick the next task](docs/roadmap/02-next.webp),
-  [close a milestone](docs/roadmap/03-close.webp).
-- **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
-  smallest base that runs the app.
-- **`kalinichenko:typescript-conventions`** — house TypeScript style.
-- **`kalinichenko:react-conventions`** — layer and feature boundaries in a
-  React app, request state as one union, and no `ref.current` in render. Each
-  rule is one that agents broke in a test without it.
+Each skill's README says when it starts and what you get. The github and
+roadmap READMEs show each scenario as a picture.
 
 The repository is its own marketplace for both tools.
 
@@ -106,20 +79,6 @@ the background at startup; to upgrade now:
 ```sh
 codex plugin marketplace upgrade kalinichenko
 ```
-
-## Recommended lint rules
-
-`kalinichenko:typescript-conventions` asks for a blank line before `return`. To
-make ESLint enforce it in a project, add this rule from `@stylistic`:
-
-```js
-'@stylistic/padding-line-between-statements': [
-  'error',
-  { blankLine: 'always', prev: '*', next: 'return' },
-],
-```
-
-It does not touch a `return` that is the only statement in its block.
 
 ## Develop
 
