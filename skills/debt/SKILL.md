@@ -9,8 +9,9 @@ The map measures where the structural debt sits — hotspots, broken layer
 rules, copies and, with ponytail installed, over-engineering — and files at
 most three places a run as issues labelled `debt`. Take-in in the
 `kalinichenko:github` skill then checks those issues whenever a task touches
-their area, so one pull request can remove the debt next to the task. A place larger than one pull
-request becomes steps that the `kalinichenko:roadmap` skill offers in order.
+their area, so one pull request can remove the debt next to the task. A place
+larger than one pull request becomes steps that the `kalinichenko:roadmap`
+skill offers in order.
 When the project has a debt skill of its own, follow that one instead.
 
 The map changes no file in the working tree and opens no pull request. Every
@@ -49,25 +50,35 @@ all paths start there.
    A clone of 15 lines or more is a finding. `jscpd` never goes into a
    `package.json`.
 4. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
-   in your skill list; else skip this step and say so. Run it on the scope. It
-   reads the working tree, not `origin/HEAD`, so drop each finding on a file
-   that `git diff --quiet origin/HEAD -- <file>` shows changed. Drop a finding
-   that the project's own rules contradict: ponytail counts a file that exports
-   one thing as bloat, and a project with one entity per file keeps it. A
-   finding is a place when its fix is a pull request of its own: a dependency
-   the platform covers, an abstraction with one implementation, a module that
-   only delegates. A cut of a few lines in one file is not a place: list it in
-   the report as a small cut, for the Boy Scout Rule when someone next works in
-   that file.
+   in your skill list; else skip this step and say so. It takes no path and
+   loads as instructions, so in Claude Code send it to one subagent, before you
+   read the project's rules: "Invoke the `ponytail:ponytail-audit` skill, audit
+   only `<scope>` of `<repository>`, and return its lines as it prints them,
+   every path of each finding in its `[path]`." In Codex, run it yourself
+   before step 2. Then sort its findings, in this order, each part of a bundled
+   finding on its own:
+   1. **Changed in the checkout.** It reads the working tree, not
+      `origin/HEAD`: drop a part whose file `git diff --quiet origin/HEAD -- <file>`
+      shows changed.
+   2. **Against the project's rules.** Drop a part that a rule of the
+      instruction files of step 2 contradicts or requires: ponytail counts a
+      file that exports one thing as bloat, and a project with one entity per
+      file keeps it. Quote the rule in the report.
+   3. **Already a broken rule** of step 2: it counts once, there.
+   4. **A place or a small cut.** A place is a fix that is a pull request of
+      its own: a dependency the platform covers, an abstraction with one
+      implementation, a layer that only delegates and that no rule requires. A
+      fix of a few lines, in one file or in a few, is a small cut: it goes into
+      the report, for the Boy Scout Rule when someone next works there.
 
 ## Choose the places
 
 A place is one fix: a file to split, a broken rule, the clones that one
 shared helper removes, or a piece of over-engineering to remove. Rank the
 places by their file's score from `measure.sh`: a broken rule takes the
-importer's score, a set of clones the highest of its files, a dependency the
-highest of the files that import it. A file outside the table gets its score from
-`measure.sh <file>`.
+importer's score, and a place over several files — clones, a dependency and
+its importers, a bundled finding — the highest of its files. A file outside
+the table gets its score from `measure.sh <file>`.
 
 A hotspot is a place only when its file holds more than one concern and the
 split can be named. A high score alone is not a place: a short file that
@@ -149,5 +160,7 @@ and linked so far.
 ## The report
 
 The issues filed, re-measured and named, with their numbers; *next*, with
-scores; the borderline hits; the small cuts; the steps skipped and why; the
-share of moved paths when it was large; the SHA measured.
+scores; the borderline hits; the small cuts, one line each with the score of
+the file it names; the ponytail findings dropped, with the rule; the lines the
+kept findings would save, not ponytail's own `net:`; the steps skipped and
+why; the share of moved paths when it was large; the SHA measured.
