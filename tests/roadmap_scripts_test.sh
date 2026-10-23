@@ -55,6 +55,10 @@ case "$*" in
       jq '.data.repository.issues.nodes' "$f"
     done | jq -s 'add | map({number, url: "https://github.com/kalinichenko88/agent-skills/issues/\(.number)"})' | jq -r "$filter" ;;
   'issue edit'*) ;;
+  'project list'*) jq -r "$filter" "$(src project-list.json)" ;;
+  'project view'* | 'project create'*) jq -r "$filter" "$(src project-view.json)" ;;
+  'project item-list'*) jq -r "$filter" "$(src project-items.json)" ;;
+  'project link'* | 'project item-add'*) ;;
   *) echo "fake gh: no answer for: $*" >&2; exit 1 ;;
 esac
 EOF
@@ -350,5 +354,37 @@ printf 'New goal.\n' >"$tmp/goal"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" describe M1 "$tmp/goal")
 check 'describe keeps the mark' "$(printf 'New goal.\n\nCurrent.')" "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
 check 'usage names every subcommand' 8 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
+
+# board.sh: a project found by title among the owner's projects, not linked
+# yet, is linked, not created again.
+reset
+pages 3
+jq '.projects[0].title = "agent-skills roadmap"' "$fixtures/project-list.json" >"$FAKE/project-list.json"
+jq '.items[0].content = {number: 1, repository: "kalinichenko88/agent-skills", type: "Issue"}' "$fixtures/project-items.json" >"$FAKE/project-items.json"
+out=$(DRY_RUN=1 bash "$scripts/board.sh")
+check 'no create' 0 "$(grep -c 'project create' <<<"$out" || true)"
+check 'links a project found by title' 'linked kalinichenko88/agent-skills' "$(grep '^linked ' <<<"$out")"
+check 'adds only the missing issues' 'issues to add: 2' "$(grep '^issues to add: ' <<<"$out")"
+check 'both views missing' "$(printf 'view Unassigned: missing\nview By milestone: missing')" "$(grep '^view ' <<<"$out")"
+check 'the filter of Unassigned' 1 "$(grep -c 'is:issue\\ is:open\\ no:assignee\\ -milestone:Later' <<<"$out" || true)"
+check 'the manual steps' 1 "$(grep -c '^Two settings the API cannot make. Open ' <<<"$out" || true)"
+# A linked project of that title is not linked again; views there are not
+# made again.
+jq '.data.repository.projectsV2.nodes = [{number: 6, title: "agent-skills roadmap", url: "https://github.com/users/kalinichenko88/projects/6", closed: false}]' \
+  "$fixtures/projects-linked.json" >"$FAKE/projects-linked.json"
+jq '.data.node.views.nodes = [{name: "Unassigned"}, {name: "By milestone"}]' "$fixtures/project-views.json" >"$FAKE/project-views.json"
+out=$(DRY_RUN=1 bash "$scripts/board.sh")
+check 'a linked project is not linked again' 0 "$(grep -c '^linked ' <<<"$out" || true)"
+check 'views there' "$(printf 'view Unassigned: there\nview By milestone: there')" "$(grep '^view ' <<<"$out")"
+# None: create and link it, in a dry run.
+reset
+out=$(DRY_RUN=1 bash "$scripts/board.sh")
+case $out in *'dry run: gh project create --owner kalinichenko88 --title agent-skills\ roadmap'*'dry run: gh project link'*'no project yet'*) ;;
+  *) fail 'creates and links the project' "$out" ;;
+esac
+# A failed create stops with the reason.
+reset
+FAKE_FAIL='project create' bash "$scripts/board.sh" >"$tmp/out" 2>&1 && fail 'board.sh exits 0 when create fails'
+grep -q '^cannot create a project under kalinichenko88: ' "$tmp/out" || fail 'board.sh names the failed create' "$(cat "$tmp/out")"
 
 echo 'roadmap_scripts_test: ok'
