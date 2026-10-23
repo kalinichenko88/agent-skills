@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Sets up the GitHub Project that shows the plan: finds the project titled
 # "<repository> roadmap", or creates it under the repository's owner; links
 # it to the repository; adds the open issues it does not hold yet; creates

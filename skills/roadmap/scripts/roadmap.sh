@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Prints the roadmap, read from GitHub now: each open milestone in order, with
 # its progress, its description and its open issues in dependency order, each
 # with its state. Later shows titles only. Issues with no milestone show as a

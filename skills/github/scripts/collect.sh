@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Collects what the github skill reads from the tracker into one file, then
 # prints the file's path and size. It only reads: no command here changes
 # GitHub, git or any file but its own output.

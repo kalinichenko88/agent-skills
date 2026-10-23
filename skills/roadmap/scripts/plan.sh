@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Writes the plan to GitHub: milestones, the current mark, blocked-by links
 # and sub-issues.
 #

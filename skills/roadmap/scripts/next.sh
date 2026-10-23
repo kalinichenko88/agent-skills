@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Prints the free tasks per track, ranked — main path, bugs, secondary — and
 # the work in progress, then writes the overlap file for the lanes.md reader
 # and prints its path and size as its last line.

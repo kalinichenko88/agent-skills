@@ -66,7 +66,11 @@ plugin hooks until you do, so without that the skills load but the rules do
 not. Editing `rules.md` does not need a new trust; changing `hooks/hooks.json`
 does.
 
-The hook is plain bash with no other dependency.
+The hook is plain bash with no other dependency. The github and roadmap skills'
+scripts are bash too, and they also need `gh`. On native Windows, Claude Code runs
+them in Git Bash, so install [Git for Windows](https://git-scm.com/downloads/win):
+without it, Claude Code runs the hook in PowerShell, and the rules do not load.
+Codex on native Windows is not tested: run it in WSL.
 
 The roadmap skill's board needs the `project` scope on the `gh` token. Run
 once on each machine:
@@ -111,10 +115,13 @@ It does not touch a `return` that is the only statement in its block.
 
 `make check` validates the manifests, runs shellcheck and replays `rules.md`
 through the hook to prove the JSON it prints carries the file byte for byte and
-stays within Claude Code's 10,000-character cap on hook context. It also runs
-the github and roadmap skills' scripts against a fake `gh` that answers from
-payloads recorded in `tests/fixtures/github/` and `tests/fixtures/roadmap/`,
-all from public repositories.
+stays within Claude Code's 10,000-character cap on hook context. It checks that
+a checkout with `core.autocrlf=true`, the Git for Windows default, keeps every
+text file in LF, that the hook still gives the rules from a CRLF `rules.md`, and
+that every script starts with `#!/usr/bin/env bash`. It also runs the github and
+roadmap skills' scripts against a fake `gh` that answers from payloads recorded
+in `tests/fixtures/github/` and `tests/fixtures/roadmap/`, all from public
+repositories.
 
 To try a script that writes on a real tracker without writing to it, set
 `DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,

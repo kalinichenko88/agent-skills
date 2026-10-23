@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Reads the plan from GitHub and prints it as tab-separated records, one per
 # line, for the awk programs next to it.
 #

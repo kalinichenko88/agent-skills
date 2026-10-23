@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Runs the roadmap skill's scripts against a fake gh. The fake answers from
 # payloads recorded on public repositories, filtered through jq as gh's own
 # --jq does, and logs every call, so no test reaches GitHub.
@@ -14,7 +14,7 @@ trap 'rm -rf "$tmp"' EXIT
 
 mkdir "$tmp/bin" "$tmp/fake"
 cat >"$tmp/bin/gh" <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 echo "$*" >>"$FAKE/calls"
 case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1 ;; esac
 filter=. a='' b=''
