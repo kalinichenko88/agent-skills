@@ -1,0 +1,58 @@
+[
+  {
+    "number": 23,
+    "title": "M0 · Stage 0",
+    "description": "Goal of stage 0.",
+    "state": "open",
+    "open_issues": 77,
+    "closed_issues": 332
+  },
+  {
+    "number": 28,
+    "title": "M1 · Stage 1",
+    "description": "Goal of stage 1.",
+    "state": "open",
+    "open_issues": 0,
+    "closed_issues": 7
+  },
+  {
+    "number": 30,
+    "title": "M2 · Stage 2",
+    "description": "Goal of stage 2.",
+    "state": "open",
+    "open_issues": 1051,
+    "closed_issues": 3748
+  },
+  {
+    "number": 100,
+    "title": "M3 · Stage 3",
+    "description": "Goal of stage 3.",
+    "state": "open",
+    "open_issues": 37,
+    "closed_issues": 42
+  },
+  {
+    "number": 117,
+    "title": "M4 · Stage 4",
+    "description": "Goal of stage 4.",
+    "state": "open",
+    "open_issues": 2578,
+    "closed_issues": 2976
+  },
+  {
+    "number": 164,
+    "title": "M5 · Stage 5",
+    "description": "Goal of stage 5.",
+    "state": "open",
+    "open_issues": 16,
+    "closed_issues": 24
+  },
+  {
+    "number": 167,
+    "title": "Later",
+    "description": "Goal of stage 6.",
+    "state": "open",
+    "open_issues": 87,
+    "closed_issues": 325
+  }
+]
