@@ -3,7 +3,8 @@
 # review and fix until the review is clean, one review subagent a round. It
 # prints, for each run, the rounds and what each round after the first was
 # given to read. It calls the model, so it costs tokens and is not part of
-# `make check`: run it by hand after a change to the review rule in rules.md.
+# `make check`: run it by hand after a change to skills/review-loop or to its
+# section in rules.md.
 # It runs with this machine's other plugins and settings.
 #
 # Usage: tests/review_loop_eval.sh [runs, default 3]
