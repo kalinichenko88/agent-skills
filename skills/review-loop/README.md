@@ -1,8 +1,9 @@
 # kalinichenko:review-loop
 
 A review that ends: rounds that read only the last fixes, a stop at the first
-clean round, one last pass over the whole branch when the loop made a fix, a
-security review last, and a summary of what was decided and fixed.
+clean round, one last pass over the whole branch when the loop needed more
+than one round, a security review last, and a summary of what was decided and
+fixed.
 
 ## When it starts
 
@@ -24,12 +25,13 @@ security review last, and a summary of what was decided and fixed.
 - **A stop.** The loop ends at the first round that confirms no defect. Nits
   are applied without another round. After the third round with a defect, the
   agent asks you, and again after every three more rounds.
-- **One last look at the whole branch.** When the loop made a fix, one pass
-  reads the whole branch again after it stops, to see how the fixes fit the
-  rest. It never runs twice.
-- **Every fix is reviewed.** A fix from a round, the last pass, the security
-  review, your answer or your review comments, also after the pull request
-  opens, is one commit with rounds of its own, at the level of that fix.
+- **One last look at the whole branch.** When the loop needed more than one
+  round, one pass reads the whole branch again after it stops, to see how the
+  fixes fit the rest. It never runs twice.
+- **Every fix is reviewed.** The fixes from the last pass, the security review
+  or your review comments, also after the pull request opens, are one commit
+  with rounds of its own: at the level of round 1, or `xhigh` for a security
+  fix.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.

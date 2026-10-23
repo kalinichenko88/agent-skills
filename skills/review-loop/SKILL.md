@@ -8,8 +8,8 @@ description: Use when a change is reviewed, before or after its pull request ope
 A review runs in rounds. An over-engineering review comes first, when its
 skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
-that confirms no defect. When the loop committed a fix, one last pass reads the
-whole branch again, once. A security review comes last. The agent fixes and
+that confirms no defect. When the loop had more than one round, one last pass
+reads the whole branch again, once. A security review comes last. The agent fixes and
 decides by itself, except for a change to business logic, and ends with a
 summary.
 
@@ -57,34 +57,38 @@ installed, skip it and say so in the summary.
    upstream, and after a push that is not the whole branch. In Codex:
    `/review`, *Review against a base branch*. A review subagent gets
    `git diff <base>..HEAD`.
-2. **Each round of fixes is one commit.** The next round reads only that
+2. **The fixes of a round are one commit.** The next round reads only that
    commit: `/code-review <level> <sha>^..<sha>`. In Codex: `/review`, *Review a
    commit*. A review subagent gets `git show <sha>`. Inside the loop, never
    send the whole branch again.
 3. **Stop at the first round that confirms no defect**, whatever that round
-   declines, for the first time or again. Apply its nits — wording, line
-   wrapping — without another round.
+   declines, for the first time or again. Apply the rest of its findings —
+   nits and decisions — without another round.
 4. **The third round still confirms a defect:** stop, and ask the person
    whether to go on. Give the findings of the three rounds. When the person
    says to go on, ask again after three more rounds. When the person says to
-   stop, end these rounds and skip what is left of step 5. Then go to the
-   security review, or to the summary when the security review has already
-   run.
+   stop, or nobody can answer, end these rounds and skip what is left of
+   step 5.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
-   level, when the loop committed a fix; nits do not count. A round on one
-   commit cannot see how a fix fits the rest of the branch; this pass can.
-   There is never a second whole-branch pass: the rounds that reread the whole
-   branch are the ones that did not stop.
+   level, when the loop had more than one round. A round on one commit cannot
+   see how a fix fits the rest of the branch; this pass can. It waits for the
+   answers to open questions, unless nobody can answer. There is never a
+   second whole-branch pass: the rounds that reread the whole branch are the
+   ones that did not stop.
 
-**Every fix commit goes through steps 2 to 4**, whatever found it: a round,
-the last pass, the security review, the answer to a question, or a person's
-review comments, before or after the pull request opens. Round 1, the last
-pass, the security review, each answer and each set of comments starts a new
-count of rounds; the rounds on its fixes, and on the fixes those rounds
-prompt, count from it. Each round runs at the level that *The level* gives the
-fix it reads, so a security fix is `xhigh`.
+### Fixes from other places
 
-A person's review comments go through *The findings* below, and the reply
+Each of these starts a new count of rounds: the last pass, the security
+review, and each set of a person's review comments, before or after the pull
+request opens. For each of them:
+
+- Its fixes are one commit, and that commit goes through steps 2 to 4.
+- Its rounds run at the level of round 1. The rounds on the security review's
+  fixes run at `xhigh`. When no level was chosen in this session, pick one by
+  *The level*.
+
+The fix for an answer to a question joins the next fix commit. When no rounds
+are running, it starts a new count, as above. The reply to a person's comments
 names the fix commit.
 
 ## The findings
@@ -103,7 +107,7 @@ names the fix commit.
    its users — a rule, a calculation, a state, a permission, the data it keeps
    or deletes. Give the options and a recommendation, and keep the rest of the
    round going while the person answers. When nobody can answer, as in a run
-   with no person, the question goes into the summary as open.
+   with no person, the question stays open in the summary.
 5. **Fix at the root.** When the same defect is in sibling call sites or in a
    shared token, fix it there, and count the places.
 6. **A finding outside the task is an issue**, through the
@@ -115,7 +119,7 @@ names the fix commit.
 After the last pass and its rounds, run `/security-review` once, on the final
 branch. It reads the branch against origin's default branch and takes no
 target, so it never runs inside the loop. Its findings go through *The
-findings*, and its fixes through *Every fix commit* in *The rounds*. In
+findings*, and its fixes through *Fixes from other places*. In
 Codex: `/review` with the custom instructions "Find security defects on this
 branch against origin/<default branch>: injection, authentication,
 authorization, secrets and data exposure." Where there is no `origin` remote,
@@ -129,11 +133,12 @@ When the review ends, report in this order, one line per item:
   round, its level and range, and the count of findings it confirmed. The
   last pass, the same way. The security review's result.
 - **Decisions:** each choice you made: the finding, the choice, the reason.
-  Each question on business logic, with the person's answer.
+  Each question on business logic, with the person's answer, or `open`.
 - **Fixed:** what changed and in which file, the commit, and any side effect
   a fix had elsewhere.
 - **Declined:** each finding that did not survive, with the reason.
 - **Filed:** the issues opened or added to, with their numbers.
 
-The pull request description carries the same summary under `## Review`, so
-that a later review recognises a declined finding instead of arguing it again.
+The pull request description carries the same summary under `## Review`, and
+each later fix commit adds its lines there. A later review then recognises a
+declined finding instead of arguing it again.
