@@ -1,7 +1,7 @@
 {
   "name": "kalinichenko",
   "version": "0.5.1",
-  "description": "Engineering rules as an always-on base prompt, plus the github, roadmap, docker, typescript-conventions and react-conventions skills.",
+  "description": "Engineering rules as an always-on base prompt, plus the github, roadmap, review-loop, docker, typescript-conventions and react-conventions skills.",
   "author": {
     "name": "Ivan Kalinichenko",
     "url": "https://github.com/kalinichenko88"

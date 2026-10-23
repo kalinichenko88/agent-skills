@@ -7,9 +7,10 @@ prompt of engineering rules, plus the skills those rules lean on.
   calling work done, ship every bug fix with its test, use the platform before
   a dependency, keep code and commits in English, write prose in Simplified
   Technical English, move docs with the change, verify review findings before
-  acting on them, load the TypeScript conventions before the first write to a
-  TypeScript file and the React conventions before the first write to a React
-  component or hook. In Claude Code a Haiku subagent does the
+  acting on them and load the review loop before the first review of a change,
+  load the TypeScript conventions before the first write to a TypeScript file
+  and the React conventions before the first write to a React component or
+  hook. In Claude Code a Haiku subagent does the
   reading for two of them: it counts the real payloads before a bug fix, and
   finds the docs a change made false. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
   `hooks/rules.sh` injects it at the start of every session and every subagent.
@@ -21,6 +22,10 @@ prompt of engineering rules, plus the skills those rules lean on.
   top of GitHub.
 
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
+- **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
+  that ends: rounds that read only the last fixes, one last pass over the
+  whole branch when the loop needed more than one round, a security review,
+  and a summary of what was decided and fixed.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
@@ -107,7 +112,10 @@ To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
 `tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
 skills, and the files they write with an implicit return in a method callback,
-as `.map((x) => (`; it calls the model, so it is not part of `make check`.
+as `.map((x) => (`. `tests/review_loop_eval.sh` counts the review rounds and
+what each one reads; run it after a change to `skills/review-loop` or to its
+section in `rules.md`. Both call the model, so they are not part of
+`make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
