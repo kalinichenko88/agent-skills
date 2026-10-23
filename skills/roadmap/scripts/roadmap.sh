@@ -24,7 +24,7 @@ if [ $# -eq 1 ]; then
   only=$(bash "$dir/read.sh" milestone "$1")
   only=${only%%$'\t'*}
 fi
-{
-  bash "$dir/read.sh" milestones
-  bash "$dir/read.sh" issues
-} | awk -F'\t' -v only="$only" -f "$dir/graph.awk" -f "$dir/roadmap.awk"
+# Each read stops the script when it fails: a part of the plan is a false plan.
+list=$(bash "$dir/read.sh" milestones)
+issues=$(bash "$dir/read.sh" issues)
+printf '%s\n%s\n' "$list" "$issues" | awk -F'\t' -v only="$only" -f "$dir/graph.awk" -f "$dir/roadmap.awk"

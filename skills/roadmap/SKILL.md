@@ -84,8 +84,8 @@ overlap file. When nothing in the current milestones is free, a `note:` line
 says so, and the main path comes from the next milestone.
 
 Give one task: the first of the main path, else of bugs, else of secondary.
-Give its number, title, track and milestone, and why it is first, as "it
-unblocks #20 and #80". Name the top bug as the alternative. When the person
+Give its number, title, track and milestone, and why it is first, as "it is
+in M1 and 2 issues wait on it". Name the top bug as the alternative. When the person
 takes a task, the `kalinichenko:github` skill's take-in starts with its bare
 number, as `#21`: it checks the task and assigns it.
 
@@ -146,7 +146,9 @@ bash <dir>/scripts/plan.sh later 21
 It makes the `Later` milestone when there is none. A task in `Later` is never
 offered, so the script refuses when an open issue outside `Later` waits on the
 task — a blocked issue, or a parent that waits on its sub-issue — and names
-them. Then ask the person: put those off too, or remove the link with
+them. A sub-issue with no milestone of its own goes into `Later` with its
+parent, so an issue that waits on it counts too, and `plan.sh sub` refuses
+the same for a child that goes under a parent in `Later`. Then ask the person: put those off too, or remove the link with
 `plan.sh unblock`. A task comes back from `Later` with
 `gh issue edit <n> --milestone '<title>'`.
 

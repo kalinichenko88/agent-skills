@@ -14,13 +14,15 @@
 #
 # A milestone is M1, Later or a whole title. A milestone is current when a
 # line of its description reads Current.; describe keeps that line. It refuses
-# what would break the plan, prints why and exits 1, and writes nothing:
-# closing a milestone with open issues, Later as current, and a link that
-# makes a cycle, also through the blockers that a sub-issue takes from its
-# parent. GitHub itself refuses a second milestone of one title. later puts a task off into the Later
+# what would break the plan, prints why and exits 1, and writes nothing: a
+# second milestone of one title, closing a milestone with open issues, Later
+# as current, and a link that makes a cycle, also through the blockers that a
+# sub-issue takes from its parent. later puts a task off into the Later
 # milestone, and makes that milestone when there is none; it refuses when an
-# open issue outside Later waits on the task, because a task in Later is never
-# offered. Putting an issue into another milestone needs no check:
+# open issue outside Later waits on the task, or on a sub-issue of it with no
+# milestone of its own, because a task in Later is never offered. sub refuses
+# the same for a child that goes into Later with its parent. Putting an issue
+# into another milestone needs no check:
 # gh issue edit <n> --milestone '<title>'.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
@@ -88,10 +90,22 @@ link() {
   b=$(issue "$2")
   [ "$a" != "$b" ] || refuse 'an issue cannot wait on itself'
   if [ "$act" != unblock ]; then
-    cycle=$(bash "$dir/read.sh" issues | awk -F'\t' -v act="$act" -v a="$a" -v b="$b" -f "$dir/graph.awk" -f "$dir/cycle.awk")
+    issues=$(bash "$dir/read.sh" issues)
+    cycle=$(awk -F'\t' -v act="$act" -v a="$a" -v b="$b" -f "$dir/graph.awk" -f "$dir/cycle.awk" <<<"$issues")
     [ -z "$cycle" ] || refuse "it makes a cycle: $cycle"
   fi
+  if [ "$act" = sub ]; then
+    list=$(bash "$dir/read.sh" milestones)
+    waiting=$(waiting "$b" "$a")
+    [ -z "$waiting" ] || refuse "#$b goes into Later with #$a, and these wait on it outside Later: $waiting"
+  fi
   ids
+}
+# The open issues outside Later that would wait for good when issue $1 goes
+# into Later, as #20, #21, from $list and $issues; $2 is its new parent.
+waiting() {
+  printf '%s\n%s\n' "$list" "$issues" | awk -F'\t' -v n="$1" -v parent="${2:-}" -f "$dir/graph.awk" -f "$dir/later.awk" |
+    sort -n | awk '{ s = s (NR > 1 ? ", " : "") "#" $0 } END { print s }'
 }
 
 [ $# -ge 1 ] || usage
@@ -99,10 +113,15 @@ act=$1
 case $act in
   create)
     [ $# -eq 3 ] || usage
+    title=$2
+    list=$(bash "$dir/read.sh" milestones)
+    if awk -F'\t' -v t="$title" '$1 == "ms" && tolower($8) == tolower(t) { f = 1 } END { exit !f }' <<<"$list"; then
+      refuse "$title exists"
+    fi
     newfile
     trimmed <"$3" >"$file"
-    run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title="$2" -F description=@"$file" --silent
-    say "created $2"
+    run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title="$title" -F description=@"$file" --silent
+    say "created $title"
     ;;
   describe)
     [ $# -eq 3 ] || usage
@@ -119,7 +138,12 @@ case $act in
   close)
     [ $# -eq 2 ] || usage
     milestone "$2"
-    open=$(bash "$dir/read.sh" issues | awk -F'\t' -v m="$n" '$1 == "is" && $3 == m { print $2 }' | sort -n | awk '{ s = s (NR > 1 ? ", " : "") "#" $0 } END { if (NR) print NR " open issues: " s }')
+    list=$(bash "$dir/read.sh" milestones)
+    issues=$(bash "$dir/read.sh" issues)
+    # A sub-issue with no milestone counts in its parent's.
+    open=$(printf '%s\n%s\n' "$list" "$issues" |
+      awk -F'\t' -v m="$n" -f "$dir/graph.awk" -f <(echo 'END { for (i = 1; i <= isn; i++) if (ems(islist[i]) == m) print islist[i] }') |
+      sort -n | awk '{ s = s (NR > 1 ? ", " : "") "#" $0 } END { if (NR) print NR " open issues: " s }')
     [ -z "$open" ] || refuse "$title has $open"
     run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -f state=closed --silent
     say "closed $title"
@@ -172,8 +196,7 @@ case $act in
       echo "#$a is in Later already"
       exit 0
     fi
-    waiting=$(printf '%s\n%s\n' "$list" "$issues" | awk -F'\t' -v n="$a" -f "$dir/graph.awk" -f "$dir/later.awk" |
-      sort -n | awk '{ s = s (NR > 1 ? ", " : "") "#" $0 } END { print s }')
+    waiting=$(waiting "$a")
     [ -z "$waiting" ] || refuse "these wait on it outside Later: $waiting"
     if [ -z "$later" ]; then
       run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title=Later -f description='What is wanted but not planned.' --silent

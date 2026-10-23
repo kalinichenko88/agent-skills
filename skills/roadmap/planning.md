@@ -39,8 +39,9 @@ until the person approves the whole plan. One approval covers the whole list.
      `gh issue edit <n> --milestone '<title>'`, the title as
      `bash <dir>/scripts/read.sh milestone M1` prints it.
    - Each link with `plan.sh block <issue> <blocker>`, and each sub-issue with
-     `plan.sh sub <parent> <child>`. A refusal names the cycle: change the
-     plan with the person, not the check.
+     `plan.sh sub <parent> <child>`. A refusal names the cycle, or the
+     issues that would wait on a task in `Later`: change the plan with the
+     person, not the check.
    - The current marks with `plan.sh current <milestone>`.
    - Last, `board.sh` (`SKILL.md`, *The board*).
 

@@ -44,7 +44,8 @@ unassigned issue looks free to everyone else: "a branch only" runs
 `worktree.sh` with `--here`, which makes no worktree and works in the current
 checkout, and "stay on this branch" runs `gh issue edit 91 --add-assignee @me`
 and touches no branch. `worktree.sh` warns instead of assigning in one case,
-below.
+below; "stay on this branch" checks the same case first, with
+`gh issue develop --list 91` and the issue's assignees.
 
 The branch, and the worktree when one is made, carry one name that says what
 the work is: `<type>/<number>-<two to four words>`, the type from *Commits* in

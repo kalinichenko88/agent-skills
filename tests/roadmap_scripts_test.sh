@@ -299,6 +299,7 @@ f=$(overlap)
 check 'cites' 'cites: src/server/log.ts, src/app/main.ts' "$(grep '^cites: ' "$f")"
 check 'branch files from compare' "files: $(jq -r '[.files[].filename] | join(", ")' "$fixtures/compare.json")" \
   "$(sed -n '/^==> #21 /,/^==> /p' "$f" | grep '^files: ')"
+check 'a failed compare is no diff yet' 'no diff yet' "$(sed -n '/^==> #21 /{n;p;}' "$(FAKE_FAIL='compare/' overlap)")"
 check 'PRs closing no issue' "$(jq '.data.repository.pullRequests.nodes | length' "$fixtures/prs-1.json")" \
   "$(bash "$scripts/next.sh" | grep -c '^PR #.*: closes no open issue$')"
 # An open PR that closes only issues closed already is work in progress too.
@@ -321,6 +322,9 @@ put '19:-'
 check 'no milestones' 'current: none' "$(bash "$scripts/next.sh" | head -1)"
 # A failed read stops the script.
 FAKE_FAIL='pullRequests(' bash "$scripts/next.sh" >/dev/null 2>&1 && fail 'next.sh exits 0 when a read fails'
+check 'next.sh prints nothing when a read fails' '' "$(FAKE_FAIL='milestones?' bash "$scripts/next.sh" 2>/dev/null || true)"
+
+check 'roadmap.sh prints nothing when a read fails' '' "$(FAKE_FAIL='milestones?' bash "$scripts/roadmap.sh" 2>/dev/null || true)"
 
 # plan.sh refuses a link that makes a cycle, and sends nothing.
 reset
@@ -342,6 +346,8 @@ put '10 11 12'
 edit 11 '.parent = {number: 10, milestone: null, repository: {nameWithOwner: "kalinichenko88/agent-skills"}}'
 blocks 12 11
 check 'block refuses an inherited cycle' 'refused: it makes a cycle: #11 → #12 → #11' "$(bash "$scripts/plan.sh" block 10 12 2>&1 || true)"
+check 'block refuses a parent blocked by its own sub-issue' 'refused: it makes a cycle: #11 would wait on itself through #10' \
+  "$(bash "$scripts/plan.sh" block 10 11 2>&1 || true)"
 # sub: the child would inherit #20, which waits on the child.
 reset
 put '19 20 21 22'
@@ -363,10 +369,17 @@ check 'current twice' 'M1 · Stage 1 is current already' "$(bash "$scripts/plan.
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" not-current M1)
 check 'not-current removes the mark' 'Goal.' "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
 check 'Later is never current' 'refused: Later is never current' "$(bash "$scripts/plan.sh" current later 2>&1 || true)"
+check 'create refuses an existing title in any case' 'refused: m1 · stage 1 exists' "$(bash "$scripts/plan.sh" create 'm1 · stage 1' /dev/null 2>&1 || true)"
 check 'close refuses open issues' 'refused: M1 · Stage 1 has 3 open issues: #19, #20, #21' "$(bash "$scripts/plan.sh" close M1 2>&1 || true)"
 printf 'New goal.\n' >"$tmp/goal"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" describe M1 "$tmp/goal")
 check 'describe keeps the mark' "$(printf 'New goal.\n\nCurrent.')" "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
+# An open sub-issue with no milestone takes it from its parent, closed or not.
+reset
+put '11:-'
+edit 11 ".parent = {number: 10, milestone: {number: $(msno M1)}, repository: {nameWithOwner: \"kalinichenko88/agent-skills\"}}"
+check 'close counts a sub-issue in the milestone of its parent' 'refused: M1 · Stage 1 has 1 open issues: #11' \
+  "$(bash "$scripts/plan.sh" close M1 2>&1 || true)"
 # plan.sh later puts a task off, unless an issue outside Later waits on it:
 # a task in Later is never offered, so that issue would wait for good.
 reset
@@ -383,6 +396,18 @@ put '10 11'
 edit 11 '.parent = {number: 10, milestone: null, repository: {nameWithOwner: "kalinichenko88/agent-skills"}}'
 check 'later refuses a sub-issue whose parent waits on it' 'refused: these wait on it outside Later: #10' \
   "$(bash "$scripts/plan.sh" later 11 2>&1 || true)"
+# A sub-issue with no milestone goes into Later with its parent.
+reset
+put '10 11:- 20'
+edit 11 ".parent = {number: 10, milestone: {number: $(msno M1)}, repository: {nameWithOwner: \"kalinichenko88/agent-skills\"}}"
+blocks 20 11
+check 'later refuses a task whose sub-issue an issue waits on' 'refused: these wait on it outside Later: #20' \
+  "$(bash "$scripts/plan.sh" later 10 2>&1 || true)"
+reset
+put '10:Later 11:- 20'
+blocks 20 11
+check 'sub refuses a child that goes into Later' 'refused: #11 goes into Later with #10, and these wait on it outside Later: #20' \
+  "$(bash "$scripts/plan.sh" sub 10 11 2>&1 || true)"
 # No Later milestone yet: it is made first.
 reset
 ms 'map(select(.title != "Later"))'
@@ -410,10 +435,17 @@ check 'the manual steps' 1 "$(grep -c '^Two settings the API cannot make. Open '
 # made again.
 jq '.data.repository.projectsV2.nodes = [{number: 6, title: "agent-skills roadmap", url: "https://github.com/users/kalinichenko88/projects/6", closed: false}]' \
   "$fixtures/projects-linked.json" >"$FAKE/projects-linked.json"
-jq '.data.node.views.nodes = [{name: "Unassigned"}, {name: "By milestone"}]' "$fixtures/project-views.json" >"$FAKE/project-views.json"
+jq '.data.node.views.nodes = [{id: "PVV_1", name: "Unassigned", filter: "is:open"}, {id: "PVV_2", name: "By milestone", filter: "is:open"}]' \
+  "$fixtures/project-views.json" >"$FAKE/project-views.json"
 out=$(DRY_RUN=1 bash "$scripts/board.sh")
 check 'a linked project is not linked again' 0 "$(grep -c '^linked ' <<<"$out" || true)"
 check 'views there' "$(printf 'view Unassigned: there\nview By milestone: there')" "$(grep '^view ' <<<"$out")"
+# A view whose filter was never set, as after a failed run, gets it.
+jq '.data.node.views.nodes = [{id: "PVV_1", name: "Unassigned", filter: null}, {id: "PVV_2", name: "By milestone", filter: "is:open"}]' \
+  "$fixtures/project-views.json" >"$FAKE/project-views.json"
+out=$(DRY_RUN=1 bash "$scripts/board.sh")
+check 'a view without its filter' "$(printf 'view Unassigned: no filter\nview By milestone: there')" "$(grep '^view ' <<<"$out")"
+check 'the filter goes to that view' 1 "$(grep -c 'view=PVV_1.*no:assignee' <<<"$out" || true)"
 # None: create and link it, in a dry run.
 reset
 out=$(DRY_RUN=1 bash "$scripts/board.sh")

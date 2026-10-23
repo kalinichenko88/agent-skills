@@ -23,14 +23,12 @@ dir=$(dirname "$0")
 
 prs=$(bash "$dir/read.sh" prs)
 while read -r n; do
-  files=$(gh api "repos/{owner}/{repo}/pulls/$n/files" --paginate --jq '.[].filename' | paste -sd, -)
+  files=$(gh api "repos/{owner}/{repo}/pulls/$n/files?per_page=100" --paginate --jq '.[].filename' | paste -sd, -)
   prs=$(awk -F'\t' -v OFS='\t' -v n="$n" -v f="$files" '$1 == "pr" && $2 == n { $5 = f } 1' <<<"$prs")
 done < <(awk -F'\t' '$1 == "pr" && $6 > 100 { print $2 }' <<<"$prs")
-out=$({
-  bash "$dir/read.sh" milestones
-  bash "$dir/read.sh" issues "${1:-bug}"
-  printf '%s\n' "$prs"
-} | awk -F'\t' -f "$dir/graph.awk" -f "$dir/next.awk")
+list=$(bash "$dir/read.sh" milestones)
+issues=$(bash "$dir/read.sh" issues "${1:-bug}")
+out=$(printf '%s\n%s\n%s\n' "$list" "$issues" "$prs" | awk -F'\t' -f "$dir/graph.awk" -f "$dir/next.awk")
 
 # The paths a body cites: tokens with a / that end in .<extension>, URLs left out.
 cites() {
@@ -48,10 +46,11 @@ cites() {
 # ponytail: one gh call per body, about a second each; one aliased GraphQL query if the file gets slow.
 body() { gh issue view "$1" --json body --jq .body; }
 default=''
+# A branch that cannot be compared, as one in a fork, has no diff yet.
 diff_of() {
   local b
   for b in ${1//,/ }; do
-    gh api "repos/{owner}/{repo}/compare/$default...$b" --jq '.files[]?.filename'
+    gh api "repos/{owner}/{repo}/compare/$default...$b" --jq '.files[]?.filename' 2>/dev/null || true
   done | awk '!seen[$0]++' | paste -sd, -
 }
 

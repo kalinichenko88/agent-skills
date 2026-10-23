@@ -6,8 +6,8 @@
 # block a b: a waits on b, and so does every loaded descendant of a.
 # sub a b: a waits on its new sub-issue b, and b and its descendants wait on
 # the open blockers of a. It adds every such edge, then, for each added edge
-# u -> v in turn, prints the chain #u → #v → … → #u when v reaches u. Nothing
-# printed: no cycle.
+# u -> v in turn, prints the chain #u → #v → … → #u when v reaches u, or that
+# an issue would wait on itself through a. Nothing printed: no cycle.
 
 END {
   init()
@@ -23,6 +23,10 @@ END {
       if (w[j] ~ /^#/ && (substr(w[j], 2) in istitle)) add(d[i], substr(w[j], 2))
   }
   for (i = 1; i <= c; i++) {
+    if (eu[i] == ev[i]) {
+      print "#" eu[i] " would wait on itself through #" a
+      exit
+    }
     split("", seen)
     chain = ""
     if (path(ev[i], eu[i], seen)) {

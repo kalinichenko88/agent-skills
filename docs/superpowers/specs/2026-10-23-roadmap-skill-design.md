@@ -277,7 +277,7 @@ what must happen and which file to read first.
 
 - **"What can I take now", "what is next on the roadmap".** Run `next.sh`. Give
   one task: its number, title, track and milestone, and why it is first (for
-  example, "it unblocks #20 and #80"). When the person takes it, the github
+  example, "it is in M1 and 2 issues wait on it"). When the person takes it, the github
   skill's take-in starts with the bare number, as now.
 - **"What can I take in parallel with the main work".** Run `next.sh`, then
   the overlap check. Give one task from bugs and one from secondary that do not
@@ -296,8 +296,10 @@ what must happen and which file to read first.
 - **The person decides to put a task off.** After the person agrees in the
   conversation, `plan.sh later <n>` moves it into `Later`, and makes that
   milestone when there is none. A task in `Later` is never offered, so the
-  script refuses when an open issue outside `Later` waits on it, and names
-  those issues.
+  script refuses when an open issue outside `Later` waits on it, or on a
+  sub-issue of it with no milestone of its own, which goes into `Later` with
+  it, and names those issues. `plan.sh sub` refuses the same for a child that
+  goes under a parent in `Later`.
 - **An agent needs the roadmap as context** (brainstorming, a plan, a review).
   Run `roadmap.sh`.
 - **Start a roadmap.** Follow `planning.md` (below).

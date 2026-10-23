@@ -69,22 +69,29 @@ if [ -n "$found" ]; then
 
   id=$(gh project view "$number" --owner "$owner" --format json --jq .id)
   views=$(gh api graphql -f id="$id" -f query='
-    query($id: ID!) { node(id: $id) { ... on ProjectV2 { views(first: 20) { nodes { name } } } } }' \
-    --jq '.data.node.views.nodes[].name')
+    query($id: ID!) { node(id: $id) { ... on ProjectV2 { views(first: 20) { nodes { id name filter } } } } }' \
+    --jq '.data.node.views.nodes[] | "\(.name)\t\(.id)\t\(.filter // "")"')
   while IFS='|' read -r view layout filter; do
-    if grep -qxF "$view" <<<"$views"; then
+    # A view there keeps its filter; one without a filter, as after a run that
+    # stopped between the two writes, gets it.
+    vid=$(awk -F'\t' -v v="$view" '$1 == v { print $2 "\t" $3; exit }' <<<"$views")
+    if [ -n "${vid#*$'\t'}" ]; then
       echo "view $view: there"
       continue
-    fi
-    echo "view $view: missing"
-    create=(gh api graphql -f project="$id" -f name="$view" -f layout="$layout" -f query='
-      mutation($project: ID!, $name: String!, $layout: ProjectV2ViewLayout!) {
-        createProjectV2View(input: {projectId: $project, name: $name, layout: $layout}) { projectV2View { id } } }')
-    if [ "${DRY_RUN:-}" = 1 ]; then
-      run "${create[@]}"
-      vid=VIEW_ID
+    elif [ -n "$vid" ]; then
+      echo "view $view: no filter"
+      vid=${vid%%$'\t'*}
     else
-      vid=$("${create[@]}" --jq .data.createProjectV2View.projectV2View.id)
+      echo "view $view: missing"
+      create=(gh api graphql -f project="$id" -f name="$view" -f layout="$layout" -f query='
+        mutation($project: ID!, $name: String!, $layout: ProjectV2ViewLayout!) {
+          createProjectV2View(input: {projectId: $project, name: $name, layout: $layout}) { projectV2View { id } } }')
+      if [ "${DRY_RUN:-}" = 1 ]; then
+        run "${create[@]}"
+        vid=VIEW_ID
+      else
+        vid=$("${create[@]}" --jq .data.createProjectV2View.projectV2View.id)
+      fi
     fi
     run gh api graphql --silent -f view="$vid" -f filter="$filter" -f query='
       mutation($view: ID!, $filter: String!) {
