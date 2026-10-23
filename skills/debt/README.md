@@ -27,6 +27,12 @@ there.
   clones of 15 lines or more; the clones one shared helper removes are one
   place. It never goes into a `package.json`. Without either, the step is
   skipped.
+- **Less code, when ponytail is installed.** Its `ponytail-audit` finds
+  dependencies the platform covers, abstractions with one implementation and
+  modules that only delegate. A finding the project's own rules contradict is
+  dropped. A cut of a few lines is reported as a small cut, not filed. Without
+  ponytail the step is skipped; it installs as the
+  [review-loop README](../review-loop/README.md#the-ponytail-step) says.
 - **Few issues, and no doubles.** At most three places a run. A place an open
   debt issue already covers is re-measured: its `## Where` gets this run's
   numbers. A place closed as not planned is not filed again.

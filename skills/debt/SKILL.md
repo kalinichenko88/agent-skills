@@ -5,10 +5,11 @@ description: Use when mapping a repository's technical debt — finding hotspots
 
 # Technical debt map
 
-The map measures where the structural debt sits, and files at most three
-places a run as issues labelled `debt`. Take-in in the `kalinichenko:github`
-skill then checks those issues whenever a task touches their area, so one pull
-request can remove the debt next to the task. A place larger than one pull
+The map measures where the structural debt sits — hotspots, broken layer
+rules, copies and, with ponytail installed, over-engineering — and files at
+most three places a run as issues labelled `debt`. Take-in in the
+`kalinichenko:github` skill then checks those issues whenever a task touches
+their area, so one pull request can remove the debt next to the task. A place larger than one pull
 request becomes steps that the `kalinichenko:roadmap` skill offers in order.
 When the project has a debt skill of its own, follow that one instead.
 
@@ -47,13 +48,25 @@ all paths start there.
    `npx --yes jscpd@<version> --min-lines 8 --reporters json --output <scratch> --ignore "**/node_modules/**,**/fixtures/**,**/*.md,**/*.json,**/*.yml,**/*.yaml,**/*.sql" <scope>`.
    A clone of 15 lines or more is a finding. `jscpd` never goes into a
    `package.json`.
+4. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
+   in your skill list; else skip this step and say so. Run it on the scope. It
+   reads the working tree, not `origin/HEAD`, so drop each finding on a file
+   that `git diff --quiet origin/HEAD -- <file>` shows changed. Drop a finding
+   that the project's own rules contradict: ponytail counts a file that exports
+   one thing as bloat, and a project with one entity per file keeps it. A
+   finding is a place when its fix is a pull request of its own: a dependency
+   the platform covers, an abstraction with one implementation, a module that
+   only delegates. A cut of a few lines in one file is not a place: list it in
+   the report as a small cut, for the Boy Scout Rule when someone next works in
+   that file.
 
 ## Choose the places
 
-A place is one fix: a file to split, a broken rule, or the clones that one
-shared helper removes. Rank the places by their file's score from
-`measure.sh`: a broken rule takes the importer's score, a set of clones the
-highest of its files. A file outside the table gets its score from
+A place is one fix: a file to split, a broken rule, the clones that one
+shared helper removes, or a piece of over-engineering to remove. Rank the
+places by their file's score from `measure.sh`: a broken rule takes the
+importer's score, a set of clones the highest of its files, a dependency the
+highest of the files that import it. A file outside the table gets its score from
 `measure.sh <file>`.
 
 A hotspot is a place only when its file holds more than one concern and the
@@ -136,5 +149,5 @@ and linked so far.
 ## The report
 
 The issues filed, re-measured and named, with their numbers; *next*, with
-scores; the borderline hits; the steps skipped and why; the share of moved
-paths when it was large; the SHA measured.
+scores; the borderline hits; the small cuts; the steps skipped and why; the
+share of moved paths when it was large; the SHA measured.
