@@ -50,27 +50,6 @@ item: an item without `url` reaches the render as `undefined`. Narrow every
 item with a guard, or with the schema library the project already has. A cast
 left after a check hides the part that the check did not do.
 
-No shared typescript-eslint config catches that cast. Turn the rule on over the
-typed config, with old violations in bulk suppressions (next section):
-
-```js
-'@typescript-eslint/no-unsafe-type-assertion': 'error',
-```
-
-## A lint rule is `error`, or it is off
-
-`warn` fails nothing. CI passes it, `--quiet` hides it, and the count only
-grows. A rule worth having is `error` from the first day. Old violations go to
-ESLint's bulk suppressions, not to `warn` on a legacy glob:
-
-```sh
-npx eslint . --suppress-rule @typescript-eslint/no-explicit-any
-```
-
-Commit `eslint-suppressions.json`. A new violation fails the check. A fixed one
-leaves the file with `--prune-suppressions`, so the count only goes down.
-Suppressions apply only to rules set to `error`.
-
 ## Bodies are braced and expanded
 
 No implicit arrow returns in callbacks and handlers, no one-line braced `if`.

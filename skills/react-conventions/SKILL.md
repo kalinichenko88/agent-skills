@@ -1,6 +1,6 @@
 ---
 name: react-conventions
-description: Use when writing or reviewing React code — adding a feature beside existing ones, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, reading a value from useRef or writing usePrevious — or when setting up lint for a React project's folders.
+description: Use when writing or reviewing React code — adding a feature beside existing ones, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, reading a value from useRef or writing usePrevious.
 ---
 
 # React conventions
@@ -33,21 +33,7 @@ declare module '../../core/store' {
 export const injectedOffersSlice = offersSlice.injectInto(rootReducer);
 ```
 
-Lint enforces the order with a ready rule — `import/no-restricted-paths` from
-`eslint-plugin-import` or `eslint-plugin-import-x`. A hand-written regex over
-import strings misses path aliases and relative paths.
-
-```js
-'import/no-restricted-paths': ['error', { zones: [
-  { target: './src/core', from: ['./src/ui', './src/shared', './src/features', './src/app'] },
-  { target: './src/ui', from: ['./src/shared', './src/features', './src/app'] },
-  { target: './src/shared', from: ['./src/features', './src/app'] },
-  { target: './src/features', from: './src/app' },
-  ...featureZones, // next section
-] }],
-```
-
-## Features import each other only through declared edges
+## A feature uses another only through its index, one way
 
 By default a feature imports no other feature. When a page needs two features,
 the page or `app` composes them, and neither knows about the other:
@@ -56,14 +42,13 @@ the page or `app` composes them, and neither knows about the other:
 <OffersList toolbar={<SearchBox scope="offers" />} />
 ```
 
-The exception is a declared edge: feature A uses something feature B owns — a
-component, hook or API of B's domain — through `features/b/index.ts`. The edge
-is listed in the lint config and goes one way: with `offers → search` listed,
-`search → offers` stays forbidden. A list that grows past a few edges means B
-belongs on a lower layer.
+When feature A needs something feature B owns — a component, hook or API of B's
+domain — A imports it through `features/b/index.ts`, and only in one direction:
+with `offers → search`, `search → offers` is forbidden. Two features that need
+each other share a part that belongs on a lower layer.
 
 ```ts
-import { useSearch } from '../search';                 // declared edge offers → search
+import { useSearch } from '../search';                 // offers → search, through the index
 import { useSearch } from '../search/use-search';      // no: a deep import
 import { autoCancelableRequest } from '../reports';    // no: a generic helper
 ```
@@ -76,27 +61,6 @@ view for that — the old place becomes one line,
 `export { x } from '../../shared/x';`, and the body moves unchanged. Show that
 one-line file in the change. A copy in the second feature, even one marked to
 move later, is the failure this rule prevents: two copies drift apart.
-
-```js
-const edges = { offers: ['search'] }; // declared one-way edges
-
-const featureZones = readdirSync('src/features').map((name) => {
-  const allowed = (edges[name] ?? []).map((dep) => {
-    return `./${dep}/index.ts`;
-  });
-
-  return { target: `./src/features/${name}`, from: './src/features', except: [`./${name}`, ...allowed] };
-});
-
-'import/no-cycle': 'error', // it skips `import type`
-'no-restricted-imports': ['error', { patterns: [{
-  regex: 'features/[^/]+/(?!index(\\.[jt]sx?)?$)',
-  message: 'Import a feature through its index.',
-}] }],
-```
-
-The rule that a generic helper stays out of a feature's `index.ts` has no lint;
-review checks it.
 
 ## A request's state is one union
 
@@ -144,7 +108,3 @@ object literal made in the same render is new every time and loops.
 Read and write refs in effects and event handlers. A value that the UI shows is
 state. The one exception is lazy initialisation:
 `if (ref.current === null) { ref.current = new Player(); }`.
-
-`eslint-plugin-react-hooks` reports most of these as `react-hooks/refs`: in
-`recommended` from 7.0, only in `recommended-latest` in 6.1.1; 5.x has no such
-rule.
