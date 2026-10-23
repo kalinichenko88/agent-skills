@@ -45,6 +45,7 @@ cites() {
     }
   } END { if (all != "") print "cites: " all }'
 }
+# ponytail: one gh call per body, about a second each; one aliased GraphQL query if the file gets slow.
 body() { gh issue view "$1" --json body --jq .body; }
 default=''
 diff_of() {

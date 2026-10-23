@@ -92,20 +92,20 @@ function mainset(cur,   i, j, q, h, t, k, e, free) {
   return free
 }
 
-# Prints a track's top shown issues and fills the want lines of the issues
-# the overlap file takes: every one shown.
-function track(name, a, n, shown,   i, j, k, m) {
+# Prints a track's top 5, and the want lines of its top wanted, which the
+# overlap file takes.
+function track(name, a, n, wanted,   i, j, k, m) {
   for (i = 1; i <= n; i++) { rank(a[i]); key[a[i]] = sprintf("%012d %06d %08d", eff[a[i]], 999999 - ups[a[i]], a[i]) }
   for (i = 2; i <= n; i++) for (j = i; j > 1 && key[a[j - 1]] > key[a[j]]; j--) { k = a[j]; a[j] = a[j - 1]; a[j - 1] = k }
   print "== " name
   if (!n) print "none"
-  for (i = 1; i <= n && i <= shown; i++) {
+  for (i = 1; i <= n && i <= wanted; i++) {
     j = a[i]
     m = ems(j) ? mstitle[ems(j)] : "no milestone"
-    print "#" j " " istitle[j] " (" m "), unblocks " ups[j]
+    if (i <= 5) print "#" j " " istitle[j] " (" m "), unblocks " ups[j]
     print "want\tcand\t" j "\t" istitle[j] "\t" name "\t" m
   }
-  if (n > shown) print "and " n - shown " more"
+  if (n > 5) print "and " n - 5 " more"
 }
 
 # eff and ups of n: walks the issues that wait on it, through any chain.

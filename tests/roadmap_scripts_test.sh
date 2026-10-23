@@ -281,6 +281,14 @@ put '1:- 2:- 3:- 4:- 5:- 6:- 7:- 8:Later'
 check 'and k more' 'and 2 more' "$(bash "$scripts/next.sh" | section secondary | tail -1)"
 check 'Later is not offered' 0 "$(bash "$scripts/next.sh" | grep -c '^#8 ' || true)"
 
+# The main path shows its top 5 too; the overlap file takes all of it.
+reset
+put '1 2 3 4 5 6 7'
+out=$(bash "$scripts/next.sh")
+check 'the main path shows its top 5' 'and 2 more' "$(section 'main path' <<<"$out" | tail -1)"
+check 'the overlap file takes the whole main path' 7 \
+  "$(grep -c '^==> #.*\[main path, ' "$(sed -n 's/^overlap: \([^ ]*\) .*/\1/p' <<<"$out")")"
+
 # The overlap file.
 overlap() { bash "$scripts/next.sh" | sed -n 's/^overlap: \([^ ]*\) .*/\1/p'; }
 reset
