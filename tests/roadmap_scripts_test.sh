@@ -305,4 +305,50 @@ check 'no milestones' 'current: none' "$(bash "$scripts/next.sh" | head -1)"
 # A failed read stops the script.
 FAKE_FAIL='pullRequests(' bash "$scripts/next.sh" >/dev/null 2>&1 && fail 'next.sh exits 0 when a read fails'
 
+# plan.sh refuses a link that makes a cycle, and sends nothing.
+reset
+put '19 20 21'
+blocks 20 21
+: >"$FAKE/calls"
+check 'block refuses a cycle' 'refused: it makes a cycle: #21 → #20 → #21' "$(bash "$scripts/plan.sh" block 21 20 2>&1 || true)"
+check 'a refused block sends no mutation' 0 "$(grep -c mutation "$FAKE/calls" || true)"
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" block 19 21)
+case $out in *'dry run: gh api graphql'*addBlockedBy*) ;; *) fail 'block prints its mutation in a dry run' "$out" ;; esac
+check 'a dry run sends no mutation' 0 "$(grep -c mutation "$FAKE/calls" || true)"
+check 'block to itself' 'refused: an issue cannot wait on itself' "$(bash "$scripts/plan.sh" block 19 19 2>&1 || true)"
+# A cycle through an inherited blocker: #11 is a sub-issue of #10, and #12
+# waits on #11. Blocking #10 on #12 makes #11 wait on #12.
+reset
+put '10 11 12'
+edit 11 '.parent = {number: 10, milestone: null, repository: {nameWithOwner: "kalinichenko88/agent-skills"}}'
+blocks 12 11
+check 'block refuses an inherited cycle' 'refused: it makes a cycle: #11 → #12 → #11' "$(bash "$scripts/plan.sh" block 10 12 2>&1 || true)"
+# sub: the child would inherit #20, which waits on the child.
+reset
+put '19 20 21 22'
+blocks 20 21
+blocks 19 20
+check 'sub refuses a cycle through the parent blockers' 'refused: it makes a cycle: #21 → #20 → #21' \
+  "$(bash "$scripts/plan.sh" sub 19 21 2>&1 || true)"
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" sub 22 19)
+case $out in *'dry run: gh api graphql'*addSubIssue*) ;; *) fail 'sub prints its mutation in a dry run' "$out" ;; esac
+
+# plan.sh on milestones.
+reset
+put '19 20 21'
+ms '(.[] | select(.title | startswith("M1 ")) | .description) = "Goal."'
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" current M1)
+check 'current adds the mark after a blank line' "$(printf 'Goal.\n\nCurrent.')" "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
+mark M1
+check 'current twice' 'M1 · Stage 1 is current already' "$(bash "$scripts/plan.sh" current M1)"
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" not-current M1)
+check 'not-current removes the mark' 'Goal.' "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
+check 'Later is never current' 'refused: Later is never current' "$(bash "$scripts/plan.sh" current later 2>&1 || true)"
+check 'close refuses open issues' 'refused: M1 · Stage 1 has 3 open issues: #19, #20, #21' "$(bash "$scripts/plan.sh" close M1 2>&1 || true)"
+check 'create refuses an existing title' 'refused: M1 · Stage 1 exists' "$(bash "$scripts/plan.sh" create 'M1 · Stage 1' /dev/null 2>&1 || true)"
+printf 'New goal.\n' >"$tmp/goal"
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" describe M1 "$tmp/goal")
+check 'describe keeps the mark' "$(printf 'New goal.\n\nCurrent.')" "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
+check 'usage names every subcommand' 8 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
+
 echo 'roadmap_scripts_test: ok'
