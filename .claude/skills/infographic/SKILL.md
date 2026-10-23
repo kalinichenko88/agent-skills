@@ -1,6 +1,6 @@
 ---
 name: infographic
-description: Use when drawing or updating the scenario pictures in docs/ that the README links for a skill, or when a change makes one of them false.
+description: Use when drawing or updating the scenario pictures in docs/ that a skill's README links, or when a change makes one of them false.
 argument-hint: "[docs/<skill>]"
 ---
 
@@ -66,10 +66,11 @@ that brief and changes only the footer's skill name and the `<image>` blocks.
    edit with that image as the reference; at most two retries per picture.
 5. Convert: `cwebp -quiet -q 85 "$dir/01-start.png" -o docs/github/01-start.webp`.
    A picture is about 0.2 MB as WebP and 1.9 MB as PNG, and the plugin installs
-   as a copy of the whole repository. Keep the file names, so that the README's
-   links still work.
-6. Commit the brief and the pictures together, and update the README's alt text
-   when a title changed.
+   as a copy of the whole repository. Keep the file names, so that the links in
+   `skills/<skill>/README.md` and the root README still work.
+6. Commit the brief and the pictures together. When a title changed, update
+   the alt text in `skills/<skill>/README.md`, and for the overview also in the
+   root README.
 
 ## When a picture is out of date
 
