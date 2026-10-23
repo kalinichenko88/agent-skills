@@ -1,7 +1,7 @@
 #!/bin/bash
-# Assigns an issue to you, checks out its branch in a worktree of its own,
-# links the branch to the issue, and prints the path to work in as its last
-# line.
+# Assigns an issue to you, checks out its branch in a worktree of its own (or,
+# with --here, in the current checkout), links the branch to the issue, and
+# prints the path to work in as its last line.
 #
 #   worktree.sh <n> <branch> [--here]
 #
