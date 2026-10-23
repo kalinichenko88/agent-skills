@@ -227,4 +227,82 @@ ms '[]'
 put '19:-'
 check 'no milestones' "$(printf '# Roadmap of kalinichenko88/agent-skills\n\nNo open milestones.')" "$(bash "$scripts/roadmap.sh" | sed -n '1,3p')"
 
+# next.sh: the tracks, ranked.
+section() { sed -n "/^== $1/,/^== /p" | grep -E '^(#|and |none)' || true; }
+reset
+mark M1
+put '19 20 21 22 40:M2 41:-'
+blocks 20 21
+blocks 19 20
+edit 22 '.labels.nodes = [{name: "bug"}]'
+out=$(bash "$scripts/next.sh")
+check 'current line' 'current: M1 · Stage 1' "$(head -1 <<<"$out")"
+check 'main path: a chain counts every step' '#21 Issue 21 (M1 · Stage 1), unblocks 2' "$(section 'main path' <<<"$out")"
+check 'bugs' '#22 Issue 22 (M1 · Stage 1), unblocks 0' "$(section bugs <<<"$out")"
+check 'secondary: next milestone, then none' \
+  "$(printf '#40 Issue 40 (M2 · Stage 2), unblocks 0\n#41 Issue 41 (no milestone), unblocks 0')" "$(section secondary <<<"$out")"
+# A blocker in M3 of an M1 task is on the main path and ranks with M1.
+reset
+mark M1
+put '19 20 21 40:M3'
+blocks 19 40
+blocks 20 40 21
+check 'an M3 blocker ranks with M1 by its unblock count' \
+  "$(printf '#40 Issue 40 (M3 · Stage 3), unblocks 2\n#21 Issue 21 (M1 · Stage 1), unblocks 1')" "$(bash "$scripts/next.sh" | section 'main path')"
+# A sub-issue in a later milestone of an M1 parent is on the main path.
+reset
+mark M1
+put '19 30:M3'
+edit 30 ".parent = {number: 19, milestone: {number: $(msno M1)}, repository: {nameWithOwner: \"kalinichenko88/agent-skills\"}}"
+edit 19 '.subIssuesSummary = {total: 1, completed: 0}'
+check 'a sub-issue of an M1 parent' '#30 Issue 30 (M3 · Stage 3), unblocks 1' "$(bash "$scripts/next.sh" | section 'main path')"
+# A cycle made by hand: neither is free, and the script ends.
+reset
+mark M1
+put '20 21'
+blocks 20 21
+blocks 21 20
+check 'a cycle ends, nothing offered' 'none' "$(bash "$scripts/next.sh" | section 'main path')"
+# Nothing free in M1: the main path is from the next milestone.
+reset
+mark M1
+put '19 40:M2'
+edit 19 '.assignees.nodes = [{login: "someone"}]'
+out=$(bash "$scripts/next.sh")
+check 'fallback note' 'note: nothing free in M1 · Stage 1; the main path is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
+check 'busy issue in progress' '#19 Issue 19: assigned to someone' "$(section 'in progress' <<<"$out")"
+# The top 5, the rest counted; Later never offered.
+reset
+put '1:- 2:- 3:- 4:- 5:- 6:- 7:- 8:Later'
+check 'and k more' 'and 2 more' "$(bash "$scripts/next.sh" | section secondary | tail -1)"
+check 'Later is not offered' 0 "$(bash "$scripts/next.sh" | grep -c '^#8 ' || true)"
+
+# The overlap file.
+overlap() { bash "$scripts/next.sh" | sed -n 's/^overlap: \([^ ]*\) .*/\1/p'; }
+reset
+put '19 21'
+edit 21 '.assignees.nodes = [{login: "someone"}] | .linkedBranches.nodes = [{ref: {name: "fix/21-x"}}]'
+printf 'Fix `src/server/log.ts:12-14` and src/app/main.ts, see https://github.com/x/y/blob/main/z.ts and e.g. this.\n' >"$FAKE/body-19"
+f=$(overlap)
+check 'cites' 'cites: src/server/log.ts, src/app/main.ts' "$(grep '^cites: ' "$f")"
+check 'branch files from compare' "files: $(jq -r '[.files[].filename] | join(", ")' "$fixtures/compare.json")" \
+  "$(sed -n '/^==> #21 /,/^==> /p' "$f" | grep '^files: ')"
+check 'PRs closing no issue' "$(jq '.data.repository.pullRequests.nodes | length' "$fixtures/prs-1.json")" \
+  "$(bash "$scripts/next.sh" | grep -c '^PR #.*: closes no issue$')"
+echo '{"files": []}' >"$FAKE/compare.json"
+check 'no diff yet' 'no diff yet' "$(sed -n '/^==> #21 /{n;p;}' "$(overlap)")"
+# The files of an open PR that closes the issue win over the branch, and past
+# 100 they come from REST.
+jq '.data.repository.pullRequests.nodes[0].closingIssuesReferences.nodes = [{number: 21, repository: {nameWithOwner: "kalinichenko88/agent-skills"}}]
+  | .data.repository.pullRequests.nodes[0].files.totalCount = 150' "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
+check 'all the files of a large PR' "files: $(jq -r '[.[].filename] | join(", ")' "$fixtures/pr-files.json")" \
+  "$(sed -n '/^==> #21 /,/^==> /p' "$(overlap)" | grep '^files: ')"
+# No milestones at all.
+reset
+ms '[]'
+put '19:-'
+check 'no milestones' 'current: none' "$(bash "$scripts/next.sh" | head -1)"
+# A failed read stops the script.
+FAKE_FAIL='pullRequests(' bash "$scripts/next.sh" >/dev/null 2>&1 && fail 'next.sh exits 0 when a read fails'
+
 echo 'roadmap_scripts_test: ok'
