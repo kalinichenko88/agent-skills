@@ -35,9 +35,17 @@ time.
 
 ## Each scenario step by step
 
-- [Start a task](../../docs/github/01-start.webp)
-- [Find something outside the task](../../docs/github/02-during.webp)
-- [Finish the task](../../docs/github/03-finish.webp)
+### Start a task
+
+![Start a task: you get a free issue, no duplicates, a clean branch, and a list of what rides along](../../docs/github/01-start.webp)
+
+### Found something outside the task
+
+![Found something outside the task: you get nothing lost in the chat, and every issue number in the final report](../../docs/github/02-during.webp)
+
+### Finish the task
+
+![Finish the task: you get a clean history on main and a tracker that matches the code](../../docs/github/03-finish.webp)
 
 ## How it works
 
