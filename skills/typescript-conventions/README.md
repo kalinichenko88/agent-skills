@@ -5,6 +5,8 @@ agent matches it and says so.
 
 ## When it starts
 
+- Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
+  `.cts`) in a session. `rules.md` asks for it, so a subagent starts it too.
 - You write or review TypeScript: declare an object shape, name a new file,
   write a callback, reach for a dependency.
 - You set up lint rules for a new TypeScript project.

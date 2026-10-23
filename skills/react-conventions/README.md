@@ -6,6 +6,8 @@ without it.
 
 ## When it starts
 
+- Before the first write or edit to a React component or hook in a session.
+  `rules.md` asks for it, so a subagent starts it too.
 - You add a feature beside existing ones, or import from another feature or
   layer.
 - One feature needs something that another feature owns.
