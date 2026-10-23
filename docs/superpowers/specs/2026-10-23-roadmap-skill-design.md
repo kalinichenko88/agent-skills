@@ -126,9 +126,11 @@ These are decided.
   reading every issue's timeline costs a query per page). That PR's files
   still count as work in progress in the overlap check.
 - **Free** means: open, not busy, no open blockers (its own or its parent's),
-  not a parent with open sub-issues, and not in `Later`. A task in `Later` is
-  offered only when the person asks for `Later` by name: then `roadmap.sh
-  Later` shows each one's state.
+  not a parent with open sub-issues, and not in `Later`, unless an open issue
+  outside `Later` waits on it through any chain: then it is needed, however
+  it got there (a link, `gh issue edit` or GitHub's own pages). Any other
+  task in `Later` is offered only when the person asks for `Later` by name:
+  then `roadmap.sh Later` shows each one's state.
 
 ### Tracks
 
@@ -296,10 +298,11 @@ what must happen and which file to read first.
   tasks.
 - **The person decides to put a task off.** After the person agrees in the
   conversation, `plan.sh later <n>` moves it into `Later`, opens that
-  milestone again when it is closed, and makes it when there is none. A task in `Later` is never offered, so the
-  script refuses when an open issue outside `Later` waits on it, or on a
-  sub-issue of it with no milestone of its own, which goes into `Later` with
-  it, and names those issues. `plan.sh sub` refuses the same for a child that
+  milestone again when it is closed, and makes it when there is none. A task
+  in `Later` that an issue outside `Later` waits on is still offered, so the
+  move would not put it off: the script refuses when an open issue outside
+  `Later` waits on it, or on a sub-issue of it with no milestone of its own,
+  which goes into `Later` with it, and names those issues. `plan.sh sub` refuses the same for a child that
   goes under a parent in `Later`.
 - **An agent needs the roadmap as context** (brainstorming, a plan, a review).
   Run `roadmap.sh`.

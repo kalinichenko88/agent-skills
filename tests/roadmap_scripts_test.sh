@@ -293,6 +293,16 @@ edit 30 '.assignees.nodes = [{login: "someone"}]'
 out=$(bash "$scripts/next.sh")
 check 'fallback between current milestones' 'note: nothing on the main path of M1 · Stage 1, M3 · Stage 3 is free; it is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
 check 'fallback main path' '#40 Issue 40 (M2 · Stage 2), unblocks 0' "$(section 'main path' <<<"$out")"
+# A task in Later that an issue outside Later waits on, through any chain, is
+# offered; one that nothing outside Later waits on is not.
+reset
+mark M1
+put '19 42:Later 43:Later 44:Later'
+blocks 19 42
+blocks 42 43
+out=$(bash "$scripts/next.sh")
+check 'a task in Later that M1 waits on' '#43 Issue 43 (Later), unblocks 2' "$(section 'main path' <<<"$out")"
+check 'a task in Later that nothing waits on' 'none' "$(section secondary <<<"$out")"
 # The top 5, the rest counted; Later never offered.
 reset
 put '1:- 2:- 3:- 4:- 5:- 6:- 7:- 8:Later'

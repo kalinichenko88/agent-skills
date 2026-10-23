@@ -20,9 +20,9 @@
 # sub-issue takes from its parent. later puts a task off into the Later
 # milestone, and opens it again when it is closed, or makes it when there is
 # none. It refuses when an open issue outside Later waits on the task, or on a
-# sub-issue of it with no milestone of its own, because a task in Later is
-# never offered; sub refuses the same for a child that goes into Later with
-# its parent. Putting an issue into another milestone needs no check:
+# sub-issue of it with no milestone of its own: a task in Later that an issue
+# outside Later waits on is still offered, so it would not be put off. sub
+# refuses the same for a child that goes into Later with its parent. Putting an issue into another milestone needs no check:
 # gh issue edit <n> --milestone '<title>'.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
@@ -101,8 +101,8 @@ link() {
   fi
   ids
 }
-# The open issues outside Later that would wait for good when issue $1 goes
-# into Later, as #20, #21, from $list and $issues; $2 is its new parent.
+# The open issues outside Later that would wait on issue $1 in Later, as
+# #20, #21, from $list and $issues; $2 is its new parent.
 waiting() {
   printf '%s\n%s\n' "$list" "$issues" | awk -F'\t' -v n="$1" -v parent="${2:-}" -f "$dir/graph.awk" -f "$dir/later.awk" |
     sort -n | awk '{ s = s (NR > 1 ? ", " : "") "#" $0 } END { print s }'

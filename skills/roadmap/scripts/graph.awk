@@ -31,6 +31,10 @@ function init(   i, j, k, c, w, b) {
       if (w[k] ~ /^#/ && (b in istitle)) edges[j] = edges[j] " " b
     }
   }
+  # needed: the issues outside Later, and every issue they wait on. A task in
+  # Later that an issue outside it waits on is needed, however it got there.
+  for (i = 1; i <= isn; i++) if (!mslater[ems(islist[i])]) needed[islist[i]] = 1
+  closure(needed)
 }
 
 # The effective milestone: the first open one of the issue's own, its
@@ -61,7 +65,7 @@ function waits(n, out,   c, d, k, i, b, seen) {
 }
 
 function isfree(n,   w) {
-  return isbusy[n] == "-" && waits(n, w) == 0 && issubs[n] == 0 && !mslater[ems(n)]
+  return isbusy[n] == "-" && waits(n, w) == 0 && issubs[n] == 0 && (n in needed)
 }
 
 # Adds to set every issue that an issue in set waits on, through any chain.

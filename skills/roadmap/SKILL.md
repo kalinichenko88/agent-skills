@@ -43,7 +43,8 @@ directory. Read all of it before the first step of that moment.
   sub-issues is never offered: its sub-issues are.
 - **Busy** means an assignee, a linked branch, or an open PR that closes the
   issue. **Free** means open, not busy, with no open blocker of its own or of
-  its parent, no open sub-issue, and not in `Later`.
+  its parent, no open sub-issue, and not in `Later` — unless an open issue
+  outside `Later` waits on it, through any chain: then it is needed.
 - **The tracks.** The main path is the free issues without the bug label in
   the current milestones, and every free issue they wait on, wherever it is.
   Bugs are the other free issues with the bug label. Secondary is every other
@@ -146,10 +147,10 @@ bash <dir>/scripts/plan.sh later 21
 ```
 
 It opens the `Later` milestone again when it is closed, and makes it when
-there is none. A task in `Later` is never
-offered, so the script refuses when an open issue outside `Later` waits on the
-task — a blocked issue, or a parent that waits on its sub-issue — and names
-them. A sub-issue with no milestone of its own goes into `Later` with its
+there is none. A task in `Later` that an issue outside `Later` waits on is
+still offered, so the move would not put it off: the script refuses when an
+open issue outside `Later` waits on the task — a blocked issue, or a parent
+that waits on its sub-issue — and names them. A sub-issue with no milestone of its own goes into `Later` with its
 parent, so an issue that waits on it counts too, and `plan.sh sub` refuses
 the same for a child that goes under a parent in `Later`. Then ask the person: put those off too, or remove the link with
 `plan.sh unblock`. A task comes back from `Later` with
