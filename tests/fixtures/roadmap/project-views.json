@@ -1,0 +1,22 @@
+{
+  "data": {
+    "node": {
+      "views": {
+        "nodes": [
+          {
+            "name": "View 0"
+          },
+          {
+            "name": "View 1"
+          },
+          {
+            "name": "View 2"
+          },
+          {
+            "name": "View 3"
+          }
+        ]
+      }
+    }
+  }
+}

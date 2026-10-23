@@ -39,7 +39,13 @@ The same defect on another surface is not a duplicate: it is the task, and
 **The work then starts in a worktree**, by default — this line is the explicit
 instruction a harness's worktree tool waits for. The user's message or the
 project's instructions can say otherwise — "a branch only", "stay on this
-branch" — and then they win.
+branch" — and then they win. Each path assigns the issue to you, because an
+unassigned issue looks free to everyone else: "a branch only" runs
+`worktree.sh` with `--here`, which makes no worktree and works in the current
+checkout, and "stay on this branch" runs `gh issue edit 91 --add-assignee @me`
+and touches no branch. `worktree.sh` warns instead of assigning in one case,
+below; "stay on this branch" checks the same case first, with
+`gh issue develop --list 91` and the issue's assignees.
 
 The branch, and the worktree when one is made, carry one name that says what
 the work is: `<type>/<number>-<two to four words>`, the type from *Commits* in
@@ -55,15 +61,15 @@ the branch to the issue, and prints the path to work in as its last line. A
 branch already linked to the issue wins over the name you gave. A branch
 already checked out is worked on where it is. A session already in a worktree,
 as one started with `claude --worktree` or `codex --worktree`, checks the
-branch out where it is.
+branch out where it is, and so does `--here`.
 
 A linked branch on an issue that nobody is assigned to can be someone else's:
 the script warns, and does not assign the issue to you. Find out whose the
 branch is before you push to it. Someone else's: say so and wait. Yours: run
 the command the warning gives, which assigns the issue to you.
 
-Then move into the worktree. Claude Code: `EnterWorktree` with the path it
-printed. Codex cannot move a running session: every command takes the worktree
+Then move into the worktree, when the script made one or found the branch in
+one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree
 as `workdir`, and every file path, read or patched, is written under it.
 
 Then read what points at it: the scout's **Linked, open work and history**
@@ -136,8 +142,13 @@ The issue in hand stays the task throughout. A hit that is someone else's work
 Nothing passes: ship the task alone — that is the usual case, not a failure to
 look. Every issue the PR closes beside the task — a ride-along, or a bug or
 debt the change removes — is a whole issue, not a Boy Scout fix: a bug brings
-its own test, it is assigned like the task, and the PR closes it under **Also
-closes** (*Pull requests* in `SKILL.md`).
+its own test, and the PR closes it under **Also closes** (*Pull requests* in
+`SKILL.md`). Assign it to you as soon as it gets that verdict, as the task is
+at take-in, so nobody else takes it while the work runs:
+
+```bash
+gh issue edit 15 --add-assignee @me
+```
 
 An issue with `## Also:` sections closes only when every problem in it is
 fixed: its own problem and each added one. Give a verdict to each problem in

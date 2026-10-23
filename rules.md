@@ -143,8 +143,9 @@ touches a repository's GitHub surface goes through the `kalinichenko:github`
 skill. Invoke it before the first `git commit`, `gh` call or workflow edit, not
 after: it carries commit trailers, PR ownership and merge style, issue filing,
 keeping issues true as the code moves, which open issues ride along with a task,
-and action pinning. A read-only subagent sent with the skill's `scout.md`
-follows that file instead: it does not load the skill and files nothing.
+and action pinning. A read-only subagent sent with the skill's `scout.md`,
+or with the roadmap skill's `lanes.md`, follows that file instead: it does not
+load the skill and files nothing.
 
 Two rules stay here in full, because they have to fire when nobody is thinking
 about GitHub at all.
