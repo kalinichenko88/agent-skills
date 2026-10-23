@@ -42,6 +42,9 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
+- **`kalinichenko:react-conventions`** — layer and feature boundaries in a
+  React app, request state as one union, and no `ref.current` in render. Each
+  rule is one that agents broke in a test without it.
 
 The repository is its own marketplace for both tools.
 

@@ -30,6 +30,27 @@ only where the guarantee matters.
 Reach for `unknown` plus a narrowing guard, or a generic. An `any` that survives
 review is a type hole, not a shortcut.
 
+## Checking the container does not check the items
+
+```ts
+const data: unknown = await response.json();
+
+if (!Array.isArray(data) || !data.every(isSearchResult)) {
+  throw new Error('The search response has an unexpected shape');
+}
+
+return data;
+```
+
+`response.json()` and `JSON.parse` return `any`, so the `unknown` annotation is
+part of the check. `Array.isArray` then narrows `unknown` to `any[]` — in
+TypeScript 5.x, 6.0 and 7.0 alike. After it, the compiler accepts any use of
+the items. `Array.isArray` checks the container; `data as SearchResult[]`
+checks nothing and only asserts each item: an item without `url` reaches the
+render as `undefined`. Narrow every
+item with a guard, or with the schema library the project already has. A cast
+left after a check hides the part that the check did not do.
+
 ## Bodies are braced and expanded
 
 No implicit arrow returns in callbacks and handlers, no one-line braced `if`.
