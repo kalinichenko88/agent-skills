@@ -10,14 +10,18 @@
 #   plan.sh block <issue> <blocker>
 #   plan.sh unblock <issue> <blocker>
 #   plan.sh sub <parent> <child>
+#   plan.sh later <issue>
 #
 # A milestone is M1, Later or a whole title. A milestone is current when a
 # line of its description reads Current.; describe keeps that line. It refuses
 # what would break the plan, prints why and exits 1, and writes nothing: a
 # second milestone of one title, closing a milestone with open issues, Later
 # as current, and a link that makes a cycle, also through the blockers that a
-# sub-issue takes from its parent. Putting an issue into a milestone needs no
-# check: gh issue edit <n> --milestone '<title>'.
+# sub-issue takes from its parent. later puts a task off into the Later
+# milestone, and makes that milestone when there is none; it refuses when an
+# open issue outside Later waits on the task, because a task in Later is never
+# offered. Putting an issue into another milestone needs no check:
+# gh issue edit <n> --milestone '<title>'.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
 # new description in the file that the printed command names.
@@ -36,6 +40,7 @@ usage: plan.sh create <title> <description-file>
        plan.sh block <issue> <blocker>
        plan.sh unblock <issue> <blocker>
        plan.sh sub <parent> <child>
+       plan.sh later <issue>
 EOF
   exit 2
 }
@@ -169,6 +174,28 @@ case $act in
         say "#$b is a sub-issue of #$a"
         ;;
     esac
+    ;;
+  later)
+    [ $# -eq 2 ] || usage
+    a=$(issue "$2")
+    list=$(bash "$dir/read.sh" milestones)
+    issues=$(bash "$dir/read.sh" issues)
+    later=$(awk -F'\t' '$1 == "ms" && $5 == 1 { print $2 "\t" $8; exit }' <<<"$list")
+    own=$(awk -F'\t' -v n="$a" '$1 == "is" && $2 == n { print $3 }' <<<"$issues")
+    [ -n "$own" ] || refuse "#$a is not an open issue"
+    if [ -n "$later" ] && [ "$own" = "${later%%$'\t'*}" ]; then
+      echo "#$a is in Later already"
+      exit 0
+    fi
+    waiting=$(printf '%s\n%s\n' "$list" "$issues" | awk -F'\t' -v n="$a" -f "$dir/graph.awk" -f "$dir/later.awk" |
+      sort -n | awk '{ s = s (NR > 1 ? ", " : "") "#" $0 } END { print s }')
+    [ -z "$waiting" ] || refuse "these wait on it outside Later: $waiting"
+    if [ -z "$later" ]; then
+      run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title=Later -f description='What is wanted but not planned.' --silent
+      later=$'0\tLater'
+    fi
+    run gh issue edit "$a" --milestone "${later#*$'\t'}"
+    say "#$a is in Later"
     ;;
   *) usage ;;
 esac

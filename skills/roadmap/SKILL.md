@@ -1,6 +1,6 @@
 ---
 name: roadmap
-description: Use when planning a product's roadmap or milestones, asking which task to take next or what can run in parallel, asking what is left to close a milestone, re-planning after a milestone closes, or when an agent needs the project's roadmap as context.
+description: Use when planning a product's roadmap or milestones, asking which task to take next or what can run in parallel, asking what is left to close a milestone, putting a task off to Later, re-planning after a milestone closes, or when an agent needs the project's roadmap as context.
 ---
 
 # Planning on GitHub
@@ -19,6 +19,7 @@ say so and stop.
 | "What on the roadmap can run in parallel" | `next.sh`, then the overlap check; every free main-path task that overlaps with nothing | *Parallel work* below |
 | "What is needed to close M1" | `roadmap.sh M1`; its open tasks in dependency order, what is in progress, what is blocked and by what | *The roadmap* below |
 | "What can I take from Later" | `roadmap.sh Later`; offer its free tasks | *The roadmap* below |
+| The person decides, in the conversation, to put a task off | `plan.sh later <n>`; a refusal names the issues that wait on it | *Putting a task off* below |
 | An agent needs the roadmap as context | `roadmap.sh` | *The roadmap* below |
 | Start a roadmap | read `docs/`, propose, one approval, then write | `planning.md` |
 | A milestone has no open issues left, or the person asks to re-plan | the same, from that milestone | `planning.md`, *Re-planning* |
@@ -49,7 +50,7 @@ directory. Read all of it before the first step of that moment.
   free issue. A track ranks by milestone order — a blocker of an `M1` task
   ranks with `M1` — then by how many issues wait on it, then oldest first.
 - An issue goes into a milestone with `gh issue edit <n> --milestone '<title>'`,
-  and out of it with `--remove-milestone`.
+  out of it with `--remove-milestone`, and into `Later` with `plan.sh later`.
 
 The developers are equal: a free task goes to whoever takes it first. The
 answer is for the account that `gh` is logged in as. Its own work in progress
@@ -132,6 +133,22 @@ milestone come last, as a count with their numbers. With a milestone — `M1`,
 `Later` or a whole title — it prints that milestone alone, with its states,
 and with the open issues it waits on in other milestones, each marked with
 where it is.
+
+## Putting a task off
+
+When the person and the agent agree, in the conversation, that a task can
+wait, it goes into `Later`. Move it only after the person says so.
+
+```bash
+bash <dir>/scripts/plan.sh later 21
+```
+
+It makes the `Later` milestone when there is none. A task in `Later` is never
+offered, so the script refuses when an open issue outside `Later` waits on the
+task — a blocked issue, or a parent that waits on its sub-issue — and names
+them. Then ask the person: put those off too, or remove the link with
+`plan.sh unblock`. A task comes back from `Later` with
+`gh issue edit <n> --milestone '<title>'`.
 
 ## The board
 

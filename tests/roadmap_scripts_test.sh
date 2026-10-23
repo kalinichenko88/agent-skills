@@ -366,7 +366,31 @@ check 'create refuses an existing title' 'refused: M1 · Stage 1 exists' "$(bash
 printf 'New goal.\n' >"$tmp/goal"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" describe M1 "$tmp/goal")
 check 'describe keeps the mark' "$(printf 'New goal.\n\nCurrent.')" "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
-check 'usage names every subcommand' 8 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
+# plan.sh later puts a task off, unless an issue outside Later waits on it:
+# a task in Later is never offered, so that issue would wait for good.
+reset
+put '19 20 21 42:Later'
+blocks 20 21
+blocks 42 19
+check 'later refuses a task that a blocked issue waits on' 'refused: these wait on it outside Later: #20' \
+  "$(bash "$scripts/plan.sh" later 21 2>&1 || true)"
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" later 19)
+case $out in *'dry run: gh issue edit 19 --milestone Later'*) ;; *) fail 'later moves a task that only Later waits on' "$out" ;; esac
+check 'later on a task in Later' '#42 is in Later already' "$(bash "$scripts/plan.sh" later 42)"
+reset
+put '10 11'
+edit 11 '.parent = {number: 10, milestone: null, repository: {nameWithOwner: "kalinichenko88/agent-skills"}}'
+check 'later refuses a sub-issue whose parent waits on it' 'refused: these wait on it outside Later: #10' \
+  "$(bash "$scripts/plan.sh" later 11 2>&1 || true)"
+# No Later milestone yet: it is made first.
+reset
+ms 'map(select(.title != "Later"))'
+put '19'
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" later 19)
+case $out in *'dry run: gh api -X POST'*'title=Later'*'dry run: gh issue edit 19 --milestone Later'*) ;;
+  *) fail 'later makes the Later milestone first' "$out" ;;
+esac
+check 'usage names every subcommand' 9 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
 
 # board.sh: a project found by title among the owner's projects, not linked
 # yet, is linked, not created again.

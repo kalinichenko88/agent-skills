@@ -53,8 +53,8 @@ When a milestone has no open issues left, or the person asks:
 1. Run `roadmap.sh <milestone>` and show it.
 2. Propose:
    - to close it, with `plan.sh close`; this is the person's call;
-   - where each issue left in it goes: another milestone, `Later`, or none
-     (`gh issue edit <n> --remove-milestone`);
+   - where each issue left in it goes: another milestone, `Later`
+     (`plan.sh later <n>`), or none (`gh issue edit <n> --remove-milestone`);
    - the next milestone's issues and links, planned again from what the
      closed one taught;
    - a milestone for each open issue that has none;

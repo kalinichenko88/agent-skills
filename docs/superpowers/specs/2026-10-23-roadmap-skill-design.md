@@ -214,7 +214,8 @@ GraphQL reads paginate: a project can have more than 100 open issues.
   progress as above.
 - **`plan.sh`** — writes. Subcommands: create, edit and close a milestone;
   mark a milestone current and remove the mark; add and remove a "blocked by"
-  link; add a sub-issue. It refuses a change that would make a cycle, and says
+  link; add a sub-issue; put a task off into `Later`. It refuses a change that
+  would make a cycle, and says
   which chain it found. The check covers every edge the change adds, the
   inherited ones too: a block on a parent also blocks its sub-issues. Putting
   issues into a milestone needs no script: `gh issue edit --milestone`, with
@@ -292,6 +293,11 @@ what must happen and which file to read first.
 - **"What is needed to close M1".** Run `roadmap.sh M1` and answer from it.
 - **"What can I take from Later".** Run `roadmap.sh Later` and offer its free
   tasks.
+- **The person decides to put a task off.** After the person agrees in the
+  conversation, `plan.sh later <n>` moves it into `Later`, and makes that
+  milestone when there is none. A task in `Later` is never offered, so the
+  script refuses when an open issue outside `Later` waits on it, and names
+  those issues.
 - **An agent needs the roadmap as context** (brainstorming, a plan, a review).
   Run `roadmap.sh`.
 - **Start a roadmap.** Follow `planning.md` (below).
