@@ -30,30 +30,26 @@ run() {
     "Make exactly one Agent tool call: subagent_type \"general-purpose\", model \"haiku\", and as its prompt the text between the lines below, copied verbatim. Do nothing else. Then reply with what the agent returned.
 ---
 $1
----") >"$2" 2>&1 || true
-}
-
-# The skills the subagent invoked before its first Write, one per line.
-before_write() {
-  jq -r 'select(.type == "assistant" and .parent_tool_use_id != null)
-    | .message.content[] | select(.type == "tool_use")
-    | if .name == "Skill" then .input.skill else .name end' "$1" 2>/dev/null |
-    sed '/^Write$/q' | grep conventions || true
+---") >"$2" 2>&1
 }
 
 for i in $(seq "$runs"); do
-  run "$ts_task" "$logs/ts-$i.jsonl" &
-  run "$react_task" "$logs/react-$i.jsonl" &
+  run "$ts_task" "$logs/typescript-conventions-$i.jsonl" &
+  run "$react_task" "$logs/react-conventions-$i.jsonl" &
 done
 wait
 
 failed=0
-for check in ts:typescript-conventions react:react-conventions; do
-  task=${check%%:*} skill=kalinichenko:${check#*:} loaded=0
-  for log in "$logs/$task"-*.jsonl; do
-    before_write "$log" | grep -qx "$skill" && loaded=$((loaded + 1))
+for skill in typescript-conventions react-conventions; do
+  loaded=0
+  for log in "$logs/$skill"-*.jsonl; do
+    # The subagent's tool calls up to its first Write, a skill by its name.
+    jq -r 'select(.type == "assistant" and .parent_tool_use_id != null)
+      | .message.content[] | select(.type == "tool_use")
+      | if .name == "Skill" then .input.skill else .name end' "$log" 2>/dev/null |
+      sed '/^Write$/q' | grep -qx "kalinichenko:$skill" && loaded=$((loaded + 1))
   done
-  echo "$task: $loaded of $runs subagents invoked $skill before the first write"
+  echo "$skill: $loaded of $runs subagents invoked it before the first write"
   [ "$loaded" -eq "$runs" ] || failed=1
 done
 echo "logs: $logs"

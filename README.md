@@ -141,10 +141,8 @@ checkout's.
 
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
-`tests/skill_load_eval.sh` gives a TypeScript task and a React task to Haiku
-subagents and counts the runs that invoke the conventions skills before their
-first write. It calls the model, so it is not part of `make check`. Run it by
-hand after a change to `rules.md` or to a skill's description.
+`tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
+skills; it calls the model, so it is not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
