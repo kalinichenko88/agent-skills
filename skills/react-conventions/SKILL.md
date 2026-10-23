@@ -8,10 +8,17 @@ description: Use when writing or reviewing React code — adding a feature besid
 ## Layers import downward only
 
 Top to bottom: `app → features → shared → ui → core`. A layer imports only the
-layers below it.
+layers below it. Inside `features`, the next section says when one feature may
+use another.
 
-An upward import that already exists is debt, not a precedent. Do not add a
-second one beside it. Report the first one as a finding outside the change.
+An upward import that already exists is debt, not a precedent. Do not add
+another one beside it. Report each existing one as a finding outside the
+change.
+
+```ts
+// core/store.ts
+import { offersReducer } from '../features/offers/offers-slice';   // no: core imports a feature
+```
 
 When a lower layer must know a feature — a store, a router, a list of
 providers — the feature registers itself through an extension point that the
@@ -19,14 +26,26 @@ lower layer owns, or `app` wires the two together:
 
 ```ts
 // core/store.ts: the extension point, no feature imports
+import { combineSlices } from '@reduxjs/toolkit';
+
+import { sessionSlice } from './session-slice';
+
 // interface: declaration merging, each feature adds its slice
 export interface LazyLoadedSlices {}
 
 export const rootReducer = combineSlices(sessionSlice).withLazyLoadedSlices<LazyLoadedSlices>();
+```
 
+```ts
 // features/offers/offers-slice.ts: the feature registers itself
+import { createSlice, type WithSlice } from '@reduxjs/toolkit';
+
+import { rootReducer } from '../../core/store';
+
+const offersSlice = createSlice({ /* … */ });
+
 declare module '../../core/store' {
-  // interface: declaration merging
+  // interface: module augmentation
   interface LazyLoadedSlices extends WithSlice<typeof offersSlice> {}
 }
 
@@ -50,19 +69,26 @@ each other share a part that belongs on a lower layer.
 ```ts
 import { useSearch } from '../search';                 // offers → search, through the index
 import { useSearch } from '../search/use-search';      // no: a deep import
-import { autoCancelableRequest } from '../reports';    // no: a generic helper
+import { abortPrevious } from '../reports';            // no: a generic helper
 ```
 
 A generic helper — abort logic, a formatter, a fetch wrapper — is never part of
 a feature's API, even through its `index.ts`. It moves down to `shared` before
 the second feature imports it. A move leaves one copy: in the same change, the
-old place re-exports it from `shared` or loses it. The old body need not be in
-view for that — the old place becomes one line,
-`export { x } from '../../shared/x';`, and the body moves unchanged. Show that
-one-line file in the change. A copy in the second feature, even one marked to
-move later, is the failure this rule prevents: two copies drift apart.
+body goes to `shared` unchanged, and the old place becomes one line,
+`export { abortPrevious } from '../../shared/abort-previous';`, or loses the
+helper. Show that one-line file in the change. A copy in the second feature,
+even one marked to move later, is the failure this rule prevents: two copies
+drift apart.
 
 ## A request's state is one union
+
+```tsx
+// no: three flags that can disagree
+const [isLoading, setIsLoading] = useState(false);
+const [error, setError] = useState<Error | null>(null);
+const [results, setResults] = useState<SearchResult[]>([]);
+```
 
 ```tsx
 type SearchState =
@@ -74,12 +100,11 @@ type SearchState =
 const [search, setSearch] = useState<SearchState>({ status: 'idle' });
 ```
 
-Three `useState` calls — `isLoading`, `error`, `results` — allow eight
-combinations, and only four of them are real. Every transition then resets the
-other two by hand, and one missed reset shows an error over fresh results. With
-one union, each transition is one `setSearch`, and the render branches on
-`status`. If the project already has a data library (TanStack Query, RTK
-Query), it holds this state instead.
+Three flags allow eight combinations, and only four of them are real. Every
+transition then resets the other two by hand, and one missed reset shows an
+error over fresh results. With one union, each transition is one `setSearch`,
+and the render branches on `status`. If the project already has a data library
+(TanStack Query, RTK Query), it holds this state instead.
 
 ## Render reads props, state and context — not refs
 
@@ -107,4 +132,9 @@ object literal made in the same render is new every time and loops.
 
 Read and write refs in effects and event handlers. A value that the UI shows is
 state. The one exception is lazy initialisation:
-`if (ref.current === null) { ref.current = new Player(); }`.
+
+```ts
+if (playerRef.current === null) {
+  playerRef.current = new Player();
+}
+```

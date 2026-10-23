@@ -45,8 +45,9 @@ return data;
 `response.json()` and `JSON.parse` return `any`, so the `unknown` annotation is
 part of the check. `Array.isArray` then narrows `unknown` to `any[]` — in
 TypeScript 5.x, 6.0 and 7.0 alike. After it, the compiler accepts any use of
-the items, so `data as SearchResult[]` checks the array and only asserts each
-item: an item without `url` reaches the render as `undefined`. Narrow every
+the items. `Array.isArray` checks the container; `data as SearchResult[]`
+checks nothing and only asserts each item: an item without `url` reaches the
+render as `undefined`. Narrow every
 item with a guard, or with the schema library the project already has. A cast
 left after a check hides the part that the check did not do.
 
