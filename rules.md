@@ -107,7 +107,9 @@ Claude Code, `/review` in Codex, a review subagent — and when a person's revie
 comments arrive, invoke the `kalinichenko:review-loop` skill. It sets the
 level, what each round reads and when the rounds stop, the security review,
 which findings to fix or decide without asking, and the summary at the end. A
-review subagent that only reads does not load it.
+review subagent that only reads does not load it. Without the skill too, verify
+each finding against the real code before you act on it: a confident wrong fix
+is worse than the defect.
 
 ## The Boy Scout Rule (always)
 

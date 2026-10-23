@@ -38,11 +38,11 @@ A review subagent and Codex's `/review` have no levels.
 
 ## Over-engineering first
 
-When the ponytail plugin's `ponytail-review` skill is in your skill list, commit
-the work and run it once on the whole branch, before the first round. It lists what to delete,
-replace with the standard library or shorten, and changes nothing. Its
-findings go through *The findings*, and its cuts are one commit, so the first
-round reads the shorter code. Skip it for documents only, and for a move that
+When the ponytail plugin's `ponytail-review` skill is in your skill list,
+commit the work and run it once on the whole branch, before the first round.
+It lists what to delete, replace with the standard library or shorten, and
+changes nothing. Its findings go through *The findings*, and its cuts are one
+commit, so the first round reads the shorter code. Skip it for documents only, and for a move that
 a script or a test proves unchanged. When the skill is not installed, skip it
 and say so in the summary.
 
@@ -50,9 +50,10 @@ and say so in the summary.
 
 1. **Commit the work.** The first round reads the whole branch:
    `/code-review <level> <base>..HEAD`, where `<base>` is
-   `git merge-base origin/<default branch> HEAD`. Name the range: with no
-   target, `/code-review` reads only the commits ahead of the upstream, and
-   after a push that is not the whole branch. In Codex: `/review`, *Review
+   `git merge-base origin/<default branch> HEAD`, or
+   `git merge-base <default branch> HEAD` where there is no `origin`. Name the
+   range: with no target, `/code-review` reads only the commits ahead of the
+   upstream, and after a push that is not the whole branch. In Codex: `/review`, *Review
    against a base branch*.
 2. **Each round of fixes is one commit.** The next round reads only that
    commit: `/code-review <level> <sha>^..<sha>`. In Codex: `/review`, *Review a
@@ -64,10 +65,12 @@ and say so in the summary.
 4. **The third round still confirms a defect:** stop, and ask the person
    whether to go on. Give the findings of the three rounds.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
-   level. A round on one commit cannot see how a fix fits the rest of the
-   branch; this pass can. Its fixes are one commit and go through steps 2 to
-   4, with the rounds counted again from this pass. There is never a second whole-branch pass: the rounds that reread the
-   whole branch are the ones that did not stop.
+   level, when a fix commit came after round 1. A round on one commit cannot
+   see how a fix fits the rest of the branch; this pass can. When round 1
+   confirmed no defect, the branch has not changed, and the pass is skipped.
+   Its fixes are one commit and go through steps 2 to 4, with the rounds
+   counted again from this pass. There is never a second whole-branch pass:
+   the rounds that reread the whole branch are the ones that did not stop.
 
 A person's review comments go through *The findings* below. Their fixes are
 one commit, and the reply names it.
@@ -97,11 +100,10 @@ one commit, and the reply names it.
 ## The security review
 
 After the last pass and its rounds, run `/security-review` once, on the final
-branch. It reads
-the branch against origin's default branch and takes no target, so it never
-runs inside the loop. Its findings go through *The findings*. Their fixes are
-one commit, and that commit takes one round of `/code-review` at the level
-above, with the same stop rule. In Codex: `/review` with the custom
+branch. It reads the branch against origin's default branch and takes no
+target, so it never runs inside the loop. Its findings go through *The
+findings*. Their fixes are one commit, and that commit goes through steps 2 to
+4 of *The rounds*, at the level from *The level*. In Codex: `/review` with the custom
 instructions "Find security defects on this branch against
 origin/<default branch>: injection, authentication, authorization, secrets and
 data exposure." Where there is no `origin` remote, say so in the summary.

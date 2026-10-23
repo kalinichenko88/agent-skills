@@ -69,9 +69,12 @@ wait
 
 # report <log>: each review round is a top-level Agent call. A round after the
 # first whose prompt has no `git show <sha>` was sent to the whole branch
-# again. With the skill, that is the one last pass, so the count is 1.
+# again. With the skill, that is the one last pass, so the count is 1. A run
+# fails when it is not 1, or when the skill was not invoked.
 # ponytail: a whole-branch prompt that also names `git show <sha>` counts as
-# one commit; read the printed prompts when a count looks wrong.
+# one commit, and a commit named another way counts as the whole branch; read
+# the printed prompts when a count looks wrong.
+failed=0
 for log in "$logs"/run-*.jsonl; do
   prompts=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Agent")
@@ -83,5 +86,7 @@ for log in "$logs"/run-*.jsonl; do
     | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
   echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, review-loop invoked $skill times"
   cut -c1-300 <<<"${prompts:-no review subagent ran}"
+  [ "$whole" -eq 1 ] && [ "$skill" -ge 1 ] || failed=1
 done
 echo "Logs: $logs"
+exit "$failed"
