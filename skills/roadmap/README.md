@@ -40,9 +40,17 @@ run in parallel, and what is left to close a milestone.
 
 ## Each scenario step by step
 
-- [Plan the roadmap](../../docs/roadmap/01-plan.webp)
-- [Pick the next task](../../docs/roadmap/02-next.webp)
-- [Close a milestone](../../docs/roadmap/03-close.webp)
+### Plan the roadmap
+
+![Plan the roadmap: you get a plan you agreed to, kept in GitHub where it cannot go stale](../../docs/roadmap/01-plan.webp)
+
+### Pick the next task
+
+![Pick the next task: you get the right task to take now, and the tasks that can run beside it without conflicts](../../docs/roadmap/02-next.webp)
+
+### Close a milestone
+
+![Close a milestone: you get a clear path to the end of M1, and the next stage ready when it closes](../../docs/roadmap/03-close.webp)
 
 ## How it works
 
