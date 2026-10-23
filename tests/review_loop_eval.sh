@@ -75,9 +75,10 @@ wait
 # fixture always has a defect, so a run that follows the skill has two rounds
 # or more. At most one of them after round 1 reads the whole branch: the last
 # pass, which a stop after three rounds skips.
-# ponytail: the count reads prompt text, so a security review subagent counts
-# as a whole-branch read, and a commit named another way counts as the whole
-# branch; whether the last pass ran is left to the printed prompts.
+# ponytail: the count reads prompt text. A prompt that names one commit and
+# the whole branch counts as one commit; a security review subagent, or a
+# commit named another way, counts as the whole branch; whether the last pass
+# ran is left to the printed prompts.
 failed=0
 for log in "$logs"/run-*.jsonl; do
   prompts=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)

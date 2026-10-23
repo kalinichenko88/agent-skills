@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Use when a change is reviewed before its pull request — running /code-review or /security-review in Claude Code or /review in Codex, sending a review subagent, choosing a review level, deciding whether another round is needed, or handling the findings a review or a person's review comments return.
+description: Use when a change is reviewed, before or after its pull request opens — running /code-review or /security-review in Claude Code or /review in Codex, sending a review subagent, choosing a review level, deciding whether another round is needed, or handling the findings a review or a person's review comments return.
 ---
 
 # Review loop
@@ -55,7 +55,8 @@ installed, skip it and say so in the summary.
    `git merge-base <default branch> HEAD` where there is no `origin`. Name the
    range: with no target, `/code-review` reads only the commits ahead of the
    upstream, and after a push that is not the whole branch. In Codex:
-   `/review`, *Review against a base branch*.
+   `/review`, *Review against a base branch*. A review subagent gets
+   `git diff <base>..HEAD`.
 2. **Each round of fixes is one commit.** The next round reads only that
    commit: `/code-review <level> <sha>^..<sha>`. In Codex: `/review`, *Review a
    commit*. A review subagent gets `git show <sha>`. Inside the loop, never
@@ -65,9 +66,10 @@ installed, skip it and say so in the summary.
    wrapping — without another round.
 4. **The third round still confirms a defect:** stop, and ask the person
    whether to go on. Give the findings of the three rounds. When the person
-   says to stop, end these rounds and skip what is left of step 5. Then go to
-   the security review, or to the summary when the security review has
-   already run.
+   says to go on, ask again after three more rounds. When the person says to
+   stop, end these rounds and skip what is left of step 5. Then go to the
+   security review, or to the summary when the security review has already
+   run.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
    level, when a round confirmed a defect and its fix was committed. A round
    on one commit cannot see how a fix fits the rest of the branch; this pass
@@ -77,8 +79,10 @@ installed, skip it and say so in the summary.
    a second whole-branch pass: the rounds that reread the whole branch are the
    ones that did not stop.
 
-A person's review comments go through *The findings* below. Their fixes are
-one commit, and the reply names it.
+A person's review comments, before or after the pull request opens, go through
+*The findings* below. Their fixes are one commit, which goes through steps 2
+to 4. The reply names the commit, and the pull request's `## Review` gets a
+line for it.
 
 ## The findings
 
@@ -95,7 +99,9 @@ one commit, and the reply names it.
 4. **Ask only about a change to business logic:** what the product does for
    its users — a rule, a calculation, a state, a permission, the data it keeps
    or deletes. Give the options and a recommendation, and keep the rest of the
-   round going while the person answers.
+   round going while the person answers. The review does not end while a
+   question is open: the fix the answer needs is one commit, and it goes
+   through steps 2 to 4 before the last pass.
 5. **Fix at the root.** When the same defect is in sibling call sites or in a
    shared token, fix it there, and count the places.
 6. **A finding outside the task is an issue**, through the
