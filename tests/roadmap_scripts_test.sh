@@ -300,7 +300,12 @@ check 'cites' 'cites: src/server/log.ts, src/app/main.ts' "$(grep '^cites: ' "$f
 check 'branch files from compare' "files: $(jq -r '[.files[].filename] | join(", ")' "$fixtures/compare.json")" \
   "$(sed -n '/^==> #21 /,/^==> /p' "$f" | grep '^files: ')"
 check 'PRs closing no issue' "$(jq '.data.repository.pullRequests.nodes | length' "$fixtures/prs-1.json")" \
-  "$(bash "$scripts/next.sh" | grep -c '^PR #.*: closes no issue$')"
+  "$(bash "$scripts/next.sh" | grep -c '^PR #.*: closes no open issue$')"
+# An open PR that closes only issues closed already is work in progress too.
+jq '.data.repository.pullRequests.nodes[].closingIssuesReferences.nodes = [{number: 999, repository: {nameWithOwner: "kalinichenko88/agent-skills"}}]' \
+  "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
+check 'PRs closing only closed issues' "$(jq '.data.repository.pullRequests.nodes | length' "$fixtures/prs-1.json")" \
+  "$(bash "$scripts/next.sh" | grep -c '^PR #.*: closes no open issue$')"
 echo '{"files": []}' >"$FAKE/compare.json"
 check 'no diff yet' 'no diff yet' "$(sed -n '/^==> #21 /{n;p;}' "$(overlap)")"
 # The files of an open PR that closes the issue win over the branch, and past

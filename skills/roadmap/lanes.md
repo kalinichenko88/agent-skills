@@ -31,8 +31,8 @@ An entry starts with `==>`:
 - `==> #22 <title> [assigned to you, PR #9 by you]` — a busy issue and who has
   it. `files:` lists the files its pull request or branch changes. When it has
   none yet, `no diff yet` follows, and then its body.
-- `==> PR #30 by someone` — an open pull request that closes no issue, and its
-  `files:`.
+- `==> PR #30 by someone` — an open pull request that closes no open issue,
+  and its `files:`.
 
 A body can hold `#` headings of its own: an entry ends only at the next line
 that starts with `==`.

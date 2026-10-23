@@ -4,7 +4,7 @@
 #
 #   want cand <n> <title> <track> <milestone title>
 #   want wip  <n> <title> <busy> <files of its open PRs|-> <its branches|->
-#   want pr   <n> <author> <files|->
+#   want pr   <n> <author> <files|->   (a PR that closes no open issue)
 #
 # The main set is every open non-bug issue of the current milestones and every
 # open issue it waits on, through any chain; its free issues are the main path.
@@ -66,8 +66,8 @@ END {
   }
   for (k = 1; k <= prn; k++) {
     p = prlist[k]
-    if (prcloses[p] != "-") continue
-    print "PR #" p " by " prauthor[p] ": closes no issue"
+    if (closes_open(p)) continue
+    print "PR #" p " by " prauthor[p] ": closes no open issue"
     print "want\tpr\t" p "\t" prauthor[p] "\t" prfiles[p]
     c++
   }
@@ -125,6 +125,14 @@ function rank(n,   seen, q, h, t, k, e, i, o) {
       if (o < eff[n]) eff[n] = o
     }
   }
+}
+
+# 1 when the PR closes an open issue that is loaded: then that issue shows
+# its files. A PR that closes only closed issues is work in progress too.
+function closes_open(p,   k, c, i) {
+  k = split(prcloses[p], c, ",")
+  for (i = 1; i <= k; i++) if (c[i] in istitle) return 1
+  return 0
 }
 
 function closes(p, n,   k, c, i) {
