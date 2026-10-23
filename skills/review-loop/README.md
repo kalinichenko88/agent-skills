@@ -28,10 +28,10 @@ fixed.
 - **One last look at the whole branch.** When the loop needed more than one
   round, one pass reads the whole branch again after it stops, to see how the
   fixes fit the rest. It never runs twice.
-- **Every fix is reviewed.** The fixes from the last pass, the security review
-  or your review comments, also after the pull request opens, are one commit
-  with rounds of its own: at the level of round 1, or `xhigh` for a security
-  fix.
+- **Later fixes are reviewed too.** The fixes from the last pass, the security
+  review or your review comments, also after the pull request opens, are one
+  commit with rounds of its own: at the level of the loop's round 1, or
+  `xhigh` for a fix to security code.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.

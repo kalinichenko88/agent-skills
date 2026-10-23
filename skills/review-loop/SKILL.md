@@ -9,9 +9,9 @@ A review runs in rounds. An over-engineering review comes first, when its
 skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
-reads the whole branch again, once. A security review comes last. The agent fixes and
-decides by itself, except for a change to business logic, and ends with a
-summary.
+reads the whole branch again, once. A security review comes last. The agent
+fixes and decides by itself, except for a change to business logic, and ends
+with a summary.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -62,13 +62,14 @@ installed, skip it and say so in the summary.
    commit*. A review subagent gets `git show <sha>`. Inside the loop, never
    send the whole branch again.
 3. **Stop at the first round that confirms no defect**, whatever that round
-   declines, for the first time or again. Apply the rest of its findings —
-   nits and decisions — without another round.
+   declines, for the first time or again. Apply its nits — wording, line
+   wrapping — without another round.
 4. **The third round still confirms a defect:** stop, and ask the person
    whether to go on. Give the findings of the three rounds. When the person
    says to go on, ask again after three more rounds. When the person says to
    stop, or nobody can answer, end these rounds and skip what is left of
-   step 5.
+   step 5. Then go to the security review, or to the summary when the
+   security review has already run.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
    level, when the loop had more than one round. A round on one commit cannot
    see how a fix fits the rest of the branch; this pass can. It waits for the
@@ -83,13 +84,13 @@ review, and each set of a person's review comments, before or after the pull
 request opens. For each of them:
 
 - Its fixes are one commit, and that commit goes through steps 2 to 4.
-- Its rounds run at the level of round 1. The rounds on the security review's
-  fixes run at `xhigh`. When no level was chosen in this session, pick one by
-  *The level*.
+- Its rounds run at the level that the loop's round 1 used. In a new session,
+  take that level from the pull request's `## Review`. A fix to security code
+  runs at `xhigh`, whatever found it.
 
 The fix for an answer to a question joins the next fix commit. When no rounds
-are running, it starts a new count, as above. The reply to a person's comments
-names the fix commit.
+are running, it starts a new count, as above. A person's review comments go
+through *The findings* below, and the reply names the fix commit.
 
 ## The findings
 
