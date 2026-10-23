@@ -331,6 +331,8 @@ check 'block refuses a cycle' 'refused: it makes a cycle: #21 → #20 → #21' "
 check 'a refused block sends no mutation' 0 "$(grep -c mutation "$FAKE/calls" || true)"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" block 19 21)
 case $out in *'dry run: gh api graphql'*addBlockedBy*) ;; *) fail 'block prints its mutation in a dry run' "$out" ;; esac
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" unblock 20 21)
+case $out in *'dry run: gh api graphql'*removeBlockedBy*) ;; *) fail 'unblock prints its mutation in a dry run' "$out" ;; esac
 check 'a dry run sends no mutation' 0 "$(grep -c mutation "$FAKE/calls" || true)"
 check 'block to itself' 'refused: an issue cannot wait on itself' "$(bash "$scripts/plan.sh" block 19 19 2>&1 || true)"
 # A cycle through an inherited blocker: #11 is a sub-issue of #10, and #12
@@ -362,7 +364,6 @@ out=$(DRY_RUN=1 bash "$scripts/plan.sh" not-current M1)
 check 'not-current removes the mark' 'Goal.' "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
 check 'Later is never current' 'refused: Later is never current' "$(bash "$scripts/plan.sh" current later 2>&1 || true)"
 check 'close refuses open issues' 'refused: M1 · Stage 1 has 3 open issues: #19, #20, #21' "$(bash "$scripts/plan.sh" close M1 2>&1 || true)"
-check 'create refuses an existing title' 'refused: M1 · Stage 1 exists' "$(bash "$scripts/plan.sh" create 'M1 · Stage 1' /dev/null 2>&1 || true)"
 printf 'New goal.\n' >"$tmp/goal"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" describe M1 "$tmp/goal")
 check 'describe keeps the mark' "$(printf 'New goal.\n\nCurrent.')" "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"

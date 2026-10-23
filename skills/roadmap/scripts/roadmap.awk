@@ -26,7 +26,7 @@ END {
   }
 }
 
-function section(m, single,   c, i, j, in_m, member, seen, done, left, best, ok, k, e, t) {
+function section(m, single,   c, i, j, in_m, member, done, left, best, ok, k, e, t) {
   print "## " mstitle[m]
   print (mscur[m] ? "current, " : "") msclosed[m] " of " (msopen[m] + msclosed[m]) " closed"
   print ""
@@ -37,15 +37,8 @@ function section(m, single,   c, i, j, in_m, member, seen, done, left, best, ok,
   c = 0
   for (i = 1; i <= isn; i++) if (ems(islist[i]) == m) { in_m[islist[i]] = 1; member[++c] = islist[i] }
   if (single) {
-    for (i = 1; i <= isn; i++) {
-      j = islist[i]
-      if (j in in_m) continue
-      for (k = 1; k <= c; k++) {
-        split("", seen)
-        if (reaches(member[k], j, seen)) { member[++c] = j; break }
-      }
-    }
-    for (k = 1; k <= c; k++) in_m[member[k]] = 1
+    closure(in_m)
+    for (i = 1; i <= isn; i++) if ((islist[i] in in_m) && ems(islist[i]) != m) member[++c] = islist[i]
   }
   # Dependency order: the lowest number whose issues in the list are all
   # printed; in a cycle, the lowest number left.
@@ -72,8 +65,4 @@ function where(n, m,   e) {
   e = ems(n)
   if (e == m) return ""
   return " (" (e ? mstitle[e] : "no milestone") ")"
-}
-
-function sortnum(a, n,   i, j, t) {
-  for (i = 2; i <= n; i++) for (j = i; j > 1 && a[j - 1] > a[j]; j--) { t = a[j]; a[j] = a[j - 1]; a[j - 1] = t }
 }

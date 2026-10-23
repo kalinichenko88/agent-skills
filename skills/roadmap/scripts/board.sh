@@ -45,10 +45,8 @@ if [ -z "$found" ]; then
     echo 'dry run: no project yet, so no items and no views'
     url='the new project'
   else
-    err=$(mktemp "${TMPDIR:-/tmp}/board.XXXXXX")
-    trap 'rm -f "$err"' EXIT
-    found=$(gh project create --owner "$owner" --title "$TITLE" --format json --jq '"\(.number)\t\(.url)"' 2>"$err") || {
-      echo "cannot create a project under $owner: $(cat "$err")"
+    found=$(gh project create --owner "$owner" --title "$TITLE" --format json --jq '"\(.number)\t\(.url)"' 2>&1) || {
+      echo "cannot create a project under $owner: $found"
       exit 1
     }
   fi

@@ -35,18 +35,17 @@ END {
 function add(u, v) { eu[++c] = u; ev[c] = v; edges[u] = edges[u] " " v }
 
 # Fills out with n and its loaded descendants, n first; returns the count.
-function family(n, out,   t, h, k, i, s) {
+function family(n, out,   t, h, i) {
   split("", out)
   t = 1
   out[1] = n
-  for (h = 1; h <= t; h++) {
-    k = kids(out[h], s)
-    for (i = 1; i <= k; i++) out[++t] = s[i]
-  }
+  for (h = 1; h <= t; h++) for (i = 1; i <= isn; i++) if (ispar[islist[i]] == out[h]) out[++t] = islist[i]
   return t
 }
 
-# As reaches() in graph.awk, and it leaves the steps after from in chain.
+# 1 when a chain of edges leads from one issue to the other, and it leaves
+# the steps after from in chain. The caller empties seen first; it stops a
+# cycle.
 function path(from, to, seen,   k, i, e) {
   if (from in seen) return 0
   seen[from] = 1

@@ -61,26 +61,18 @@ function waits(n, out,   c, d, k, i, b, seen) {
   return c
 }
 
-# Fills out[1..count] with the loaded open sub-issues of n.
-function kids(n, out,   i, c) {
-  split("", out)
-  c = 0
-  for (i = 1; i <= isn; i++) if (ispar[islist[i]] == n) out[++c] = islist[i]
-  return c
-}
-
 function isfree(n,   w) {
   return isbusy[n] == "-" && waits(n, w) == 0 && issubs[n] == 0 && !mslater[ems(n)]
 }
 
-# 1 when a chain of edges leads from one issue to the other. The caller
-# empties seen first; it stops a cycle.
-function reaches(from, to, seen,   k, i, e) {
-  if (from in seen) return 0
-  seen[from] = 1
-  k = split(edges[from], e, " ")
-  for (i = 1; i <= k; i++) if (e[i] == to || reaches(e[i], to, seen)) return 1
-  return 0
+# Adds to set every issue that an issue in set waits on, through any chain.
+function closure(set,   q, h, t, k, e, i, j) {
+  t = 0
+  for (j in set) q[++t] = j
+  for (h = 1; h <= t; h++) {
+    k = split(edges[q[h]], e, " ")
+    for (i = 1; i <= k; i++) if (!(e[i] in set)) { set[e[i]] = 1; q[++t] = e[i] }
+  }
 }
 
 function order_of(n,   e) {
@@ -99,4 +91,8 @@ function state(n,   s, w, c, k, b) {
   }
   if (issubs[n] > 0) s = s (s == "" ? "" : "; ") "open sub-issues: " issubs[n]
   return s == "" ? "free" : s
+}
+
+function sortnum(a, n,   i, j, t) {
+  for (i = 2; i <= n; i++) for (j = i; j > 1 && a[j - 1] > a[j]; j--) { t = a[j]; a[j] = a[j - 1]; a[j - 1] = t }
 }

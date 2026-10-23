@@ -12,8 +12,15 @@
 # effective order (the lowest milestone order among the issue and the issues
 # that wait on it), then by how many issues wait on it, then by number.
 
+# The pr records come after the issues. A PR that closes an open issue gives
+# that issue its files; one that closes only closed issues is listed alone.
 $1 == "pr" {
-  prlist[++prn] = $2; prauthor[$2] = $3; prcloses[$2] = $4; prfiles[$2] = $5
+  prlist[++prn] = $2; prauthor[$2] = $3; prfiles[$2] = $5
+  pk = split($4, pc, ",")
+  for (i = 1; i <= pk; i++) if (pc[i] in istitle) {
+    open_pr[$2] = 1
+    if ($5 != "-") wipfiles[pc[i]] = (pc[i] in wipfiles ? wipfiles[pc[i]] "," : "") $5
+  }
 }
 
 END {
@@ -59,14 +66,11 @@ END {
   for (i = 1; i <= c; i++) {
     j = busy[i]
     print "#" j " " istitle[j] ": " isbusy[j]
-    f = ""
-    for (k = 1; k <= prn; k++) if (closes(prlist[k], j) && prfiles[prlist[k]] != "-")
-      f = f (f == "" ? "" : ",") prfiles[prlist[k]]
-    print "want\twip\t" j "\t" istitle[j] "\t" isbusy[j] "\t" (f == "" ? "-" : f) "\t" ((j in isbr) ? isbr[j] : "-")
+    print "want\twip\t" j "\t" istitle[j] "\t" isbusy[j] "\t" ((j in wipfiles) ? wipfiles[j] : "-") "\t" ((j in isbr) ? isbr[j] : "-")
   }
   for (k = 1; k <= prn; k++) {
     p = prlist[k]
-    if (closes_open(p)) continue
+    if (p in open_pr) continue
     print "PR #" p " by " prauthor[p] ": closes no open issue"
     print "want\tpr\t" p "\t" prauthor[p] "\t" prfiles[p]
     c++
@@ -76,17 +80,10 @@ END {
 
 # Fills main with the open non-bug issues of the milestones in cur and every
 # issue they wait on; returns how many of them are free.
-function mainset(cur,   i, j, q, h, t, k, e, free) {
+function mainset(cur,   i, j, free) {
   split("", main)
-  t = 0
-  for (i = 1; i <= isn; i++) {
-    j = islist[i]
-    if (!isbug[j] && (ems(j) in cur)) { main[j] = 1; q[++t] = j }
-  }
-  for (h = 1; h <= t; h++) {
-    k = split(edges[q[h]], e, " ")
-    for (i = 1; i <= k; i++) if (!(e[i] in main)) { main[e[i]] = 1; q[++t] = e[i] }
-  }
+  for (i = 1; i <= isn; i++) if (!isbug[islist[i]] && (ems(islist[i]) in cur)) main[islist[i]] = 1
+  closure(main)
   free = 0
   for (j in main) if (isfree(j)) free++
   return free
@@ -125,22 +122,4 @@ function rank(n,   seen, q, h, t, k, e, i, o) {
       if (o < eff[n]) eff[n] = o
     }
   }
-}
-
-# 1 when the PR closes an open issue that is loaded: then that issue shows
-# its files. A PR that closes only closed issues is work in progress too.
-function closes_open(p,   k, c, i) {
-  k = split(prcloses[p], c, ",")
-  for (i = 1; i <= k; i++) if (c[i] in istitle) return 1
-  return 0
-}
-
-function closes(p, n,   k, c, i) {
-  k = split(prcloses[p], c, ",")
-  for (i = 1; i <= k; i++) if (c[i] == n) return 1
-  return 0
-}
-
-function sortnum(a, n,   i, j, t) {
-  for (i = 2; i <= n; i++) for (j = i; j > 1 && a[j - 1] > a[j]; j--) { t = a[j]; a[j] = a[j - 1]; a[j - 1] = t }
 }

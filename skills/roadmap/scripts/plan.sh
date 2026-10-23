@@ -14,10 +14,10 @@
 #
 # A milestone is M1, Later or a whole title. A milestone is current when a
 # line of its description reads Current.; describe keeps that line. It refuses
-# what would break the plan, prints why and exits 1, and writes nothing: a
-# second milestone of one title, closing a milestone with open issues, Later
-# as current, and a link that makes a cycle, also through the blockers that a
-# sub-issue takes from its parent. later puts a task off into the Later
+# what would break the plan, prints why and exits 1, and writes nothing:
+# closing a milestone with open issues, Later as current, and a link that
+# makes a cycle, also through the blockers that a sub-issue takes from its
+# parent. GitHub itself refuses a second milestone of one title. later puts a task off into the Later
 # milestone, and makes that milestone when there is none; it refuses when an
 # open issue outside Later waits on the task, because a task in Later is never
 # offered. Putting an issue into another milestone needs no check:
@@ -99,15 +99,10 @@ act=$1
 case $act in
   create)
     [ $# -eq 3 ] || usage
-    title=$2
-    list=$(bash "$dir/read.sh" milestones)
-    if awk -F'\t' -v t="$title" '$1 == "ms" && tolower($8) == tolower(t) { f = 1 } END { exit !f }' <<<"$list"; then
-      refuse "$title exists"
-    fi
     newfile
     trimmed <"$3" >"$file"
-    run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title="$title" -F description=@"$file" --silent
-    say "created $title"
+    run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title="$2" -F description=@"$file" --silent
+    say "created $2"
     ;;
   describe)
     [ $# -eq 3 ] || usage
@@ -158,22 +153,12 @@ case $act in
     [ $# -eq 3 ] || usage
     link "$2" "$3"
     case $act in
-      block)
-        run gh api graphql --silent -f i="$ida" -f b="$idb" -f query='mutation($i: ID!, $b: ID!) {
-          addBlockedBy(input: {issueId: $i, blockingIssueId: $b}) { issue { number } } }'
-        say "#$a is blocked by #$b"
-        ;;
-      unblock)
-        run gh api graphql --silent -f i="$ida" -f b="$idb" -f query='mutation($i: ID!, $b: ID!) {
-          removeBlockedBy(input: {issueId: $i, blockingIssueId: $b}) { issue { number } } }'
-        say "#$a is no longer blocked by #$b"
-        ;;
-      sub)
-        run gh api graphql --silent -f i="$ida" -f b="$idb" -f query='mutation($i: ID!, $b: ID!) {
-          addSubIssue(input: {issueId: $i, subIssueId: $b}) { issue { number } } }'
-        say "#$b is a sub-issue of #$a"
-        ;;
+      block) call='addBlockedBy(input: {issueId: $i, blockingIssueId: $b})' msg="#$a is blocked by #$b" ;;
+      unblock) call='removeBlockedBy(input: {issueId: $i, blockingIssueId: $b})' msg="#$a is no longer blocked by #$b" ;;
+      sub) call='addSubIssue(input: {issueId: $i, subIssueId: $b})' msg="#$b is a sub-issue of #$a" ;;
     esac
+    run gh api graphql --silent -f i="$ida" -f b="$idb" -f query="mutation(\$i: ID!, \$b: ID!) { $call { issue { number } } }"
+    say "$msg"
     ;;
   later)
     [ $# -eq 2 ] || usage
