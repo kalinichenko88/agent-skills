@@ -30,6 +30,14 @@ prompt of engineering rules, plus the skills those rules lean on.
   [start a task](docs/github/01-start.webp),
   [find something outside the task](docs/github/02-during.webp),
   [finish the task](docs/github/03-finish.webp).
+- **`kalinichenko:roadmap`** — a project manager on top of GitHub. It answers
+  "what can I take now", "what can run in parallel" and "what is left to close
+  M1", and builds the roadmap with you from the project's `docs/`. The plan
+  lives in GitHub: milestones in order, "blocked by" links and sub-issues, so
+  it cannot go stale. Scripts read it through the GitHub API and rank the free
+  tasks on the main path, among bugs and the rest. In Claude Code a Haiku
+  subagent reads the code to find which tasks would change the same functions.
+  A GitHub Project with saved views, which the skill sets up, shows the plan.
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
@@ -58,6 +66,13 @@ not. Editing `rules.md` does not need a new trust; changing `hooks/hooks.json`
 does.
 
 The hook is plain bash with no other dependency.
+
+The roadmap skill's board needs the `project` scope on the `gh` token. Run
+once on each machine:
+
+```sh
+gh auth refresh -s project
+```
 
 ## Update
 
@@ -96,12 +111,14 @@ It does not touch a `return` that is the only statement in its block.
 `make check` validates the manifests, runs shellcheck and replays `rules.md`
 through the hook to prove the JSON it prints carries the file byte for byte and
 stays within Claude Code's 10,000-character cap on hook context. It also runs
-the github skill's scripts against a fake `gh` that answers from payloads
-recorded in `tests/fixtures/github/`.
+the github and roadmap skills' scripts against a fake `gh` that answers from
+payloads recorded in `tests/fixtures/github/` and `tests/fixtures/roadmap/`,
+all from public repositories.
 
 To try a script that writes on a real tracker without writing to it, set
-`DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`
-and `add-finding.sh` at another repository than the checkout's.
+`DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,
+`add-finding.sh` and the roadmap scripts at another repository than the
+checkout's.
 
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
