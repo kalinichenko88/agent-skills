@@ -136,6 +136,13 @@ small, safe and needs no decision. Fix it now and list it in the PR description
 as not part of the task. A finding that fails one of those three is not a Boy
 Scout fix; it is an issue. Cleaner than you found it is not the same as rebuilt.
 
+## Code conventions (always)
+
+Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
+`.cts`) in a session, invoke the `kalinichenko:typescript-conventions` skill.
+Before the first write or edit to a React component or hook, invoke
+`kalinichenko:react-conventions` too. A subagent invokes them itself.
+
 ## GitHub (always)
 
 A commit message, a pull request, an issue, a workflow file — anything that
