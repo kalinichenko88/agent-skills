@@ -78,11 +78,14 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
 
    ```sh
    notes=$(sed -n "/^## $version /,/^## /{/^## /d;p;}" CHANGELOG.md | sed '1{/^$/d;}') \
-     && [ -n "$notes" ] && gh release create "v$version" --title "v$version" --notes "$notes"
+     && [ -n "$notes" ] && gh release create "v$version" --verify-tag --title "v$version" --notes "$notes"
    ```
 
    Empty notes mean the heading in step 4 does not read `## $version ` — fix
-   the file, commit it on top and run this again. A failed `gh release create`
-   leaves nothing to undo: fix the cause and run it again.
+   the file, commit it on top and run this again. Without `--verify-tag`, a tag
+   missing on the remote does not stop `gh`: it tags the default branch's HEAD
+   and publishes the release there. With it, `gh` stops: run the push from step 6,
+   then run this again. A failed `gh release create` leaves nothing to
+   undo: fix the cause and run it again.
 8. **Report** the new tag, the release URL and the update commands from the
    README's *Update* section.
