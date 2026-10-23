@@ -42,11 +42,20 @@ if (!Array.isArray(data) || !data.every(isSearchResult)) {
 return data;
 ```
 
-`Array.isArray` narrows `unknown` to `any[]`. After it, the compiler accepts
-any use of the items, so `data as SearchResult[]` checks the array and only
-asserts each item: an item without `url` reaches the render as `undefined`.
-Narrow every item with a guard, or with the schema library the project already
-has. A cast left after a check hides the part that the check did not do.
+`response.json()` and `JSON.parse` return `any`, so the `unknown` annotation is
+part of the check. `Array.isArray` then narrows `unknown` to `any[]` — in
+TypeScript 5.x, 6.0 and 7.0 alike. After it, the compiler accepts any use of
+the items, so `data as SearchResult[]` checks the array and only asserts each
+item: an item without `url` reaches the render as `undefined`. Narrow every
+item with a guard, or with the schema library the project already has. A cast
+left after a check hides the part that the check did not do.
+
+No shared typescript-eslint config catches that cast. Turn the rule on over the
+typed config, with old violations in bulk suppressions (next section):
+
+```js
+'@typescript-eslint/no-unsafe-type-assertion': 'error',
+```
 
 ## A lint rule is `error`, or it is off
 
