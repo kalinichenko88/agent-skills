@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "content": {
+        "number": 213,
+        "repository": "other/repo",
+        "type": "Issue"
+      }
+    },
+    {
+      "content": {
+        "number": 211,
+        "repository": "other/repo",
+        "type": "Issue"
+      }
+    },
+    {
+      "content": {
+        "number": 28,
+        "repository": "other/repo",
+        "type": "Issue"
+      }
+    }
+  ]
+}

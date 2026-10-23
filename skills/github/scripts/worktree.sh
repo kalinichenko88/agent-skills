@@ -1,9 +1,9 @@
-#!/bin/bash
-# Assigns an issue to you, checks out its branch in a worktree of its own,
-# links the branch to the issue, and prints the path to work in as its last
-# line.
+#!/usr/bin/env bash
+# Assigns an issue to you, checks out its branch in a worktree of its own (or,
+# with --here, in the current checkout), links the branch to the issue, and
+# prints the path to work in as its last line.
 #
-#   worktree.sh <n> <branch>
+#   worktree.sh <n> <branch> [--here]
 #
 # An issue with a linked branch and no assignee gets a warning instead: the
 # branch can be someone else's.
@@ -11,17 +11,18 @@
 # A branch already linked to the issue wins over a <branch> that is not
 # linked: the first one that gh lists. A branch already checked out somewhere
 # is worked on there. A session already in a worktree, as one started with
-# claude --worktree or codex --worktree, checks the branch out where it is.
+# claude --worktree or codex --worktree, checks the branch out where it is;
+# --here does the same in any checkout, for "a branch only".
 #
 # DRY_RUN=1 prints the commands that would write, and runs none.
 
 set -euo pipefail
 
-[ $# -eq 2 ] || {
-  echo 'usage: worktree.sh <n> <branch>' >&2
+[ $# -eq 2 ] || { [ $# -eq 3 ] && [ "$3" = --here ]; } || {
+  echo 'usage: worktree.sh <n> <branch> [--here]' >&2
   exit 2
 }
-n=$1 branch=$2
+n=$1 branch=$2 here=${3:-}
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
@@ -57,7 +58,7 @@ if [ -n "$path" ]; then
 fi
 
 common=$(git rev-parse --path-format=absolute --git-common-dir)
-if [ "$(git rev-parse --path-format=absolute --git-dir)" != "$common" ]; then
+if [ -n "$here" ] || [ "$(git rev-parse --path-format=absolute --git-dir)" != "$common" ]; then
   run gh issue develop "$n" --name "$branch" --checkout
   git rev-parse --show-toplevel
   exit 0

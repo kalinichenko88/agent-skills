@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Adds a finding to an open issue, its host: appends the section to the body,
 # sets the new title, adds the label and leaves a one-line comment.
 #

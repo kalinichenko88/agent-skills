@@ -1,0 +1,84 @@
+{
+  "data": {
+    "viewer": {
+      "login": "kalinichenko88"
+    },
+    "repository": {
+      "nameWithOwner": "kalinichenko88/agent-skills",
+      "pullRequests": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": "Y3Vyc29yOnYyOpHPAAAAASVc9No="
+        },
+        "nodes": [
+          {
+            "number": 28,
+            "author": {
+              "login": "kalinichenko88"
+            },
+            "closingIssuesReferences": {
+              "nodes": []
+            },
+            "files": {
+              "totalCount": 4,
+              "nodes": [
+                {
+                  "path": ".claude/skills/infographic/SKILL.md"
+                },
+                {
+                  "path": "README.md"
+                },
+                {
+                  "path": "docs/github/03-finish.webp"
+                },
+                {
+                  "path": "docs/github/brief.md"
+                }
+              ]
+            }
+          },
+          {
+            "number": 29,
+            "author": {
+              "login": "kalinichenko88"
+            },
+            "closingIssuesReferences": {
+              "nodes": []
+            },
+            "files": {
+              "totalCount": 3,
+              "nodes": [
+                {
+                  "path": ".claude/skills/release/SKILL.md"
+                },
+                {
+                  "path": "CHANGELOG.md"
+                },
+                {
+                  "path": "README.md"
+                }
+              ]
+            }
+          },
+          {
+            "number": 30,
+            "author": {
+              "login": "kalinichenko88"
+            },
+            "closingIssuesReferences": {
+              "nodes": []
+            },
+            "files": {
+              "totalCount": 1,
+              "nodes": [
+                {
+                  "path": ".claude/skills/release/SKILL.md"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

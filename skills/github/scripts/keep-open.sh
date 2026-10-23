@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Keeps an issue open when a pull request merges: removes the pull request's
 # link that would close it. A pull request from a branch that worktree.sh
 # linked to the issue gets that link when it opens, whatever its description
