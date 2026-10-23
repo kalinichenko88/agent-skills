@@ -8,9 +8,9 @@ description: Use when a change is reviewed before its pull request — running /
 A review runs in rounds. An over-engineering review comes first, when its
 skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
-that confirms no defect. A security review comes last. The agent fixes and
-decides by itself, except for a change to business logic, and ends with a
-summary.
+that confirms no defect. Then one last pass reads the whole branch again, once.
+A security review comes last. The agent fixes and decides by itself, except
+for a change to business logic, and ends with a summary.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -56,13 +56,18 @@ and say so in the summary.
    against a base branch*.
 2. **Each round of fixes is one commit.** The next round reads only that
    commit: `/code-review <level> <sha>^..<sha>`. In Codex: `/review`, *Review a
-   commit*. A review subagent gets `git show <sha>`. Never send the whole
-   branch again.
+   commit*. A review subagent gets `git show <sha>`. Inside the loop, never
+   send the whole branch again.
 3. **Stop at the first round that confirms no defect**, whatever that round
    declines, for the first time or again. Apply its nits — wording, line
    wrapping — without another round.
 4. **The third round still confirms a defect:** stop, and ask the person
    whether to go on. Give the findings of the three rounds.
+5. **The last pass reads the whole branch once**, as in step 1, at the same
+   level. A round on one commit cannot see how a fix fits the rest of the
+   branch; this pass can. Its fixes are one commit and go through steps 2 to
+   4, with the rounds counted again from this pass. There is never a second whole-branch pass: the rounds that reread the
+   whole branch are the ones that did not stop.
 
 A person's review comments go through *The findings* below. Their fixes are
 one commit, and the reply names it.
@@ -91,7 +96,8 @@ one commit, and the reply names it.
 
 ## The security review
 
-When the loop stops, run `/security-review` once, on the final branch. It reads
+After the last pass and its rounds, run `/security-review` once, on the final
+branch. It reads
 the branch against origin's default branch and takes no target, so it never
 runs inside the loop. Its findings go through *The findings*. Their fixes are
 one commit, and that commit takes one round of `/code-review` at the level
@@ -106,7 +112,7 @@ When the review ends, report in this order, one line per item:
 
 - **Rounds:** `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
-  security review's result.
+  last pass, the same way. The security review's result.
 - **Decisions:** each choice you made: the finding, the choice, the reason.
   Each question on business logic, with the person's answer.
 - **Fixed:** what changed and in which file, the commit, and any side effect

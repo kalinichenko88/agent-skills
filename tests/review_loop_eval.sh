@@ -67,19 +67,20 @@ done
 wait
 
 # report <log>: each review round is a top-level Agent call. A round after the
-# first that names main in its prompt was sent to the whole branch again.
-# ponytail: a prompt that names main only as context counts as a whole-branch
-# read; read the printed prompts when a count looks wrong.
+# first whose prompt has no `git show <sha>` was sent to the whole branch
+# again. With the skill, that is the one last pass, so the count is 1.
+# ponytail: a whole-branch prompt that also names `git show <sha>` counts as
+# one commit; read the printed prompts when a count looks wrong.
 for log in "$logs"/run-*.jsonl; do
   prompts=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Agent")
-    | .input.prompt | gsub("\n"; " ") | .[0:300]' "$log")
+    | .input.prompt | gsub("\n"; " ")' "$log")
   rounds=$(grep -c . <<<"$prompts" || true)
-  whole=$(tail -n +2 <<<"$prompts" | grep -cE 'main' || true)
+  whole=$(tail -n +2 <<<"$prompts" | grep -cvE 'git( -C [^ ]+)? show [0-9a-f]{7,}' || true)
   skill=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Skill")
     | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
   echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, review-loop invoked $skill times"
-  echo "${prompts:-no review subagent ran}"
+  cut -c1-300 <<<"${prompts:-no review subagent ran}"
 done
 echo "Logs: $logs"

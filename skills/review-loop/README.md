@@ -24,6 +24,9 @@ fixed.
 - **A stop.** The loop ends at the first round that confirms no defect. Nits
   are applied without another round. After the third round with a defect, the
   agent asks you.
+- **One last look at the whole branch.** After the loop stops, one pass reads
+  the whole branch again, to see how the fixes fit the rest. Its fixes go
+  through the same rounds. It never runs twice.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.

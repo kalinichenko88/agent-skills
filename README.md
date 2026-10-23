@@ -22,8 +22,8 @@ prompt of engineering rules, plus the skills those rules lean on.
 
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
 - **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
-  that ends: rounds that read only the last fixes, a security review last, and
-  a summary of what was decided and fixed.
+  that ends: rounds that read only the last fixes, one last pass over the
+  whole branch, a security review, and a summary of what was decided and fixed.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
