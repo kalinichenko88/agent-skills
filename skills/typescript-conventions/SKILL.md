@@ -30,6 +30,38 @@ only where the guarantee matters.
 Reach for `unknown` plus a narrowing guard, or a generic. An `any` that survives
 review is a type hole, not a shortcut.
 
+## Checking the container does not check the items
+
+```ts
+const data: unknown = await response.json();
+
+if (!Array.isArray(data) || !data.every(isSearchResult)) {
+  throw new Error('The search response has an unexpected shape');
+}
+
+return data;
+```
+
+`Array.isArray` narrows `unknown` to `any[]`. After it, the compiler accepts
+any use of the items, so `data as SearchResult[]` checks the array and only
+asserts each item: an item without `url` reaches the render as `undefined`.
+Narrow every item with a guard, or with the schema library the project already
+has. A cast left after a check hides the part that the check did not do.
+
+## A lint rule is `error`, or it is off
+
+`warn` fails nothing. CI passes it, `--quiet` hides it, and the count only
+grows. A rule worth having is `error` from the first day. Old violations go to
+ESLint's bulk suppressions, not to `warn` on a legacy glob:
+
+```sh
+npx eslint . --suppress-rule @typescript-eslint/no-explicit-any
+```
+
+Commit `eslint-suppressions.json`. A new violation fails the check. A fixed one
+leaves the file with `--prune-suppressions`, so the count only goes down.
+Suppressions apply only to rules set to `error`.
+
 ## Bodies are braced and expanded
 
 No implicit arrow returns in callbacks and handlers, no one-line braced `if`.
