@@ -1,0 +1,40 @@
+# kalinichenko:debt
+
+A map of the technical debt: where the code is large and changes often, where
+it breaks the project's own layer rules, and where it is copied. At most three
+places a run become issues labelled `debt`, each with the numbers that put it
+there.
+
+## When it starts
+
+- You ask where the technical debt is, or for a debt map of a path.
+- You ask to find hotspots, layer or import violations, or duplicated code, and
+  file them for refactoring.
+- You ask to re-measure the debt issues that are already open.
+
+## What you get
+
+- **Hotspots, measured.** `scripts/measure.sh` ranks the code files by lines ×
+  the commits that touched them in 60 days. Tests count; documents, lockfiles
+  and fixtures are left out. It needs only bash, git and awk. A high score
+  alone files nothing: the file must hold more than one concern, with a split
+  that can be named.
+- **Your rules, not the skill's.** A layer violation is a rule from the
+  project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks. A hit the
+  rule's text leaves open is reported as borderline, not filed. With no such
+  rule, the step is skipped, and the report says so.
+- **Copies, when it can.** With `bunx` or `npx` on the PATH, `jscpd` finds
+  clones of 15 lines or more; the clones one shared helper removes are one
+  place. It never goes into a `package.json`. Without either, the step is
+  skipped.
+- **Few issues, and no doubles.** At most three places a run. A place an open
+  debt issue already covers is re-measured: its `## Where` gets this run's
+  numbers. A place closed as not planned is not filed again.
+- **Issues take-in reads.** Each issue is labelled `debt`. The label is created
+  once when the repository has none. Take-in in `kalinichenko:github` checks
+  every open debt issue in the area of a task.
+- **Steps in order.** A place larger than one pull request is a parent with a
+  sub-issue per step, linked with the roadmap skill's `plan.sh`, so
+  `kalinichenko:roadmap` offers them in order.
+- **No edits.** The map changes no file in the working tree and opens no pull
+  request. A project with a debt skill of its own keeps using that one.

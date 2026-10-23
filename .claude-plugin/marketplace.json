@@ -8,7 +8,7 @@
     {
       "name": "kalinichenko",
       "source": "./",
-      "description": "Engineering rules as an always-on base prompt, plus the github, roadmap, review-loop, docker, typescript-conventions and react-conventions skills."
+      "description": "Engineering rules as an always-on base prompt, plus the github, roadmap, review-loop, debt, docker, typescript-conventions and react-conventions skills."
     }
   ],
   "description": "Ivan Kalinichenko's engineering rules and skills for Claude Code and Codex."
