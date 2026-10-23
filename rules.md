@@ -138,10 +138,10 @@ Scout fix; it is an issue. Cleaner than you found it is not the same as rebuilt.
 
 ## Code conventions (always)
 
-Before you write or edit a `.ts` or `.tsx` file, invoke the
-`kalinichenko:typescript-conventions` skill. Before you write or edit a React
-component or hook, invoke `kalinichenko:react-conventions` too. A subagent
-invokes them itself, before its first write.
+Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
+`.cts`) in a session, invoke the `kalinichenko:typescript-conventions` skill.
+Before the first write or edit to a React component or hook, invoke
+`kalinichenko:react-conventions` too. A subagent invokes them itself.
 
 ## GitHub (always)
 
