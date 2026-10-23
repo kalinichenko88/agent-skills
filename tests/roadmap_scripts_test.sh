@@ -294,7 +294,7 @@ check 'no diff yet' 'no diff yet' "$(sed -n '/^==> #21 /{n;p;}' "$(overlap)")"
 # The files of an open PR that closes the issue win over the branch, and past
 # 100 they come from REST.
 jq '.data.repository.pullRequests.nodes[0].closingIssuesReferences.nodes = [{number: 21, repository: {nameWithOwner: "kalinichenko88/agent-skills"}}]
-  | .data.repository.pullRequests.nodes[0].files.totalCount = 150' "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
+  | .data.repository.pullRequests.nodes[0].files |= {totalCount: 150, nodes: .nodes[:1]}' "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
 check 'all the files of a large PR' "files: $(jq -r '[.[].filename] | join(", ")' "$fixtures/pr-files.json")" \
   "$(sed -n '/^==> #21 /,/^==> /p' "$(overlap)" | grep '^files: ')"
 # No milestones at all.
