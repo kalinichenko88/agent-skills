@@ -43,8 +43,10 @@ cites() {
     }
   } END { if (all != "") print "cites: " all }'
 }
+# A body line that starts with == gets a space before it: in the file, == starts
+# a section or an entry.
 # ponytail: one gh call per body, about a second each; one aliased GraphQL query if the file gets slow.
-body() { gh issue view "$1" --json body --jq .body; }
+body() { gh issue view "$1" --json body --jq .body | sed 's/^==/ ==/'; }
 default=''
 # A branch that cannot be compared, as one in a fork, has no diff yet.
 diff_of() {

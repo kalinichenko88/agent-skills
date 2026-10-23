@@ -8,7 +8,6 @@
 # edges j -> i of edges[j], for the issues that read.sh loaded.
 
 $1 == "repo" { repo = $2 }
-$1 == "me" { me = $2 }
 $1 == "ms" {
   msorder[$2] = $3; mscur[$2] = $4; mslater[$2] = $5
   msopen[$2] = $6; msclosed[$2] = $7; mstitle[$2] = $8

@@ -45,7 +45,7 @@ END {
       split("", cur)
       cur[mslist[i]] = 1
       gsub(/; /, ", ", titles)
-      print "note: nothing free in " titles "; the main path is from " mstitle[mslist[i]]
+      print "note: nothing on the main path of " titles " is free; it is from " mstitle[mslist[i]]
       mainset(cur)
     }
   }

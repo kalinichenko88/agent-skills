@@ -303,7 +303,7 @@ rm -f "$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations --here)
 check 'worktree.sh --here assigns and checks the branch out where it is' \
   "$(printf 'dry run: gh issue edit 5 --add-assignee @me\ndry run: gh issue develop 5 --name feat/5-scout-citations --checkout\n%s' "$top")" "$out"
-bash "$scripts/worktree.sh" 5 b --there >/dev/null 2>&1 && fail 'worktree.sh takes an unknown third argument'
+(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 b --there >/dev/null 2>&1) && fail 'worktree.sh takes an unknown third argument'
 
 # keep-open.sh removes the pull request's link to the one issue it is given.
 # keep-open-21.json is PR #21's answer, with its link to #14; the cases add a

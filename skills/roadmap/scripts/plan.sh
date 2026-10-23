@@ -190,24 +190,28 @@ case $act in
     list=$(bash "$dir/read.sh" milestones)
     issues=$(bash "$dir/read.sh" issues)
     later=$(awk -F'\t' '$1 == "ms" && $5 == 1 { print $2 "\t" $8; exit }' <<<"$list")
+    # No open Later: a closed one opens again. Its open issues go back into
+    # Later with it, so the check counts them as in Later.
+    closed=''
+    if [ -z "$later" ]; then
+      closed=$(gh api 'repos/{owner}/{repo}/milestones?state=closed&per_page=100' --paginate \
+        --jq '.[] | select(.title | ascii_downcase == "later") | "\(.number)\t\(.title)"' | awk 'NR == 1')
+      later=$closed
+      [ -z "$closed" ] || list=$list$'\n'"ms	${closed%%$'\t'*}	1000000000	0	1	0	0	${closed#*$'\t'}"
+    fi
     own=$(awk -F'\t' -v n="$a" '$1 == "is" && $2 == n { print $3 }' <<<"$issues")
     [ -n "$own" ] || refuse "#$a is not an open issue"
-    if [ -n "$later" ] && [ "$own" = "${later%%$'\t'*}" ]; then
+    if [ -z "$closed" ] && [ -n "$later" ] && [ "$own" = "${later%%$'\t'*}" ]; then
       echo "#$a is in Later already"
       exit 0
     fi
     waiting=$(waiting "$a")
     [ -z "$waiting" ] || refuse "these wait on it outside Later: $waiting"
-    # No open Later: a closed one is opened again, else one is made.
-    if [ -z "$later" ]; then
-      later=$(gh api 'repos/{owner}/{repo}/milestones?state=closed&per_page=100' --paginate \
-        --jq '.[] | select(.title | ascii_downcase == "later") | "\(.number)\t\(.title)"' | awk 'NR == 1')
-      if [ -n "$later" ]; then
-        run gh api -X PATCH "repos/{owner}/{repo}/milestones/${later%%$'\t'*}" -f state=open --silent
-      else
-        run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title=Later -f description='What is wanted but not planned.' --silent
-        later=$'0\tLater'
-      fi
+    if [ -n "$closed" ]; then
+      run gh api -X PATCH "repos/{owner}/{repo}/milestones/${closed%%$'\t'*}" -f state=open --silent
+    elif [ -z "$later" ]; then
+      run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title=Later -f description='What is wanted but not planned.' --silent
+      later=$'0\tLater'
     fi
     run gh issue edit "$a" --milestone "${later#*$'\t'}"
     say "#$a is in Later"

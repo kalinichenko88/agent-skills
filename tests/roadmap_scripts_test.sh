@@ -134,6 +134,13 @@ blocks() {
   done
 }
 
+# A title keeps its backslashes: golang/go#82205's.
+reset
+put '19'
+edit 19 '.title = "strconv: Unquote(`'"'"'\\xff'"'"'`) returns \"\\xff\" (invalid UTF-8) instead of the encoding of U+00FF"'
+check 'a title with backslashes' $'- #19 strconv: Unquote(`\'\\xff\'`) returns "\\xff" (invalid UTF-8) instead of the encoding of U+00FF: free' \
+  "$(bash "$scripts/roadmap.sh" | grep '^- #19 ')"
+
 # read.sh issues: every page, and each field of the record.
 reset
 pages 150
@@ -274,7 +281,7 @@ mark M1
 put '19 40:M2'
 edit 19 '.assignees.nodes = [{login: "someone"}]'
 out=$(bash "$scripts/next.sh")
-check 'fallback note' 'note: nothing free in M1 · Stage 1; the main path is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
+check 'fallback note' 'note: nothing on the main path of M1 · Stage 1 is free; it is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
 check 'busy issue in progress' '#19 Issue 19: assigned to someone' "$(section 'in progress' <<<"$out")"
 # A milestone between two current ones is the next one.
 reset
@@ -284,7 +291,7 @@ put '19 30:M3 40:M2 50:M4'
 edit 19 '.assignees.nodes = [{login: "someone"}]'
 edit 30 '.assignees.nodes = [{login: "someone"}]'
 out=$(bash "$scripts/next.sh")
-check 'fallback between current milestones' 'note: nothing free in M1 · Stage 1, M3 · Stage 3; the main path is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
+check 'fallback between current milestones' 'note: nothing on the main path of M1 · Stage 1, M3 · Stage 3 is free; it is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
 check 'fallback main path' '#40 Issue 40 (M2 · Stage 2), unblocks 0' "$(section 'main path' <<<"$out")"
 # The top 5, the rest counted; Later never offered.
 reset
@@ -308,6 +315,8 @@ edit 21 '.assignees.nodes = [{login: "someone"}] | .linkedBranches.nodes = [{ref
 printf 'Fix `src/server/log.ts:12-14` and src/app/main.ts, see https://github.com/x/y/blob/main/z.ts and e.g. this.\n' >"$FAKE/body-19"
 f=$(overlap)
 check 'cites' 'cites: src/server/log.ts, src/app/main.ts' "$(grep '^cites: ' "$f")"
+printf 'Plan\n====\nFix src/a/b.ts\n' >"$FAKE/body-19"
+check 'a body line that starts with == stays in its entry' ' ====' "$(sed -n '/^==> #19 /,/^==> /p' "$(overlap)" | grep '=====*$')"
 check 'branch files from compare' "files: $(jq -r '[.files[].filename] | join(", ")' "$fixtures/compare.json")" \
   "$(sed -n '/^==> #21 /,/^==> /p' "$f" | grep '^files: ')"
 check 'a failed compare is no diff yet' 'no diff yet' "$(sed -n '/^==> #21 /{n;p;}' "$(FAKE_FAIL='compare/' overlap)")"
@@ -326,6 +335,9 @@ jq '.data.repository.pullRequests.nodes[0].closingIssuesReferences.nodes = [{num
   | .data.repository.pullRequests.nodes[0].files |= {totalCount: 150, nodes: .nodes[:1]}' "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
 check 'all the files of a large PR' "files: $(jq -r '[.[].filename] | join(", ")' "$fixtures/pr-files.json")" \
   "$(sed -n '/^==> #21 /,/^==> /p' "$(overlap)" | grep '^files: ')"
+# GitHub can give no file list for a PR.
+jq '.data.repository.pullRequests.nodes[0].files = null' "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
+bash "$scripts/next.sh" >/dev/null 2>&1 || fail 'next.sh stops on a PR without a file list'
 # No milestones at all.
 reset
 ms '[]'
@@ -436,6 +448,14 @@ out=$(DRY_RUN=1 bash "$scripts/plan.sh" later 19)
 case $out in *'dry run: gh api -X PATCH'*"milestones/$(msno Later)"*'state=open'*'dry run: gh issue edit 19 --milestone Later'*) ;;
   *) fail 'later opens a closed Later again' "$out" ;;
 esac
+# The issues of a closed Later are in Later when it opens again.
+reset
+jq '[.[] | select(.title == "Later") | .state = "closed"]' "$fixtures/milestones.json" >"$FAKE/milestones-closed.json"
+ms 'map(select(.title != "Later"))'
+put '19 5:Later'
+blocks 5 19
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" later 19 2>&1 || true)
+case $out in *'state=open'*'dry run: gh issue edit 19 --milestone Later'*) ;; *) fail 'later counts the issues of a closed Later as in Later' "$out" ;; esac
 check 'usage names every subcommand' 9 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
 
 # board.sh: a project found by title among the owner's projects, not linked
@@ -477,4 +497,6 @@ reset
 FAKE_FAIL='project create' bash "$scripts/board.sh" >"$tmp/out" 2>&1 && fail 'board.sh exits 0 when create fails'
 grep -q '^cannot create a project under kalinichenko88: ' "$tmp/out" || fail 'board.sh names the failed create' "$(cat "$tmp/out")"
 
+# gh's --jq runs gojq, whose Go regexp takes (?<name>) only from Go 1.22.
+grep -n '(?<' "$scripts"/*.sh && fail 'a named capture in a gh --jq filter'
 echo 'roadmap_scripts_test: ok'

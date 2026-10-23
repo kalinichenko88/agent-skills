@@ -80,9 +80,10 @@ The argument is the repository's name for the bug label in `gh label list`.
 The script prints the current milestones, then the sections `== main path`,
 `== bugs` and `== secondary` — each one's top 5, ranked, as `#21 <title>
 (<milestone>), unblocks 2` — then `== in progress`, and last the path of the
-overlap file. When nothing in the current milestones is free, a `note:` line
-says so, and the main path comes from the next milestone: the first after the
-first current one that is not current and not `Later`.
+overlap file. When nothing on the main path of the current milestones is
+free, a `note:` line says so, and the main path comes from the next
+milestone: the first after the first current one that is not current and not
+`Later`.
 
 Give one task: the first of the main path, else of bugs, else of secondary.
 Give its number, title, track and milestone, and why it is first, as "it is

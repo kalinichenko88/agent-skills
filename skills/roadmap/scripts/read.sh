@@ -10,7 +10,6 @@
 # The records:
 #
 #   repo  <owner/name>
-#   me    <login>
 #   is    <n> <milestone|0> <bug 1|0> <busy|-> <open blockers|-> <parent|0>
 #         <parent's milestone|0> <open sub-issues> <title>
 #   br    <n> <linked branch>
@@ -38,11 +37,14 @@ usage() {
 }
 [ $# -ge 1 ] || usage
 
+# A record: the fields joined by tabs, as @tsv does but without its escapes,
+# so a backslash stays one; a tab or a line break in a field becomes a space.
+tsv='def tsv: map(. // "" | tostring | gsub("[\t\r\n]"; " ")) | join("\t");'
 # The one page of open milestones, with their order and current mark.
 # ponytail: 100 open milestones at most; paginate if a project ever has more.
-milestones='def later: .title | ascii_downcase == "later";
+milestones=$tsv'def later: .title | ascii_downcase == "later";
 def order: if later then 1000000000
-  elif (.title | test("^M[0-9]+([^0-9]|$)")) then (.title | capture("^M(?<k>[0-9]+)").k | tonumber)
+  elif (.title | test("^M[0-9]+([^0-9]|$)")) then (.title | match("^M([0-9]+)").captures[0].string | tonumber)
   else 100000 + .number end;
 def lines: (.description // "") | gsub("\r"; "") | split("\n") | map(gsub("^\\s+|\\s+$"; "")) | map(select(. != ""));
 map(. + {order: order, later: later, lines: lines})
@@ -72,11 +74,11 @@ case $1 in
     }
   }
 }'
-    BUG=${2:-bug} gh api graphql --paginate -F owner='{owner}' -F name='{repo}' -f query="$query" --jq '
+    BUG=${2:-bug} gh api graphql --paginate -F owner='{owner}' -F name='{repo}' -f query="$query" --jq "$tsv"'
       .data.viewer.login as $me | .data.repository.nameWithOwner as $repo
       | def who: if . == null then "ghost" elif .login == $me then "you" else .login end;
         def dash: if . == "" then "-" else . end;
-      (["repo", $repo] | @tsv), (["me", $me] | @tsv),
+      (["repo", $repo] | tsv),
       (.data.repository.issues.nodes[] | . as $i
         | ([(.assignees.nodes[] | "assigned to " + (. | who)),
             (.linkedBranches.nodes[] | select(.ref) | "branch " + .ref.name),
@@ -89,16 +91,16 @@ case $1 in
         | (["is", .number, (.milestone.number // 0), (if any(.labels.nodes[]; .name == $ENV.BUG) then 1 else 0 end),
             $busy, $blockers, (if $local then .parent.number else 0 end),
             (if $local then .parent.milestone.number // 0 else 0 end),
-            (.subIssuesSummary.total - .subIssuesSummary.completed), .title] | @tsv),
-          (.linkedBranches.nodes[] | select(.ref) | ["br", $i.number, .ref.name] | @tsv))'
+            (.subIssuesSummary.total - .subIssuesSummary.completed), .title] | tsv),
+          (.linkedBranches.nodes[] | select(.ref) | ["br", $i.number, .ref.name] | tsv))'
     ;;
   milestones)
     [ $# -eq 1 ] || usage
     gh api 'repos/{owner}/{repo}/milestones?state=open&per_page=100' --jq "$milestones"'
       | (any(.[]; .marked)) as $any | (map(select(.later | not)) | .[0].number) as $first
       | (.[] | ["ms", .number, .order, (if .marked or (($any | not) and .number == $first) then 1 else 0 end),
-          (if .later then 1 else 0 end), .open_issues, .closed_issues, .title] | @tsv),
-        (.[] | .number as $n | .lines[] | select(. != "Current.") | ["md", $n, .] | @tsv)'
+          (if .later then 1 else 0 end), .open_issues, .closed_issues, .title] | tsv),
+        (.[] | .number as $n | .lines[] | select(. != "Current.") | ["md", $n, .] | tsv)'
     ;;
   milestone)
     [ $# -eq 2 ] || usage
@@ -106,7 +108,7 @@ case $1 in
       | ($ENV.NAME | ascii_downcase) as $q
       | .[] | (.title | ascii_downcase) as $t
       | select($t == $q or (($q | test("^m[0-9]+$")) and ($t | startswith($q)) and ($t | .[($q | length):] | test("^([^0-9]|$)"))))
-      | [.number, .title] | @tsv')
+      | [.number, .title] | tsv')
     [ -n "$found" ] || {
       echo "read.sh: no open milestone matches $2" >&2
       exit 1
@@ -130,14 +132,13 @@ case $1 in
     }
   }
 }'
-    gh api graphql --paginate -F owner='{owner}' -F name='{repo}' -f query="$query" --jq '
+    gh api graphql --paginate -F owner='{owner}' -F name='{repo}' -f query="$query" --jq "$tsv"'
       .data.viewer.login as $me | .data.repository.nameWithOwner as $repo
       | def dash: if . == "" then "-" else . end;
-      (["me", $me] | @tsv),
       (.data.repository.pullRequests.nodes[]
         | ["pr", .number, (if .author == null then "ghost" elif .author.login == $me then "you" else .author.login end),
            ([.closingIssuesReferences.nodes[] | select(.repository.nameWithOwner == $repo) | .number | tostring] | join(",") | dash),
-           ([.files.nodes[].path] | join(",") | dash), .files.totalCount] | @tsv)'
+           ([.files.nodes[]?.path] | join(",") | dash), (.files.totalCount // 0)] | tsv)'
     ;;
   *) usage ;;
 esac

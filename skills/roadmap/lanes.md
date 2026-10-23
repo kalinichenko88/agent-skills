@@ -35,7 +35,8 @@ An entry starts with `==>`:
   and its `files:`.
 
 A body can hold `#` headings of its own: an entry ends only at the next line
-that starts with `==`.
+that starts with `==`. A body line that starts with `==` has a space before
+it.
 
 ## Read
 
