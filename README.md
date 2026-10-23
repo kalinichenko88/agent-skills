@@ -13,8 +13,12 @@ prompt of engineering rules, plus the skills those rules lean on.
   `hooks/rules.sh` injects it at the start of every session and every subagent.
 - **[`kalinichenko:github`](skills/github/README.md)** — commits, pull
   requests, issues and Actions.
+
+  ![The GitHub skill: start a task, find something outside it, finish it](docs/github/00-overview.webp)
 - **[`kalinichenko:roadmap`](skills/roadmap/README.md)** — a project manager on
   top of GitHub.
+
+  ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**

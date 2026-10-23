@@ -67,9 +67,10 @@ that brief and changes only the footer's skill name and the `<image>` blocks.
 5. Convert: `cwebp -quiet -q 85 "$dir/01-start.png" -o docs/github/01-start.webp`.
    A picture is about 0.2 MB as WebP and 1.9 MB as PNG, and the plugin installs
    as a copy of the whole repository. Keep the file names, so that the links in
-   `skills/<skill>/README.md` still work.
-6. Commit the brief and the pictures together, and update the alt text in
-   `skills/<skill>/README.md` when a title changed.
+   `skills/<skill>/README.md` and the root README still work.
+6. Commit the brief and the pictures together. When a title changed, update
+   the alt text in `skills/<skill>/README.md`, and for the overview also in the
+   root README.
 
 ## When a picture is out of date
 
