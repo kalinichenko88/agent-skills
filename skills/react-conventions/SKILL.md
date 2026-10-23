@@ -119,9 +119,9 @@ Query), it holds this state instead.
 
 ## Render reads props, state and context — not refs
 
-A ref changes without a re-render. A value read from `ref.current` in the
-component body comes from an earlier moment, and the UI does not update when it
-changes. The common `usePrevious` — `useRef`, an effect that writes it,
+A ref change schedules no render. A value read from `ref.current` in the
+component body can be stale, and the UI does not update when it changes. The
+common `usePrevious` — `useRef`, an effect that writes it,
 `return ref.current` — does exactly this: an arrow next to a changed price
 disappears on the next unrelated render.
 
@@ -137,8 +137,14 @@ export function usePrevious<T>(value: T): T | undefined {
 }
 ```
 
+It returns the previous *different* value: A → B → B gives
+`undefined → A → A`. Pass a primitive or a value with a stable identity: an
+object literal made in the same render is new every time and loops.
+
 Read and write refs in effects and event handlers. A value that the UI shows is
 state. The one exception is lazy initialisation:
 `if (ref.current === null) { ref.current = new Player(); }`.
-`eslint-plugin-react-hooks` reports the rest with the React Compiler checks in
-its `recommended` preset (6.x; `recommended-latest` in 5.2).
+
+`eslint-plugin-react-hooks` reports most of these as `react-hooks/refs`: in
+`recommended` from 7.0, only in `recommended-latest` in 6.1.1; 5.x has no such
+rule.
