@@ -180,4 +180,51 @@ check 'pr record: number, you, file count' "$(printf 'pr\t%s\tyou\t%s' "${first%
   "$(bash "$scripts/read.sh" prs | grep '^pr	' | head -1 | cut -f1-3,6)"
 check 'usage' 2 "$(bash "$scripts/read.sh" >/dev/null 2>&1; echo $?)"
 
+# roadmap.sh: each milestone in order, its issues in dependency order with
+# their state.
+reset
+mark M1
+put '19 20 21 22 23 42:Later 50:M2'
+blocks 20 21
+edit 22 '.assignees.nodes = [{login: "kalinichenko88"}]'
+edit 23 '.blockedBy.nodes = [{number: 3, state: "OPEN", repository: {nameWithOwner: "other/repo"}}]'
+out=$(bash "$scripts/roadmap.sh")
+check 'dependency order and states' \
+  "$(printf -- '- #19 Issue 19: free\n- #21 Issue 21: free\n- #20 Issue 20: blocked by #21\n- #22 Issue 22: assigned to you\n- #23 Issue 23: blocked by other/repo#3')" \
+  "$(sed -n '/^## M1 /,/^## /p' <<<"$out" | grep '^- ')"
+progress() { jq -r --arg p "$1 " '.[] | select(.title | startswith($p)) | "\(.closed_issues) of \(.open_issues + .closed_issues) closed"' "$fixtures/milestones.json"; }
+check 'a current milestone' "current, $(progress M1)" "$(sed -n '/^## M1 /{n;p;}' <<<"$out")"
+check 'a milestone that is not current' "$(progress M2)" "$(sed -n '/^## M2 /{n;p;}' <<<"$out")"
+check 'Later shows titles only' '- #42 Issue 42' "$(sed -n '/^## Later/,/^## /p' <<<"$out" | grep '^- ')"
+check 'Later by name shows states' '- #42 Issue 42: free' "$(bash "$scripts/roadmap.sh" Later | grep '^- ')"
+# A cycle made by hand in GitHub ends, and both issues show.
+blocks 21 20
+check 'a cycle prints each issue once' 2 "$(bash "$scripts/roadmap.sh" | grep -cE '^- #2[01] ')"
+
+# A sub-issue takes its parent's milestone and blockers; a parent waits on its
+# open sub-issues, also those in another repository.
+reset
+put '19 30:- 31:M2'
+edit 30 ".parent = {number: 19, milestone: {number: $(msno M1)}, repository: {nameWithOwner: \"kalinichenko88/agent-skills\"}}"
+blocks 19 31
+edit 19 '.subIssuesSummary = {total: 2, completed: 0}'
+out=$(bash "$scripts/roadmap.sh")
+check 'a sub-issue under its parent milestone, blocked through it' '- #30 Issue 30: blocked by #31' \
+  "$(sed -n '/^## M1 /,/^## /p' <<<"$out" | grep '^- #30 ')"
+check 'a parent waits on all its open sub-issues' '- #19 Issue 19: blocked by #31; open sub-issues: 2' "$(grep '^- #19 ' <<<"$out")"
+check 'one milestone with a blocker elsewhere' '- #31 Issue 31 (M2 · Stage 2): free' "$(bash "$scripts/roadmap.sh" M1 | grep '^- #31 ')"
+check 'one milestone has one section' 1 "$(bash "$scripts/roadmap.sh" M1 | grep -c '^## ')"
+
+# A closed milestone counts as none.
+reset
+put '19 24'
+edit 24 '.milestone = {number: 999999}'
+check 'an issue in a closed milestone' '1 open: #24' "$(bash "$scripts/roadmap.sh" | sed -n '/^## No milestone/{n;p;}')"
+
+# No milestones at all, as in a new project.
+reset
+ms '[]'
+put '19:-'
+check 'no milestones' "$(printf '# Roadmap of kalinichenko88/agent-skills\n\nNo open milestones.')" "$(bash "$scripts/roadmap.sh" | sed -n '1,3p')"
+
 echo 'roadmap_scripts_test: ok'
