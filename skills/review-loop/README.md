@@ -1,8 +1,8 @@
 # kalinichenko:review-loop
 
 A review that ends: rounds that read only the last fixes, a stop at the first
-clean round, a security review last, and a summary of what was decided and
-fixed.
+clean round, one last pass over the whole branch when a defect was fixed, a
+security review last, and a summary of what was decided and fixed.
 
 ## When it starts
 
@@ -14,8 +14,9 @@ fixed.
 ## What you get
 
 - **Less code first.** When the
-  [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed, its `ponytail-review` runs once before the first round,
-  and its cuts are one commit. Without ponytail the step is skipped, and the
+  [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed,
+  its `ponytail-review` runs once before the first round, and its cuts are one
+  commit. Without ponytail the step is skipped, and the
   summary says so.
 - **A level with a reason.** `low` to `xhigh` by the weight of the change, and
   one sentence that says why. `ultra` only when you ask for it.

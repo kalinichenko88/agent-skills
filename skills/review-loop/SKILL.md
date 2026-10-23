@@ -65,7 +65,8 @@ installed, skip it and say so in the summary.
    wrapping — without another round.
 4. **The third round still confirms a defect:** stop, and ask the person
    whether to go on. Give the findings of the three rounds. When the person
-   says to stop, skip step 5 and go to the security review.
+   says to stop, skip step 5 and go to the security review, or to the summary
+   when the security review has already run.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
    level, when a round confirmed a defect and its fix was committed. A round
    on one commit cannot see how a fix fits the rest of the branch; this pass
@@ -106,10 +107,12 @@ After the last pass and its rounds, run `/security-review` once, on the final
 branch. It reads the branch against origin's default branch and takes no
 target, so it never runs inside the loop. Its findings go through *The
 findings*. Their fixes are one commit, and that commit goes through steps 2 to
-4 of *The rounds*, at the level the loop used, with the rounds counted again
-from this review. In Codex: `/review` with the custom instructions "Find
-security defects on this branch against origin/<default branch>: injection,
-authentication, authorization, secrets and data exposure." Where there is no `origin` remote, say so in the summary.
+4 of *The rounds*, with the rounds counted again from this review. Its level
+comes from *The level* for that fix: a fix to an access check is `xhigh`,
+whatever level the loop used. In Codex: `/review` with the custom instructions
+"Find security defects on this branch against origin/<default branch>:
+injection, authentication, authorization, secrets and data exposure." Where
+there is no `origin` remote, say so in the summary.
 
 ## The summary
 
