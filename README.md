@@ -24,7 +24,7 @@ prompt of engineering rules, plus the skills those rules lean on.
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
 - **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
   that ends: rounds that read only the last fixes, one last pass over the
-  whole branch when a defect was fixed, a security review, and a summary of
+  whole branch when the loop made a fix, a security review, and a summary of
   what was decided and fixed.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
@@ -112,8 +112,8 @@ To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
 `tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
 skills. `tests/review_loop_eval.sh` counts the review rounds and what each one
-reads; run it after a change to `skills/review-loop`. Both call the model, so
-they are not part of `make check`.
+reads; run it after a change to `skills/review-loop` or to its section in
+`rules.md`. Both call the model, so they are not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run

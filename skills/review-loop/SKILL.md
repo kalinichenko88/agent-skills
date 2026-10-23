@@ -8,7 +8,7 @@ description: Use when a change is reviewed, before or after its pull request ope
 A review runs in rounds. An over-engineering review comes first, when its
 skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
-that confirms no defect. When the loop fixed a defect, one last pass reads the
+that confirms no defect. When the loop committed a fix, one last pass reads the
 whole branch again, once. A security review comes last. The agent fixes and
 decides by itself, except for a change to business logic, and ends with a
 summary.
@@ -71,18 +71,21 @@ installed, skip it and say so in the summary.
    security review, or to the summary when the security review has already
    run.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
-   level, when a round confirmed a defect and its fix was committed. A round
-   on one commit cannot see how a fix fits the rest of the branch; this pass
-   can. When round 1 confirmed no defect, the pass is skipped: no fix needs
-   that look, and nits do not count. Its fixes are one commit and go through
-   steps 2 to 4, with the rounds counted again from this pass. There is never
-   a second whole-branch pass: the rounds that reread the whole branch are the
-   ones that did not stop.
+   level, when the loop committed a fix; nits do not count. A round on one
+   commit cannot see how a fix fits the rest of the branch; this pass can.
+   There is never a second whole-branch pass: the rounds that reread the whole
+   branch are the ones that did not stop.
 
-A person's review comments, before or after the pull request opens, go through
-*The findings* below. Their fixes are one commit, which goes through steps 2
-to 4. The reply names the commit, and the pull request's `## Review` gets a
-line for it.
+**Every fix commit goes through steps 2 to 4**, whatever found it: a round,
+the last pass, the security review, the answer to a question, or a person's
+review comments, before or after the pull request opens. Round 1, the last
+pass, the security review, each answer and each set of comments starts a new
+count of rounds; the rounds on its fixes, and on the fixes those rounds
+prompt, count from it. Each round runs at the level that *The level* gives the
+fix it reads, so a security fix is `xhigh`.
+
+A person's review comments go through *The findings* below, and the reply
+names the fix commit.
 
 ## The findings
 
@@ -99,9 +102,8 @@ line for it.
 4. **Ask only about a change to business logic:** what the product does for
    its users — a rule, a calculation, a state, a permission, the data it keeps
    or deletes. Give the options and a recommendation, and keep the rest of the
-   round going while the person answers. The review does not end while a
-   question is open: the fix the answer needs is one commit, and it goes
-   through steps 2 to 4 before the last pass.
+   round going while the person answers. When nobody can answer, as in a run
+   with no person, the question goes into the summary as open.
 5. **Fix at the root.** When the same defect is in sibling call sites or in a
    shared token, fix it there, and count the places.
 6. **A finding outside the task is an issue**, through the
@@ -113,13 +115,11 @@ line for it.
 After the last pass and its rounds, run `/security-review` once, on the final
 branch. It reads the branch against origin's default branch and takes no
 target, so it never runs inside the loop. Its findings go through *The
-findings*. Their fixes are one commit, and that commit goes through steps 2 to
-4 of *The rounds*, with the rounds counted again from this review. The rounds
-on that commit run at `xhigh`, the row for security, whatever level the loop
-used. In Codex: `/review` with the custom instructions
-"Find security defects on this branch against origin/<default branch>:
-injection, authentication, authorization, secrets and data exposure." Where
-there is no `origin` remote, say so in the summary.
+findings*, and its fixes through *Every fix commit* in *The rounds*. In
+Codex: `/review` with the custom instructions "Find security defects on this
+branch against origin/<default branch>: injection, authentication,
+authorization, secrets and data exposure." Where there is no `origin` remote,
+say so in the summary.
 
 ## The summary
 
