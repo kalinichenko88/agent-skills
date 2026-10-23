@@ -7,9 +7,10 @@ prompt of engineering rules, plus the skills those rules lean on.
   calling work done, ship every bug fix with its test, use the platform before
   a dependency, keep code and commits in English, write prose in Simplified
   Technical English, move docs with the change, verify review findings before
-  acting on them. In Claude Code a Haiku subagent does the reading for two of
-  them: it counts the real payloads before a bug fix, and finds the docs a
-  change made false. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
+  acting on them, load the TypeScript and React conventions before the first
+  write to a `.ts` or `.tsx` file. In Claude Code a Haiku subagent does the
+  reading for two of them: it counts the real payloads before a bug fix, and
+  finds the docs a change made false. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
   `hooks/rules.sh` injects it at the start of every session and every subagent.
 - **`kalinichenko:github`** — commits, pull requests, issues and Actions.
 
@@ -139,6 +140,11 @@ To try a script that writes on a real tracker without writing to it, set
 checkout's.
 
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
+
+`tests/skill_load_eval.sh` gives a TypeScript task and a React task to Haiku
+subagents and counts the runs that invoke the conventions skills before their
+first write. It calls the model, so it is not part of `make check`. Run it by
+hand after a change to `rules.md` or to a skill's description.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
