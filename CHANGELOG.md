@@ -4,6 +4,20 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 `main`: its subject without the type, and the PR number when it has one. The
 `/release` skill writes the section; pull requests leave this file alone.
 
+## 0.5.1 - 2026-10-23
+
+### Changed
+
+- Say in the conventions READMEs that rules.md starts them before the first write (#45)
+- Show every scenario picture in the github and roadmap READMEs (#44)
+- Give each skill a README with its pictures (#43)
+
+### Fixed
+
+- typescript: show that the brace rule covers a JSX .map callback (#49)
+- rules: make subagents invoke the TypeScript and React conventions before they write (#42)
+- release: stop the release when its tag is not on the remote (#39)
+
 ## 0.5.0 - 2026-10-23
 
 ### Added
