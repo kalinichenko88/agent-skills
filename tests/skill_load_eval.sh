@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Gives a TypeScript task and a React task to Haiku subagents and counts the
+# Gives two TypeScript tasks and a React task to Haiku subagents and counts the
 # runs that invoke the conventions skills before their first write, then the
-# written files with an implicit return in a method callback. It calls
+# written files with an implicit return in a method callback, then the order
+# runs with a file that does not open with its primary export. It calls
 # the model, so it costs tokens and is not part of `make check`: run it by hand
 # after a change to rules.md or to a skill's description. It runs with this
 # machine's other plugins and settings, the setup the rules must work in.
@@ -16,6 +17,7 @@ runs=${1:-5}
 logs=$(mktemp -d)
 
 ts_task='Add src/cart-total.ts to this project. A cart item has an id, a name, a unit price in cents and a quantity. Export a function that returns the cart total in cents, skipping items with quantity 0, and a function that returns the names of the items whose unit price is over a given limit. Write the file, then reply with its contents.'
+order_task='Add an order feature to this project, in src/. An order has an id, a customer and a list of lines. A line has a product id, a quantity and a unit price in cents. A customer has an id, a name and a discount, which is either a percent or a fixed amount in cents. Add a function that returns the order total in cents after the customer discount, and a function that returns a text summary of the order, one row per line and the total at the end, each in its own file. Both functions use the same order, line, customer and discount types. Write the files, then reply with the path and the contents of every file you wrote.'
 react_task='Add src/search-panel.tsx to this project: a React component with a text input and a Search button. On submit it fetches /api/search?q=<the text>, which returns a JSON array of { id, title, url }. While the request runs it shows "Loading…", on failure it shows the error message, and on success it shows the results as a list of links. Write the file, then reply with its contents.'
 # One Haiku session that hands the task to one Haiku subagent, as the main
 # model does with routine work. The installed copy of the plugin is turned off,
@@ -72,19 +74,51 @@ braced() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
+# first <dir>...: the order runs whose every written file opens with an export
+# after its imports, as typescript-conventions asks of the primary export. It
+# prints the first line of each file that opens with something else. The
+# recorded runs that broke the rule put a helper or an Intl constant there.
+first() {
+  local ok=0 dir file line bad
+  for dir; do
+    if [ -z "$(find "$dir/src" -name '*.ts' 2>/dev/null)" ]; then
+      echo "no file written: $dir/src"
+      continue
+    fi
+    bad=0
+    while IFS= read -r file; do
+      # The first line past the imports, blank lines and comments.
+      line=$(awk '/^import/ { open = !/;[[:space:]]*$/; next }
+        open { if (/;[[:space:]]*$/) open = 0; next }
+        /^[[:space:]]*$/ || /^[[:space:]]*(\/\/|\/\*|\*)/ { next }
+        { print; exit }' "$file")
+      case $line in export*) ;; *) echo "$file: $line" && bad=1 ;; esac
+    done < <(find "$dir/src" -name '*.ts')
+    [ "$bad" -eq 1 ] || ok=$((ok + 1))
+  done
+  echo "export first: $ok of $# order runs open every file with an export"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
 for i in $(seq "$runs"); do
   run "$ts_task" "$logs/ts-$i.jsonl" &
   run "$react_task" "$logs/react-$i.jsonl" &
+  run "$order_task" "$logs/order-$i.jsonl" &
 done
 wait
 
 failed=0
-count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl
+count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl "$logs"/order-*.jsonl
 count react-conventions "$logs"/react-*.jsonl
 files=()
 for i in $(seq "$runs"); do
   files+=("$logs/ts-$i/src/cart-total.ts" "$logs/react-$i/src/search-panel.tsx")
 done
 braced "${files[@]}"
+orders=()
+for i in $(seq "$runs"); do
+  orders+=("$logs/order-$i")
+done
+first "${orders[@]}"
 echo "logs: $logs"
 exit "$failed"

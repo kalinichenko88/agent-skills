@@ -161,4 +161,27 @@ than inheriting whatever the host has.
 ## Files are kebab-case, one entity per file
 
 `create-vault.ts`, not `createVault.ts`. Intra-file order: imports → the primary
-export → private helpers below it.
+export → everything it uses below it: private helpers, module constants, and
+the types that only this file uses. A file opens with what it is for.
+
+```ts
+import type { Order } from './order';
+
+export function orderSummary(order: Order): string {
+  const rows = order.lines.map((line) => {
+    return `${line.productId} × ${line.quantity}: ${formatCents(line.quantity * line.unitPriceCents)}`;
+  });
+
+  return rows.join('\n');
+}
+
+const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+function formatCents(cents: number): string {
+  return money.format(cents / 100);
+}
+```
+
+Not: `const money` and `formatCents` above `orderSummary`. A `const` below the
+export is safe: the function reads it when it runs, after the module has
+loaded.
