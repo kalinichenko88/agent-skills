@@ -56,6 +56,23 @@ left after a check hides the part that the check did not do.
 No implicit arrow returns in callbacks and handlers, no one-line braced `if`.
 The body goes on its own line, even when it is one statement.
 
+```tsx
+const inStock = items.filter((item) => {
+  return item.quantity > 0;
+});
+
+{results.map((result) => {
+  return (
+    <li key={result.id}>
+      <a href={result.url}>{result.title}</a>
+    </li>
+  );
+})}
+```
+
+JSX is no exception. `results.map((result) => (<li …>…</li>))` is an implicit
+return too: a callback that renders a list takes braces and a `return`.
+
 ## A blank line goes before `return`
 
 ```ts
