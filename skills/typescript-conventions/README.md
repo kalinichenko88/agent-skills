@@ -20,7 +20,7 @@ agent matches it and says so.
 - **A check of the array checks each item.** `Array.isArray` checks only the
   container. Each item gets a guard, or the project's schema library.
 - **Bodies are braced and expanded.** No implicit arrow returns in callbacks,
-  no one-line braced `if`.
+  a JSX `.map` included, no one-line braced `if`.
 - **A blank line before `return`**, unless it is the only statement in its
   block.
 - **Render conditions are named constants**, declared above the `return`.

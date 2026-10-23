@@ -106,7 +106,8 @@ checkout's.
 To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
 `tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
-skills; it calls the model, so it is not part of `make check`.
+skills, and the files they write with an implicit return in a method callback,
+as `.map((x) => (`; it calls the model, so it is not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
