@@ -13,8 +13,8 @@ fixed.
 
 ## What you get
 
-- **Less code first.** When the [ponytail](https://github.com/DietrichGebert/ponytail)
-  plugin is installed, its `ponytail-review` runs once before the first round,
+- **Less code first.** When the
+  [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed, its `ponytail-review` runs once before the first round,
   and its cuts are one commit. Without ponytail the step is skipped, and the
   summary says so.
 - **A level with a reason.** `low` to `xhigh` by the weight of the change, and
@@ -24,14 +24,14 @@ fixed.
 - **A stop.** The loop ends at the first round that confirms no defect. Nits
   are applied without another round. After the third round with a defect, the
   agent asks you.
-- **One last look at the whole branch.** After the loop stops, one pass reads
-  the whole branch again, to see how the fixes fit the rest. Its fixes go
-  through the same rounds. It never runs twice.
+- **One last look at the whole branch.** When the loop fixed a defect, one
+  pass reads the whole branch again after it stops, to see how the fixes fit
+  the rest. Its fixes go through the same rounds. It never runs twice.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.
 - **A security review last.** `/security-review` runs once on the final
-  branch. Its fixes take one more round of `/code-review`.
+  branch. Its fixes go through the same rounds of `/code-review`.
 - **A summary.** The rounds, the decisions with their reasons, what was fixed,
   what was declined and why, and the issues filed. The pull request
   description carries it under `## Review`.
