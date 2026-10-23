@@ -58,11 +58,10 @@ not. Editing `rules.md` does not need a new trust; changing `hooks/hooks.json`
 does.
 
 The hook is plain bash with no other dependency. The github skill's scripts are
-bash too, and they also need `gh`. macOS, Linux and WSL have bash already. On
-native Windows, Claude Code runs them in Git Bash, so install
-[Git for Windows](https://git-scm.com/downloads/win): without it, Claude Code
-runs the hook in PowerShell, and the rules do not load. Codex on native Windows
-is not tested: run it in WSL.
+bash too, and they also need `gh`. On native Windows, Claude Code runs them in
+Git Bash, so install [Git for Windows](https://git-scm.com/downloads/win):
+without it, Claude Code runs the hook in PowerShell, and the rules do not load.
+Codex on native Windows is not tested: run it in WSL.
 
 ## Update
 
@@ -102,9 +101,8 @@ It does not touch a `return` that is the only statement in its block.
 through the hook to prove the JSON it prints carries the file byte for byte and
 stays within Claude Code's 10,000-character cap on hook context. It checks that
 a checkout with `core.autocrlf=true`, the Git for Windows default, keeps every
-text file in LF and still gives the rules. It also runs the github skill's
-scripts against a fake `gh` that answers from payloads
-recorded in `tests/fixtures/github/`.
+text file in LF. It also runs the github skill's scripts against a fake `gh`
+that answers from payloads recorded in `tests/fixtures/github/`.
 
 To try a script that writes on a real tracker without writing to it, set
 `DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`
