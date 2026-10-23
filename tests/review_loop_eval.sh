@@ -2,8 +2,8 @@
 # Gives the main model a branch with one defect and two nits, and asks it to
 # review and fix until the review is clean, one review subagent a round. It
 # prints, for each run, the rounds and what each round after the first was
-# given to read. It exits 1 when a run has fewer than two rounds, did not read
-# the whole branch exactly once after round 1, or did not invoke the skill. It
+# given to read. It exits 1 when a run has fewer than two rounds, read the
+# whole branch more than once after round 1, or did not invoke the skill. It
 # calls the model, so it costs tokens and is not part of `make check`: run it
 # by hand after a change to skills/review-loop or to its section in rules.md.
 # It runs with this machine's other plugins and settings.
@@ -68,28 +68,30 @@ for i in $(seq "$runs"); do
 done
 wait
 
-# report <log>: each review round is a top-level Agent call. A round after the
-# first that names no single commit — `git show <sha>` or `<sha>^..<sha>` —
-# was sent to the whole branch again. The fixture always has a defect, so a run
-# that follows the skill has two rounds or more, and exactly one of them after
-# round 1 is the whole branch: the last pass.
-# ponytail: a whole-branch prompt that also names a single commit counts as
-# one commit, and a commit named another way counts as the whole branch; read
-# the printed prompts when a count looks wrong.
+# report <log>: each review round is a top-level Agent call that is not an
+# Explore subagent, the kind rules.md sends to count payloads and sweep docs. A
+# round after the first that names no single commit — `git show <sha>`,
+# `git show HEAD` or `<sha>^..<sha>` — was sent to the whole branch again. The
+# fixture always has a defect, so a run that follows the skill has two rounds
+# or more. At most one of them after round 1 reads the whole branch: the last
+# pass, which a stop after three rounds skips.
+# ponytail: the count reads prompt text, so a security review subagent counts
+# as a whole-branch read, and a commit named another way counts as the whole
+# branch; whether the last pass ran is left to the printed prompts.
 failed=0
 for log in "$logs"/run-*.jsonl; do
   prompts=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Agent")
-    | .input.prompt | gsub("\n"; " ")' "$log")
+    | select(.input.subagent_type != "Explore") | .input.prompt | gsub("\n"; " ")' "$log")
   rounds=$(grep -c . <<<"$prompts" || true)
   whole=$(tail -n +2 <<<"$prompts" |
-    grep -cvE 'git( -C [^ ]+)? show( --?[a-z-]+)* [0-9a-f]{7,}|[0-9a-f]{7,}\^\.\.[0-9a-f]{7,}' || true)
+    grep -cvE 'git( -C [^ ]+)? show( --?[a-z-]+)* ([0-9a-f]{7,}|HEAD)\.?([^.~^0-9A-Za-z]|$)|[0-9a-f]{7,}\^\.\.[0-9a-f]{7,}' || true)
   skill=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Skill")
     | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
   echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, review-loop invoked $skill times"
   cut -c1-300 <<<"${prompts:-no review subagent ran}"
-  [ "$rounds" -ge 2 ] && [ "$whole" -eq 1 ] && [ "$skill" -ge 1 ] || failed=1
+  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$skill" -ge 1 ] || failed=1
 done
 echo "Logs: $logs"
 exit "$failed"

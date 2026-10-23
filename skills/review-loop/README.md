@@ -16,8 +16,7 @@ security review last, and a summary of what was decided and fixed.
 - **Less code first.** When the
   [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed,
   its `ponytail-review` runs once before the first round, and its cuts are one
-  commit. Without ponytail the step is skipped, and the
-  summary says so.
+  commit. Without ponytail the step is skipped, and the summary says so.
 - **A level with a reason.** `low` to `xhigh` by the weight of the change, and
   one sentence that says why. `ultra` only when you ask for it.
 - **Rounds that read less.** The first round reads the whole branch. Each round
