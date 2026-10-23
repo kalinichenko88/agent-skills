@@ -30,15 +30,22 @@ prompt of engineering rules, plus the skills those rules lean on.
   [start a task](docs/github/01-start.webp),
   [find something outside the task](docs/github/02-during.webp),
   [finish the task](docs/github/03-finish.webp).
-- **`kalinichenko:roadmap`** — a project manager on top of GitHub. It answers
-  "what can I take now", "what can run in parallel" and "what is left to close
-  M1", builds the roadmap with you from the project's `docs/`, and puts a task
-  off to `Later` when you agree to. The plan lives in GitHub: milestones in
-  order, "blocked by" links and sub-issues, so it cannot go stale. Scripts read
-  it through the GitHub API and rank the free tasks on the main path, among
-  bugs and the rest. In Claude Code a Haiku subagent reads the code to find
-  which tasks would change the same functions. A GitHub Project with saved
-  views, which the skill sets up, shows the plan.
+- **`kalinichenko:roadmap`** — a project manager on top of GitHub.
+
+  ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
+
+  It answers "what can I take now", "what can run in parallel" and "what is
+  left to close M1", builds the roadmap with you from the project's `docs/`,
+  and puts a task off to `Later` when you agree to. The plan lives in GitHub:
+  milestones in order, "blocked by" links and sub-issues, so it cannot go
+  stale. Scripts read it through the GitHub API and rank the free tasks on the
+  main path, among bugs and the rest. In Claude Code a Haiku subagent reads the
+  code to find which tasks would change the same functions. A GitHub Project
+  with saved views, which the skill sets up, shows the plan. Each scenario step
+  by step:
+  [plan the roadmap](docs/roadmap/01-plan.webp),
+  [pick the next task](docs/roadmap/02-next.webp),
+  [close a milestone](docs/roadmap/03-close.webp).
 - **`kalinichenko:docker`** — the newest stable image, pinned exactly, on the
   smallest base that runs the app.
 - **`kalinichenko:typescript-conventions`** — house TypeScript style.
