@@ -4,6 +4,23 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 `main`: its subject without the type, and the PR number when it has one. The
 `/release` skill writes the section; pull requests leave this file alone.
 
+## 0.5.0 - 2026-10-23
+
+### Added
+
+- react: add a react-conventions skill and a typescript-conventions rule on checking items (#32)
+- roadmap: add a PM skill that plans milestones on GitHub (#35)
+
+### Changed
+
+- roadmap: draw the scenario pictures for the roadmap skill (#37)
+- Replace a private repository's name in the github fixtures and tests (#36)
+
+### Fixed
+
+- Keep LF in a Windows checkout and find bash on PATH (#34)
+- release: keep positional-argument text out of the release-notes command (#30)
+
 ## 0.4.1 - 2026-10-19
 
 ### Changed
