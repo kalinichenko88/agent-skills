@@ -1,10 +1,33 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # The hook hand-escapes rules.md into JSON. Both Claude Code and Codex drop
 # context that does not parse, so the real file must come back byte for byte.
+# The hook must also run from a Windows-style checkout and on NixOS.
 
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
+
+# Git for Windows checks out with core.autocrlf=true by default. bash reads a CR
+# as part of the command, so that checkout must keep LF too: the hook, and every
+# script the skills run.
+crlf=$(mktemp -d)
+trap 'rm -rf "$crlf"' EXIT
+git -C "$root" -c core.autocrlf=true checkout-index -a --prefix="$crlf/"
+[ "$("$crlf/hooks/rules.sh" SessionStart)" = "$("$root/hooks/rules.sh" SessionStart)" ] || {
+  echo "FAIL: the hook in a core.autocrlf=true checkout does not give the rules"
+  exit 1
+}
+# hooks.json runs the hook through its shebang, and NixOS has no /bin/bash.
+[ "$(head -1 "$root/hooks/rules.sh")" = '#!/usr/bin/env bash' ] || {
+  echo "FAIL: the hook's shebang must find bash on PATH: #!/usr/bin/env bash"
+  exit 1
+}
+files=$(grep -rIl $'\r' "$crlf" || true)
+[ -z "$files" ] || {
+  echo "FAIL: a core.autocrlf=true checkout has CRLF in:"
+  echo "${files//$crlf\//  }"
+  exit 1
+}
 
 for event in SessionStart SubagentStart; do
   output=$("$root/hooks/rules.sh" "$event")
