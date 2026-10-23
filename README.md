@@ -27,8 +27,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   whole branch when the loop needed more than one round, a security review,
   and a summary of what was decided and fixed.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
-  debt: hotspots, broken layer rules and copies, filed as at most three `debt`
-  issues a run.
+  debt: hotspots, broken layer rules, copies and, with ponytail, over-engineering,
+  filed as at most three `debt` issues a run.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
