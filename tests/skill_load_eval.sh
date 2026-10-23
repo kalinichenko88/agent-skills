@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gives a TypeScript task and a React task to Haiku subagents and counts the
 # runs that invoke the conventions skills before their first write, then the
-# written files that break the brace rule of typescript-conventions. It calls
+# written files with an implicit return in a method callback. It calls
 # the model, so it costs tokens and is not part of `make check`: run it by hand
 # after a change to rules.md or to a skill's description. It runs with this
 # machine's other plugins and settings, the setup the rules must work in.
