@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Gives a TypeScript task and a React task to Haiku subagents and counts the
-# runs that invoke the conventions skills before their first write. It calls
+# runs that invoke the conventions skills before their first write, then the
+# written files with an implicit return in a method callback. It calls
 # the model, so it costs tokens and is not part of `make check`: run it by hand
 # after a change to rules.md or to a skill's description. It runs with this
 # machine's other plugins and settings, the setup the rules must work in.
@@ -54,6 +55,23 @@ count() {
   [ "$loaded" -eq "$#" ] || failed=1
 }
 
+# braced <file>...: the written files with no implicit arrow return, which the
+# brace rule of typescript-conventions forbids. It prints each one it finds.
+# It sees only an arrow that is a method's first argument, as `.map((x) => (`
+# and `.filter((x) => x.done)`: the shape the recorded runs wrote.
+braced() {
+  local implicit='\.[[:alnum:]_]+\(\(?[^()]*\)? *=> *([^{ ]|$)' ok=0 file
+  for file; do
+    if [ ! -f "$file" ]; then
+      echo "no file written: $file"
+    elif ! grep -HnE "$implicit" "$file"; then
+      ok=$((ok + 1))
+    fi
+  done
+  echo "brace rule: $ok of $# written files have no implicit arrow return"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
 for i in $(seq "$runs"); do
   run "$ts_task" "$logs/ts-$i.jsonl" &
   run "$react_task" "$logs/react-$i.jsonl" &
@@ -63,5 +81,10 @@ wait
 failed=0
 count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl
 count react-conventions "$logs"/react-*.jsonl
+files=()
+for i in $(seq "$runs"); do
+  files+=("$logs/ts-$i/src/cart-total.ts" "$logs/react-$i/src/search-panel.tsx")
+done
+braced "${files[@]}"
 echo "logs: $logs"
 exit "$failed"
