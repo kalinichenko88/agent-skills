@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Says whether an issue can be taken into work: prints "take #<n>" and exits 0,
 # or prints each reason to wait or stop and exits 1. It only reads.
 #

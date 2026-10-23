@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Runs the github skill's scripts against a fake gh. The fake answers from
 # payloads recorded on this repository, filtered through jq as gh's own --jq
 # does, and logs every call, so no test reaches GitHub.
@@ -13,7 +13,7 @@ trap 'rm -rf "$tmp"' EXIT
 
 mkdir "$tmp/bin"
 cat >"$tmp/bin/gh" <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 echo "$*" >>"$FAKE/calls"
 case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1 ;; esac
 filter=. search=''
