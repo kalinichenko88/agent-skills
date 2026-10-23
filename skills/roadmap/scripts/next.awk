@@ -29,16 +29,18 @@ END {
     k = split(edges[j], e, " ")
     for (i = 1; i <= k; i++) redges[e[i]] = redges[e[i]] " " j
   }
-  last = 0
+  first = 0
   titles = ""
   for (i = 1; i <= msn; i++) if (mscur[mslist[i]]) {
     cur[mslist[i]] = 1
     titles = titles (titles == "" ? "" : "; ") mstitle[mslist[i]]
-    last = i
+    if (!first) first = i
   }
   print "current: " (titles == "" ? "none" : titles)
-  if (mainset(cur) == 0 && last) {
-    for (i = last + 1; i <= msn; i++) if (!mslater[mslist[i]]) break
+  # The next milestone: the first after the first current one that is not
+  # current and not Later.
+  if (mainset(cur) == 0 && first) {
+    for (i = first + 1; i <= msn; i++) if (!cur[mslist[i]] && !mslater[mslist[i]]) break
     if (i <= msn) {
       split("", cur)
       cur[mslist[i]] = 1

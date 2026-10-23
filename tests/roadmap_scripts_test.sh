@@ -42,6 +42,7 @@ case "$*" in
   'api graphql'*'projectsV2('*) jq -r "$filter" "$(src projects-linked.json)" ;;
   'api graphql'*'views('*) jq -r "$filter" "$(src project-views.json)" ;;
   'api -X '*) ;;
+  'api repos/{owner}/{repo}/milestones?state=closed'*) jq -r "$filter" "$(src milestones-closed.json)" ;;
   'api repos/{owner}/{repo}/milestones?'*) jq -r "$filter" "$(src milestones.json)" ;;
   'api repos/{owner}/{repo}/milestones/'*)
     jq --argjson n "${2##*/}" '.[] | select(.number == $n)' "$(src milestones.json)" | jq -r "$filter" ;;
@@ -275,6 +276,16 @@ edit 19 '.assignees.nodes = [{login: "someone"}]'
 out=$(bash "$scripts/next.sh")
 check 'fallback note' 'note: nothing free in M1 · Stage 1; the main path is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
 check 'busy issue in progress' '#19 Issue 19: assigned to someone' "$(section 'in progress' <<<"$out")"
+# A milestone between two current ones is the next one.
+reset
+mark M1
+mark M3
+put '19 30:M3 40:M2 50:M4'
+edit 19 '.assignees.nodes = [{login: "someone"}]'
+edit 30 '.assignees.nodes = [{login: "someone"}]'
+out=$(bash "$scripts/next.sh")
+check 'fallback between current milestones' 'note: nothing free in M1 · Stage 1, M3 · Stage 3; the main path is from M2 · Stage 2' "$(sed -n 2p <<<"$out")"
+check 'fallback main path' '#40 Issue 40 (M2 · Stage 2), unblocks 0' "$(section 'main path' <<<"$out")"
 # The top 5, the rest counted; Later never offered.
 reset
 put '1:- 2:- 3:- 4:- 5:- 6:- 7:- 8:Later'
@@ -415,6 +426,15 @@ put '19'
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" later 19)
 case $out in *'dry run: gh api -X POST'*'title=Later'*'dry run: gh issue edit 19 --milestone Later'*) ;;
   *) fail 'later makes the Later milestone first' "$out" ;;
+esac
+# A closed Later is opened again.
+reset
+jq '[.[] | select(.title == "Later") | .state = "closed"]' "$fixtures/milestones.json" >"$FAKE/milestones-closed.json"
+ms 'map(select(.title != "Later"))'
+put '19'
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" later 19)
+case $out in *'dry run: gh api -X PATCH'*"milestones/$(msno Later)"*'state=open'*'dry run: gh issue edit 19 --milestone Later'*) ;;
+  *) fail 'later opens a closed Later again' "$out" ;;
 esac
 check 'usage names every subcommand' 9 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
 

@@ -138,7 +138,8 @@ These are decided.
   their open blockers and their open sub-issues. It is what holds the milestone
   up (my call). When no main-path task is
   free, the answer says so and offers the free tasks of the next milestone
-  in order (my call).
+  in order: the first after the first current one that is not current and
+  not `Later` (my call).
 - **Bugs:** free issues with the repository's bug label, in any milestone or
   none. The label name comes from `gh label list`, as the github skill's
   `collect.sh take-in` takes it. A bug in `Later` follows the `Later` rule above
@@ -294,8 +295,8 @@ what must happen and which file to read first.
 - **"What can I take from Later".** Run `roadmap.sh Later` and offer its free
   tasks.
 - **The person decides to put a task off.** After the person agrees in the
-  conversation, `plan.sh later <n>` moves it into `Later`, and makes that
-  milestone when there is none. A task in `Later` is never offered, so the
+  conversation, `plan.sh later <n>` moves it into `Later`, opens that
+  milestone again when it is closed, and makes it when there is none. A task in `Later` is never offered, so the
   script refuses when an open issue outside `Later` waits on it, or on a
   sub-issue of it with no milestone of its own, which goes into `Later` with
   it, and names those issues. `plan.sh sub` refuses the same for a child that

@@ -81,7 +81,8 @@ The script prints the current milestones, then the sections `== main path`,
 `== bugs` and `== secondary` — each one's top 5, ranked, as `#21 <title>
 (<milestone>), unblocks 2` — then `== in progress`, and last the path of the
 overlap file. When nothing in the current milestones is free, a `note:` line
-says so, and the main path comes from the next milestone.
+says so, and the main path comes from the next milestone: the first after the
+first current one that is not current and not `Later`.
 
 Give one task: the first of the main path, else of bugs, else of secondary.
 Give its number, title, track and milestone, and why it is first, as "it is
@@ -143,7 +144,8 @@ wait, it goes into `Later`. Move it only after the person says so.
 bash <dir>/scripts/plan.sh later 21
 ```
 
-It makes the `Later` milestone when there is none. A task in `Later` is never
+It opens the `Later` milestone again when it is closed, and makes it when
+there is none. A task in `Later` is never
 offered, so the script refuses when an open issue outside `Later` waits on the
 task — a blocked issue, or a parent that waits on its sub-issue — and names
 them. A sub-issue with no milestone of its own goes into `Later` with its

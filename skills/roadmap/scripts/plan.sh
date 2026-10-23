@@ -18,11 +18,11 @@
 # second milestone of one title, closing a milestone with open issues, Later
 # as current, and a link that makes a cycle, also through the blockers that a
 # sub-issue takes from its parent. later puts a task off into the Later
-# milestone, and makes that milestone when there is none; it refuses when an
-# open issue outside Later waits on the task, or on a sub-issue of it with no
-# milestone of its own, because a task in Later is never offered. sub refuses
-# the same for a child that goes into Later with its parent. Putting an issue
-# into another milestone needs no check:
+# milestone, and opens it again when it is closed, or makes it when there is
+# none. It refuses when an open issue outside Later waits on the task, or on a
+# sub-issue of it with no milestone of its own, because a task in Later is
+# never offered; sub refuses the same for a child that goes into Later with
+# its parent. Putting an issue into another milestone needs no check:
 # gh issue edit <n> --milestone '<title>'.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
@@ -198,9 +198,16 @@ case $act in
     fi
     waiting=$(waiting "$a")
     [ -z "$waiting" ] || refuse "these wait on it outside Later: $waiting"
+    # No open Later: a closed one is opened again, else one is made.
     if [ -z "$later" ]; then
-      run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title=Later -f description='What is wanted but not planned.' --silent
-      later=$'0\tLater'
+      later=$(gh api 'repos/{owner}/{repo}/milestones?state=closed&per_page=100' --paginate \
+        --jq '.[] | select(.title | ascii_downcase == "later") | "\(.number)\t\(.title)"' | awk 'NR == 1')
+      if [ -n "$later" ]; then
+        run gh api -X PATCH "repos/{owner}/{repo}/milestones/${later%%$'\t'*}" -f state=open --silent
+      else
+        run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title=Later -f description='What is wanted but not planned.' --silent
+        later=$'0\tLater'
+      fi
     fi
     run gh issue edit "$a" --milestone "${later#*$'\t'}"
     say "#$a is in Later"
