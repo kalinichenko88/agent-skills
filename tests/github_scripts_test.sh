@@ -250,8 +250,8 @@ answer '.state = "CLOSED" | .assignees.nodes = [{login: "someone"}, {login: "kal
 check 'take-in-check.sh on an issue someone else has' \
   "$(printf '#5: closed\n#5: assigned to someone\n#5: PR #9 by someone is open and closes it\nexit 1')" "$(take '#5')"
 check 'take-in-check.sh on an issue of another repository' \
-  "$(printf '#179 is in selgeo/magos, and this checkout is kalinichenko88/agent-skills: stop\nexit 1')" \
-  "$(take https://github.com/selgeo/magos/issues/179)"
+  "$(printf '#179 is in octo-org/octo-repo, and this checkout is kalinichenko88/agent-skills: stop\nexit 1')" \
+  "$(take https://github.com/octo-org/octo-repo/issues/179)"
 
 # worktree.sh in a main checkout, with DRY_RUN=1. As recorded, #5 has no
 # assignee.
