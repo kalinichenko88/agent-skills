@@ -301,7 +301,7 @@ what must happen and which file to read first.
   milestone again when it is closed, and makes it when there is none. A task
   in `Later` that an issue outside `Later` waits on is still offered, so the
   move would not put it off: the script refuses when an open issue outside
-  `Later` waits on it, or on a sub-issue of it with no milestone of its own,
+  `Later` waits on it through any chain, or on a sub-issue of it with no milestone of its own,
   which goes into `Later` with it, and names those issues. `plan.sh sub` refuses the same for a child that
   goes under a parent in `Later`.
 - **An agent needs the roadmap as context** (brainstorming, a plan, a review).

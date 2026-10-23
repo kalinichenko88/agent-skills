@@ -345,6 +345,8 @@ jq '.data.repository.pullRequests.nodes[0].closingIssuesReferences.nodes = [{num
   | .data.repository.pullRequests.nodes[0].files |= {totalCount: 150, nodes: .nodes[:1]}' "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
 check 'all the files of a large PR' "files: $(jq -r '[.[].filename] | join(", ")' "$fixtures/pr-files.json")" \
   "$(sed -n '/^==> #21 /,/^==> /p' "$(overlap)" | grep '^files: ')"
+jq '.[0].filename = "docs/a\\new.md"' "$fixtures/pr-files.json" >"$FAKE/pr-files.json"
+check 'a file name with a backslash' 'docs/a\new.md' "$(sed -n '/^==> #21 /,/^==> /p' "$(overlap)" | sed -n 's/^files: \([^,]*\),.*/\1/p')"
 # GitHub can give no file list for a PR.
 jq '.data.repository.pullRequests.nodes[0].files = null' "$fixtures/prs-1.json" >"$FAKE/prs-1.json"
 bash "$scripts/next.sh" >/dev/null 2>&1 || fail 'next.sh stops on a PR without a file list'
@@ -403,6 +405,8 @@ out=$(DRY_RUN=1 bash "$scripts/plan.sh" not-current M1)
 check 'not-current removes the mark' 'Goal.' "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
 check 'Later is never current' 'refused: Later is never current' "$(bash "$scripts/plan.sh" current later 2>&1 || true)"
 check 'create refuses an existing title in any case' 'refused: m1 · stage 1 exists' "$(bash "$scripts/plan.sh" create 'm1 · stage 1' /dev/null 2>&1 || true)"
+ms '. + [{number: 999, title: "C:\\new", description: "", state: "open", open_issues: 0, closed_issues: 0}]'
+check 'create refuses an existing title with a backslash' 'refused: C:\new exists' "$(bash "$scripts/plan.sh" create 'C:\new' /dev/null 2>&1 || true)"
 check 'close refuses open issues' 'refused: M1 · Stage 1 has 3 open issues: #19, #20, #21' "$(bash "$scripts/plan.sh" close M1 2>&1 || true)"
 printf 'New goal.\n' >"$tmp/goal"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" describe M1 "$tmp/goal")
@@ -436,6 +440,14 @@ edit 11 ".parent = {number: 10, milestone: {number: $(msno M1)}, repository: {na
 blocks 20 11
 check 'later refuses a task whose sub-issue an issue waits on' 'refused: these wait on it outside Later: #20' \
   "$(bash "$scripts/plan.sh" later 10 2>&1 || true)"
+# A wait through a task in Later counts too: #19 waits on #42, which waits on #50.
+reset
+mark M1
+put '19 42:Later 50:M2'
+blocks 19 42
+blocks 42 50
+check 'later refuses a task that an issue waits on through Later' 'refused: these wait on it outside Later: #19' \
+  "$(bash "$scripts/plan.sh" later 50 2>&1 || true)"
 reset
 put '10:Later 11:- 20'
 blocks 20 11

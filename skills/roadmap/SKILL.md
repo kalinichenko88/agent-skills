@@ -149,8 +149,8 @@ bash <dir>/scripts/plan.sh later 21
 It opens the `Later` milestone again when it is closed, and makes it when
 there is none. A task in `Later` that an issue outside `Later` waits on is
 still offered, so the move would not put it off: the script refuses when an
-open issue outside `Later` waits on the task — a blocked issue, or a parent
-that waits on its sub-issue — and names them. A sub-issue with no milestone of its own goes into `Later` with its
+open issue outside `Later` waits on the task, through any chain — a blocked
+issue, or a parent that waits on its sub-issue — and names them. A sub-issue with no milestone of its own goes into `Later` with its
 parent, so an issue that waits on it counts too, and `plan.sh sub` refuses
 the same for a child that goes under a parent in `Later`. Then ask the person: put those off too, or remove the link with
 `plan.sh unblock`. A task comes back from `Later` with

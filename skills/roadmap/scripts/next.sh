@@ -24,7 +24,8 @@ dir=$(dirname "$0")
 prs=$(bash "$dir/read.sh" prs)
 while read -r n; do
   files=$(gh api "repos/{owner}/{repo}/pulls/$n/files?per_page=100" --paginate --jq '.[].filename' | paste -sd, -)
-  prs=$(awk -F'\t' -v OFS='\t' -v n="$n" -v f="$files" '$1 == "pr" && $2 == n { $5 = f } 1' <<<"$prs")
+  # Through ENVIRON, not -v, which would read a backslash in a path as an escape.
+  prs=$(F=$files awk -F'\t' -v OFS='\t' -v n="$n" '$1 == "pr" && $2 == n { $5 = ENVIRON["F"] } 1' <<<"$prs")
 done < <(awk -F'\t' '$1 == "pr" && $6 > 100 { print $2 }' <<<"$prs")
 list=$(bash "$dir/read.sh" milestones)
 issues=$(bash "$dir/read.sh" issues "${1:-bug}")

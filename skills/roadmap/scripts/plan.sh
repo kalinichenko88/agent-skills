@@ -19,8 +19,8 @@
 # as current, and a link that makes a cycle, also through the blockers that a
 # sub-issue takes from its parent. later puts a task off into the Later
 # milestone, and opens it again when it is closed, or makes it when there is
-# none. It refuses when an open issue outside Later waits on the task, or on a
-# sub-issue of it with no milestone of its own: a task in Later that an issue
+# none. It refuses when an open issue outside Later waits on the task through
+# any chain, or on a sub-issue of it with no milestone of its own: a task in Later that an issue
 # outside Later waits on is still offered, so it would not be put off. sub
 # refuses the same for a child that goes into Later with its parent. Putting an issue into another milestone needs no check:
 # gh issue edit <n> --milestone '<title>'.
@@ -115,7 +115,8 @@ case $act in
     [ $# -eq 3 ] || usage
     title=$2
     list=$(bash "$dir/read.sh" milestones)
-    if awk -F'\t' -v t="$title" '$1 == "ms" && tolower($8) == tolower(t) { f = 1 } END { exit !f }' <<<"$list"; then
+    # Through ENVIRON, not -v, which would read a backslash in the title as an escape.
+    if T=$title awk -F'\t' '$1 == "ms" && tolower($8) == tolower(ENVIRON["T"]) { f = 1 } END { exit !f }' <<<"$list"; then
       refuse "$title exists"
     fi
     newfile
