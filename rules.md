@@ -100,28 +100,14 @@ ones now say something false.
 - A follow-up is allowed only for a broader sweep the change merely brushes
   against — never for the document that describes the very behaviour changed.
 
-## Handling code-review findings (always)
+## Code review (always)
 
-After any code review — `/code-review` in Claude Code, `/review` in Codex, a
-review subagent, or a human's comments — follow this order, without being asked:
-
-1. **Verify each finding yourself before acting on it.** Reproduce it against
-   the real code or in a browser. Reviewers report findings that are wrong,
-   stale, or right for the wrong reason, and a confident wrong fix is worse
-   than the original defect. Say plainly which findings did not survive.
-2. **Fix the unambiguous ones immediately.** Real bugs, dead code, accessibility
-   and contrast failures, code that contradicts its own documentation, wrong
-   numbers in docs. No need to ask.
-3. **Ask before anything that is a judgment call**, with concrete options and a
-   recommendation: changes to visual appearance or feel, trade-offs with no
-   objectively right answer, and anything widening the scope of the current
-   work. Prefer showing the options (rendered variants, screenshots, before and
-   after numbers) over describing them.
-4. **Fix at the root, not at the symptom.** If the same defect exists in sibling
-   call sites or in a shared token, fix it there and say how many places it
-   covered.
-5. **Report honestly.** State what was fixed, what was deliberately skipped and
-   why, and any side effect a fix introduced elsewhere.
+Before the first review of a change — `/code-review` or `/security-review` in
+Claude Code, `/review` in Codex, a review subagent — and when a person's review
+comments arrive, invoke the `kalinichenko:review-loop` skill. It sets the
+level, what each round reads and when the rounds stop, the security review,
+which findings to fix or decide without asking, and the summary at the end. A
+review subagent that only reads does not load it.
 
 ## The Boy Scout Rule (always)
 

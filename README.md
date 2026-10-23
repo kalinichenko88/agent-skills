@@ -6,8 +6,8 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **`rules.md`** — the base prompt: run the repository's own check before
   calling work done, ship every bug fix with its test, use the platform before
   a dependency, keep code and commits in English, write prose in Simplified
-  Technical English, move docs with the change, verify review findings before
-  acting on them, load the TypeScript conventions before the first write to a
+  Technical English, move docs with the change, load the review loop before
+  the first review of a change, load the TypeScript conventions before the first write to a
   TypeScript file and the React conventions before the first write to a React
   component or hook. In Claude Code a Haiku subagent does the
   reading for two of them: it counts the real payloads before a bug fix, and
@@ -21,6 +21,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   top of GitHub.
 
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
+- **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
+  that ends: rounds that read only the last fixes, a security review last, and
+  a summary of what was decided and fixed.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
