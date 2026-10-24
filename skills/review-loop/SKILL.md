@@ -11,9 +11,9 @@ reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. A security review comes last. The agent
 fixes and decides by itself, except for a change to business logic, and
-writes a summary. When the task is an issue taken into work, the person asked
-for a pull request, or the branch has an open one, the push and the pull
-request follow in the same turn, on the conditions in *The pull request*.
+writes a summary. When the task is an issue taken into work, or the person
+asked for a pull request, the push and the pull request follow in the same
+turn, on the conditions in *The pull request*.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -162,23 +162,24 @@ instead.
 
 Go on in the same turn when all of these hold:
 
-- The task is an issue taken into work, the person asked for a pull request,
-  or the branch has an open pull request.
+- The task is an issue taken into work, or the person asked for a pull
+  request.
 - The branch is not the default branch.
 - The check on the final branch passes.
 
 Then:
 
 1. Push the branch. When the push succeeds, open the pull request through the
-   `kalinichenko:github` skill, with the summary under `## Review`. When the
-   branch has an open pull request already, add the summary's lines to its
-   `## Review` instead.
-2. When a question on business logic is still open, ask it. Its fix, when it
-   needs one, goes through *Fixes from other places*, *The summary* and
-   step 1 again.
-3. When step 1 pushed, the pull request is open and no question on business
-   logic is open, show the `gh pr merge` command that *Pull requests* in that
-   skill gives, and ask whether to run it. On a yes, run the merge, then do
-   *Finishing* from that skill.
+   `kalinichenko:github` skill, with the summary under `## Review`, or, when
+   the branch has an open pull request already, add the summary's lines to
+   its `## Review`.
+2. When questions on business logic are still open, ask them. Each answer
+   goes into `## Review`. The fix for an answer, when it needs one, goes
+   through *Fixes from other places* and *The summary*, and then through this
+   section again, from its conditions.
+3. When the push in step 1 succeeded, the pull request is open and no
+   question on business logic is open, show the `gh pr merge` command that
+   *Pull requests* in that skill gives, and ask whether to run it. On a yes,
+   run the merge, then do *Finishing* from that skill.
 
 Only the merge and the open questions on business logic wait for the person.
