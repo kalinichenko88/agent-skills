@@ -9,7 +9,7 @@
 
 $1 == "repo" { repo = $2 }
 $1 == "ms" {
-  msorder[$2] = $3; mscur[$2] = $4; mslater[$2] = $5; mstitle[$2] = $6
+  msorder[$2] = $3; mscur[$2] = $4; mslater[$2] = $5; mstitle[$2] = $6; msdue[$2] = $7
   mslist[++msn] = $2
 }
 $1 == "mc" { msopen[$2] = $3; msclosed[$2] = $4 }

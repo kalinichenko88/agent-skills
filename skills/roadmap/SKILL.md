@@ -129,11 +129,11 @@ bash <dir>/scripts/roadmap.sh M1
 ```
 
 With no argument, it prints each open milestone in order: its progress
-(`current, 22 of 54 closed`), its description, and its open issues in
-dependency order, each with its state — `free`, `blocked by #21`, `open
-sub-issues: 2`, or who has it. The progress counts the milestone's issues,
-not its pull requests; a milestone closed while the script runs shows
-`not counted`. `Later` shows titles only. Issues with no
+(`current, 22 of 54 closed`, then `, due 2026-12-01` when it has a due date),
+its description, and its open issues in dependency order, each with its state
+— `free`, `blocked by #21`, `open sub-issues: 2`, or who has it. The progress
+counts the milestone's issues, not its pull requests; a milestone closed while
+the script runs shows `not counted`. `Later` shows titles only. Issues with no
 milestone come last, as a count with their numbers. With a milestone — `M1`,
 `Later` or a whole title — it prints that milestone alone, with its states,
 and with the open issues it waits on in other milestones, each marked with
