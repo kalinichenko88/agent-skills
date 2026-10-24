@@ -23,10 +23,11 @@ there.
   project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks. A hit the
   rule's text leaves open is reported as borderline, not filed. With no such
   rule, the step is skipped, and the report says so.
-- **Copies, when it can.** With `bunx` or `npx` on the PATH, `jscpd` finds
-  clones of 15 lines or more; the clones one shared helper removes are one
-  place. It never goes into a `package.json`. Without either, the step is
-  skipped.
+- **Copies, when it can.** `scripts/clones.sh` runs `jscpd` with `bunx` or
+  `npx`, outside your checkout, so neither the project's `.npmrc` nor its
+  `.jscpd.json` is read. Clones of 15 lines or more in code files are
+  findings; the clones one shared helper removes are one place. It never goes
+  into a `package.json`. When `jscpd` cannot run, the step is skipped.
 - **Less code, when ponytail is installed.** Its `ponytail-audit` finds
   dependencies the platform covers, abstractions with one implementation and
   modules that only delegate. A finding the project's own rules contradict is

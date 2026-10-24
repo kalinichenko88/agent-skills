@@ -19,9 +19,10 @@ set -euo pipefail
   exit 2
 }
 path=${1:-.}
+# The data rule, which clones.sh reads too.
+data=$(<"$(dirname "$0")/data.ere")
 cd "$(git rev-parse --show-toplevel)"
 ref=$(git rev-parse --abbrev-ref --verify -q origin/HEAD || echo HEAD)
-data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock)$|(^|/)(fixtures|testdata|vendor|__snapshots__)/|(^|/)go\.sum$'
 
 # ponytail: renames are not followed, so a file moved inside the window counts
 # its commits from the move; git log --follow per file if a hotspot hides

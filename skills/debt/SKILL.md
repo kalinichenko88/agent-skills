@@ -36,12 +36,12 @@ git worktree prune
 GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null worktree add --detach <tree> <sha>
 ```
 
-No step runs a package manager or a script of the project in `<tree>`: its
-`.npmrc` or its scripts can run the project's code. Remove `<tree>` when the
-map ends, with `git worktree remove --force <tree>`, and the `<run>` of step 3
-with it; when a `<tree>` from an earlier run is there, remove it first. Run
-every command from the root of its checkout, so that all paths start there;
-step 3 is the one exception.
+No step runs a package manager (`npm`, `npx`, `bun`, `pnpm`, `yarn`) or a
+script of the project, in `<tree>` or in your checkout: a project's `.npmrc`
+or scripts can run its code. `clones.sh` of step 3 runs `jscpd` outside both.
+Remove `<tree>` when the map ends, with `git worktree remove --force <tree>`;
+when a `<tree>` from an earlier run is there, remove it first. Run every
+command from the root of its checkout, so that all paths start there.
 
 1. **Hotspots.** `bash <dir>/scripts/measure.sh [path]` prints the code files
    by lines × the commits that touched them in 60 days, the top 15, and the SHA
@@ -61,17 +61,12 @@ step 3 is the one exception.
    *borderline*: name it in the report, and file none. The map carries no rules
    of its own: with no such rule in the instruction files, skip this step and
    say so.
-3. **Duplication**, with the newest `jscpd`. The runner is `bunx` in a Bun
-   project, else `npx --yes`; with neither, skip this step and say so. Run it
-   in `<run>`, a new empty directory in your scratch directory with no
-   `package.json` or `node_modules` in it or above it: npm reads the `.npmrc`
-   of the nearest such directory. With `--absolute` the report gives each path
-   from `/`: strip from it the real path of `<tree>`, as `pwd -P` prints it in
-   `<tree>`.
-   `<runner> jscpd@latest --min-lines 8 --absolute --reporters json --output . --ignore "**/node_modules/**,**/fixtures/**,**/testdata/**,**/vendor/**,**/__snapshots__/**,**/*.md,**/*.json,**/*.yml,**/*.yaml,**/*.sql" "<tree>/<scope>"`.
-   When it exits with an error, skip this step and say so. The settings are
-   all on this line: the project's `.jscpd.json` is not read, because it can
-   name reporters that load code. A clone of 15 lines or more is a finding. `jscpd` never goes into a
+3. **Duplication.** `bash <dir>/scripts/clones.sh <tree> [path]` runs the
+   newest `jscpd`, with `bunx` in a Bun project and else with `npx`, in a
+   temporary directory outside `<tree>`. It prints the clones of 8 lines or
+   more in code files, longest first, with paths from the root. When it exits
+   with an error, as with neither `bunx` nor `npx`, skip this step and say so.
+   A clone of 15 lines or more is a finding. `jscpd` never goes into a
    `package.json`.
 4. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
    in your skill list; else skip this step and say so. It takes no path and
@@ -79,9 +74,9 @@ step 3 is the one exception.
    read the project's rules: "Invoke the `ponytail:ponytail-audit` skill, audit
    only `<scope>` of `<tree>`, and return its lines as it prints them, every
    path of each finding in its `[path]` and relative to `<tree>`. Run no
-   package manager and no script there." In Codex, run it yourself before
-   step 2. Then sort its findings, in this order, each part of a bundled
-   finding on its own:
+   package manager and no script of the project, in any directory." In Codex,
+   run it yourself before step 2. Then sort its findings, in this order, each
+   part of a bundled finding on its own:
    1. **Against the project's rules.** Drop a part that a rule of the
       instruction files of step 2 contradicts or requires: ponytail counts a
       file that exports one thing as bloat, and a project with one entity per
