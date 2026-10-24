@@ -7,7 +7,7 @@ check: lint test
 lint:
 	claude plugin validate .
 	jq empty .codex-plugin/plugin.json hooks/hooks.json
-	shellcheck hooks/*.sh tests/*.sh skills/github/scripts/*.sh skills/roadmap/scripts/*.sh skills/debt/scripts/*.sh
+	shellcheck hooks/*.sh tests/*.sh skills/github/scripts/*.sh skills/roadmap/scripts/*.sh skills/debt/scripts/*.sh tests/fixtures/debt/*.sh
 
 # A test passes only when it exits 0 and its last non-empty line on stdout is
 # its ok line: under bash 3.2 a script that set -u stops exits 0 when it has an

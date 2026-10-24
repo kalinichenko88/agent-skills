@@ -1,20 +1,20 @@
 ---
 name: debt
-description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file, or over-engineering — and filing or re-measuring debt issues for refactoring.
+description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file, duplicated code, or over-engineering — and filing or re-measuring debt issues for refactoring.
 ---
 
 # Technical debt map
 
 The map measures where the structural debt sits — hotspots, broken layer
-rules and, with ponytail installed, over-engineering — and files at
+rules, copies and, with ponytail installed, over-engineering — and files at
 most three places a run as issues labelled `debt`. Take-in in the
 `kalinichenko:github` skill then checks those issues whenever a task touches
 their area, so one pull request can remove the debt next to the task. A place
 larger than one pull request becomes steps that the `kalinichenko:roadmap`
 skill offers in order.
 
-First check that the project has no debt skill of its own: a `debt` skill in
-your skill list other than this one, or a file that
+First check that the project has no debt skill of its own: a skill named
+`debt` in your skill list other than this one, or a file that
 `git ls-files ':(top,glob)**/.*/**/skills/debt/SKILL.md'` prints from any
 directory of the checkout. When it has one, follow that one instead, with its
 own rules and tools, and stop here.
@@ -26,15 +26,17 @@ memory of an earlier one. `<dir>` is this skill's base directory, and
 
 ## Measure
 
-Run `git fetch -q origin` first, when there is an `origin`. The scope is a
-path from the repository's root, or the whole tree.
+Run `git -c core.hooksPath=/dev/null fetch -q origin` first, when there is an
+`origin`. The scope is a path from the repository's root, or the whole tree.
 
 Step 1 runs in your checkout. Every later step runs in `<tree>`, a checkout of
 the SHA on the "Measured on" line of step 1, and not in the working tree: a
 local commit or edit is not debt on the default branch. When that line says
 `HEAD`, the clone has no `origin/HEAD`, and local commits count. Put `<tree>`
-in your scratch directory, outside the repository, and make it right after
-step 1, with no hook and no LFS download:
+in your scratch directory, outside the repository. When a `<tree>` from an
+earlier run is there, remove it first, with
+`git worktree remove --force <tree>`. Then make it right after step 1, with no
+hook and no LFS download:
 
 ```bash
 git worktree prune
@@ -43,10 +45,10 @@ GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null worktree add --detach <tre
 
 No step runs a package manager (`npm`, `npx`, `bun`, `pnpm`, `yarn`) or a
 script of the project, in `<tree>` or in your checkout: a project's `.npmrc`
-or scripts can run its code. Remove `<tree>` when the map ends, with
-`git worktree remove --force <tree>`; when a `<tree>` from an earlier run is
-there, remove it first. Run every command from the root of its checkout, so
-that all paths start there.
+or scripts can run its code. `clones.sh` of step 4 runs `jscpd` outside both,
+in a temporary directory of its own. Remove `<tree>` the same way when the map
+ends. Run every command from the root of its checkout, so that all paths
+start there.
 
 1. **Hotspots.** `bash <dir>/scripts/measure.sh [path]` prints the code files
    by lines × the commits that touched them in 60 days, the top 15, and the SHA
@@ -89,14 +91,27 @@ that all paths start there.
       implementation, a layer that only delegates and that no rule requires. A
       fix of a few lines, in one file or in a few, is a small cut: it goes into
       the report, for the Boy Scout Rule when someone next works there.
+4. **Duplication.** `bash <dir>/scripts/clones.sh <tree> [path]` runs
+   `jscpd`, at the version the script pins, on a copy of the scope's code
+   files, by the data rule of step 1 and with SQL left out, so that a copy in
+   a document or a fixture cannot hide a clone. It prints the clones of 15
+   lines or more, longest first, with paths from the root: each one is a
+   finding. *Lines* is jscpd's length, the length of the first file's range.
+   jscpd gives pairs: read the ranges, and rows that copy the same block are
+   one place, which the fewest shared helpers that remove all its rows fix.
+   Sort a clone place as the findings of step 3: a rule of step 2's files that
+   requires the copies drops it, and one that forbids them makes it a broken
+   rule, counted once. When it exits with an error, as with neither `npx` nor
+   `bunx` or with a shared `TMPDIR`, skip this step and give its message in the
+   report. `jscpd` never goes into a `package.json`.
 
 ## Choose the places
 
-A place is one fix: a file to split, a broken rule, or a piece of
-over-engineering to remove. Rank the places by their file's score from
-`measure.sh`: a broken rule takes the importer's score, and a place over
-several files — a dependency and its importers, a bundled finding — the
-highest of its files. A file outside
+A place is one fix: a file to split, a broken rule, the clones that one
+shared helper removes, or a piece of over-engineering to remove. Rank the
+places by their file's score from `measure.sh`: a broken rule takes the
+importer's score, and a place over several files — clones, a dependency and
+its importers, a bundled finding — the highest of its files. A file outside
 the table gets its score from `measure.sh <file>`.
 
 A hotspot is a place only when its file holds more than one concern, the
@@ -149,7 +164,8 @@ at most 600 words, tables and code blocks not counted:
    move with the next pull request, and the SHA dates the evidence.
 2. `## What is broken`: the rule, quoted with its file and heading, or the
    measurement that makes the place a hotspot. The evidence names each file
-   and symbol, with the command and its count.
+   and symbol, with the command and its count. A clone is named by its two
+   files and its length in lines, from `clones.sh`, without its line ranges.
 3. `## The split`: the modules after the change, and what each one owns.
 4. `## The order`: one pull request per step, each with the tests and checks
    that prove it unchanged, by name. Run none of them here: their counts belong
