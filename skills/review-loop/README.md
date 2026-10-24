@@ -43,9 +43,9 @@ fixed.
   example from a private source in that section or in a reply to a review
   comment keeps no names, numbers, titles, paths or code.
 - **Then the pull request.** For an issue taken into work, or when you ask
-  for one, the agent runs the repository's check again, opens the pull
-  request after the summary and asks whether to merge, in the same turn. Only
-  the merge waits for you.
+  for one, the agent runs the repository's check on the final branch before
+  the summary. Then it opens the pull request and asks whether to merge, in
+  the same turn. Only the merge waits for you.
 
 ## The ponytail step
 

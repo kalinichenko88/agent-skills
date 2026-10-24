@@ -158,8 +158,10 @@ the diff and the issue stays open: the PR says `Part of #15`, and
 
 ## After the work
 
-Taking an issue in is the request for the whole flow, to the offer to merge.
-When the work is done, run the repository's own check, such as `make check`,
-then invoke the `kalinichenko:review-loop` skill. That skill ends with the
-check on the final branch, the pull request and the offer to merge, in the
-same turn. After the summary, only the merge waits for the person.
+Taking an issue in is the request for the whole flow: the work, the review,
+the pull request and the question whether to merge. When the work is done, run
+the repository's own check, such as `make check`, then invoke the
+`kalinichenko:review-loop` skill. That skill runs the check on the final
+branch. On a branch other than the default branch, it then opens the pull
+request and asks whether to merge, in the same turn. After the summary, only
+the merge waits for the person.
