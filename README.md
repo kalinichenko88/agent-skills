@@ -139,10 +139,10 @@ skills, the files they write with an implicit return in a method callback, as
 `.map((x) => (`, and the runs with a file that opens with a helper or a
 constant instead of its primary export. `tests/review_loop_eval.sh` counts the
 review rounds and what each one reads. It checks that no count of rounds goes
-past three, and that a security review follows the last pass. Its fixture has a local `origin`, and its
-task says that no one can answer questions. Run it after a change to
-`skills/review-loop` or to its section in `rules.md`. Both call the model, so
-they are not part of `make check`.
+past three, and that a security review follows the last pass. Its fixture has
+a local `origin`, and its task says that no one can answer questions. Run it
+after a change to `skills/review-loop` or to its section in `rules.md`. Both
+call the model, so they are not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
