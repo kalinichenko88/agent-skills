@@ -12,7 +12,11 @@ most three places a run as issues labelled `debt`. Take-in in the
 their area, so one pull request can remove the debt next to the task. A place
 larger than one pull request becomes steps that the `kalinichenko:roadmap`
 skill offers in order.
-When the project has a debt skill of its own, follow that one instead.
+
+First check that the project has no debt skill of its own: a `debt` skill in
+your skill list other than this one, or a file that
+`git ls-files '.*/skills/debt/SKILL.md'` prints. When it has one, follow that
+one instead, with its own rules and tools, and stop here.
 
 The map changes no file in the working tree and opens no pull request. Every
 number in an issue comes from a command's output in this run, never from
@@ -53,7 +57,8 @@ command from the root of its checkout, so that all paths start there.
    `CLAUDE.md`, `AGENTS.md` and the ones in the scope's directories — for what
    a directory may import or hold, with its exceptions. Turn each rule into one
    `git grep -n` over the scope. For a whole word use `-w`: `\b` does not work
-   with `-E` on macOS. A rule that a grep cannot test, such as a size or a
+   with `-E` on macOS. Try each pattern first on a line it must find: a broken
+   pattern finds nothing, and that looks like a pass. A rule that a grep cannot test, such as a size or a
    mirrored layout, gets the command that can (`wc -l`, a listing), or is left
    out and named in the report. Keep a hit only when the rule's text, its
    exceptions included, forbids it. A hit that the text leaves open is
@@ -62,12 +67,13 @@ command from the root of its checkout, so that all paths start there.
    say so.
 3. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
    in your skill list; else skip this step and say so. It takes no path and
-   loads as instructions, so in Claude Code send it to one subagent, before you
-   read the project's rules: "Invoke the `ponytail:ponytail-audit` skill, audit
-   only `<scope>` of `<tree>`, and return its lines as it prints them, every
-   path of each finding in its `[path]` and relative to `<tree>`. Run no
+   loads as instructions, so in Claude Code send it to one subagent right
+   after you make `<tree>`, before step 2 reads the project's rules: "Invoke
+   the `ponytail:ponytail-audit` skill, audit only `<scope>` of `<tree>`, and
+   return its lines as it prints them, every path of each finding in its
+   `[path]` and relative to `<tree>`. File nothing, change no file, and run no
    package manager and no script of the project, in any directory." In Codex,
-   run it yourself before step 2. Then sort its findings, in this order, each
+   run it yourself at that point. Then sort its findings, in this order, each
    part of a bundled finding on its own:
    1. **Against the project's rules.** Drop a part that a rule of the
       instruction files of step 2 contradicts or requires: ponytail counts a
@@ -89,9 +95,11 @@ several files — a dependency and its importers, a bundled finding — the
 highest of its files. A file outside
 the table gets its score from `measure.sh <file>`.
 
-A hotspot is a place only when its file holds more than one concern and the
-split can be named. A high score alone is not a place: a short file that
-changes often, or a large file of one concern, goes into *next*.
+A hotspot is a place only when its file holds more than one concern, the
+split can be named, and no rule of the instruction files keeps the file
+whole, as one that puts a module's rules in one service. A high score alone
+is not a place: a short file that changes often, or a large file of one
+concern, goes into *next*.
 
 Then read what already covers each place. `collect.sh filing` from the
 `kalinichenko:github` skill (`<skills>/github/tracker.md`), with the place's
@@ -170,7 +178,8 @@ and linked so far.
 
 The issues filed, re-measured and named, with their numbers; *next*, with
 scores; the borderline hits; the small cuts, one line each with the score of
-the file it names; the ponytail findings dropped, with the rule; the lines the
-kept findings would save, not ponytail's own `net:`; the steps skipped and
+the file it names, or of its highest file; the ponytail findings dropped, with
+the rule; the lines the kept findings would save, marked as your estimate,
+not ponytail's own `net:`; the steps skipped and
 why; the share of moved code files when it was large; the SHA measured, and
 that it was `HEAD` when it was.
