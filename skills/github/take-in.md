@@ -163,6 +163,6 @@ and, off the default branch, the pull request and the question whether to
 merge. When the work is done, run the repository's own check, such as
 `make check`, then invoke the `kalinichenko:review-loop` skill. That skill
 runs the check on the final branch and writes a summary. Then, when the check
-passes on a branch other than the default branch, it opens the pull request
+passes and the branch is not the default branch, it opens the pull request
 and asks whether to merge, in the same turn. After the summary, only the
 merge waits for the person.

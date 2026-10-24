@@ -12,7 +12,8 @@ that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. A security review comes last. The agent
 fixes and decides by itself, except for a change to business logic, and ends
 with a summary. When the task is an issue taken into work, or the person asked
-for a pull request, the pull request follows in the same turn.
+for a pull request, the pull request follows in the same turn, on the
+conditions in *The pull request*.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -171,8 +172,8 @@ Then:
 
 1. Through the `kalinichenko:github` skill, push the branch and, when the push
    succeeds, open the pull request, with the summary under `## Review`.
-2. Show the `gh pr merge` command that *Pull requests* in that skill gives,
-   and ask whether to run it. On a yes, run it, then do *Finishing* from that
-   skill.
+2. When the pull request is open, show the `gh pr merge` command that
+   *Pull requests* in that skill gives, and ask whether to run it. On a yes,
+   run it, then do *Finishing* from that skill.
 
 Only the merge waits for the person.
