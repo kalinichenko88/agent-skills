@@ -4,6 +4,7 @@
 #
 #   read.sh issues [bug-label]   the open issues (the label defaults to bug)
 #   read.sh milestones           the open milestones, in order
+#   read.sh counts               the issue counts of the open milestones
 #   read.sh milestone <name>     the number and title of one open milestone
 #   read.sh prs                  the open pull requests
 #
@@ -13,7 +14,8 @@
 #   is    <n> <milestone|0> <bug 1|0> <busy|-> <open blockers|-> <parent|0>
 #         <parent's milestone|0> <open sub-issues> <title>
 #   br    <n> <linked branch>
-#   ms    <n> <order> <current 1|0> <later 1|0> <open> <closed> <title>
+#   ms    <n> <order> <current 1|0> <later 1|0> <title>
+#   mc    <n> <open issues> <closed issues>
 #   md    <n> <description line>
 #   pr    <n> <author|you> <closed issues|-> <files|-> <file count>
 #
@@ -32,7 +34,7 @@
 set -euo pipefail
 
 usage() {
-  echo 'usage: read.sh issues [bug-label] | milestones | milestone <name> | prs' >&2
+  echo 'usage: read.sh issues [bug-label] | milestones | counts | milestone <name> | prs' >&2
   exit 2
 }
 [ $# -ge 1 ] || usage
@@ -99,8 +101,29 @@ case $1 in
     gh api 'repos/{owner}/{repo}/milestones?state=open&per_page=100' --jq "$milestones"'
       | (any(.[]; .marked)) as $any | (map(select(.later | not)) | .[0].number) as $first
       | (.[] | ["ms", .number, .order, (if .marked or (($any | not) and .number == $first) then 1 else 0 end),
-          (if .later then 1 else 0 end), .open_issues, .closed_issues, .title] | tsv),
+          (if .later then 1 else 0 end), .title] | tsv),
         (.[] | .number as $n | .lines[] | select(. != "Current.") | ["md", $n, .] | tsv)'
+    ;;
+  counts)
+    [ $# -eq 1 ] || usage
+    # GraphQL, not the open_issues and closed_issues of REST: those count the
+    # milestone's pull requests too. GitHub stops a query at 10 seconds, and
+    # counting a milestone of thousands of issues takes seconds, so the pages
+    # hold 10 milestones.
+    query='query($owner: String!, $name: String!, $endCursor: String) {
+  repository(owner: $owner, name: $name) {
+    milestones(states: OPEN, first: 10, after: $endCursor) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        number
+        openIssues: issues(states: OPEN) { totalCount }
+        closedIssues: issues(states: CLOSED) { totalCount }
+      }
+    }
+  }
+}'
+    gh api graphql --paginate -F owner='{owner}' -F name='{repo}' -f query="$query" --jq "$tsv"'
+      .data.repository.milestones.nodes[] | ["mc", .number, .openIssues.totalCount, .closedIssues.totalCount] | tsv'
     ;;
   milestone)
     [ $# -eq 2 ] || usage

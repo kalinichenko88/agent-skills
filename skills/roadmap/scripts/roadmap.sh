@@ -26,5 +26,6 @@ if [ $# -eq 1 ]; then
 fi
 # Each read stops the script when it fails: a part of the plan is a false plan.
 list=$(bash "$dir/read.sh" milestones)
+counts=$(bash "$dir/read.sh" counts)
 issues=$(bash "$dir/read.sh" issues)
-printf '%s\n%s\n' "$list" "$issues" | awk -F'\t' -v only="$only" -f "$dir/graph.awk" -f "$dir/roadmap.awk"
+printf '%s\n%s\n%s\n' "$list" "$counts" "$issues" | awk -F'\t' -v only="$only" -f "$dir/graph.awk" -f "$dir/roadmap.awk"

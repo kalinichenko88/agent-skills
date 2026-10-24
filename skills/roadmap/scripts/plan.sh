@@ -116,7 +116,7 @@ case $act in
     title=$2
     list=$(bash "$dir/read.sh" milestones)
     # Through ENVIRON, not -v, which would read a backslash in the title as an escape.
-    if T=$title awk -F'\t' '$1 == "ms" && tolower($8) == tolower(ENVIRON["T"]) { f = 1 } END { exit !f }' <<<"$list"; then
+    if T=$title awk -F'\t' '$1 == "ms" && tolower($6) == tolower(ENVIRON["T"]) { f = 1 } END { exit !f }' <<<"$list"; then
       refuse "$title exists"
     fi
     newfile
@@ -190,7 +190,7 @@ case $act in
     a=$(issue "$2")
     list=$(bash "$dir/read.sh" milestones)
     issues=$(bash "$dir/read.sh" issues)
-    later=$(awk -F'\t' '$1 == "ms" && $5 == 1 { print $2 "\t" $8; exit }' <<<"$list")
+    later=$(awk -F'\t' '$1 == "ms" && $5 == 1 { print $2 "\t" $6; exit }' <<<"$list")
     # No open Later: a closed one opens again. Its open issues go back into
     # Later with it, so the check counts them as in Later.
     closed=''
@@ -198,7 +198,7 @@ case $act in
       closed=$(gh api 'repos/{owner}/{repo}/milestones?state=closed&per_page=100' --paginate \
         --jq '.[] | select(.title | ascii_downcase == "later") | "\(.number)\t\(.title)"' | awk 'NR == 1')
       later=$closed
-      [ -z "$closed" ] || list=$list$'\n'"ms	${closed%%$'\t'*}	1000000000	0	1	0	0	${closed#*$'\t'}"
+      [ -z "$closed" ] || list=$list$'\n'"ms	${closed%%$'\t'*}	1000000000	0	1	${closed#*$'\t'}"
     fi
     own=$(awk -F'\t' -v n="$a" '$1 == "is" && $2 == n { print $3 }' <<<"$issues")
     [ -n "$own" ] || refuse "#$a is not an open issue"

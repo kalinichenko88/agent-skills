@@ -35,6 +35,7 @@ pages() {
 }
 case "$*" in
   'api graphql'*mutation*) ;;
+  'api graphql'*'milestones(states: OPEN'*) pages milestone-counts ;;
   'api graphql'*'issues(states: OPEN'*) pages issues ;;
   'api graphql'*'pullRequests(states: OPEN'*) pages prs ;;
   'api graphql'*'a: issue(number'*)
@@ -167,13 +168,13 @@ check 'another bug label' 0 "$(bash "$scripts/read.sh" issues defect | awk -F'\t
 # read.sh milestones: in order, the current mark, the description lines.
 reset
 check 'order, Later last' "$(printf 'M0 · Stage 0\nM1 · Stage 1\nM2 · Stage 2\nM3 · Stage 3\nM4 · Stage 4\nM5 · Stage 5\nLater')" \
-  "$(bash "$scripts/read.sh" milestones | awk -F'\t' '$1=="ms" {print $8}')"
+  "$(bash "$scripts/read.sh" milestones | awk -F'\t' '$1=="ms" {print $6}')"
 check 'the first is current when none is marked' 'M0 · Stage 0' \
-  "$(bash "$scripts/read.sh" milestones | awk -F'\t' '$1=="ms" && $4==1 {print $8}')"
+  "$(bash "$scripts/read.sh" milestones | awk -F'\t' '$1=="ms" && $4==1 {print $6}')"
 mark M0
 ms '(.[] | select(.title | startswith("M1 ")) | .description) += "\r\n Current. \r\n"'
 out=$(bash "$scripts/read.sh" milestones)
-check 'marked milestones are current' "$(printf 'M0 · Stage 0\nM1 · Stage 1')" "$(awk -F'\t' '$1=="ms" && $4==1 {print $8}' <<<"$out")"
+check 'marked milestones are current' "$(printf 'M0 · Stage 0\nM1 · Stage 1')" "$(awk -F'\t' '$1=="ms" && $4==1 {print $6}' <<<"$out")"
 check 'the mark is no description line' 0 "$(grep -c 'Current\.' <<<"$out")"
 check 'no carriage return' 0 "$(grep -c $'\r' <<<"$out")"
 mark Later
@@ -204,14 +205,23 @@ out=$(bash "$scripts/roadmap.sh")
 check 'dependency order and states' \
   "$(printf -- '- #19 Issue 19: free\n- #21 Issue 21: free\n- #20 Issue 20: blocked by #21\n- #22 Issue 22: assigned to you\n- #23 Issue 23: blocked by other/repo#3')" \
   "$(sed -n '/^## M1 /,/^## /p' <<<"$out" | grep '^- ')"
-progress() { jq -r --arg p "$1 " '.[] | select(.title | startswith($p)) | "\(.closed_issues) of \(.open_issues + .closed_issues) closed"' "$fixtures/milestones.json"; }
+progress() {
+  jq -r --argjson n "$(msno "$1")" '.data.repository.milestones.nodes[] | select(.number == $n)
+    | "\(.closedIssues.totalCount) of \(.openIssues.totalCount + .closedIssues.totalCount) closed"' "$fixtures/milestone-counts-1.json"
+}
 check 'a current milestone' "current, $(progress M1)" "$(sed -n '/^## M1 /{n;p;}' <<<"$out")"
-check 'a milestone that is not current' "$(progress M2)" "$(sed -n '/^## M2 /{n;p;}' <<<"$out")"
+# REST's counts of a milestone take in its pull requests: recorded at one
+# moment, M2 has 1057 open and 3748 closed in REST, and 1056 open and 3710
+# closed issues. The line counts issues only.
+check 'a milestone that is not current, without its pull requests' "$(progress M2)" "$(sed -n '/^## M2 /{n;p;}' <<<"$out")"
 check 'Later shows titles only' '- #42 Issue 42' "$(sed -n '/^## Later/,/^## /p' <<<"$out" | grep '^- ')"
 check 'Later by name shows states' '- #42 Issue 42: free' "$(bash "$scripts/roadmap.sh" Later | grep '^- ')"
 # A cycle made by hand in GitHub ends, and both issues show.
 blocks 21 20
 check 'a cycle prints each issue once' 2 "$(bash "$scripts/roadmap.sh" | grep -cE '^- #2[01] ')"
+# A milestone closed between the list read and the count read has no count.
+ms '. + [{number: 998, title: "M9 · Stage 9", description: "", state: "open", open_issues: 0, closed_issues: 0}]'
+check 'a milestone with no count' 'not counted' "$(bash "$scripts/roadmap.sh" | sed -n '/^## M9 /{n;p;}')"
 
 # A sub-issue takes its parent's milestone and blockers; a parent waits on its
 # open sub-issues, also those in another repository.
@@ -358,8 +368,10 @@ check 'no milestones' 'current: none' "$(bash "$scripts/next.sh" | head -1)"
 # A failed read stops the script.
 FAKE_FAIL='pullRequests(' bash "$scripts/next.sh" >/dev/null 2>&1 && fail 'next.sh exits 0 when a read fails'
 check 'next.sh prints nothing when a read fails' '' "$(FAKE_FAIL='milestones?' bash "$scripts/next.sh" 2>/dev/null || true)"
+FAKE_FAIL='milestones(states' bash "$scripts/next.sh" >/dev/null 2>&1 || fail 'next.sh reads the counts it does not print'
 
 check 'roadmap.sh prints nothing when a read fails' '' "$(FAKE_FAIL='milestones?' bash "$scripts/roadmap.sh" 2>/dev/null || true)"
+check 'roadmap.sh prints nothing when the count read fails' '' "$(FAKE_FAIL='milestones(states' bash "$scripts/roadmap.sh" 2>/dev/null || true)"
 
 # plan.sh refuses a link that makes a cycle, and sends nothing.
 reset
