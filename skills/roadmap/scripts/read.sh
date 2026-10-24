@@ -13,7 +13,8 @@
 #   is    <n> <milestone|0> <bug 1|0> <busy|-> <open blockers|-> <parent|0>
 #         <parent's milestone|0> <open sub-issues> <title>
 #   br    <n> <linked branch>
-#   ms    <n> <order> <current 1|0> <later 1|0> <open> <closed> <title>
+#   ms    <n> <order> <current 1|0> <later 1|0> <open issues> <closed issues>
+#         <title>
 #   md    <n> <description line>
 #   pr    <n> <author|you> <closed issues|-> <files|-> <file count>
 #
@@ -96,10 +97,30 @@ case $1 in
     ;;
   milestones)
     [ $# -eq 1 ] || usage
-    gh api 'repos/{owner}/{repo}/milestones?state=open&per_page=100' --jq "$milestones"'
+    # The counts come from GraphQL: the open_issues and closed_issues of REST
+    # count the milestone's pull requests too. GitHub stops a query at 10
+    # seconds, and counting a milestone of thousands of issues takes seconds,
+    # so the pages hold 10 milestones.
+    query='query($owner: String!, $name: String!, $endCursor: String) {
+  repository(owner: $owner, name: $name) {
+    milestones(states: OPEN, first: 10, after: $endCursor) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        number
+        openIssues: issues(states: OPEN) { totalCount }
+        closedIssues: issues(states: CLOSED) { totalCount }
+      }
+    }
+  }
+}'
+    counts=$(gh api graphql --paginate -F owner='{owner}' -F name='{repo}' -f query="$query" \
+      --jq '.data.repository.milestones.nodes[] | "\(.number) \(.openIssues.totalCount) \(.closedIssues.totalCount)"')
+    # A milestone made between the two reads has no count yet, and no issues.
+    COUNTS=$counts gh api 'repos/{owner}/{repo}/milestones?state=open&per_page=100' --jq "$milestones"'
+      | ($ENV.COUNTS | split("\n") | map(select(. != "") | split(" ") | {key: .[0], value: .[1:]}) | from_entries) as $counts
       | (any(.[]; .marked)) as $any | (map(select(.later | not)) | .[0].number) as $first
       | (.[] | ["ms", .number, .order, (if .marked or (($any | not) and .number == $first) then 1 else 0 end),
-          (if .later then 1 else 0 end), .open_issues, .closed_issues, .title] | tsv),
+          (if .later then 1 else 0 end), ($counts[.number | tostring] // [0, 0])[], .title] | tsv),
         (.[] | .number as $n | .lines[] | select(. != "Current.") | ["md", $n, .] | tsv)'
     ;;
   milestone)

@@ -35,6 +35,7 @@ pages() {
 }
 case "$*" in
   'api graphql'*mutation*) ;;
+  'api graphql'*'milestones(states: OPEN'*) pages milestone-counts ;;
   'api graphql'*'issues(states: OPEN'*) pages issues ;;
   'api graphql'*'pullRequests(states: OPEN'*) pages prs ;;
   'api graphql'*'a: issue(number'*)
@@ -204,9 +205,14 @@ out=$(bash "$scripts/roadmap.sh")
 check 'dependency order and states' \
   "$(printf -- '- #19 Issue 19: free\n- #21 Issue 21: free\n- #20 Issue 20: blocked by #21\n- #22 Issue 22: assigned to you\n- #23 Issue 23: blocked by other/repo#3')" \
   "$(sed -n '/^## M1 /,/^## /p' <<<"$out" | grep '^- ')"
-progress() { jq -r --arg p "$1 " '.[] | select(.title | startswith($p)) | "\(.closed_issues) of \(.open_issues + .closed_issues) closed"' "$fixtures/milestones.json"; }
+progress() {
+  jq -r --argjson n "$(msno "$1")" '.data.repository.milestones.nodes[] | select(.number == $n)
+    | "\(.closedIssues.totalCount) of \(.openIssues.totalCount + .closedIssues.totalCount) closed"' "$fixtures/milestone-counts-1.json"
+}
 check 'a current milestone' "current, $(progress M1)" "$(sed -n '/^## M1 /{n;p;}' <<<"$out")"
-check 'a milestone that is not current' "$(progress M2)" "$(sed -n '/^## M2 /{n;p;}' <<<"$out")"
+# REST's counts of a milestone take in its pull requests: the recorded M2 has
+# 3748 closed in REST, and 3710 closed issues. The line counts issues only.
+check 'a milestone that is not current, without its pull requests' "$(progress M2)" "$(sed -n '/^## M2 /{n;p;}' <<<"$out")"
 check 'Later shows titles only' '- #42 Issue 42' "$(sed -n '/^## Later/,/^## /p' <<<"$out" | grep '^- ')"
 check 'Later by name shows states' '- #42 Issue 42: free' "$(bash "$scripts/roadmap.sh" Later | grep '^- ')"
 # A cycle made by hand in GitHub ends, and both issues show.
@@ -360,6 +366,7 @@ FAKE_FAIL='pullRequests(' bash "$scripts/next.sh" >/dev/null 2>&1 && fail 'next.
 check 'next.sh prints nothing when a read fails' '' "$(FAKE_FAIL='milestones?' bash "$scripts/next.sh" 2>/dev/null || true)"
 
 check 'roadmap.sh prints nothing when a read fails' '' "$(FAKE_FAIL='milestones?' bash "$scripts/roadmap.sh" 2>/dev/null || true)"
+check 'roadmap.sh prints nothing when the count read fails' '' "$(FAKE_FAIL='milestones(states' bash "$scripts/roadmap.sh" 2>/dev/null || true)"
 
 # plan.sh refuses a link that makes a cycle, and sends nothing.
 reset
