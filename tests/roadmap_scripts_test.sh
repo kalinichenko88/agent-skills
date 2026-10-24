@@ -195,6 +195,7 @@ check 'M1 of two milestones names both' \
 check 'a whole title of the two resolves' 999 "$(bash "$scripts/read.sh" milestone 'm1 · other' | cut -f1)"
 bash "$scripts/roadmap.sh" M1 >/dev/null 2>&1 && fail 'roadmap.sh M1 of two milestones exits 0'
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" current M1 2>&1) && fail 'plan.sh current M1 of two milestones exits 0'
+check 'plan.sh current M1 of two milestones names both' 1 "$(grep -c '^read.sh: M1 matches more than one' <<<"$out" || true)"
 check 'plan.sh current M1 of two milestones writes nothing' 0 "$(grep -c '^dry run' <<<"$out" || true)"
 # A title that is M1 alone is its own whole title, so M1 names it.
 ms '. + [.[] | select(.title == "M1 · Stage 1") | .number = 998 | .title = "M1"]'
@@ -450,6 +451,8 @@ check 'rename changes the case of its own title' 'renamed M1 · Stage 1 to M1 ·
   "$(bash "$scripts/plan.sh" rename M1 'M1 · STAGE 1' 2>&1)"
 check 'create refuses the M<n> of another milestone' 'refused: M1 · Stage 1 is M1 already' \
   "$(bash "$scripts/plan.sh" create 'M1 · Another' /dev/null 2>&1 || true)"
+check 'create refuses the M<n> of another milestone in lower case' 'refused: M1 · Stage 1 is M1 already' \
+  "$(bash "$scripts/plan.sh" create 'm1 · another' /dev/null 2>&1 || true)"
 check 'rename refuses the M<n> of another milestone' 'refused: M1 · Stage 1 is M1 already' \
   "$(bash "$scripts/plan.sh" rename M2 'M01 · Third' 2>&1 || true)"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" create 'M10 · Ten' /dev/null)
