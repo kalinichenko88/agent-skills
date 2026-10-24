@@ -144,9 +144,10 @@ To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 skills, the files they write with an implicit return in a method callback, as
 `.map((x) => (`, the runs with a file that opens with a helper or a constant
 instead of its primary export, and the runs that put the order, its line, the
-customer or the discount outside `models/` or two of them in one file. In a React feature, it counts the runs that put a
-sub-component's own hook at the feature root or in `shared`, and the runs with
-a zod schema outside `schemas/`.
+customer or the discount outside `models/` or two of them in one file. In a
+React feature, it counts the runs that put a sub-component's own hook at the
+feature root or in `shared`, and the runs with a zod schema outside
+`schemas/`.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
 It checks that no count of rounds goes past three, and that a security review
 follows the last pass. Its fixture has a local `origin`, and its task says

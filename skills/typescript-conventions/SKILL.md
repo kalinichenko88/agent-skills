@@ -190,22 +190,25 @@ loaded.
 
 A model is a type or an enum. A model that two files or more use goes to the
 `models/` folder of its area: the nearest folder that holds every file that
-uses it. One model per file, named after the model. Two cases share a file:
+uses it. One model per file, named after the model. Two cases may share a
+file:
 
-- A model built from one other model with `Omit`, `Pick`, `Partial` or `&`,
-  as `OrderDraft = Omit<Order, 'id'>`, goes into that model's file.
-- A union and the variants that exist only for it, as
-  `Discount = PercentDiscount | FixedDiscount`, share the union's file.
+- A model whose definition names one other model, as
+  `OrderDraft = Omit<Order, 'id'>`, `Order | null` or
+  `Order & { paidAt: string }`, may go into that model's file.
+- A discriminated union and its variants, which share a tag field, as
+  `Discount = PercentDiscount | FixedDiscount` with `kind`, may share the
+  union's file.
 
 Every other model gets a file of its own: one that holds another, as `Order`
-holds a list of `OrderLine`, and one built from two models, as
+holds a list of `OrderLine`, and one whose definition names two models, as
 `Order & Customer`. A type that only one file uses stays in that file, below
 the primary export.
 
-A schema, a zod one for instance, goes to the `schemas/` folder beside
-`models/`, one schema per file. A model that has a schema infers its type from
-it, so the shape is written once. A model that no code parses has no schema
-and is written by hand.
+A schema, a zod one for instance, goes to the `schemas/` folder of its area,
+beside `models/`, one schema per file. A model that has a schema infers its
+type from it, so the shape is written once. A model that no code parses has
+no schema and is written by hand.
 
 ```
 orders/

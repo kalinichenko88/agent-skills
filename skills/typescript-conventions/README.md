@@ -34,9 +34,10 @@ agent matches it and says so.
   primary export; its helpers, module constants and own types go below it.
 - **A shared type is a model in `models/`, a schema is in `schemas/`.** A type
   or an enum that two files or more use goes to the `models/` folder of their
-  nearest common folder, one model per file. A model built from one other
-  model shares its file, and a union shares its file with its variants. A zod
-  schema goes to `schemas/`, and its model infers the type from it.
+  nearest common folder, one model per file. A model whose definition names
+  one other model may share that model's file, and a discriminated union may
+  share its file with its variants. A zod schema goes to `schemas/` of its
+  area, and its model infers the type from it.
 
 ## Recommended lint rules
 

@@ -3,10 +3,11 @@
 # the runs that invoke the conventions skills before their first write, and
 # the written files with an implicit return in a method callback. It counts
 # the order runs with a file that does not open with its primary export, and
-# the order runs with two models in one file or a model outside models/. It
-# counts the feature runs that put a sub-component's own hook at the feature
-# root or in `shared`, and the feature runs with a zod schema outside
-# schemas/. It calls the model, so it costs tokens and is not part of
+# the order runs that put the order, its line, the customer or the discount
+# outside models/, or two of them in one file. It counts the feature runs that
+# put a sub-component's own hook at the feature root or in `shared`, and the
+# feature runs with a zod schema outside schemas/. It calls the model, so it
+# costs tokens and is not part of
 # `make check`: run it by hand after a change to rules.md or to a skill's
 # description. It runs with this machine's other plugins and settings, the
 # setup the rules must work in.
