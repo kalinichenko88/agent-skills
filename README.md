@@ -115,6 +115,12 @@ when `bun` is installed. Without `node`, the test skips `clones.sh` and says
 so. One case runs `clones.sh` with no `TMPDIR`, so it makes and removes a
 directory in your `~/.cache`.
 
+`make check` runs every `tests/<name>_test.sh`. A test passes only when it
+exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
+3.2, a script that `set -u` stops exits 0 when it has an EXIT trap.
+`tests/makefile_test.sh` checks this rule. A new test script ends with its `ok`
+line.
+
 To try a script that writes on a real tracker without writing to it, set
 `DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,
 `add-finding.sh` and the roadmap scripts at another repository than the

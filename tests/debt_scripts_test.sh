@@ -24,6 +24,12 @@ fail() {
   exit 1
 }
 check() { [ "$2" = "$3" ] || fail "$1" "$(printf 'want: %s\ngot:  %s' "$2" "$3")"; }
+# Ends the test early: the note says what did not run, and the ok line stays
+# last, as make test needs.
+skip() { printf 'debt_scripts_test: %s\n' "$1"; echo 'debt_scripts_test: ok'; exit 0; }
+# shellcheck disable=SC2317 # the echo runs only when skip does not exit
+out=$(skip 'a note'; echo 'skip did not exit') || fail 'skip exits non-zero' "$out"
+check 'skip prints its note, then the ok line last' "$(printf '%s\n' 'debt_scripts_test: a note' 'debt_scripts_test: ok')" "$out"
 # -f, so that a global gitignore cannot drop a file the test needs.
 commit() { git -C "$repo" add -A -f && git -C "$repo" commit -qm "$1"; }
 
@@ -86,10 +92,7 @@ check 'a path with only data' 'No code files under tests on HEAD.' "$err"
 # got and the files it was given, and answers with that report. The README, the
 # fixture, node_modules and the SQL hold copies of the code, and jscpd never
 # gets them.
-command -v node >/dev/null || {
-  echo 'debt_scripts_test: ok; clones.sh not run, no node'
-  exit 0
-}
+command -v node >/dev/null || skip 'clones.sh not run, no node'
 clones=$root/skills/debt/scripts/clones.sh
 tree=$tmp/tree
 bash "$root/tests/fixtures/debt/tree.sh" "$tree"
@@ -117,7 +120,7 @@ taken='is above the temporary directory, and npm or jscpd would take it; set TMP
 # shared one, as /tmp on Linux, or below a package.json, a node_modules or a
 # .ignore: then nothing below can run.
 out=$(PATH=$fake bash "$clones" "$tree" 2>"$tmp/err") || case $(cat "$tmp/err") in
-  *"$refused" | *"$taken") echo "debt_scripts_test: ok; clones.sh not run: $(cat "$tmp/err")" && exit 0 ;;
+  *"$refused" | *"$taken") skip "clones.sh not run: $(cat "$tmp/err")" ;;
   *) fail 'clones.sh on the tree' "$(cat "$tmp/err")" ;;
 esac
 check 'the code clones, longest first' "$rows" "$out"
