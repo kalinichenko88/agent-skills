@@ -165,4 +165,4 @@ merge. When the work is done, run the repository's own check, such as
 runs the check on the final branch and writes a summary. Then, when the check
 passes and the branch is not the default branch, it opens the pull request
 and asks whether to merge, in the same turn. After the summary, only the
-merge and a question on business logic wait for the person.
+merge and the open questions on business logic wait for the person.

@@ -46,8 +46,8 @@ fixed.
 - **Then the pull request.** For an issue taken into work, or when you ask
   for a pull request, the agent opens it after the summary and asks whether
   to merge, in the same turn. This needs a passing check and a branch other
-  than the default branch. Only the merge and a question on business logic
-  wait for you.
+  than the default branch. Only the merge and the open questions on business
+  logic wait for you.
 
 ## The ponytail step
 
