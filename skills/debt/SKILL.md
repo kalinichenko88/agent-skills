@@ -96,8 +96,8 @@ that all paths start there.
    a document or a fixture cannot hide a clone. It prints the clones of 15
    lines or more, longest first, with paths from the root: each one is a
    finding. When it exits with an error, as with neither `npx` nor `bunx` or
-   with a shared `TMPDIR`, skip this step and give its message in the report. `jscpd` never goes into a
-   `package.json`.
+   with a shared `TMPDIR`, skip this step and give its message in the report.
+   `jscpd` never goes into a `package.json`.
 
 ## Choose the places
 

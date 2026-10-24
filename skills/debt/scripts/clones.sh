@@ -12,12 +12,12 @@
 # or .gitignore of the project is read. The copy is in a new temporary
 # directory, and the runner and the parser run there, not in <tree>: a
 # project's .npmrc or bunfig.toml can run its code. Each directory above it
-# must be owned by the person or by root and not writable by others, so that
-# no other user can put a file there during the run; and none may hold what
-# npm or jscpd would take from a parent: a package.json, a node_modules, whose
-# .bin goes first on PATH, or a .ignore. That directory is in TMPDIR, or in
-# the cache directory, ~/.cache, when TMPDIR is not set; a shared TMPDIR, such
-# as /tmp, is refused. The runner is npx with node, else bunx with bun.
+# must be private: owned by the person or by root, and writable by nobody else,
+# so that no other user can put there, during the run either, what npm or bun
+# take from a parent, as a node_modules whose .bin goes first on PATH. None may
+# hold a .ignore, which jscpd reads from a parent and which would hide files.
+# That directory is in TMPDIR, or in ~/.cache when TMPDIR is not set; a shared
+# TMPDIR, as /tmp, is refused. The runner is npx with node, else bunx with bun.
 #
 # jscpd is pinned to the version that wrote tests/fixtures/debt/jscpd-report.json:
 # a new one runs here only on purpose, with the report recorded again.
@@ -47,28 +47,40 @@ else
   exit 3
 fi
 
-base=${TMPDIR:-${XDG_CACHE_HOME:-$HOME/.cache}}
-mkdir -p "$base"
+if [ -n "${TMPDIR:-}" ]; then
+  base=$TMPDIR
+elif [ -n "${HOME:-}" ]; then
+  base=$HOME/.cache
+  mkdir -p "$base"
+else
+  echo 'clones.sh: set TMPDIR or HOME' >&2
+  exit 1
+fi
+case $base in /*) ;; *)
+  echo "clones.sh: TMPDIR must be an absolute path" >&2
+  exit 1
+  ;;
+esac
 # A template, because macOS's mktemp -d alone does not read TMPDIR.
 run=$(mktemp -d "${base%/}/clones.XXXXXX")
 trap 'rm -rf "$run"' EXIT
 run=$(cd "$run" && pwd -P)
-# A group may write: with a group of the person alone, as umask 002 makes, it
-# is private, and a group of other people is a trust the person chose.
+# A group may write only when it is the person's own, as with user private
+# groups: one with the person's name.
 me=$(id -u)
+own=()
+[ "$(id -gn)" != "$(id -un)" ] || own=(-o -group "$(id -g)")
 dir=$run
 while [ "$dir" != / ]; do
   dir=$(dirname "$dir")
-  [ -n "$(find "$dir" -maxdepth 0 \( -user "$me" -o -user 0 \) ! -perm -0002)" ] || {
+  [ -n "$(find "$dir" -maxdepth 0 \( -user "$me" -o -user 0 \) \( ! -perm -0020 ${own[@]+"${own[@]}"} \) ! -perm -0002)" ] || {
     echo "clones.sh: $dir, above the temporary directory, belongs to another user or others can write it; set TMPDIR to a private directory" >&2
     exit 1
   }
-  for f in package.json node_modules .ignore; do
-    [ ! -e "$dir/$f" ] && [ ! -L "$dir/$f" ] || {
-      echo "clones.sh: $dir/$f is above the temporary directory; set TMPDIR to a directory with none above it" >&2
-      exit 1
-    }
-  done
+  [ ! -e "$dir/.ignore" ] && [ ! -L "$dir/.ignore" ] || {
+    echo "clones.sh: $dir/.ignore is above the temporary directory, and jscpd would read it; set TMPDIR to a directory with none above it" >&2
+    exit 1
+  }
 done
 
 # ponytail: a path with a quote, a backslash, a tab or a newline comes out
@@ -100,7 +112,7 @@ GIT_LFS_SKIP_SMUDGE=1 git -C "$tree" checkout-index --prefix="$run/code/" --stdi
       .sort((a, b) => b.lines - a.lines || (a.firstFile.name < b.firstFile.name ? -1 : a.firstFile.name > b.firstFile.name ? 1 : 0))
       .map((d) => `| ${d.lines} | ${[d.firstFile, d.secondFile].map((f) => `\`${rel(f.name)}\` ${f.start}-${f.end}`).join(" | ")} |`);
   } catch {
-    stop("jscpd wrote a report that cannot be read");
+    stop("jscpd wrote no report that can be read");
   }
   console.log(rows.length ? ["| Lines | File | Other file |", "| ---: | --- | --- |", ...rows].join("\n") : "No clones of 15 lines or more.");
 ')
