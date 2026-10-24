@@ -85,8 +85,9 @@ drift apart.
 
 A sub-component with a hook, helper or constant file of its own is a folder:
 its component and the files that only it uses. A file that two parts use goes
-to their nearest common folder. The page is the feature's top part, so its own
-files sit at the feature root.
+to their nearest common folder; a type or a schema goes into its `models/` or
+`schemas/` folder there, as typescript-conventions says. The page is the
+feature's top part, so its own files sit at the feature root.
 
 ```
 features/orders/

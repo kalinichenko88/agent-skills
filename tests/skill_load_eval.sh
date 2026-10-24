@@ -27,11 +27,13 @@ feature_task='Add a products feature to this project, in src/features/products/.
 # One Haiku session that hands the task to one Haiku subagent, as the main
 # model does with routine work. The installed copy of the plugin is turned off,
 # so the skill list and the rules come from this checkout. The files it writes
-# stay next to its log.
+# stay next to its log. A third argument adds dependencies to its package.json,
+# so the other tasks keep the setup of their recorded runs.
 run() {
-  local work=${2%.jsonl}
+  local work=${2%.jsonl} deps='"react":"^19.2.0"'
+  [ -z "${3:-}" ] || deps="$deps,$3"
   mkdir -p "$work/src"
-  echo '{"type":"module","dependencies":{"react":"^19.2.0","zod":"^4.6.0"},"devDependencies":{"typescript":"^5.9.0","@types/react":"^19.2.0"}}' >"$work/package.json"
+  printf '{"type":"module","dependencies":{%s},"devDependencies":{"typescript":"^5.9.0","@types/react":"^19.2.0"}}\n' "$deps" >"$work/package.json"
   echo '{"compilerOptions":{"strict":true,"jsx":"react-jsx","noEmit":true},"include":["src"]}' >"$work/tsconfig.json"
   (cd "$work" && claude -p --model haiku --output-format stream-json --verbose \
     --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
@@ -131,6 +133,10 @@ nested() {
 # Discount each in a file of its own under a models/ folder, as
 # typescript-conventions asks. It prints each file that breaks it. The recorded
 # runs without the rule declared all four in src/order.ts.
+# ponytail: it knows the names Order, OrderLine, Line, Customer and Discount,
+# as `export type`, `export enum` or `export interface` at a line's start.
+# Another name or form passes unseen. A run that names all four this way is
+# the only shape recorded so far.
 models() {
   local ok=0 dir decl bad
   for dir; do
@@ -148,6 +154,8 @@ models() {
 # declares one. The recorded runs without the rule declared it beside the fetch
 # or the type, in products-api.ts or product.ts. A schema wrapped at the parse
 # call, as `z.array(productSchema).parse(data)`, is not a declaration.
+# ponytail: it finds a schema by `z.object(`. `z.strictObject`, `z.looseObject`
+# and an imported `object(` pass unseen; every recorded run used `z.object`.
 schemas() {
   local ok=0 dir found
   for dir; do
@@ -163,7 +171,7 @@ for i in $(seq "$runs"); do
   run "$ts_task" "$logs/ts-$i.jsonl" &
   run "$react_task" "$logs/react-$i.jsonl" &
   run "$order_task" "$logs/order-$i.jsonl" &
-  run "$feature_task" "$logs/feature-$i.jsonl" &
+  run "$feature_task" "$logs/feature-$i.jsonl" '"zod":"^4.6.0"' &
 done
 wait
 

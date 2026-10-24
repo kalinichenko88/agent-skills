@@ -190,26 +190,49 @@ loaded.
 
 A model is a type or an enum. A model that two files or more use goes to the
 `models/` folder of its area: the nearest folder that holds every file that
-uses it. One model per file, named after the model. A model built from others
-with `Omit`, `Pick`, `Partial`, `&` or `|` shares their file. A model that only
-holds another, as `Order` holds a list of `OrderLine`, gets a file of its own.
-A type that only one file uses stays in that file, below the primary export.
+uses it. One model per file, named after the model. Two cases share a file:
+
+- A model built from one other model with `Omit`, `Pick`, `Partial` or `&`,
+  as `OrderDraft = Omit<Order, 'id'>`, goes into that model's file.
+- A union and the variants that exist only for it, as
+  `Discount = PercentDiscount | FixedDiscount`, share the union's file.
+
+Every other model gets a file of its own: one that holds another, as `Order`
+holds a list of `OrderLine`, and one built from two models, as
+`Order & Customer`. A type that only one file uses stays in that file, below
+the primary export.
 
 A schema, a zod one for instance, goes to the `schemas/` folder beside
-`models/`, one schema per file. The model infers its type from the schema.
+`models/`, one schema per file. A model that has a schema infers its type from
+it, so the shape is written once. A model that no code parses has no schema
+and is written by hand.
 
 ```
 orders/
 ├── models/
-│   ├── order.ts         Order, and OrderDraft built from it
+│   ├── order.ts         Order, and OrderDraft = Omit<Order, 'id'>
 │   ├── order-line.ts    OrderLine
-│   ├── customer.ts      Customer
+│   ├── customer.ts      Customer, by hand: no code parses it
 │   └── discount.ts      Discount = PercentDiscount | FixedDiscount
 ├── schemas/
-│   ├── order.ts         orderSchema
+│   ├── order.ts         orderSchema, the response of fetch-orders.ts
 │   └── order-line.ts    orderLineSchema
+├── fetch-orders.ts
 ├── order-total.ts
 └── order-summary.ts
+```
+
+```ts
+// schemas/order.ts
+import { z } from 'zod';
+
+import { orderLineSchema } from './order-line';
+
+export const orderSchema = z.object({
+  id: z.string(),
+  customerId: z.string(),
+  lines: z.array(orderLineSchema),
+});
 ```
 
 ```ts
