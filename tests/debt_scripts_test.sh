@@ -27,7 +27,8 @@ check() { [ "$2" = "$3" ] || fail "$1" "$(printf 'want: %s\ngot:  %s' "$2" "$3")
 # Ends the test early: the note says what did not run, and the ok line stays
 # last, as make test needs.
 skip() { printf 'debt_scripts_test: %s\n' "$1"; echo 'debt_scripts_test: ok'; exit 0; }
-check 'skip prints its note, then the ok line last' "$(printf '%s\n' 'debt_scripts_test: a note' 'debt_scripts_test: ok')" "$(skip 'a note')"
+# shellcheck disable=SC2317 # the echo runs only when skip does not exit
+check 'skip prints its note, then the ok line last' "$(printf '%s\n' 'debt_scripts_test: a note' 'debt_scripts_test: ok')" "$(skip 'a note'; echo 'skip did not exit')"
 # -f, so that a global gitignore cannot drop a file the test needs.
 commit() { git -C "$repo" add -A -f && git -C "$repo" commit -qm "$1"; }
 
