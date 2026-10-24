@@ -162,22 +162,21 @@ instead.
 
 Go on in the same turn when all of these hold:
 
-- The task is an issue taken into work, or the person asked for a pull
-  request.
+- The task is an issue taken into work, or the person asked for a pull request.
 - The branch is not the default branch.
 - The check on the final branch passes.
 
 Then:
 
-1. Push the branch. When the push succeeds, open the pull request through the
-   `kalinichenko:github` skill, with the summary under `## Review`, or, when
-   the branch has an open pull request already, add the summary's lines to
-   its `## Review`.
-2. When questions on business logic are still open, ask them. Each answer
-   goes into `## Review`. The fix for an answer, when it needs one, goes
-   through *Fixes from other places* and *The summary*, and then through this
-   section again, from its conditions.
-3. When the push in step 1 succeeded, the pull request is open and no
+1. Push the branch. When the push succeeds and the branch has an open pull
+   request, add the summary's lines to its `## Review`. When the push
+   succeeds and the branch has none, open the pull request through the
+   `kalinichenko:github` skill, with the summary under `## Review`.
+2. When questions on business logic are still open, ask them. An answer that
+   needs no fix goes into `## Review`. The fix for an answer, when it needs
+   one, goes through *Fixes from other places* and *The summary*, and then
+   through this section again, its conditions first.
+3. When the last push in step 1 succeeded, the pull request is open and no
    question on business logic is open, show the `gh pr merge` command that
    *Pull requests* in that skill gives, and ask whether to run it. On a yes,
    run the merge, then do *Finishing* from that skill.
