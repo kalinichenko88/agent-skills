@@ -1,15 +1,15 @@
 # kalinichenko:debt
 
 A map of the technical debt: where the code is large and changes often, where
-it breaks the project's own layer rules, and where it is copied. At most three
-places a run become issues labelled `debt`, each with the numbers that put it
-there.
+it breaks the project's own layer rules, and, with ponytail, where it is
+over-engineered. At most three places a run become issues labelled `debt`,
+each with the numbers that put it there.
 
 ## When it starts
 
 - You ask where the technical debt is, or for a debt map of a path.
-- You ask to find hotspots, layer or import violations, or duplicated code, and
-  file them for refactoring.
+- You ask to find hotspots, layer or import violations, or over-engineering,
+  and file them for refactoring.
 - You ask to re-measure the debt issues that are already open.
 
 ## What you get
@@ -23,11 +23,6 @@ there.
   project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks. A hit the
   rule's text leaves open is reported as borderline, not filed. With no such
   rule, the step is skipped, and the report says so.
-- **Copies, when it can.** `scripts/clones.sh` runs `jscpd` with `bunx` or
-  `npx`, outside your checkout, so neither the project's `.npmrc` nor its
-  `.jscpd.json` is read. Clones of 15 lines or more in code files are
-  findings; the clones one shared helper removes are one place. It never goes
-  into a `package.json`. When `jscpd` cannot run, the step is skipped.
 - **Less code, when ponytail is installed.** Its `ponytail-audit` finds
   dependencies the platform covers, abstractions with one implementation and
   modules that only delegate. A finding the project's own rules contradict is
@@ -46,6 +41,6 @@ there.
 - **The default branch, and no edits.** Every count comes from `origin/HEAD`,
   not from your local changes; in a clone without it, from `HEAD`, and the
   report says so. The later steps read a checkout of that commit outside the
-  repository, and none of them runs its code: no hook, no `.npmrc`. The map
-  changes no file in the working tree and opens no pull request. A project
-  with a debt skill of its own keeps using that one.
+  repository, and none of them runs its code: no hook, no package manager.
+  The map changes no file in the working tree and opens no pull request. A
+  project with a debt skill of its own keeps using that one.

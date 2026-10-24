@@ -1,12 +1,12 @@
 ---
 name: debt
-description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file, or duplicated code — and filing or re-measuring debt issues for refactoring.
+description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file, or over-engineering — and filing or re-measuring debt issues for refactoring.
 ---
 
 # Technical debt map
 
 The map measures where the structural debt sits — hotspots, broken layer
-rules, copies and, with ponytail installed, over-engineering — and files at
+rules and, with ponytail installed, over-engineering — and files at
 most three places a run as issues labelled `debt`. Take-in in the
 `kalinichenko:github` skill then checks those issues whenever a task touches
 their area, so one pull request can remove the debt next to the task. A place
@@ -38,8 +38,7 @@ GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null worktree add --detach <tre
 
 No step runs a package manager (`npm`, `npx`, `bun`, `pnpm`, `yarn`) or a
 script of the project, in `<tree>` or in your checkout: a project's `.npmrc`
-or scripts can run its code. `clones.sh` of step 3 runs `jscpd` outside both.
-Remove `<tree>` when the map ends, with `git worktree remove --force <tree>`;
+or scripts can run its code. Remove `<tree>` when the map ends, with `git worktree remove --force <tree>`;
 when a `<tree>` from an earlier run is there, remove it first. Run every
 command from the root of its checkout, so that all paths start there.
 
@@ -61,14 +60,7 @@ command from the root of its checkout, so that all paths start there.
    *borderline*: name it in the report, and file none. The map carries no rules
    of its own: with no such rule in the instruction files, skip this step and
    say so.
-3. **Duplication.** `bash <dir>/scripts/clones.sh <tree> [path]` runs the
-   newest `jscpd`, with `bunx` in a Bun project and else with `npx`, in a
-   temporary directory outside `<tree>`. It prints the clones of 8 lines or
-   more in code files, longest first, with paths from the root. When it exits
-   with an error, as with neither `bunx` nor `npx`, skip this step and say so.
-   A clone of 15 lines or more is a finding. `jscpd` never goes into a
-   `package.json`.
-4. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
+3. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
    in your skill list; else skip this step and say so. It takes no path and
    loads as instructions, so in Claude Code send it to one subagent, before you
    read the project's rules: "Invoke the `ponytail:ponytail-audit` skill, audit
@@ -90,11 +82,11 @@ command from the root of its checkout, so that all paths start there.
 
 ## Choose the places
 
-A place is one fix: a file to split, a broken rule, the clones that one
-shared helper removes, or a piece of over-engineering to remove. Rank the
-places by their file's score from `measure.sh`: a broken rule takes the
-importer's score, and a place over several files — clones, a dependency and
-its importers, a bundled finding — the highest of its files. A file outside
+A place is one fix: a file to split, a broken rule, or a piece of
+over-engineering to remove. Rank the places by their file's score from
+`measure.sh`: a broken rule takes the importer's score, and a place over
+several files — a dependency and its importers, a bundled finding — the
+highest of its files. A file outside
 the table gets its score from `measure.sh <file>`.
 
 A hotspot is a place only when its file holds more than one concern and the

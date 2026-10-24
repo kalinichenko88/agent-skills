@@ -3,14 +3,13 @@
 # large file last changed 90 days ago, a file whose name holds a colon, one
 # whose name ends as a document's does, and one with a non-ASCII name, a
 # document and a fixture that are data, not code, and a file moved into src/,
-# one moved inside it, and a moved document. Then clones.sh, with a fake npx.
+# one moved inside it, and a moved document.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 measure=$root/skills/debt/scripts/measure.sh
-clones=$root/skills/debt/scripts/clones.sh
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
@@ -70,26 +69,4 @@ check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$rep
 
 err=$(cd "$repo" && bash "$measure" tests 2>&1) && fail 'a path with only data exits 0' "$err"
 check 'a path with only data' 'No code files under tests on HEAD.' "$err"
-
-# clones.sh, with a fake npx: it writes down where it ran and what it got, and
-# writes the report that jscpd 5.4.2 wrote for a tree with code clones, SVG
-# copies and fixtures.
-mkdir -p "$tmp/bin" "$tmp/tree"
-real=$(cd "$tmp/tree" && pwd -P)
-cat >"$tmp/bin/npx" <<'EOF'
-#!/usr/bin/env bash
-pwd -P >"$FAKE_LOG"
-echo "$*" >>"$FAKE_LOG"
-[ -z "${FAKE_FAIL:-}" ] || exit 1
-sed "s|@TREE@|$FAKE_TREE|g" "$FAKE_REPORT" >jscpd-report.json
-EOF
-chmod +x "$tmp/bin/npx"
-export FAKE_LOG=$tmp/npx.log FAKE_TREE=$real FAKE_REPORT=$root/tests/fixtures/debt/jscpd-report.json
-out=$(PATH=$tmp/bin:$PATH bash "$clones" "$tmp/tree" src)
-check 'the code clones, longest first' \
-  "$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 10 | `src/short1.ts` 1-10 | `src/short2.ts` 1-10 |')" "$out"
-check 'jscpd on the path' "--yes jscpd@latest --min-lines 8 --absolute --reporters json --output . $real/src" "$(sed -n 2p "$FAKE_LOG")"
-case $(head -n 1 "$FAKE_LOG") in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
-FAKE_FAIL=1 PATH=$tmp/bin:$PATH bash "$clones" "$tmp/tree" 2>/dev/null && fail 'a failed jscpd exits 0'
-FAKE_TREE=/elsewhere PATH=$tmp/bin:$PATH bash "$clones" "$tmp/tree" 2>/dev/null && fail 'a path outside the tree exits 0'
 echo 'debt_scripts_test: ok'
