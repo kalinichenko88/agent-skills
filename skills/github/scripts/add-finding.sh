@@ -44,8 +44,17 @@ host=$(bash "$(dirname "$0")/collect.sh" status "$n")
 
 tmp=${TMPDIR:-/tmp}
 body=$(mktemp "${tmp%/}/body.XXXXXX")
+# bash 3.2 runs this trap with $? at 0 when set -u stops the script, so a run
+# passes only when it set finished at its end.
+clean() {
+  local code=$?
+  [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1
+  rm -f "$body"
+  exit "$code"
+}
+finished=
 # A dry run keeps the new body to be read.
-[ "${DRY_RUN:-}" = 1 ] || trap 'rm -f "$body"' EXIT
+[ "${DRY_RUN:-}" = 1 ] || trap clean EXIT
 gh issue view "$n" --json body --jq .body >"$body"
 { echo; cat "$section"; } >>"$body"
 
@@ -53,3 +62,4 @@ args=(issue edit "$n" --title "$title" --body-file "$body")
 [ -z "$label" ] || args+=(--add-label "$label")
 run gh "${args[@]}"
 run gh issue comment "$n" --body "Added to the body: $problem."
+finished=1

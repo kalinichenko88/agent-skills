@@ -121,6 +121,12 @@ exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
 `tests/makefile_test.sh` checks this rule. A new test script ends with its `ok`
 line.
 
+A skill script that sets an EXIT trap under `set -u` empties `finished` before
+the trap and sets `finished=1` at each end that succeeds. Its trap turns an exit
+status of 0 without that flag into 1: bash 3.2 runs the trap with `$?` at 0 when
+`set -u` stops the script. `clean` in `skills/github/scripts/collect.sh` shows
+the shape.
+
 To try a script that writes on a real tracker without writing to it, set
 `DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,
 `add-finding.sh` and the roadmap scripts at another repository than the

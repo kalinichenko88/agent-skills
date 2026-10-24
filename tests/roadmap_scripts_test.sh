@@ -457,6 +457,22 @@ check 'rename refuses the M<n> of another milestone' 'refused: M1 · Stage 1 is 
   "$(bash "$scripts/plan.sh" rename M2 'M01 · Third' 2>&1 || true)"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" create 'M10 · Ten' /dev/null)
 case $out in *'dry run: gh api -X POST'*) ;; *) fail 'create takes M10 next to M1' "$out" ;; esac
+# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. A copy of
+# plan.sh gets a stop after its trap and runs with a finished from the
+# environment. Two stops: an unbound variable, the case itself, and an exit 0,
+# which gives the trap the $? of 0 of bash 3.2 on any bash. Each must exit
+# non-zero, show that it reached the stop, and leave nothing in TMPDIR.
+cp -R "$scripts" "$tmp/stopped"
+for stop in unbound exit; do
+  awk -v stop="$stop" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ {
+    print (stop == "exit" ? "echo stop-after-trap; exit 0" : ": \"$unbound_after_trap\"") }' "$scripts/plan.sh" >"$tmp/stopped/plan.sh"
+  mark='stop-after-trap'
+  [ "$stop" = exit ] || mark='unbound_after_trap: unbound variable'
+  before=$(ls -A "$tmp")
+  out=$(finished=1 bash "$tmp/stopped/plan.sh" create 'M10 · Ten' /dev/null 2>&1) && fail "create exits 0 after its $stop stop" "$out"
+  case $out in *"$mark"*) ;; *) fail "create stops before its $stop stop" "$out" ;; esac
+  check "create leaves nothing in TMPDIR after its $stop stop" "$before" "$(ls -A "$tmp")"
+done
 check 'rename refuses Later before it reads' 'refused: a milestone does not become Later: plan.sh later puts off one task at a time' \
   "$(bash "$scripts/plan.sh" rename NoSuch later 2>&1 || true)"
 # due sends noon UTC, the same day in UTC and in the US time zones that
