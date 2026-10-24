@@ -30,6 +30,11 @@ time.
 - **Commits in one shape.** `type(scope): sentence`, at most five bullets
   under it, and no `Co-Authored-By:` trailer. A merge is a squash with one
   list for the whole branch.
+- **Nothing private in a public repository.** Before an issue, a comment, a
+  PR or a commit goes to a public repository, the agent reads its visibility.
+  A case from a private repository goes in with counts and neutral names: "a
+  private tracker with 100 open issues", not its name, numbers, titles or
+  code.
 - **Actions on the latest major.** Each `uses:` is checked against the GitHub
   API. The language runtime in CI is not older than the one on your machine.
 
