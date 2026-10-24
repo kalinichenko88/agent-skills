@@ -36,13 +36,20 @@ script unbound "check 'name' 'want''got'"
 script early "check 'same' 'a' 'a'; exit 0"
 script late "check 'same' 'a' 'a'" 'exit 3'
 script after "check 'same' 'a' 'a'" "echo 'FAIL: later'"
+script note "check 'same' 'a' 'a'; echo 'note_test: one check not run'"
 
 run() { make -s -C "$tmp" -f "$root/Makefile" test TESTS="$1" >"$tmp/out" 2>&1; }
 run pass || fail 'make test fails a test that passes' "$(cat "$tmp/out")"
+run note || fail 'make test fails a test that prints a note before its ok line' "$(cat "$tmp/out")"
 run differ && fail 'make test passes a test whose check fails' "$(cat "$tmp/out")"
 run unbound && fail 'make test passes a test that an unbound variable stops' "$(cat "$tmp/out")"
 run early && fail 'make test passes a test that exits 0 before its ok line' "$(cat "$tmp/out")"
 run late && fail 'make test passes a test that exits 3 after its ok line' "$(cat "$tmp/out")"
 run after && fail 'make test passes a test whose ok line is not its last' "$(cat "$tmp/out")"
 run 'unbound pass' && fail 'make test passes when an earlier test stops' "$(cat "$tmp/out")"
+
+# A test that skips a part, as the debt test does without node, prints its note
+# on a line before its ok line, never after it on the same line. The [o] keeps
+# this line out of its own match.
+grep -n "_test: [o]k[^'\"]" "$root"/tests/*_test.sh && fail 'an ok line with text after it' 'Print the note on a line before the ok line.'
 echo 'makefile_test: ok'

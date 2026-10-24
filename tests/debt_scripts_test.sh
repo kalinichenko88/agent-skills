@@ -87,7 +87,7 @@ check 'a path with only data' 'No code files under tests on HEAD.' "$err"
 # fixture, node_modules and the SQL hold copies of the code, and jscpd never
 # gets them.
 command -v node >/dev/null || {
-  echo 'clones.sh not run, no node'
+  echo 'debt_scripts_test: clones.sh not run, no node'
   echo 'debt_scripts_test: ok'
   exit 0
 }
@@ -118,7 +118,7 @@ taken='is above the temporary directory, and npm or jscpd would take it; set TMP
 # shared one, as /tmp on Linux, or below a package.json, a node_modules or a
 # .ignore: then nothing below can run.
 out=$(PATH=$fake bash "$clones" "$tree" 2>"$tmp/err") || case $(cat "$tmp/err") in
-  *"$refused" | *"$taken") echo "clones.sh not run: $(cat "$tmp/err")" && echo 'debt_scripts_test: ok' && exit 0 ;;
+  *"$refused" | *"$taken") echo "debt_scripts_test: clones.sh not run: $(cat "$tmp/err")" && echo 'debt_scripts_test: ok' && exit 0 ;;
   *) fail 'clones.sh on the tree' "$(cat "$tmp/err")" ;;
 esac
 check 'the code clones, longest first' "$rows" "$out"
