@@ -13,9 +13,11 @@ $1 == "ms" {
   mslist[++msn] = $2
 }
 $1 == "mc" { msopen[$2] = $3; msclosed[$2] = $4 }
-# Appends v to the list s, after sep when s is not empty. Not an in test on the
-# key: mawk makes the element before it reads the right side, so the test is
-# always true. No v is empty: read.sh drops blank lines and writes - for none.
+# Returns the list s with v added, after sep when s is not empty. Not an in
+# test on the key: mawk makes the element before it reads the right side, so
+# the test is always true. No caller passes an empty v: read.sh drops blank
+# lines and writes - for none, and next.sh reads from REST only a PR's files
+# past 100.
 function append(s, sep, v) { return s (s == "" ? "" : sep) v }
 $1 == "md" { mdlines[$2] = append(mdlines[$2], "\n", $3) }
 $1 == "is" {
