@@ -35,9 +35,9 @@ directory. Read all of it before the first step of that moment.
   The order comes from the number after `M`; other titles come after; `Later`
   is last and holds what is wanted but not planned. One number belongs to one
   open milestone: `plan.sh create` and `rename` refuse a second `M1`, and an
-  `m1` or `M01` too. When two open milestones have `M1` anyway, as two made by
-  hand, `M1` names only a milestone whose whole title is `M1`. Otherwise the
-  scripts list both: give a whole title.
+  `m1` or `M01` too. When two open titles start with `M1` and then no digit
+  anyway, as two made by hand, the scripts list both: give a whole title. A
+  whole title, in any case, wins over `M1`.
 - **The current milestones** have the line `Current.` in their description.
   `plan.sh current` and `plan.sh not-current` set and remove it. When no
   milestone has it, the first open one is current. `Later` is never current.

@@ -185,7 +185,7 @@ check 'later resolves in any case' Later "$(bash "$scripts/read.sh" milestone la
 bash "$scripts/read.sh" milestone M9 2>/dev/null && fail 'an unknown milestone exits 0'
 ms 'map(if (.title | startswith("M1 ")) then .title = "M10 · Stage 10" else . end)'
 bash "$scripts/read.sh" milestone M1 2>/dev/null && fail 'M1 matches M10'
-# Two open milestones with one M<n>, as one made by hand on GitHub gives: M1
+# Two open titles that start with M1, as one made by hand on GitHub gives: M1
 # names neither, in read.sh and in each script that reads through it.
 reset
 ms '. + [.[] | select(.title == "M1 · Stage 1") | .number = 999 | .title = "M1 · Other"]'
@@ -195,7 +195,7 @@ check 'M1 of two milestones names both' \
 check 'a whole title of the two resolves' 999 "$(bash "$scripts/read.sh" milestone 'm1 · other' | cut -f1)"
 bash "$scripts/roadmap.sh" M1 >/dev/null 2>&1 && fail 'roadmap.sh M1 of two milestones exits 0'
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" current M1 2>&1) && fail 'plan.sh current M1 of two milestones exits 0'
-check 'plan.sh current M1 of two milestones names both' 1 "$(grep -c '^read.sh: M1 matches more than one' <<<"$out" || true)"
+check 'plan.sh current M1 of two milestones gives the reason' 1 "$(grep -c '^read.sh: M1 matches more than one' <<<"$out" || true)"
 check 'plan.sh current M1 of two milestones writes nothing' 0 "$(grep -c '^dry run' <<<"$out" || true)"
 # A title that is M1 alone is its own whole title, so M1 names it.
 ms '. + [.[] | select(.title == "M1 · Stage 1") | .number = 998 | .title = "M1"]'
