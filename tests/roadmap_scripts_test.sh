@@ -171,6 +171,10 @@ check 'order, Later last' "$(printf 'M0 · Stage 0\nM1 · Stage 1\nM2 · Stage 2
   "$(bash "$scripts/read.sh" milestones | awk -F'\t' '$1=="ms" {print $6}')"
 check 'the first is current when none is marked' 'M0 · Stage 0' \
   "$(bash "$scripts/read.sh" milestones | awk -F'\t' '$1=="ms" && $4==1 {print $6}')"
+# m2 is M2 for the order too, as it is for read.sh milestone and plan.sh.
+ms 'map(if .title == "M2 · Stage 2" then .title = "m2 · Stage 2" else . end)'
+check 'the order reads m<n> in any case' 2 "$(bash "$scripts/read.sh" milestones | awk -F'\t' '$6=="m2 · Stage 2" {print $3}')"
+reset
 mark M0
 ms '(.[] | select(.title | startswith("M1 ")) | .description) += "\r\n Current. \r\n"'
 out=$(bash "$scripts/read.sh" milestones)
