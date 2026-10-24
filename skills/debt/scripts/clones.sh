@@ -76,6 +76,7 @@ clean() {
   rm -rf "$run"
   exit "$code"
 }
+finished=
 trap clean EXIT
 run=$(cd "$run" && pwd -P)
 # A group may write only when it is the person's own, as with user private

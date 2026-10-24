@@ -182,21 +182,26 @@ FAKE_FAIL='comments(first' bash "$scripts/collect.sh" filing scout.md >/dev/null
   fail 'filing exits 0 when a query fails'
 check 'a failed filing leaves no file behind' "$before" "$(collects)"
 
-# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. stopped
-# <script> <n> copies the scripts and puts an unbound variable after the n-th
-# line that sets an EXIT trap in that script; the copy must exit non-zero.
-stopped() {
+# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. stops
+# <script> <n> <args> copies the scripts, puts an unbound variable after the
+# n-th line that sets an EXIT trap in that script, and runs the copy with
+# /bin/bash, 3.2 on macOS. It must stop there, exit non-zero and leave nothing
+# in TMPDIR, also with a finished from the environment.
+stops() {
+  local script=$1 at=$2 before out
+  shift 2
   rm -rf "$tmp/stopped"
   cp -R "$scripts" "$tmp/stopped"
-  awk -v at="$2" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ && ++n == at { print ": \"$unbound_after_trap\"" }' \
-    "$scripts/$1" >"$tmp/stopped/$1"
+  awk -v at="$at" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ && ++n == at { print ": \"$unbound_after_trap\"" }' \
+    "$scripts/$script" >"$tmp/stopped/$script"
+  before=$(ls "$tmp")
+  out=$(finished=1 /bin/bash "$tmp/stopped/$script" "$@" 2>&1) && fail "$script $at exits 0 when set -u stops it" "$out"
+  case $out in *'unbound_after_trap: unbound variable'*) ;; *) fail "$script $at stops on something else" "$out" ;; esac
+  check "$script $at, stopped by set -u, leaves nothing in TMPDIR" "$before" "$(ls "$tmp")"
 }
-stopped collect.sh 2
-bash "$tmp/stopped/collect.sh" filing scout.md >/dev/null 2>&1 && fail 'filing exits 0 when set -u stops it'
-check 'a filing that set -u stops leaves no file behind' "$before" "$(collects)"
-stopped collect.sh 1
+stops collect.sh 2 filing scout.md
 printf '== Bodies\n' >"$tmp/collected"
-bash "$tmp/stopped/collect.sh" bodies "$tmp/collected" 5 >/dev/null 2>&1 && fail 'bodies exits 0 when set -u stops it'
+stops collect.sh 1 bodies "$tmp/collected" 5
 
 # take-in starts with the issue and its timeline, then the bodies of the
 # timeline and of the open hits. An issue with a bug or debt label that
@@ -255,9 +260,8 @@ check 'add-finding.sh edits and comments' \
     "$(sed -n 's/^issue edit 5 --title New title --body-file //p' "$tmp/calls")")" "$(writes)"
 check 'the new body is the old one and the section' \
   "$(jq -r .data.repository.n5.body "$fixtures/tracker.json"; echo; cat "$tmp/section.md")" "$(cat "$tmp/body")"
-stopped add-finding.sh 1
 : >"$tmp/calls"
-bash "$tmp/stopped/add-finding.sh" 5 "$tmp/section.md" 'New title' >/dev/null 2>&1 && fail 'add-finding.sh exits 0 when set -u stops it'
+stops add-finding.sh 1 5 "$tmp/section.md" 'New title'
 check 'add-finding.sh that set -u stops writes nothing' '' "$(writes)"
 
 # take-in-check.sh

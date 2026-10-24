@@ -52,6 +52,7 @@ clean() {
   rm -f "$body"
   exit "$code"
 }
+finished=
 # A dry run keeps the new body to be read.
 [ "${DRY_RUN:-}" = 1 ] || trap clean EXIT
 gh issue view "$n" --json body --jq .body >"$body"

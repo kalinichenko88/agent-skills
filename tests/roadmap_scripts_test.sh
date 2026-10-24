@@ -458,10 +458,15 @@ check 'rename refuses the M<n> of another milestone' 'refused: M1 · Stage 1 is 
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" create 'M10 · Ten' /dev/null)
 case $out in *'dry run: gh api -X POST'*) ;; *) fail 'create takes M10 next to M1' "$out" ;; esac
 # bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. A copy of
-# plan.sh with an unbound variable after its trap must exit non-zero.
+# plan.sh with an unbound variable after its trap, run with /bin/bash (3.2 on
+# macOS) and a finished from the environment, must stop there, exit non-zero
+# and leave nothing in TMPDIR.
 cp -R "$scripts" "$tmp/stopped"
 awk '{ print } !/^[ \t]*#/ && /trap .* EXIT/ { print ": \"$unbound_after_trap\"" }' "$scripts/plan.sh" >"$tmp/stopped/plan.sh"
-bash "$tmp/stopped/plan.sh" create 'M10 · Ten' /dev/null >/dev/null 2>&1 && fail 'create exits 0 when set -u stops it'
+before=$(ls "$tmp")
+out=$(finished=1 /bin/bash "$tmp/stopped/plan.sh" create 'M10 · Ten' /dev/null 2>&1) && fail 'create exits 0 when set -u stops it' "$out"
+case $out in *'unbound_after_trap: unbound variable'*) ;; *) fail 'create stops on something else' "$out" ;; esac
+check 'create, stopped by set -u, leaves nothing in TMPDIR' "$before" "$(ls "$tmp")"
 check 'rename refuses Later before it reads' 'refused: a milestone does not become Later: plan.sh later puts off one task at a time' \
   "$(bash "$scripts/plan.sh" rename NoSuch later 2>&1 || true)"
 # due sends noon UTC, the same day in UTC and in the US time zones that

@@ -228,6 +228,7 @@ case $job in
     if [ -n "$new" ]; then
       part=$(mktemp)
       # As in clean below: a stop by set -u leaves $? at 0 here.
+      finished=
       trap 'code=$?; rm -f "$part"; [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1; exit "$code"' EXIT
       # shellcheck disable=SC2086 # one number per word
       printf '%s\n' $new | entries >"$part"
@@ -258,6 +259,7 @@ clean() {
   [ "$code" = 0 ] || rm -f "$file"
   exit "$code"
 }
+finished=
 trap clean EXIT
 echo "# collect.sh $job in $repo" >"$file"
 echo >>"$file"

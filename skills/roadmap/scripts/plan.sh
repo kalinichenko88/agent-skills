@@ -72,6 +72,7 @@ milestone() {
 # trailing blank lines.
 newfile() {
   file=$(mktemp "${TMPDIR:-/tmp}/milestone.XXXXXX")
+  finished=
   [ "${DRY_RUN:-}" = 1 ] || trap clean EXIT
 }
 # bash 3.2 runs this trap with $? at 0 when set -u stops the script, so a run
