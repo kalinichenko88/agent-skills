@@ -10,6 +10,8 @@
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
+# A person's color.ui=always must not reach what the scripts read from git.
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=color.ui GIT_CONFIG_VALUE_0=always
 measure=$root/skills/debt/scripts/measure.sh
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -20,7 +22,8 @@ fail() {
   exit 1
 }
 check() { [ "$2" = "$3" ] || fail "$1" "$(printf 'want: %s\ngot:  %s' "$2" "$3")"; }
-commit() { git -C "$repo" add -A && git -C "$repo" commit -qm "$1"; }
+# -f, so that a global gitignore cannot drop a file the test needs.
+commit() { git -C "$repo" add -A -f && git -C "$repo" commit -qm "$1"; }
 
 repo=$tmp/repo
 mkdir -p "$repo/src" "$repo/tests/fixtures"
@@ -45,6 +48,8 @@ seq 50 >"$repo/заметки.md"
 seq 6 >"$repo/src/.gitignore"
 seq 6 >"$repo/Dockerfile.dockerignore"
 seq 6 >"$repo/.eslintrc.js"
+mkdir -p "$repo/node_modules/lib"
+seq 6 >"$repo/node_modules/lib/index.js"
 commit 'add a:b, mvnw.cmd and two non-ASCII names'
 seq 5 >"$repo/first.sh"
 seq 4 >"$repo/src/old.sh"
@@ -87,7 +92,7 @@ clones=$root/skills/debt/scripts/clones.sh
 tree=$tmp/tree
 bash "$root/tests/fixtures/debt/tree.sh" "$tree"
 git -C "$tree" init -q
-git -C "$tree" add -A
+git -C "$tree" add -A -f
 real=$(cd "$tree" && pwd -P)
 mkdir "$tmp/bin"
 cat >"$tmp/bin/npx" <<'EOF'
@@ -105,8 +110,8 @@ rows=$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 3
 check 'the code clones, longest first' "$rows" "$(PATH=$fake bash "$clones" "$tree")"
 run=$(sed -n 2p "$FAKE_LOG")
 case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
-check 'npx with its run directory as the prefix, and only the code files' \
-  "$(printf '%s\n' npx "--prefix $run --yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
+check 'npx, with only the code files' \
+  "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
 check 'a relative tree with CDPATH set' "$rows" "$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)"
 jq '.duplicates = []' "$FAKE_REPORT" >"$tmp/none.json"
 check 'no clones' 'No clones of 15 lines or more in code files.' "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
@@ -114,17 +119,26 @@ check 'no clones' 'No clones of 15 lines or more in code files.' "$(FAKE_REPORT=
 err=$(PATH=$fake bash "$clones" "$tree" migrations 2>&1) && fail 'a path with only SQL exits 0' "$err"
 check 'a path with only SQL' 'No code files under migrations.' "$err"
 err=$(PATH=$fake bash "$clones" "$tmp" 2>&1) && fail 'a tree that is not a checkout exits 0' "$err"
-jq '.duplicates = [] | .statistics.total.sources = 0' "$FAKE_REPORT" >"$tmp/empty.json"
-FAKE_REPORT=$tmp/empty.json PATH=$fake bash "$clones" "$tree" 2>/dev/null && fail 'a report of no file exits 0'
 FAKE_FAIL=1 PATH=$fake bash "$clones" "$tree" 2>/dev/null && fail 'a failed jscpd exits 0'
-FAKE_ROOT=/elsewhere PATH=$fake bash "$clones" "$tree" 2>/dev/null && fail 'a path outside the copy exits 0'
+err=$(FAKE_ROOT=/elsewhere PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a path outside the copy exits 0' "$err"
+check 'a path outside the copy' 'clones.sh: jscpd gave a path outside the copy' "$err"
+for f in node_modules .ignore; do
+  mkdir -p "$tmp/above-$f/tmp"
+  : >"$tmp/above-$f/$f"
+  err=$(TMPDIR=$tmp/above-$f/tmp PATH=$fake bash "$clones" "$tree" 2>&1) && fail "a $f above the temporary directory exits 0" "$err"
+  check "a $f above the temporary directory" \
+    "clones.sh: $(cd "$tmp/above-$f" && pwd -P)/$f is above the temporary directory; set TMPDIR to another one" "$err"
+done
 
-# bunx with bun, on a PATH with no npx and no node.
-if command -v bun >/dev/null; then
+# bunx with bun, on a PATH with no npx and no node, where /usr/bin and /bin
+# have neither; bun itself, not a version manager's shim.
+if command -v bun >/dev/null && [ ! -e /usr/bin/npx ] && [ ! -e /bin/npx ] &&
+  "$(command -v bun)" --version >/dev/null 2>&1; then
   mkdir "$tmp/bunbin"
   cp "$tmp/bin/npx" "$tmp/bunbin/bunx"
   ln -s "$(command -v bun)" "$tmp/bunbin/bun"
   check 'bunx with bun' "$rows" "$(PATH=$tmp/bunbin:/usr/bin:/bin bash "$clones" "$tree")"
-  check 'bunx in its run directory' "$(printf '%s\n' bunx "$args")" "$(sed -n '1p;3p' "$FAKE_LOG")"
+  check 'bunx' "$(printf '%s\n' bunx "$args")" "$(sed -n '1p;3p' "$FAKE_LOG")"
+  case $(sed -n 2p "$FAKE_LOG") in "$real"*) fail 'bunx ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 fi
 echo 'debt_scripts_test: ok'

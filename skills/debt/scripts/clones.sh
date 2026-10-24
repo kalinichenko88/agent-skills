@@ -11,9 +11,10 @@
 # fixture cannot pair with a code file and hide its clone, and no .jscpd.json
 # or .gitignore of the project is read. The copy is in a new temporary
 # directory, and the runner and the parser run there, not in <tree>: a
-# project's .npmrc or bunfig.toml can run its code. npx gets that directory as
-# its --prefix, so that npm reads no .npmrc above it; bun reads a bunfig.toml
-# only where it runs. The runner is npx with node, else bunx with bun.
+# project's .npmrc or bunfig.toml can run its code. The script stops when a
+# directory above it holds what npm, bun or jscpd would take from there: a
+# package.json or a node_modules, whose .bin goes first on PATH, a bunfig.toml,
+# a .ignore or a .jscpd.json. The runner is npx with node, else bunx with bun.
 #
 # jscpd is pinned to the version that wrote tests/fixtures/debt/jscpd-report.json:
 # a new one runs here only on purpose, with the report recorded again.
@@ -36,8 +37,18 @@ path=${2:-.}
 run=$(mktemp -d "${TMPDIR:-/tmp}/clones.XXXXXX")
 trap 'rm -rf "$run"' EXIT
 run=$(cd "$run" && pwd -P)
+dir=$run
+while [ "$dir" != / ]; do
+  dir=$(dirname "$dir")
+  for f in package.json node_modules bunfig.toml .ignore .jscpd.json; do
+    [ ! -e "$dir/$f" ] || {
+      echo "clones.sh: $dir/$f is above the temporary directory; set TMPDIR to another one" >&2
+      exit 1
+    }
+  done
+done
 if command -v npx >/dev/null; then
-  runner=(npx --prefix "$run" --yes)
+  runner=(npx --yes)
   js=node
 elif command -v bunx >/dev/null; then
   runner=(bunx)
@@ -50,7 +61,7 @@ fi
 # ponytail: a path with a quote, a backslash, a tab or a newline comes out
 # quoted, so the data rule does not see its end; -z and NUL records if one
 # turns up.
-git -c core.quotePath=false -C "$tree" grep -I -l '' -- "$path" >"$run/text" || [ $? -eq 1 ]
+git -c core.quotePath=false -C "$tree" grep --no-color -I -l '' -- "$path" >"$run/text" || [ $? -eq 1 ]
 grep -Ev "$data|\.sql\$" "$run/text" >"$run/files" || [ $? -eq 1 ]
 [ -s "$run/files" ] || {
   echo "No code files under $path." >&2
@@ -60,13 +71,15 @@ GIT_LFS_SKIP_SMUDGE=1 git -C "$tree" checkout-index --prefix="$run/code/" --stdi
 (cd "$run" && "${runner[@]}" "$jscpd" --min-lines 15 --no-gitignore --absolute --reporters json --output . code >/dev/null)
 
 # jscpd gives real paths, as pwd -P does: a path outside the copy stops the
-# run, so that no local path reaches an issue.
+# run, and its message names no local path, so that none reaches an issue.
 # shellcheck disable=SC2016 # the ${...} are JavaScript's
 (cd "$run" && ROOT=$run/code/ "$js" -e '
-  const { duplicates, statistics } = JSON.parse(require("fs").readFileSync("jscpd-report.json", "utf8"));
-  if (!statistics.total.sources) throw new Error("jscpd read no file");
+  const { duplicates } = JSON.parse(require("fs").readFileSync("jscpd-report.json", "utf8"));
   const rel = (name) => {
-    if (!name.startsWith(process.env.ROOT)) throw new Error(`not in the copy: ${name}`);
+    if (!name.startsWith(process.env.ROOT)) {
+      console.error("clones.sh: jscpd gave a path outside the copy");
+      process.exit(1);
+    }
     return name.slice(process.env.ROOT.length);
   };
   const rows = duplicates

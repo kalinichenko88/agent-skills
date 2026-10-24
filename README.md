@@ -70,7 +70,7 @@ native Windows, Claude Code runs
 them in Git Bash, so install [Git for Windows](https://git-scm.com/downloads/win):
 without it, Claude Code runs the hook in PowerShell, and the rules do not load.
 Codex on native Windows is not tested: run it in WSL. Neither is the debt
-skill's `clones.sh`: there, its step is skipped with an error.
+skill's `clones.sh`.
 
 The roadmap skill's board needs the `project` scope on the `gh` token. Run
 once on each machine:
