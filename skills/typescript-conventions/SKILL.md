@@ -196,14 +196,14 @@ file:
 - A model made by an operation on one other model may go into that model's
   file: `OrderDraft = Omit<Order, 'id'>`, `PartialOrder = Partial<Order>`,
   `MaybeOrder = Order | null`, `PaidOrder = Order & { paidAt: string }`.
-- A tagged union and its variants, which share a tag field, may share the
-  union's file: `Discount = PercentDiscount | FixedDiscount`, each variant with
-  `kind`.
+- A tagged (discriminated) union and its variants, which share a tag field,
+  may share the union's file: `Discount = PercentDiscount | FixedDiscount`,
+  each variant with `kind`.
 
-Every other model gets a file of its own: one whose fields hold another model,
-as `Order` holds `lines: OrderLine[]`, and one made from two models, as
-`Order & Customer`. A type that only one file uses stays in that file, below
-the primary export.
+A model outside these two cases gets a file of its own: one whose own fields
+hold another model, as `Order` holds `lines: OrderLine[]`, and one made from
+two models, as `Order & Customer`. A type that only one file uses stays in
+that file, below the primary export.
 
 A schema, a zod one for instance, goes to the `schemas/` folder of its area,
 beside `models/`, one schema per file. A model that has a schema infers its
@@ -216,7 +216,7 @@ orders/
 │   ├── order.ts         Order, and OrderDraft = Omit<Order, 'id'>
 │   ├── order-line.ts    OrderLine
 │   ├── customer.ts      Customer, by hand: no code parses it
-│   └── discount.ts      Discount = PercentDiscount | FixedDiscount, by kind
+│   └── discount.ts      Discount = PercentDiscount | FixedDiscount, tagged by kind
 ├── schemas/
 │   ├── order.ts         orderSchema, the response of fetch-orders.ts
 │   └── order-line.ts    orderLineSchema

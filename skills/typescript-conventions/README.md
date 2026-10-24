@@ -36,9 +36,10 @@ agent matches it and says so.
   or an enum that two files or more use goes to the `models/` folder of their
   nearest common folder, one model per file. A model made by an operation on
   one other model, as `Omit<Order, 'id'>`, may share that model's file, and a
-  tagged union may share its file with its variants. A model whose fields hold
-  another model gets a file of its own. A zod schema goes to `schemas/` of its
-  area, and its model infers the type from it.
+  tagged (discriminated) union may share its file with its variants. Any other
+  model gets a file of its own: one whose own fields hold another model, and
+  one made from two models. A zod schema goes to `schemas/` of its area, and
+  its model infers the type from it.
 
 ## Recommended lint rules
 
