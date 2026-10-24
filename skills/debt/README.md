@@ -42,5 +42,6 @@ there.
 - **Steps in order.** A place larger than one pull request is a parent with a
   sub-issue per step, linked with the roadmap skill's `plan.sh`, so
   `kalinichenko:roadmap` offers them in order.
-- **No edits.** The map changes no file in the working tree and opens no pull
-  request. A project with a debt skill of its own keeps using that one.
+- **The default branch, and no edits.** Every count comes from `origin/HEAD`,
+  or `HEAD` in a clone without it, not from your local changes. The map
+  changes no file in the working tree and opens no pull request. A project with a debt skill of its own keeps using that one.

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Runs the debt skill's measure.sh on a repository it builds: a hot file, a
-# large file last changed 90 days ago, a file whose name holds a colon, and a
-# document and a fixture that are data, not code.
+# large file last changed 90 days ago, a file whose name holds a colon, one
+# whose name ends as a document's does, and one with a non-ASCII name, a
+# document and a fixture that are data, not code, and a moved file and document.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -24,6 +25,7 @@ mkdir -p "$repo/src" "$repo/tests/fixtures"
 git -C "$repo" init -q -b main
 git -C "$repo" config user.name test
 git -C "$repo" config user.email test@example.com
+git -C "$repo" config core.quotePath true
 old="$(($(date +%s) - 90 * 86400)) +0000"
 seq 200 >"$repo/big.sh"
 GIT_AUTHOR_DATE=$old GIT_COMMITTER_DATE=$old commit 'add big'
@@ -35,24 +37,29 @@ for i in 1 2 3; do
   commit "change $i"
 done
 seq 10 >"$repo/src/a:b.sh"
-commit 'add a:b'
+seq 7 >"$repo/mvnw.cmd"
+seq 3 >"$repo/src/заказ.sh"
+seq 50 >"$repo/заметки.md"
+commit 'add a:b, mvnw.cmd and two non-ASCII names'
 seq 5 >"$repo/src/first.sh"
 commit 'add first'
+mkdir "$repo/docs"
 git -C "$repo" mv src/first.sh src/kept.sh
-commit 'move first'
+git -C "$repo" mv notes.md docs/notes.md
+commit 'move first and notes'
 
 out=$(cd "$repo/src" && bash "$measure")
 check 'the rows, by score, with no data' \
-  "$(printf '%s\n' '| `src/hot.sh` | 55 | 3 | 165 |' '| `src/a:b.sh` | 10 | 1 | 10 |' '| `src/kept.sh` | 5 | 1 | 5 |' '| `big.sh` | 200 | 0 | 0 |')" \
+  "$(printf '%s\n' '| `src/hot.sh` | 55 | 3 | 165 |' '| `src/a:b.sh` | 10 | 1 | 10 |' '| `mvnw.cmd` | 7 | 1 | 7 |' '| `src/kept.sh` | 5 | 1 | 5 |' '| `src/заказ.sh` | 3 | 1 | 3 |' '| `big.sh` | 200 | 0 | 0 |')" \
   "$(grep '^| `' <<<"$out")"
 check 'the measured line, without origin' \
-  "Measured on \`HEAD\` at $(git -C "$repo" rev-parse --short HEAD), 4 code files." "$(grep '^Measured on' <<<"$out")"
-check 'the moved paths' 'Paths moved in 60 days: 1. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
+  "Measured on \`HEAD\` at $(git -C "$repo" rev-parse --short HEAD), 6 code files." "$(grep '^Measured on' <<<"$out")"
+check 'the moved code files' 'Code files moved in 60 days: 1. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
 
 git clone -q "$repo" "$tmp/clone"
 out=$(cd "$tmp/clone" && bash "$measure" src)
-check 'a path, in a clone' '`src/hot.sh` `src/a:b.sh` `src/kept.sh`' "$(grep -o '^| `[^`]*`' <<<"$out" | cut -c3- | paste -sd' ' -)"
-case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 3 code files.') ;; *) fail 'the clone reads origin/main' "$out" ;; esac
+check 'a path, in a clone' '`src/hot.sh` `src/a:b.sh` `src/kept.sh` `src/заказ.sh`' "$(grep -o '^| `[^`]*`' <<<"$out" | cut -c3- | paste -sd' ' -)"
+case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 4 code files.') ;; *) fail 'the clone reads origin/main' "$out" ;; esac
 out=$(cd "$repo" && bash "$measure" big.sh)
 check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$repo" rev-parse --short HEAD), 1 code files." "$(tail -n 1 <<<"$out")"
 
