@@ -121,6 +121,11 @@ exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
 `tests/makefile_test.sh` checks this rule. A new test script ends with its `ok`
 line.
 
+GitHub Actions runs `make check` on each pull request and each push to `main`
+(`.github/workflows/check.yml`). It runs on Ubuntu: bash 5, `mawk` as `awk`,
+and ShellCheck 0.11.0. A second job runs gitleaks on the new commits. The eval
+scripts below call the model, so they do not run there.
+
 A skill script that sets an EXIT trap under `set -u` empties `finished` before
 the trap and sets `finished=1` at each end that succeeds. Its trap turns an exit
 status of 0 without that flag into 1: bash 3.2 runs the trap with `$?` at 0 when

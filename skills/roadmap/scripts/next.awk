@@ -19,8 +19,7 @@ $1 == "pr" {
   pk = split($4, pc, ",")
   for (i = 1; i <= pk; i++) if (pc[i] in istitle) {
     open_pr[$2] = 1
-    # Not an in test: mawk makes the element before it reads the right side.
-    if ($5 != "-") wipfiles[pc[i]] = wipfiles[pc[i]] (wipfiles[pc[i]] == "" ? "" : ",") $5
+    if ($5 != "-") wipfiles[pc[i]] = append(wipfiles[pc[i]], ",", $5)
   }
 }
 

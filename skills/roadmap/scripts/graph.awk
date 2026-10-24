@@ -13,15 +13,17 @@ $1 == "ms" {
   mslist[++msn] = $2
 }
 $1 == "mc" { msopen[$2] = $3; msclosed[$2] = $4 }
-# Not an in test, here and for br: mawk makes the element before it reads the
-# right side.
-$1 == "md" { mdlines[$2] = mdlines[$2] (mdlines[$2] == "" ? "" : "\n") $3 }
+# Appends v to the list s, after sep when s is not empty. Not an in test on the
+# key: mawk makes the element before it reads the right side, so the test is
+# always true. No v is empty: read.sh drops blank lines and writes - for none.
+function append(s, sep, v) { return s (s == "" ? "" : sep) v }
+$1 == "md" { mdlines[$2] = append(mdlines[$2], "\n", $3) }
 $1 == "is" {
   isms[$2] = $3; isbug[$2] = $4; isbusy[$2] = $5; isblk[$2] = $6
   ispar[$2] = $7; isparms[$2] = $8; issubs[$2] = $9; istitle[$2] = $10
   islist[++isn] = $2
 }
-$1 == "br" { isbr[$2] = isbr[$2] (isbr[$2] == "" ? "" : ",") $3 }
+$1 == "br" { isbr[$2] = append(isbr[$2], ",", $3) }
 
 function init(   i, j, k, c, w, b) {
   for (i = 1; i <= isn; i++) {
