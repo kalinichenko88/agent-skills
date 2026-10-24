@@ -76,38 +76,35 @@ wait
 
 # report <log>: each top-level Agent call that is not an Explore subagent, the
 # kind rules.md sends to count payloads and sweep docs, is a review round or a
-# part of the security review. The security review starts at a Skill call of
-# security-review, or at a prompt that says "security review", and goes on to
-# the next round that names a single commit — `git show <sha>`, `git show
-# HEAD` or `<sha>^..<sha>`: /security-review sends one subagent to find defects
-# and one more for each finding. Any other round after the first was sent to
-# the whole branch again. The fixture always has a defect, so a run that
-# follows the skill has two rounds or more. At most one of them after round 1
-# reads the whole branch: the last pass, which a stop after three rounds
-# skips. A security review follows the last read of the whole branch.
+# part of the security review. The security review is a Skill call of
+# security-review, a prompt that says "security review", and a prompt with the
+# "HARD EXCLUSIONS" of /security-review: the command sends one subagent to find
+# defects, and one with those exclusions for each finding. A round after the
+# first that names no single commit — `git show <sha>`, `git show HEAD` or
+# `<sha>^..<sha>` — was sent to the whole branch again. The fixture always has
+# a defect, so a run that follows the skill has two rounds or more. At most one
+# of them after round 1 reads the whole branch: the last pass, which a stop
+# after three rounds skips. A security review follows the last read of the
+# whole branch.
 # ponytail: the count reads prompt text. A prompt that names one commit and
 # the whole branch counts as one commit; a commit named another way counts as
-# the whole branch, and so does a security review whose prompt does not say
-# so; a round that says "security review" is taken for one, which can pass a
+# the whole branch, and so does a part of the security review without those
+# words; a round that says "security review" is taken for one, which can pass a
 # run that ran none; whether the last pass ran is left to the printed prompts.
 commit='git( -C [^ ]+)? show( --?[a-z-]+)* ([0-9a-f]{7,}|HEAD)\.?([^.~^0-9A-Za-z]|$)|[0-9a-f]{7,}\^\.\.[0-9a-f]{7,}'
-secrev='[Ss]ecurity[ -][Rr]eview'
+secrev='security[ -]review|hard exclusions'
 failed=0
 for log in "$logs"/run-*.jsonl; do
-  prompts=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
+  # One line a prompt: W when it reads the whole branch, C one commit, S the
+  # security review, then a tab and the prompt.
+  prompts=$(jq -rR --arg commit "$commit" --arg secrev "$secrev" 'fromjson?
+    | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use")
-    | if .name == "Skill" and .input.skill == "security-review" then "Skill: /security-review"
+    | if .name == "Skill" and .input.skill == "security-review" then "S\tSkill: /security-review"
       elif .name == "Agent" and .input.subagent_type != "Explore" then .input.prompt | gsub("\n"; " ")
+        | (if test($secrev; "i") then "S" elif test($commit) then "C" else "W" end) + "\t" + .
       else empty end' "$log")
-  # One letter a prompt: W reads the whole branch, C one commit, S is the
-  # security review.
-  kinds=$(sec=0; while IFS= read -r p; do
-    [ -n "$p" ] || continue
-    if grep -qE "$secrev" <<<"$p"; then sec=1; echo S
-    elif grep -qE "$commit" <<<"$p"; then sec=0; echo C
-    elif [ "$sec" = 1 ]; then echo S
-    else echo W; fi
-  done <<<"$prompts")
+  kinds=$(cut -f1 <<<"$prompts")
   rounds=$(grep -c '[CW]' <<<"$kinds" || true)
   whole=$(grep '[CW]' <<<"$kinds" | tail -n +2 | grep -c W || true)
   last=$(grep -n W <<<"$kinds" | tail -n 1 | cut -d: -f1)
