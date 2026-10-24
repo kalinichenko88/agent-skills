@@ -1,6 +1,6 @@
 ---
 name: typescript-conventions
-description: Use when writing or reviewing TypeScript — declaring an object shape, naming a new file, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
+description: Use when writing or reviewing TypeScript — declaring an object shape, placing a type, an enum or a schema that several files use, naming a new file, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
 ---
 
 # TypeScript conventions
@@ -165,7 +165,7 @@ export → everything it uses below it: private helpers, module constants, and
 the types that only this file uses. A file opens with what it is for.
 
 ```ts
-import type { Order } from './order';
+import type { Order } from './models/order';
 
 export function orderSummary(order: Order): string {
   const rows = order.lines.map((line) => {
@@ -185,3 +185,69 @@ function formatCents(cents: number): string {
 Not: `const money` and `formatCents` above `orderSummary`. A `const` below the
 export is safe: the function reads it when it runs, after the module has
 loaded.
+
+## A shared type is a model in `models/`, a schema is in `schemas/`
+
+A model is a type or an enum. A model that two files or more use goes to the
+`models/` folder of its area: the nearest folder that holds every file that
+uses it. One model per file, named after the model. Two cases may share a
+file:
+
+- A model made by an operation on one other model may go into that model's
+  file: `OrderDraft = Omit<Order, 'id'>`, `PartialOrder = Partial<Order>`,
+  `MaybeOrder = Order | null`, `PaidOrder = Order & { paidAt: string }`.
+- A tagged (discriminated) union and its variants, which share a tag field,
+  may share the union's file: `Discount = PercentDiscount | FixedDiscount`,
+  each variant with `kind`.
+
+A model outside these two cases gets a file of its own: one whose own fields
+hold another model, as `Order` holds `lines: OrderLine[]`, and one made from
+two models, as `Order & Customer`. A type that only one file uses stays in
+that file, below the primary export.
+
+A schema, a zod one for instance, goes to the `schemas/` folder of its area,
+beside `models/`, one schema per file. A model that has a schema infers its
+type from it, so the shape is written once. A model that no code parses has
+no schema and is written by hand.
+
+```
+orders/
+├── models/
+│   ├── order.ts         Order, and OrderDraft = Omit<Order, 'id'>
+│   ├── order-line.ts    OrderLine
+│   ├── customer.ts      Customer, by hand: no code parses it
+│   └── discount.ts      Discount = PercentDiscount | FixedDiscount, tagged by kind
+├── schemas/
+│   ├── order.ts         orderSchema, the response of fetch-orders.ts
+│   └── order-line.ts    orderLineSchema
+├── fetch-orders.ts
+├── order-total.ts
+└── order-summary.ts
+```
+
+```ts
+// schemas/order.ts
+import { z } from 'zod';
+
+import { orderLineSchema } from './order-line';
+
+export const orderSchema = z.object({
+  id: z.string(),
+  customerId: z.string(),
+  lines: z.array(orderLineSchema),
+});
+```
+
+```ts
+// models/order.ts
+import type { z } from 'zod';
+
+import type { orderSchema } from '../schemas/order';
+
+export type Order = z.infer<typeof orderSchema>;
+
+export type OrderDraft = Omit<Order, 'id'>;
+```
+
+Not: `Order`, `OrderLine`, `Customer` and `Discount` together in one
+`order.ts`, and not a schema beside the fetch that parses with it.

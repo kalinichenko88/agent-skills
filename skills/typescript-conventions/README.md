@@ -7,8 +7,9 @@ agent matches it and says so.
 
 - Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
   `.cts`) in a session. `rules.md` asks for it, so a subagent starts it too.
-- You write or review TypeScript: declare an object shape, name a new file,
-  write a callback, reach for a dependency.
+- You write or review TypeScript: declare an object shape, place a type, an
+  enum or a schema that several files use, name a new file, write a callback,
+  reach for a dependency.
 - You set up lint rules for a new TypeScript project.
 
 ## The rules
@@ -31,6 +32,14 @@ agent matches it and says so.
   the project pins.
 - **Files are kebab-case, one entity per file.** A file opens with its
   primary export; its helpers, module constants and own types go below it.
+- **A shared type is a model in `models/`, a schema is in `schemas/`.** A type
+  or an enum that two files or more use goes to the `models/` folder of their
+  nearest common folder, one model per file. A model made by an operation on
+  one other model, as `Omit<Order, 'id'>`, may share that model's file, and a
+  tagged (discriminated) union may share its file with its variants. Any other
+  model gets a file of its own: one whose own fields hold another model, and
+  one made from two models. A zod schema goes to `schemas/` of its area, and
+  its model infers the type from it.
 
 ## Recommended lint rules
 

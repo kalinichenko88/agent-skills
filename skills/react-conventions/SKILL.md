@@ -1,6 +1,6 @@
 ---
 name: react-conventions
-description: Use when writing or reviewing React code — adding a feature beside existing ones, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, reading a value from useRef or writing usePrevious.
+description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, reading a value from useRef or writing usePrevious.
 ---
 
 # React conventions
@@ -80,6 +80,31 @@ body goes to `shared` unchanged, and the old place becomes one line,
 helper. Show that one-line file in the change. A copy in the second feature,
 even one marked to move later, is the failure this rule prevents: two copies
 drift apart.
+
+## A part's own files live in its folder
+
+A sub-component with a hook, helper or constant file of its own is a folder:
+its component and the files that only it uses. A file that two parts use goes
+to their nearest common folder. A shared type goes into `models/` and a schema
+into `schemas/` of its area, the nearest folder that holds every file that uses
+it, as typescript-conventions says. The page is the feature's top part, so its
+own files sit at the feature root.
+
+```
+features/orders/
+├── index.ts
+├── orders-page.tsx        composes the parts
+├── fetch-orders.ts        the page's request
+├── models/order.ts        the type that the page and the table use
+├── schemas/order.ts       the schema that fetch-orders.ts parses with
+└── orders-table/
+    ├── orders-table.tsx   ROWS_PER_PAGE stays in it, below the export
+    └── use-table-sort.ts  only the table uses it
+```
+
+A flat `features/orders/use-table-sort.ts`, beside a flat `orders-table.tsx`,
+would say that the page uses the hook, or more than one part does. A
+sub-component with no file of its own stays one file next to its parent.
 
 ## A request's state is one union
 

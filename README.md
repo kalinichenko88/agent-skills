@@ -34,8 +34,8 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
   — house TypeScript style.
 - **[`kalinichenko:react-conventions`](skills/react-conventions/README.md)** —
-  layer and feature boundaries in a React app, request state as one union, and
-  no `ref.current` in render.
+  layer and feature boundaries in a React app, where a sub-component's own
+  files go, request state as one union, and no `ref.current` in render.
 
 Each skill's README says when it starts and what you get. The github and
 roadmap READMEs show each scenario as a picture.
@@ -142,13 +142,18 @@ To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 
 `tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
 skills, the files they write with an implicit return in a method callback, as
-`.map((x) => (`, and the runs with a file that opens with a helper or a
-constant instead of its primary export. `tests/review_loop_eval.sh` counts the
-review rounds and what each one reads. It checks that no count of rounds goes
-past three, and that a security review follows the last pass. Its fixture has
-a local `origin`, and its task says that no one can answer questions. Run it
-after a change to `skills/review-loop` or to its section in `rules.md`. Both
-call the model, so they are not part of `make check`.
+`.map((x) => (`, the runs with a file that opens with a helper or a constant
+instead of its primary export, and the runs that put the order, its line, the
+customer or the discount outside `models/` or two of them in one file. In a
+React feature, it counts the runs that put a sub-component's own hook at the
+feature root or in `shared`, and the runs with a zod schema outside
+`schemas/`.
+`tests/review_loop_eval.sh` counts the review rounds and what each one reads.
+It checks that no count of rounds goes past three, and that a security review
+follows the last pass. Its fixture has a local `origin`, and its task says
+that no one can answer questions. Run it after a change to
+`skills/review-loop` or to its section in `rules.md`. Both call the model, so
+they are not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
