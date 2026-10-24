@@ -124,8 +124,8 @@ line.
 GitHub Actions runs `make check` on each pull request and each push to `main`
 (`.github/workflows/check.yml`). It runs on Ubuntu 26.04, with its ShellCheck
 0.11.0 and with `mawk` as `awk`; `make check` on macOS runs BWK awk. A second
-job runs gitleaks on the new commits. The eval
-scripts below call the model, so they do not run there.
+job runs gitleaks on the new commits. The eval scripts below call the model, so
+they do not run there.
 
 A skill script that sets an EXIT trap under `set -u` empties `finished` before
 the trap and sets `finished=1` at each end that succeeds. Its trap turns an exit
