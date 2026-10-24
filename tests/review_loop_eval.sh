@@ -94,8 +94,10 @@ wait
 # the whole branch counts as one commit. A commit named another way counts as
 # the whole branch. So does a part of the security review without those words.
 # A round that says "security review" is taken for one: it can pass a run that
-# ran none, and it can hide a second read of the whole branch. Whether the last
-# pass ran is left to the printed prompts.
+# ran none, and it can hide a second read of the whole branch. A round taken
+# for the whole branch or for the security review starts a new count, so it can
+# hide a count past three rounds. Whether the last pass ran is left to the
+# printed prompts.
 commit='git( -C [^ ]+)? show( --?[a-z-]+)* ([0-9a-f]{7,}|HEAD)\.?([^.~^0-9A-Za-z]|$)|[0-9a-f]{7,}\^\.\.[0-9a-f]{7,}'
 secrev='security[ -]review|hard exclusions'
 failed=0
