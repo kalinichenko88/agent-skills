@@ -25,7 +25,8 @@
 # The order of a milestone is <k> for a title M<k>, 100000 + its number for
 # another title, and 1000000000 for Later. A milestone is current when a line
 # of its description reads Current.; when none does, the first one that is not
-# Later is.
+# Later is. milestone exits 1 and lists the titles when M<n> matches more
+# than one open milestone.
 #
 # Needs only bash and gh: every filter is gh's own --jq, which runs on each
 # page. So the records go to awk, which sees every page.
@@ -132,11 +133,18 @@ case $1 in
       | .[] | (.title | ascii_downcase) as $t
       | select($t == $q or (($q | test("^m[0-9]+$")) and ($t | startswith($q)) and ($t | .[($q | length):] | test("^([^0-9]|$)"))))
       | [.number, .title] | tsv')
-    [ -n "$found" ] || {
-      echo "read.sh: no open milestone matches $2" >&2
-      exit 1
-    }
-    echo "${found%%$'\n'*}"
+    case $found in
+      '')
+        echo "read.sh: no open milestone matches $2" >&2
+        exit 1
+        ;;
+      *$'\n'*)
+        echo "read.sh: $2 matches more than one open milestone; name it by its whole title:" >&2
+        while IFS=$'\t' read -r _ t; do echo "  $t" >&2; done <<<"$found"
+        exit 1
+        ;;
+    esac
+    echo "$found"
     ;;
   prs)
     [ $# -eq 1 ] || usage

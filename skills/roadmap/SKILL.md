@@ -33,7 +33,10 @@ directory. Read all of it before the first step of that moment.
 - **A stage is a milestone**, titled `M<n> · <name>`. Its description is a
   short goal and a `Done when` sentence: an outcome someone can see in a demo.
   The order comes from the number after `M`; other titles come after; `Later`
-  is last and holds what is wanted but not planned.
+  is last and holds what is wanted but not planned. One number belongs to one
+  open milestone: `plan.sh create` and `rename` refuse a second `M1`. When two
+  open milestones have it anyway, `M1` names neither, and the scripts list
+  both: name the milestone by its whole title.
 - **The current milestones** have the line `Current.` in their description.
   `plan.sh current` and `plan.sh not-current` set and remove it. When no
   milestone has it, the first open one is current. `Later` is never current.
