@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Gives the main model a branch with one defect and two nits, and asks it to
 # review and fix until the review is clean, one review subagent a round. It
-# prints, for each run, the rounds and what each round after the first was
-# given to read. It exits 1 when a run has fewer than two rounds, read the
+# prints, for each run, the counts, then each review subagent's prompt after
+# its kind: W reads the whole branch, C one commit, S is the security review.
+# It exits 1 when a run has fewer than two rounds, read the
 # whole branch more than once after round 1, ran no security review after its
 # last read of the whole branch, or did not invoke the skill. It
 # calls the model, so it costs tokens and is not part of `make check`: run it
