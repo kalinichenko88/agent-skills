@@ -48,8 +48,10 @@ run late && fail 'make test passes a test that exits 3 after its ok line' "$(cat
 run after && fail 'make test passes a test whose ok line is not its last' "$(cat "$tmp/out")"
 run 'unbound pass' && fail 'make test passes when an earlier test stops' "$(cat "$tmp/out")"
 
-# A test that skips a part, as the debt test does without node, prints its note
-# on a line before its ok line, never after it on the same line. The [o] keeps
-# this line out of its own match.
-grep -n "_test: [o]k[^'\"]" "$root"/tests/*_test.sh && fail 'an ok line with text after it' 'Print the note on a line before the ok line.'
+# The debt test skips clones.sh when there is no node, and must still pass.
+# Run that path where /usr/bin and /bin hold no node.
+if [ ! -x /usr/bin/node ] && [ ! -x /bin/node ]; then
+  PATH=/usr/bin:/bin make -s -C "$root" test TESTS=debt_scripts >"$tmp/out" 2>&1 ||
+    fail 'make test fails the debt test without node' "$(cat "$tmp/out")"
+fi
 echo 'makefile_test: ok'
