@@ -7,7 +7,8 @@ description: Use when touching a repository's GitHub surface — writing a commi
 
 Everything here needs `gh` authenticated against a GitHub remote. Where it is
 not — `gh auth status` fails, or the remote is elsewhere — skip the step and say
-so in the final report rather than inventing a substitute.
+so in the final report rather than inventing a substitute. *Public
+repositories* is the one exception: there, the target counts as public.
 
 | Moment | What must happen | Read first |
 | --- | --- | --- |
@@ -17,7 +18,7 @@ so in the final report rather than inventing a substitute.
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
 | Picking an issue up — `#91` or its URL | `take-in-check.sh`; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code, and assign each one when it joins | `take-in.md` |
-| Writing to a repository — an issue, a comment, a PR, a branch, a commit | `gh repo view <owner/name or URL> --json visibility` on each repository that gets it; fails: as `PUBLIC`; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |
+| Writing to a repository — an issue, a comment, a PR, a branch, a commit | `gh repo view <owner/name> --json visibility` on each repository that gets it, and when it fails, take it as `PUBLIC`; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host | *GitHub Actions* below |
 
 A file in the last column sits next to this one, in this skill's base
@@ -139,17 +140,21 @@ gone, and correct it.
 ## Public repositories
 
 Before the first write to each repository, read the visibility of the
-repository that gets the text. Give `gh repo view` that repository: the
-`--repo` or the URL of the `gh` call, or the URL of the remote you push to. A
-`gh` call with neither writes to the checkout's default repository, the one
+repository that gets the text. Give `gh repo view` that repository as
+`owner/name` or as a remote URL: the `--repo` of the `gh` call, the
+`owner/name` in the issue or PR URL that the call takes, or the URL of the
+remote you push to. `gh repo view` does not take an issue or PR URL. A `gh`
+call with none of these writes to the checkout's default repository, the one
 that `gh repo view` prints with no argument. That default can differ from the
-remote that `git push` uses, for example when `origin` and `upstream` differ.
+remote that `git push` uses: with no default set, `gh` takes `upstream` before
+`origin`.
 
 ```bash
-gh repo view <owner/name or URL> --json visibility --jq .visibility
+gh repo view <owner/name or remote URL> --json visibility --jq .visibility
 ```
 
-When the command fails for that repository, write as if it printed `PUBLIC`.
+When the command fails for that repository, or `gh` cannot run, write as if it
+printed `PUBLIC`.
 
 A write is an issue, a comment, a PR title or description, a branch name, a
 tag, a release, or a commit. A commit is its message and each file it changes:
@@ -166,6 +171,9 @@ source is private:
 - A work tracker, a wiki or a chat.
 - A log or a file that the person gives you.
 - The data of a person or a customer.
+
+The content of the repository that gets the text is not a private source for
+that text: its own paths, numbers and code stay as they are.
 
 From a private source, leave out each detail that names the source or its
 content:
