@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Gives two TypeScript tasks and two React tasks to Haiku subagents and counts
-# the runs that invoke the conventions skills before their first write, then
-# the written files with an implicit return in a method callback, then the
-# order runs with a file that does not open with its primary export, then the
-# feature runs that put a sub-component's own hook at the feature root or in
-# `shared`. It calls the model, so it costs tokens and is not part of
+# Gives two TypeScript tasks and two React tasks to Haiku subagents. It counts
+# the runs that invoke the conventions skills before their first write, and
+# the written files with an implicit return in a method callback. It counts
+# the order runs with a file that does not open with its primary export, and
+# the order runs with two models in one file or a model outside models/. It
+# counts the feature runs that put a sub-component's own hook at the feature
+# root or in `shared`, and the feature runs with a zod schema outside
+# schemas/. It calls the model, so it costs tokens and is not part of
 # `make check`: run it by hand after a change to rules.md or to a skill's
 # description. It runs with this machine's other plugins and settings, the
 # setup the rules must work in.
@@ -21,7 +23,7 @@ logs=$(mktemp -d)
 ts_task='Add src/cart-total.ts to this project. A cart item has an id, a name, a unit price in cents and a quantity. Export a function that returns the cart total in cents, skipping items with quantity 0, and a function that returns the names of the items whose unit price is over a given limit. Write the file, then reply with its contents.'
 order_task='Add an order feature to this project, in src/. An order has an id, a customer and a list of lines. A line has a product id, a quantity and a unit price in cents. A customer has an id, a name and a discount, which is either a percent or a fixed amount in cents. Add a function that returns the order total in cents after the customer discount, and a function that returns a text summary of the order, one row per line and the total at the end, each in its own file. Both functions use the same order, line, customer and discount types. Write the files, then reply with the path and the contents of every file you wrote.'
 react_task='Add src/search-panel.tsx to this project: a React component with a text input and a Search button. On submit it fetches /api/search?q=<the text>, which returns a JSON array of { id, title, url }. While the request runs it shows "Loading…", on failure it shows the error message, and on success it shows the results as a list of links. Write the file, then reply with its contents.'
-feature_task='Add a products feature to this project, in src/features/products/. Its page shows a filter panel and a grid of products. The filter panel keeps the values the user is typing in a hook that only the panel uses, and it waits 300 ms after the last keystroke before it applies them: keep that number in a constant. The page loads the products once from GET /api/products, which returns a JSON array of { id, name, price, category }, and the grid shows the products that match the applied filters. Write the files, then reply with the path and the contents of every file you wrote.'
+feature_task='Add a products feature to this project, in src/features/products/. Its page shows a filter panel and a grid of products. The filter panel keeps the values the user is typing in a hook that only the panel uses, and it waits 300 ms after the last keystroke before it applies them: keep that number in a constant. The page loads the products once from GET /api/products, which returns a JSON array of { id, name, price, category }, checks the response with a zod schema, and the grid shows the products that match the applied filters. Write the files, then reply with the path and the contents of every file you wrote.'
 # One Haiku session that hands the task to one Haiku subagent, as the main
 # model does with routine work. The installed copy of the plugin is turned off,
 # so the skill list and the rules come from this checkout. The files it writes
@@ -29,7 +31,7 @@ feature_task='Add a products feature to this project, in src/features/products/.
 run() {
   local work=${2%.jsonl}
   mkdir -p "$work/src"
-  echo '{"type":"module","dependencies":{"react":"^19.2.0"},"devDependencies":{"typescript":"^5.9.0","@types/react":"^19.2.0"}}' >"$work/package.json"
+  echo '{"type":"module","dependencies":{"react":"^19.2.0","zod":"^4.6.0"},"devDependencies":{"typescript":"^5.9.0","@types/react":"^19.2.0"}}' >"$work/package.json"
   echo '{"compilerOptions":{"strict":true,"jsx":"react-jsx","noEmit":true},"include":["src"]}' >"$work/tsconfig.json"
   (cd "$work" && claude -p --model haiku --output-format stream-json --verbose \
     --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
@@ -125,6 +127,38 @@ nested() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
+# models <dir>...: the order runs that declare Order, the line, Customer and
+# Discount each in a file of its own under a models/ folder, as
+# typescript-conventions asks. It prints each file that breaks it. The recorded
+# runs without the rule declared all four in src/order.ts.
+models() {
+  local ok=0 dir decl bad
+  for dir; do
+    decl=$(grep -rHoE '^export (type|enum|interface) (Order|OrderLine|Line|Customer|Discount)[ =<]' "$dir/src" || true)
+    [ -n "$decl" ] || { echo "no model written: $dir/src" && continue; }
+    bad=$(awk -F: '$1 !~ /\/models\// || ++seen[$1] > 1 { print $1 }' <<<"$decl" | sort -u)
+    if [ -n "$bad" ]; then echo "$bad"; else ok=$((ok + 1)); fi
+  done
+  echo "models: $ok of $# order runs keep each model in a file of its own in models/"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
+# schemas <dir>...: the feature runs that declare their zod object schemas
+# only in the feature's schemas/ folder. It prints each other file that
+# declares one. The recorded runs without the rule declared it beside the fetch
+# or the type, in products-api.ts or product.ts. A schema wrapped at the parse
+# call, as `z.array(productSchema).parse(data)`, is not a declaration.
+schemas() {
+  local ok=0 dir found
+  for dir; do
+    [ -d "$dir/src/features/products/schemas" ] || { echo "no schemas/ folder: $dir" && continue; }
+    found=$(find "$dir/src" -type f ! -path "$dir/src/features/products/schemas/*" -exec grep -lE 'z\.object\(' {} + || true)
+    if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
+  done
+  echo "schemas: $ok of $# feature runs declare their zod schemas only in schemas/"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
 for i in $(seq "$runs"); do
   run "$ts_task" "$logs/ts-$i.jsonl" &
   run "$react_task" "$logs/react-$i.jsonl" &
@@ -142,6 +176,8 @@ for i in $(seq "$runs"); do
 done
 braced "${files[@]}"
 first "$logs"/order-*/
+models "$logs"/order-*/
 nested "$logs"/feature-*/
+schemas "$logs"/feature-*/
 echo "logs: $logs"
 exit "$failed"

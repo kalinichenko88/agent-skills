@@ -1,6 +1,6 @@
 ---
 name: typescript-conventions
-description: Use when writing or reviewing TypeScript — declaring an object shape, naming a new file, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
+description: Use when writing or reviewing TypeScript — declaring an object shape, placing a type, an enum or a schema that several files use, naming a new file, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
 ---
 
 # TypeScript conventions
@@ -165,7 +165,7 @@ export → everything it uses below it: private helpers, module constants, and
 the types that only this file uses. A file opens with what it is for.
 
 ```ts
-import type { Order } from './order';
+import type { Order } from './models/order';
 
 export function orderSummary(order: Order): string {
   const rows = order.lines.map((line) => {
@@ -185,3 +185,43 @@ function formatCents(cents: number): string {
 Not: `const money` and `formatCents` above `orderSummary`. A `const` below the
 export is safe: the function reads it when it runs, after the module has
 loaded.
+
+## A shared type is a model in `models/`, a schema is in `schemas/`
+
+A model is a type or an enum. A model that two files or more use goes to the
+`models/` folder of its area: the nearest folder that holds every file that
+uses it. One model per file, named after the model. A model built from others
+with `Omit`, `Pick`, `Partial`, `&` or `|` shares their file. A model that only
+holds another, as `Order` holds a list of `OrderLine`, gets a file of its own.
+A type that only one file uses stays in that file, below the primary export.
+
+A schema, a zod one for instance, goes to the `schemas/` folder beside
+`models/`, one schema per file. The model infers its type from the schema.
+
+```
+orders/
+├── models/
+│   ├── order.ts         Order, and OrderDraft built from it
+│   ├── order-line.ts    OrderLine
+│   ├── customer.ts      Customer
+│   └── discount.ts      Discount = PercentDiscount | FixedDiscount
+├── schemas/
+│   ├── order.ts         orderSchema
+│   └── order-line.ts    orderLineSchema
+├── order-total.ts
+└── order-summary.ts
+```
+
+```ts
+// models/order.ts
+import type { z } from 'zod';
+
+import type { orderSchema } from '../schemas/order';
+
+export type Order = z.infer<typeof orderSchema>;
+
+export type OrderDraft = Omit<Order, 'id'>;
+```
+
+Not: `Order`, `OrderLine`, `Customer` and `Discount` together in one
+`order.ts`, and not a schema beside the fetch that parses with it.

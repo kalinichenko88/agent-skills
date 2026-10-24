@@ -143,8 +143,10 @@ To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 `tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
 skills, the files they write with an implicit return in a method callback, as
 `.map((x) => (`, the runs with a file that opens with a helper or a constant
-instead of its primary export, and the React feature runs that put a
-sub-component's own hook at the feature root or in `shared`.
+instead of its primary export, and the runs with two models in one file or a
+model outside `models/`. In a React feature, it counts the runs that put a
+sub-component's own hook at the feature root or in `shared`, and the runs with
+a zod schema outside `schemas/`.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
 It checks that no count of rounds goes past three, and that a security review
 follows the last pass. Its fixture has a local `origin`, and its task says

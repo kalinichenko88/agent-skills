@@ -93,7 +93,7 @@ features/orders/
 ├── index.ts
 ├── orders-page.tsx        composes the parts
 ├── fetch-orders.ts        the page's request
-├── order.ts               the type that the page and the table use
+├── models/order.ts        the type that the page and the table use
 └── orders-table/
     ├── orders-table.tsx   ROWS_PER_PAGE stays in it, below the export
     └── use-table-sort.ts  only the table uses it
