@@ -194,7 +194,11 @@ check 'M1 of two milestones names both' \
   "$(printf 'read.sh: M1 matches more than one open milestone; name it by its whole title:\n  M1 · Stage 1\n  M1 · Other')" "$(cat "$tmp/out")"
 check 'a whole title of the two resolves' 999 "$(bash "$scripts/read.sh" milestone 'm1 · other' | cut -f1)"
 bash "$scripts/roadmap.sh" M1 >/dev/null 2>&1 && fail 'roadmap.sh M1 of two milestones exits 0'
-DRY_RUN=1 bash "$scripts/plan.sh" current M1 >/dev/null 2>&1 && fail 'plan.sh current M1 of two milestones exits 0'
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" current M1 2>&1) && fail 'plan.sh current M1 of two milestones exits 0'
+check 'plan.sh current M1 of two milestones writes nothing' 0 "$(grep -c '^dry run' <<<"$out" || true)"
+# A title that is M1 alone is its own whole title, so M1 names it.
+ms '. + [.[] | select(.title == "M1 · Stage 1") | .number = 998 | .title = "M1"]'
+check 'the whole title M1 resolves next to M1 · ...' 998 "$(bash "$scripts/read.sh" milestone M1 | cut -f1)"
 
 # read.sh prs. The recorded pull requests are the owner's, so each author is you.
 reset

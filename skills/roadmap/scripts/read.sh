@@ -25,8 +25,8 @@
 # The order of a milestone is <k> for a title M<k>, 100000 + its number for
 # another title, and 1000000000 for Later. A milestone is current when a line
 # of its description reads Current.; when none does, the first one that is not
-# Later is. milestone exits 1 and lists the titles when M<n> matches more
-# than one open milestone.
+# Later is. milestone takes a whole title first, then M<n>, and exits 1 and
+# lists the titles when M<n> matches more than one open milestone.
 #
 # Needs only bash and gh: every filter is gh's own --jq, which runs on each
 # page. So the records go to awk, which sees every page.
@@ -130,9 +130,10 @@ case $1 in
     [ $# -eq 2 ] || usage
     found=$(NAME=$2 gh api 'repos/{owner}/{repo}/milestones?state=open&per_page=100' --jq "$milestones"'
       | ($ENV.NAME | ascii_downcase) as $q
-      | .[] | (.title | ascii_downcase) as $t
-      | select($t == $q or (($q | test("^m[0-9]+$")) and ($t | startswith($q)) and ($t | .[($q | length):] | test("^([^0-9]|$)"))))
-      | [.number, .title] | tsv')
+      | map(. + {t: (.title | ascii_downcase)})
+      | (map(select(.t == $q)) | select(length > 0))
+        // map(select(($q | test("^m[0-9]+$")) and (.t | startswith($q)) and (.t | .[($q | length):] | test("^([^0-9]|$)"))))
+      | .[] | [.number, .title] | tsv')
     case $found in
       '')
         echo "read.sh: no open milestone matches $2" >&2

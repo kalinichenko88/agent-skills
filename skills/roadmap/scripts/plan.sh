@@ -80,12 +80,15 @@ marked() { awk '{ sub(/\r$/, ""); gsub(/^[ \t]+|[ \t]+$/, "") } $0 == "Current."
 # Writes the file as the milestone's description.
 describe() { run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -F description=@"$file" --silent; }
 # Prints why the title $1 is taken: an open milestone in $list, other than
-# number $2, has it in any case, or has its M<n>, as M01 has M1. Through
-# ENVIRON, not -v, which would read a backslash in the title as an escape.
+# number $2, has it in any case, or has its M<n>. The M counts in any case, as
+# in read.sh milestone, and the number as a number, as in the order: m1 and
+# M01 are M1. Through ENVIRON, not -v, which would read a backslash in the
+# title as an escape.
 taken() {
   T=$1 N=${2:-} awk -F'\t' 'function m(t) { return match(t, /^[Mm][0-9]+/) ? substr(t, 2, RLENGTH - 1) + 0 : -1 }
-    $1 == "ms" && $2 != ENVIRON["N"] && tolower($6) == tolower(ENVIRON["T"]) { print ENVIRON["T"] " exists"; exit }
-    $1 == "ms" && $2 != ENVIRON["N"] && m($6) >= 0 && m($6) == m(ENVIRON["T"]) { print $6 " is M" m($6) " already"; exit }' <<<"$list"
+    $1 != "ms" || $2 == ENVIRON["N"] { next }
+    tolower($6) == tolower(ENVIRON["T"]) { print ENVIRON["T"] " exists"; exit }
+    m($6) >= 0 && m($6) == m(ENVIRON["T"]) { print $6 " is M" m($6) " already"; exit }' <<<"$list"
 }
 # Exits 0 when $1, as YYYY-MM-DD, is a day that exists, so 2026-02-30 is
 # never sent.
@@ -137,8 +140,8 @@ case $act in
     [ $# -eq 3 ] || usage
     title=$2
     list=$(bash "$dir/read.sh" milestones)
-    taken=$(taken "$title")
-    [ -z "$taken" ] || refuse "$taken"
+    why=$(taken "$title")
+    [ -z "$why" ] || refuse "$why"
     newfile
     trimmed <"$3" >"$file"
     run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title="$title" -F description=@"$file" --silent
@@ -161,8 +164,8 @@ case $act in
     [ "$(tr '[:upper:]' '[:lower:]' <<<"$3")" != later ] || refuse 'a milestone does not become Later: plan.sh later puts off one task at a time'
     milestone "$2"
     list=$(bash "$dir/read.sh" milestones)
-    taken=$(taken "$3" "$n")
-    [ -z "$taken" ] || refuse "$taken"
+    why=$(taken "$3" "$n")
+    [ -z "$why" ] || refuse "$why"
     run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -f title="$3" --silent
     say "renamed $title to $3"
     ;;

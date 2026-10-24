@@ -67,4 +67,7 @@ When a milestone has no open issues left, or the person asks:
    - the new current marks: `plan.sh current` and `plan.sh not-current`.
 3. After one approval, write as at the start. `plan.sh describe <milestone>
    <file>` changes a description and keeps its current mark. `plan.sh rename`
-   changes a title, and `plan.sh due` a due date; `none` removes it.
+   changes a title, and `plan.sh due` a due date; `none` removes it. A rename
+   into a number that another open milestone has is refused. To move stages
+   up by one, rename from the highest number down; to swap two, give one of
+   them a free number first.
