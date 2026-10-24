@@ -31,6 +31,8 @@ script pass "check 'same' 'a' 'a'"
 script differ "check 'differ' 'a' 'b'"
 # No space between the last two strings gives check two arguments: $3 is unbound.
 script unbound "check 'name' 'want''got'"
+# The same stop on any bash: bash 5 exits 1 on the unbound variable above.
+script early "check 'same' 'a' 'a'; exit 0"
 script late "check 'same' 'a' 'a'" 'exit 3'
 script after "check 'same' 'a' 'a'" "echo 'FAIL: later'"
 
@@ -38,6 +40,7 @@ run() { make -s -C "$tmp" -f "$root/Makefile" test TESTS="$1" >"$tmp/out" 2>&1; 
 run pass || fail 'make test fails a test that passes' "$(cat "$tmp/out")"
 run differ && fail 'make test passes a test whose check fails' "$(cat "$tmp/out")"
 run unbound && fail 'make test passes a test that an unbound variable stops' "$(cat "$tmp/out")"
+run early && fail 'make test passes a test that exits 0 before its ok line' "$(cat "$tmp/out")"
 run late && fail 'make test passes a test that exits 3 after its ok line' "$(cat "$tmp/out")"
 run after && fail 'make test passes a test whose ok line is not its last' "$(cat "$tmp/out")"
 run 'unbound pass' && fail 'make test passes when an earlier test stops' "$(cat "$tmp/out")"
