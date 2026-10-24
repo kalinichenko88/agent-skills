@@ -19,17 +19,17 @@ set -euo pipefail
   exit 2
 }
 path=${1:-.}
-top=$(git rev-parse --show-toplevel)
-ref=$(git -C "$top" rev-parse --abbrev-ref --verify -q origin/HEAD || echo HEAD)
-data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock)$|(^|/)(fixtures|testdata|vendor|__snapshots__)/|(^|/)(go\.sum|package-lock\.json|pnpm-lock\.yaml)$'
+cd "$(git rev-parse --show-toplevel)"
+ref=$(git rev-parse --abbrev-ref --verify -q origin/HEAD || echo HEAD)
+data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock)$|(^|/)(fixtures|testdata|vendor|__snapshots__)/|(^|/)go\.sum$'
 
 # ponytail: renames are not followed, so a file moved inside the window counts
 # its commits from the move; git log --follow per file if a hotspot hides
 # behind one.
 rows=$({
-  git -C "$top" grep -I -c '' "$ref" -- "$path" || true
+  git grep -I -c '' "$ref" -- "$path" || true
   echo '== log'
-  git -C "$top" log --since=60.days --format= --name-only "$ref" -- "$path"
+  git log --since=60.days --format= --name-only "$ref" -- "$path"
 } | awk -v ref="$ref:" -v data="$data" '
   $0 == "== log" { inlog = 1; next }
   !inlog {
@@ -51,6 +51,6 @@ echo '| File | Lines | Commits in 60 days | Score |'
 echo '| --- | ---: | ---: | ---: |'
 head -n 15 <<<"$rows" | awk -F'\t' '{ printf "| `%s` | %d | %d | %d |\n", $4, $2, $3, $1 }'
 echo
-echo "Measured on \`$ref\` at $(git -C "$top" rev-parse --short "$ref"), $(grep -c . <<<"$rows") code files."
-moved=$(git -C "$top" log --since=60.days -M --diff-filter=R --name-only --format= "$ref" -- "$path" | grep -c . || true)
+echo "Measured on \`$ref\` at $(git rev-parse --short "$ref"), $(grep -c . <<<"$rows") code files."
+moved=$(git log --since=60.days -M --diff-filter=R --name-only --format= "$ref" -- "$path" | grep -c . || true)
 [ "$moved" -eq 0 ] || echo "Paths moved in 60 days: $moved. Their commits count from the move."

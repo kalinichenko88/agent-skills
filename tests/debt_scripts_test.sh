@@ -17,7 +17,6 @@ fail() {
   exit 1
 }
 check() { [ "$2" = "$3" ] || fail "$1" "$(printf 'want: %s\ngot:  %s' "$2" "$3")"; }
-lines() { seq "$1" | sed 's/^/echo /'; }
 commit() { git -C "$repo" add -A && git -C "$repo" commit -qm "$1"; }
 
 repo=$tmp/repo
@@ -26,18 +25,18 @@ git -C "$repo" init -q -b main
 git -C "$repo" config user.name test
 git -C "$repo" config user.email test@example.com
 old="$(($(date +%s) - 90 * 86400)) +0000"
-lines 200 >"$repo/big.sh"
+seq 200 >"$repo/big.sh"
 GIT_AUTHOR_DATE=$old GIT_COMMITTER_DATE=$old commit 'add big'
 for i in 1 2 3; do
-  lines $((40 + i * 5)) >"$repo/src/hot.sh"
-  lines $((290 + i)) >"$repo/notes.md"
-  lines 100 >"$repo/tests/fixtures/data.sh"
+  seq $((40 + i * 5)) >"$repo/src/hot.sh"
+  seq $((290 + i)) >"$repo/notes.md"
+  seq 100 >"$repo/tests/fixtures/data.sh"
   echo "$i" >>"$repo/tests/fixtures/data.sh"
   commit "change $i"
 done
-lines 10 >"$repo/src/a:b.sh"
+seq 10 >"$repo/src/a:b.sh"
 commit 'add a:b'
-lines 5 >"$repo/src/first.sh"
+seq 5 >"$repo/src/first.sh"
 commit 'add first'
 git -C "$repo" mv src/first.sh src/kept.sh
 commit 'move first'
@@ -51,7 +50,7 @@ check 'the measured line, without origin' \
 check 'the moved paths' 'Paths moved in 60 days: 1. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
 
 git clone -q "$repo" "$tmp/clone"
-out=$(bash -c 'cd "$1" && bash "$2" src' _ "$tmp/clone" "$measure")
+out=$(cd "$tmp/clone" && bash "$measure" src)
 check 'a path, in a clone' '`src/hot.sh` `src/a:b.sh` `src/kept.sh`' "$(grep -o '^| `[^`]*`' <<<"$out" | cut -c3- | paste -sd' ' -)"
 case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 3 code files.') ;; *) fail 'the clone reads origin/main' "$out" ;; esac
 out=$(cd "$repo" && bash "$measure" big.sh)

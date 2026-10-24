@@ -43,10 +43,10 @@ all paths start there.
    *borderline*: name it in the report, and file none. The map carries no rules
    of its own: with no such rule in the instruction files, skip this step and
    say so.
-3. **Duplication**, with the project's runner: `bunx` in a Bun project, else
-   `npx`; with neither, skip this step and say so. Look up the newest version
-   first, `npm view jscpd version`, and run that exact version:
-   `npx --yes jscpd@<version> --min-lines 8 --reporters json --output <scratch> --ignore "**/node_modules/**,**/fixtures/**,**/*.md,**/*.json,**/*.yml,**/*.yaml,**/*.sql" <scope>`.
+3. **Duplication**, with the newest `jscpd` and the project's runner:
+   `bunx` in a Bun project, else `npx --yes`; with neither, skip this step and
+   say so:
+   `npx --yes jscpd@latest --min-lines 8 --reporters json --output <scratch> --ignore "**/node_modules/**,**/fixtures/**,**/*.md,**/*.json,**/*.yml,**/*.yaml,**/*.sql" <scope>`.
    A clone of 15 lines or more is a finding. `jscpd` never goes into a
    `package.json`.
 4. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
