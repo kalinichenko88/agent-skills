@@ -10,7 +10,9 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Not ubuntu-latest, which moves under the workflow. 26.04 ships
+    # ShellCheck 0.11.0, the version make check runs locally.
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
         with:
@@ -18,23 +20,14 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      # The runner's ShellCheck is 0.9.0: it reports SC2015 on lines that
-      # 0.11.0, the version make check runs locally, passes.
-      - name: Install ShellCheck 0.11.0
-        working-directory: ${{ runner.temp }}
-        run: |
-          curl -fsSLO https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
-          echo '8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  shellcheck-v0.11.0.linux.x86_64.tar.xz' | sha256sum -c -
-          tar -xJf shellcheck-v0.11.0.linux.x86_64.tar.xz
-          sudo install shellcheck-v0.11.0/shellcheck /usr/local/bin/shellcheck
-          shellcheck --version
       - run: npm install -g @anthropic-ai/claude-code
-      - run: |
-          awk -W version 2>&1 | head -n 1
-          make check
+      # The host's awk is BWK awk, and the runner's can be gawk. CI takes mawk,
+      # the default awk on Debian and Ubuntu, and the one the scripts broke on.
+      - run: sudo update-alternatives --set awk /usr/bin/mawk
+      - run: make check
 
   secrets:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: read

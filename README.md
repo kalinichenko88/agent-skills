@@ -122,8 +122,9 @@ exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
 line.
 
 GitHub Actions runs `make check` on each pull request and each push to `main`
-(`.github/workflows/check.yml`). It runs on Ubuntu: bash 5, `mawk` as `awk`,
-and ShellCheck 0.11.0. A second job runs gitleaks on the new commits. The eval
+(`.github/workflows/check.yml`). It runs on Ubuntu 26.04, with its ShellCheck
+0.11.0 and with `mawk` as `awk`. So the scripts are tested on BWK awk on macOS
+and on mawk in CI. A second job runs gitleaks on the new commits. The eval
 scripts below call the model, so they do not run there.
 
 A skill script that sets an EXIT trap under `set -u` empties `finished` before

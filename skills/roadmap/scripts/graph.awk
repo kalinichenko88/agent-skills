@@ -13,12 +13,10 @@ $1 == "ms" {
   mslist[++msn] = $2
 }
 $1 == "mc" { msopen[$2] = $3; msclosed[$2] = $4 }
-# Returns the list s with v added, after sep when s is not empty. Not an in
-# test on the key: mawk makes the element before it reads the right side, so
-# the test is always true. An empty v would add only sep, and no caller passes
-# one: description lines, branches, file lists, titles and state parts all
-# have text.
-function append(s, sep, v) { return s (s == "" ? "" : sep) v }
+# Returns the list s with v added, after sep when s is not empty; an empty v
+# adds nothing. Not an in test on the key: mawk makes the element before it
+# reads the right side, so the test is always true.
+function append(s, sep, v) { return v == "" ? s : s (s == "" ? "" : sep) v }
 $1 == "md" { mdlines[$2] = append(mdlines[$2], "\n", $3) }
 $1 == "is" {
   isms[$2] = $3; isbug[$2] = $4; isbusy[$2] = $5; isblk[$2] = $6
