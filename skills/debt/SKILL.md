@@ -93,10 +93,10 @@ that all paths start there.
 4. **Duplication.** `bash <dir>/scripts/clones.sh <tree> [path]` runs the
    newest `jscpd` on a copy of the scope's code files, by the data rule of
    step 1 and with SQL left out, so that a copy in a document or a fixture
-   cannot hide a clone. It prints the clones of 8 lines or more, longest
-   first, with paths from the root. When it exits with an error, as with
-   neither `npx` nor `bunx`, skip this step and give its message. A clone of
-   15 lines or more is a finding. `jscpd` never goes into a `package.json`.
+   cannot hide a clone. It prints the clones of 15 lines or more, longest
+   first, with paths from the root: each one is a finding. When it exits with
+   an error, as with neither `npx` nor `bunx`, skip this step and give its
+   message. `jscpd` never goes into a `package.json`.
 
 ## Choose the places
 

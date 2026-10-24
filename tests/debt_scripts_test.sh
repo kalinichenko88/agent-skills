@@ -4,7 +4,7 @@
 # whose name ends as a document's does, one with a non-ASCII name, and a
 # dotfile that is code; a document, a fixture and ignore files that are data,
 # not code; and a file moved into src/, one moved inside it, and a moved
-# document. Then clones.sh, with a fake npx and bunx.
+# document. Then clones.sh, with a fake npx.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -74,10 +74,10 @@ check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$rep
 err=$(cd "$repo" && bash "$measure" tests 2>&1) && fail 'a path with only data exits 0' "$err"
 check 'a path with only data' 'No code files under tests on HEAD.' "$err"
 
-# clones.sh, with a fake npx and bunx: each writes down its name, where it ran,
-# what it got and the files it was given, and writes the report that jscpd
-# 5.4.2 wrote for this tree. The README, the fixture and the SQL hold copies of
-# the code there, and jscpd never got them.
+# clones.sh, with a fake npx: it writes down its name, where it ran, what it
+# got and the files it was given, and writes the report that jscpd 5.4.2 wrote
+# for this tree. The README, the fixture and the SQL hold copies of the code
+# there, and jscpd never got them.
 { command -v node || command -v bun; } >/dev/null || {
   echo 'debt_scripts_test: ok; clones.sh not run, no node or bun'
   exit 0
@@ -96,23 +96,18 @@ cat >"$tmp/bin/npx" <<'EOF'
 [ -z "${FAKE_FAIL:-}" ] || exit 1
 sed "s|@ROOT@|${FAKE_ROOT:-$(cd "${!#}" && pwd -P)}|g" "$FAKE_REPORT" >jscpd-report.json
 EOF
-cp "$tmp/bin/npx" "$tmp/bin/bunx"
-chmod +x "$tmp/bin/npx" "$tmp/bin/bunx"
+chmod +x "$tmp/bin/npx"
 export FAKE_LOG=$tmp/runner.log FAKE_REPORT=$root/tests/fixtures/debt/jscpd-report.json
 fake=$tmp/bin:$PATH
-args='jscpd@latest --min-lines 8 --absolute --reporters json --output . code'
+args='jscpd@latest --min-lines 15 --absolute --reporters json --output . code'
 
 out=$(PATH=$fake bash "$clones" "$tree")
 check 'the code clones, longest first' \
-  "$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 10 | `src/short1.ts` 1-10 | `src/short\|2.ts` 1-10 |')" "$out"
+  "$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short\|2.ts` 1-20 |')" "$out"
 check 'npx, with only the code files' "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts './src/short|2.ts' ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
 case $(sed -n 2p "$FAKE_LOG") in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 out=$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)
 check 'a relative tree with CDPATH set' '| Lines | File | Other file |' "$(head -n 1 <<<"$out")"
-: >"$tree/bun.lock"
-PATH=$fake bash "$clones" "$tree" >/dev/null
-check 'bunx in a Bun project' "$(printf '%s\n' bunx "$args")" "$(sed -n '1p;3p' "$FAKE_LOG")"
-rm "$tree/bun.lock"
 check 'a path with only SQL' 'No code files under migrations.' "$(PATH=$fake bash "$clones" "$tree" migrations)"
 
 : >"$tmp/project/package.json"

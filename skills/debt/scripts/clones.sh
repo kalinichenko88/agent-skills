@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Finds the clones of 8 lines or more in the code files of a checkout with the
+# Finds the clones of 15 lines or more in the code files of a checkout with the
 # newest jscpd, and prints them longest first as a Markdown table: each file
 # from the checkout's root, with its lines.
 #
@@ -12,10 +12,10 @@
 # project is read. The copy is in a new temporary directory, and the runner and
 # the parser run there, not in <tree>: npm reads the .npmrc of the nearest
 # directory above with a package.json, bun reads a bunfig.toml, and either can
-# run the project's code. The runner is bunx in a Bun project and npx else,
-# whichever is installed; node, else bun, reads the report.
+# run the project's code. The runner is npx, else bunx; node, else bun, reads
+# the report.
 #
-# Needs bash, git and tar, npx or bunx, and node or bun.
+# Needs bash and git, and npx with node or bunx with bun.
 
 set -euo pipefail
 unset CDPATH
@@ -28,9 +28,7 @@ data=$(<"$(dirname "$0")/data.ere")
 tree=$(cd "$1" && pwd -P)
 path=${2:-.}
 
-if { [ -e "$tree/bun.lock" ] || [ -e "$tree/bun.lockb" ]; } && command -v bunx >/dev/null; then
-  runner=(bunx)
-elif command -v npx >/dev/null; then
+if command -v npx >/dev/null; then
   runner=(npx --yes)
 elif command -v bunx >/dev/null; then
   runner=(bunx)
@@ -38,10 +36,7 @@ else
   echo 'clones.sh: needs npx or bunx' >&2
   exit 3
 fi
-js=$(command -v node || command -v bun) || {
-  echo 'clones.sh: needs node or bun' >&2
-  exit 3
-}
+js=$(command -v node || command -v bun)
 
 # A template, because macOS's mktemp -d alone does not read TMPDIR.
 run=$(mktemp -d "${TMPDIR:-/tmp}/clones.XXXXXX")
@@ -59,15 +54,15 @@ while [ "$dir" != / ]; do
 done
 
 # ponytail: a path with a quote, a backslash, a tab or a newline comes out
-# quoted and stops tar; -z and NUL records if one turns up.
+# quoted, so the data rule does not see its end; -z and NUL records if one
+# turns up.
 git -c core.quotePath=false -C "$tree" ls-files -- "$path" | grep -Ev "$data|\.sql\$" >"$run/files" || true
 [ -s "$run/files" ] || {
   echo "No code files under $path."
   exit 0
 }
-mkdir "$run/code"
-(cd "$tree" && tar -cf - -T "$run/files") | tar -xf - -C "$run/code"
-(cd "$run" && "${runner[@]}" jscpd@latest --min-lines 8 --absolute --reporters json --output . code >/dev/null)
+GIT_LFS_SKIP_SMUDGE=1 git -C "$tree" checkout-index --prefix="$run/code/" --stdin <"$run/files"
+(cd "$run" && "${runner[@]}" jscpd@latest --min-lines 15 --absolute --reporters json --output . code >/dev/null)
 
 # jscpd gives real paths, as pwd -P does: a path outside the copy stops the
 # run, so that no local path reaches an issue.
@@ -78,13 +73,9 @@ mkdir "$run/code"
     if (!name.startsWith(process.env.ROOT)) throw new Error(`not in the copy: ${name}`);
     return name.slice(process.env.ROOT.length);
   };
-  const span = (name) => {
-    const text = name.replaceAll("|", "\\|");
-    return text.includes("`") ? `\`\` ${text} \`\`` : `\`${text}\``;
-  };
+  const span = (name) => `\`${name.replaceAll("|", "\\|")}\``;
   const rows = duplicates
-    .map((d) => ({ lines: d.lines, files: [d.firstFile, d.secondFile].map((f) => ({ ...f, name: rel(f.name) })) }))
-    .sort((a, b) => b.lines - a.lines || (a.files[0].name < b.files[0].name ? -1 : a.files[0].name > b.files[0].name ? 1 : 0))
-    .map((d) => `| ${d.lines} | ${d.files.map((f) => `${span(f.name)} ${f.start}-${f.end}`).join(" | ")} |`);
-  console.log(rows.length ? ["| Lines | File | Other file |", "| ---: | --- | --- |", ...rows].join("\n") : "No clones of 8 lines or more in code files.");
+    .sort((a, b) => b.lines - a.lines || (a.firstFile.name < b.firstFile.name ? -1 : a.firstFile.name > b.firstFile.name ? 1 : 0))
+    .map((d) => `| ${d.lines} | ${[d.firstFile, d.secondFile].map((f) => `${span(rel(f.name))} ${f.start}-${f.end}`).join(" | ")} |`);
+  console.log(rows.length ? ["| Lines | File | Other file |", "| ---: | --- | --- |", ...rows].join("\n") : "No clones of 15 lines or more in code files.");
 ')

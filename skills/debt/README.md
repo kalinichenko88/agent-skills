@@ -27,7 +27,7 @@ issues labelled `debt`, each with the numbers that put it there.
   `npx` or `bunx` on a copy of the code files, in a temporary directory, so
   the project's `.npmrc`, `bunfig.toml` and `.jscpd.json` run and set
   nothing. Documents, fixtures and SQL stay out, so a copy there hides no
-  clone. Clones of 15 lines or more are findings, and the clones one shared
+  clone. It lists the clones of 15 lines or more, and the clones one shared
   helper removes are one place. It never goes into a `package.json`. When
   `jscpd` cannot run, the step is skipped.
 - **Less code, when ponytail is installed.** Its `ponytail-audit` finds

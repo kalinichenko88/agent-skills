@@ -40,11 +40,11 @@
     },
     {
       "firstFile": {
-        "end": 10,
+        "end": 20,
         "endLoc": {
           "column": 39,
-          "line": 10,
-          "position": 372
+          "line": 20,
+          "position": 772
         },
         "name": "@ROOT@/src/short1.ts",
         "start": 1,
@@ -55,16 +55,16 @@
         }
       },
       "format": "typescript",
-      "fragment": "export const w1 = (1 * 7) + (1 % 3);\nexport const w2 = (2 * 7) + (2 % 3);\nexport const w3 = (3 * 7) + (3 % 3);\nexport const w4 = (4 * 7) + (4 % 3);\nexport const w5 = (5 * 7) + (5 % 3);\nexport const w6 = (6 * 7) + (6 % 3);\nexport const w7 = (7 * 7) + (7 % 3);\nexport const w8 = (8 * 7) + (8 % 3);\nexport const w9 = (9 * 7) + (9 % 3);\nexport const w10 = (10 * 7) + (10 % 3);",
+      "fragment": "export const w1 = (1 * 7) + (1 % 3);\nexport const w2 = (2 * 7) + (2 % 3);\nexport const w3 = (3 * 7) + (3 % 3);\nexport const w4 = (4 * 7) + (4 % 3);\nexport const w5 = (5 * 7) + (5 % 3);\nexport const w6 = (6 * 7) + (6 % 3);\nexport const w7 = (7 * 7) + (7 % 3);\nexport const w8 = (8 * 7) + (8 % 3);\nexport const w9 = (9 * 7) + (9 % 3);\nexport const w10 = (10 * 7) + (10 % 3);\nexport const w11 = (11 * 7) + (11 % 3);\nexport const w12 = (12 * 7) + (12 % 3);\nexport const w13 = (13 * 7) + (13 % 3);\nexport const w14 = (14 * 7) + (14 % 3);\nexport const w15 = (15 * 7) + (15 % 3);\nexport const w16 = (16 * 7) + (16 % 3);\nexport const w17 = (17 * 7) + (17 % 3);\nexport const w18 = (18 * 7) + (18 % 3);\nexport const w19 = (19 * 7) + (19 % 3);\nexport const w20 = (20 * 7) + (20 % 3);",
       "isNew": false,
       "kind": "exact",
-      "lines": 10,
+      "lines": 20,
       "secondFile": {
-        "end": 10,
+        "end": 20,
         "endLoc": {
           "column": 39,
-          "line": 10,
-          "position": 372
+          "line": 20,
+          "position": 772
         },
         "name": "@ROOT@/src/short|2.ts",
         "start": 1,
@@ -74,36 +74,36 @@
           "position": 0
         }
       },
-      "tokens": 160
+      "tokens": 320
     }
   ],
   "statistics": {
-    "detectionDate": "2026-10-24T10:14:42.017Z",
+    "detectionDate": "2026-10-24T10:21:52.965Z",
     "formats": {
       "typescript": {
         "clones": 2,
-        "duplicatedLines": 40,
-        "duplicatedTokens": 640,
-        "lines": 80,
+        "duplicatedLines": 50,
+        "duplicatedTokens": 800,
+        "lines": 100,
         "newClones": 0,
         "newDuplicatedLines": 0,
         "percentage": 50.0,
         "percentageTokens": 50.0,
         "sources": 4,
-        "tokens": 1280
+        "tokens": 1600
       }
     },
     "total": {
       "clones": 2,
-      "duplicatedLines": 40,
-      "duplicatedTokens": 640,
-      "lines": 80,
+      "duplicatedLines": 50,
+      "duplicatedTokens": 800,
+      "lines": 100,
       "newClones": 0,
       "newDuplicatedLines": 0,
       "percentage": 50.0,
       "percentageTokens": 50.0,
       "sources": 4,
-      "tokens": 1280
+      "tokens": 1600
     }
   }
 }
