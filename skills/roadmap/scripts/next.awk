@@ -19,7 +19,11 @@ $1 == "pr" {
   pk = split($4, pc, ",")
   for (i = 1; i <= pk; i++) if (pc[i] in istitle) {
     open_pr[$2] = 1
-    if ($5 != "-") wipfiles[pc[i]] = (pc[i] in wipfiles ? wipfiles[pc[i]] "," : "") $5
+    # Not one assignment with an in test: mawk makes the element before it
+    # reads the right side, so the test is always true.
+    if ($5 == "-") continue
+    if (pc[i] in wipfiles) wipfiles[pc[i]] = wipfiles[pc[i]] "," $5
+    else wipfiles[pc[i]] = $5
   }
 }
 
