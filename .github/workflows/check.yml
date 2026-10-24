@@ -21,9 +21,13 @@ jobs:
         with:
           node-version: 24
       - run: npm install -g @anthropic-ai/claude-code
-      # The host's awk is BWK awk, and the runner's can be gawk. CI takes mawk,
-      # the default awk on Debian and Ubuntu, and the one the scripts broke on.
-      - run: sudo update-alternatives --set awk /usr/bin/mawk
+      # make check on macOS runs BWK awk, and the runner's awk can be gawk. CI
+      # takes mawk, the default awk on Debian and Ubuntu, and the one the
+      # scripts broke on.
+      - run: |
+          sudo update-alternatives --set awk /usr/bin/mawk
+          awk -W version 2>&1 | head -n 1
+          shellcheck --version | sed -n 2p
       - run: make check
 
   secrets:
