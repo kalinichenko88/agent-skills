@@ -1,12 +1,12 @@
 ---
 name: debt
-description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file, or over-engineering — and filing or re-measuring debt issues for refactoring.
+description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file, duplicated code, or over-engineering — and filing or re-measuring debt issues for refactoring.
 ---
 
 # Technical debt map
 
 The map measures where the structural debt sits — hotspots, broken layer
-rules and, with ponytail installed, over-engineering — and files at
+rules, copies and, with ponytail installed, over-engineering — and files at
 most three places a run as issues labelled `debt`. Take-in in the
 `kalinichenko:github` skill then checks those issues whenever a task touches
 their area, so one pull request can remove the debt next to the task. A place
@@ -43,7 +43,8 @@ GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null worktree add --detach <tre
 
 No step runs a package manager (`npm`, `npx`, `bun`, `pnpm`, `yarn`) or a
 script of the project, in `<tree>` or in your checkout: a project's `.npmrc`
-or scripts can run its code. Remove `<tree>` when the map ends, with
+or scripts can run its code. `clones.sh` of step 4 runs `jscpd` outside both,
+in a temporary directory of its own. Remove `<tree>` when the map ends, with
 `git worktree remove --force <tree>`; when a `<tree>` from an earlier run is
 there, remove it first. Run every command from the root of its checkout, so
 that all paths start there.
@@ -89,14 +90,21 @@ that all paths start there.
       implementation, a layer that only delegates and that no rule requires. A
       fix of a few lines, in one file or in a few, is a small cut: it goes into
       the report, for the Boy Scout Rule when someone next works there.
+4. **Duplication.** `bash <dir>/scripts/clones.sh <tree> [path]` runs the
+   newest `jscpd` on a copy of the scope's code files, by the data rule of
+   step 1 and with SQL left out, so that a copy in a document or a fixture
+   cannot hide a clone. It prints the clones of 8 lines or more, longest
+   first, with paths from the root. When it exits with an error, as with
+   neither `npx` nor `bunx`, skip this step and give its message. A clone of
+   15 lines or more is a finding. `jscpd` never goes into a `package.json`.
 
 ## Choose the places
 
-A place is one fix: a file to split, a broken rule, or a piece of
-over-engineering to remove. Rank the places by their file's score from
-`measure.sh`: a broken rule takes the importer's score, and a place over
-several files — a dependency and its importers, a bundled finding — the
-highest of its files. A file outside
+A place is one fix: a file to split, a broken rule, the clones that one
+shared helper removes, or a piece of over-engineering to remove. Rank the
+places by their file's score from `measure.sh`: a broken rule takes the
+importer's score, and a place over several files — clones, a dependency and
+its importers, a bundled finding — the highest of its files. A file outside
 the table gets its score from `measure.sh <file>`.
 
 A hotspot is a place only when its file holds more than one concern, the
