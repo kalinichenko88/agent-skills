@@ -105,12 +105,14 @@ first() {
 # of the feature root and out of `shared`, as react-conventions asks. It prints
 # each hook it finds there. The recorded runs without the rule wrote it as
 # src/features/products/use-filter-draft.ts.
-# ponytail: it checks only that shape, a `use-*` file. Each of these passes: a
-# feature-level hooks/ folder, a hook in the grid's folder, a camelCase name, a
-# constant file at the feature root. Each of these fails, though the skill
-# allows it: a page's own `use-*` hook at the feature root, a generic `use-*`
-# hook in src/shared. No recorded run wrote any of these, so add a case when a
-# run does.
+# ponytail: it checks only that shape, a `use-*` file found by its name. Each
+# of these passes: a feature-level hooks/ folder, a hook in the grid's folder,
+# a camelCase name, a hook folder with an index.ts, a hook in a folder named
+# shared inside the feature, a constant file at the feature root. Any file
+# under a `use-*` folder at the feature root counts as a hook at the root. Each
+# of these fails, though the skill allows it: a page's own `use-*` hook at the
+# feature root, a generic `use-*` hook in src/shared. No recorded run wrote any
+# of these, so add a case when a run does.
 nested() {
   local ok=0 dir found
   for dir; do
