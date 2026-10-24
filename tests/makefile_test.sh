@@ -31,7 +31,8 @@ script pass "check 'same' 'a' 'a'"
 script differ "check 'differ' 'a' 'b'"
 # No space between the last two strings gives check two arguments: $3 is unbound.
 script unbound "check 'name' 'want''got'"
-# The same stop on any bash: bash 5 exits 1 on the unbound variable above.
+# Bash 5 exits 1 on the unbound variable above. This script exits 0 before its
+# ok line on any bash, as bash 3.2 does above.
 script early "check 'same' 'a' 'a'; exit 0"
 script late "check 'same' 'a' 'a'" 'exit 3'
 script after "check 'same' 'a' 'a'" "echo 'FAIL: later'"
