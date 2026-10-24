@@ -1,6 +1,6 @@
 ---
 name: react-conventions
-description: Use when writing or reviewing React code — adding a feature beside existing ones, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, reading a value from useRef or writing usePrevious.
+description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, reading a value from useRef or writing usePrevious.
 ---
 
 # React conventions
@@ -80,6 +80,28 @@ body goes to `shared` unchanged, and the old place becomes one line,
 helper. Show that one-line file in the change. A copy in the second feature,
 even one marked to move later, is the failure this rule prevents: two copies
 drift apart.
+
+## A part's own files live in its folder
+
+A feature folder has the same shape at each depth. A sub-component with a
+hook, helper or constant file of its own is a folder: its component and the
+files that only it uses. A file that two parts use goes to their nearest
+common folder. A file that two features use moves down to `shared`, as above.
+
+```
+features/orders/
+├── index.ts
+├── orders-page.tsx        composes the parts
+├── fetch-orders.ts        the page's request
+├── order.ts               the type that the page and the table use
+└── orders-table/
+    ├── orders-table.tsx   ROWS_PER_PAGE stays in it, below the export
+    └── use-table-sort.ts  only the table uses it
+```
+
+`features/orders/use-table-sort.ts`, next to `orders-table.tsx`, says that the
+whole feature uses the hook. A sub-component with no file of its own stays one
+file next to its parent.
 
 ## A request's state is one union
 
