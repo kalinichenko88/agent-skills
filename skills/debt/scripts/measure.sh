@@ -27,6 +27,8 @@ data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock)$|(^|/)(fixtures|testdata|
 # its commits from the move; git log --follow per file if a hotspot hides
 # behind one.
 # core.quotePath=false keeps non-ASCII paths as they are, not as "\320...".
+# ponytail: a path with a quote, a backslash, a tab or a newline still comes
+# out quoted and counts as code; -z and NUL records if one turns up.
 # The regex goes through ENVIRON, because awk -v turns \. into any character.
 rows=$({
   git -c core.quotePath=false grep -I -c '' "$ref" -- "$path" || true
@@ -54,6 +56,7 @@ echo '| --- | ---: | ---: | ---: |'
 head -n 15 <<<"$rows" | awk -F'\t' '{ printf "| `%s` | %d | %d | %d |\n", $4, $2, $3, $1 }'
 echo
 echo "Measured on \`$ref\` at $(git rev-parse --short "$ref"), $(grep -c . <<<"$rows") code files."
-moved=$(git -c core.quotePath=false log --since=60.days -M --diff-filter=R --name-only --format= "$ref" -- "$path" |
+# The renames of the whole tree: a move into the path has its source outside it.
+moved=$(git -c core.quotePath=false log --since=60.days -M --diff-filter=R --name-only --format= "$ref" |
   sort -u | grep -cFxf <(cut -f4 <<<"$rows") || true)
 [ "$moved" -eq 0 ] || echo "Code files moved in 60 days: $moved. Their commits count from the move."

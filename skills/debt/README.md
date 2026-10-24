@@ -44,4 +44,5 @@ there.
   `kalinichenko:roadmap` offers them in order.
 - **The default branch, and no edits.** Every count comes from `origin/HEAD`,
   or `HEAD` in a clone without it, not from your local changes. The map
-  changes no file in the working tree and opens no pull request. A project with a debt skill of its own keeps using that one.
+  changes no file in the working tree and opens no pull request. A project
+  with a debt skill of its own keeps using that one.

@@ -22,14 +22,15 @@ memory of an earlier one. `<dir>` is this skill's base directory, and
 ## Measure
 
 Run `git fetch -q origin` first, when there is an `origin`. The scope is a
-path from the repository's root, or the whole tree. Run every command from the
-repository's root, so that all paths start there.
+path from the repository's root, or the whole tree.
 
-Every step reads `<ref>`, the ref on the "Measured on" line of step 1, and not
-the working tree: a local commit or edit is not debt on the default branch.
-Steps 3 and 4 read files, so right after step 1 export the scope at `<ref>`:
-`mkdir <scratch>/tree && git archive <ref> -- <scope> | tar -x -C <scratch>/tree`.
-Its paths are the repository's.
+Step 1 runs in your checkout. Every later step runs in `<tree>`, a checkout of
+the SHA on the "Measured on" line of step 1 in your scratch directory, and not
+in the working tree: a local commit or edit is not debt on the default branch.
+Make it right after step 1 with `git worktree add --detach <tree> <sha>`, and
+remove it when the map ends with `git worktree remove --force <tree>`; when a
+`<tree>` from an earlier run is there, remove it first. Run every command from
+the root of its checkout, so that all paths start there.
 
 1. **Hotspots.** `bash <dir>/scripts/measure.sh [path]` prints the code files
    by lines × the commits that touched them in 60 days, the top 15, and the SHA
@@ -38,10 +39,10 @@ Its paths are the repository's.
    last line counts the code files the window moved. When they are a large
    share of the scope, the commit counts start at the move, and a score is
    close to the file's size: say so in the report.
-2. **Layer rules.** Read the project's instruction files — `CLAUDE.md`,
-   `AGENTS.md` and the ones in the scope's directories — for what a directory
-   may import or hold, with its exceptions. Turn each rule into one
-   `git grep -n <pattern> <ref> -- <scope>`. For a whole word use `-w`: `\b` does not work
+2. **Layer rules.** Read the project's instruction files in `<tree>` —
+   `CLAUDE.md`, `AGENTS.md` and the ones in the scope's directories — for what
+   a directory may import or hold, with its exceptions. Turn each rule into one
+   `git grep -n` over the scope. For a whole word use `-w`: `\b` does not work
    with `-E` on macOS. A rule that a grep cannot test, such as a size or a
    mirrored layout, gets the command that can (`wc -l`, a listing), or is left
    out and named in the report. Keep a hit only when the rule's text, its
@@ -50,8 +51,7 @@ Its paths are the repository's.
    of its own: with no such rule in the instruction files, skip this step and
    say so.
 3. **Duplication**, with the newest `jscpd`. The runner is `bunx` in a Bun
-   project, else `npx --yes`; with neither, skip this step and say so. In
-   `<scratch>/tree`, run
+   project, else `npx --yes`; with neither, skip this step and say so. Run
    `<runner> jscpd@latest --min-lines 8 --reporters json --output <scratch> --ignore "**/node_modules/**,**/fixtures/**,**/testdata/**,**/vendor/**,**/__snapshots__/**,**/*.md,**/*.json,**/*.yml,**/*.yaml,**/*.sql" <scope>`.
    A clone of 15 lines or more is a finding. `jscpd` never goes into a
    `package.json`.
@@ -59,8 +59,8 @@ Its paths are the repository's.
    in your skill list; else skip this step and say so. It takes no path and
    loads as instructions, so in Claude Code send it to one subagent, before you
    read the project's rules: "Invoke the `ponytail:ponytail-audit` skill, audit
-   only `<scope>` of `<scratch>/tree`, and return its lines as it prints them,
-   every path of each finding in its `[path]`." In Codex, run it yourself
+   only `<scope>` of `<tree>`, and return its lines as it prints them, every
+   path of each finding in its `[path]` and relative to `<tree>`." In Codex, run it yourself
    before step 2. Then sort its findings, in this order, each part of a bundled
    finding on its own:
    1. **Against the project's rules.** Drop a part that a rule of the

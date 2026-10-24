@@ -41,10 +41,10 @@ seq 7 >"$repo/mvnw.cmd"
 seq 3 >"$repo/src/заказ.sh"
 seq 50 >"$repo/заметки.md"
 commit 'add a:b, mvnw.cmd and two non-ASCII names'
-seq 5 >"$repo/src/first.sh"
+seq 5 >"$repo/first.sh"
 commit 'add first'
 mkdir "$repo/docs"
-git -C "$repo" mv src/first.sh src/kept.sh
+git -C "$repo" mv first.sh src/kept.sh
 git -C "$repo" mv notes.md docs/notes.md
 commit 'move first and notes'
 
@@ -60,6 +60,7 @@ git clone -q "$repo" "$tmp/clone"
 out=$(cd "$tmp/clone" && bash "$measure" src)
 check 'a path, in a clone' '`src/hot.sh` `src/a:b.sh` `src/kept.sh` `src/заказ.sh`' "$(grep -o '^| `[^`]*`' <<<"$out" | cut -c3- | paste -sd' ' -)"
 case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 4 code files.') ;; *) fail 'the clone reads origin/main' "$out" ;; esac
+check 'a move into the path' 'Code files moved in 60 days: 1. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
 out=$(cd "$repo" && bash "$measure" big.sh)
 check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$repo" rev-parse --short HEAD), 1 code files." "$(tail -n 1 <<<"$out")"
 
