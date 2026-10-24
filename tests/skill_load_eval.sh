@@ -110,10 +110,10 @@ first() {
 # a hook in src/hooks or another folder outside the feature, a camelCase name,
 # a hook folder with an index.ts, a hook in a folder named shared inside the
 # feature, a constant file at the feature root. A `use-*` file inside a `use-*`
-# folder at the feature root counts as a hook at the root. Each
-# of these fails, though the skill allows it: a page's own `use-*` hook at the
-# feature root, a generic `use-*` hook in src/shared. No recorded run wrote any
-# of these, so add a case when a run does.
+# folder at the feature root counts as a hook at the root. Each of these
+# fails, though the skill allows it: a page's own `use-*` hook at the feature
+# root, a generic `use-*` hook in src/shared. No recorded run wrote any of
+# these, so add a case when a run does.
 nested() {
   local ok=0 dir found
   for dir; do
