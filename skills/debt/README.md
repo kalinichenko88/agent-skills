@@ -31,7 +31,8 @@ issues labelled `debt`, each with the numbers that put it there.
   helper removes are one place. It never goes into a `package.json`. When
   `jscpd` cannot run, the step is skipped. The copy goes to `TMPDIR`, or to
   `~/.cache` when `TMPDIR` is not set. It is refused below a directory that
-  other users can write, as `/tmp` on Linux, or that holds a `.ignore`.
+  other users can write, as `/tmp` on Linux, or that holds a `package.json`,
+  a `node_modules` or a `.ignore`: then set `TMPDIR` to another directory.
 - **Less code, when ponytail is installed.** Its `ponytail-audit` finds
   dependencies the platform covers, abstractions with one implementation and
   modules that only delegate. A finding the project's own rules contradict is

@@ -13,11 +13,12 @@
 # directory, and the runner and the parser run there, not in <tree>: a
 # project's .npmrc or bunfig.toml can run its code. Each directory above it
 # must be private: owned by the person or by root, and writable by nobody else,
-# so that no other user can put there, during the run either, what npm or bun
-# take from a parent, as a node_modules whose .bin goes first on PATH. None may
-# hold a .ignore, which jscpd reads from a parent and which would hide files.
-# That directory is in TMPDIR, or in ~/.cache when TMPDIR is not set; a shared
-# TMPDIR, as /tmp, is refused. The runner is npx with node, else bunx with bun.
+# so that no other user can put a file there during the run. And none may hold
+# what npm or jscpd take from a parent: a package.json, whose directory npm
+# takes as the project, with its .npmrc; a node_modules, whose .bin goes first
+# on PATH; a .ignore, which would hide files. That directory is in TMPDIR, or
+# in ~/.cache when TMPDIR is not set; a shared TMPDIR, as /tmp, is refused. The
+# runner is npx with node, else bunx with bun.
 #
 # jscpd is pinned to the version that wrote tests/fixtures/debt/jscpd-report.json:
 # a new one runs here only on purpose, with the report recorded again.
@@ -48,19 +49,23 @@ else
 fi
 
 if [ -n "${TMPDIR:-}" ]; then
-  base=$TMPDIR
+  var=TMPDIR base=$TMPDIR
 elif [ -n "${HOME:-}" ]; then
-  base=$HOME/.cache
-  mkdir -p "$base"
+  var=HOME base=$HOME/.cache
 else
   echo 'clones.sh: set TMPDIR or HOME' >&2
   exit 1
 fi
 case $base in /*) ;; *)
-  echo "clones.sh: TMPDIR must be an absolute path" >&2
+  echo "clones.sh: $var must be an absolute path" >&2
   exit 1
   ;;
 esac
+[ "$var" = TMPDIR ] || mkdir -p "$base"
+[ -d "$base" ] || {
+  echo 'clones.sh: TMPDIR is not a directory' >&2
+  exit 1
+}
 # A template, because macOS's mktemp -d alone does not read TMPDIR.
 run=$(mktemp -d "${base%/}/clones.XXXXXX")
 trap 'rm -rf "$run"' EXIT
@@ -74,13 +79,15 @@ dir=$run
 while [ "$dir" != / ]; do
   dir=$(dirname "$dir")
   [ -n "$(find "$dir" -maxdepth 0 \( -user "$me" -o -user 0 \) \( ! -perm -0020 ${own[@]+"${own[@]}"} \) ! -perm -0002)" ] || {
-    echo "clones.sh: $dir, above the temporary directory, belongs to another user or others can write it; set TMPDIR to a private directory" >&2
+    echo "clones.sh: $dir, above the temporary directory, belongs to another user, or a group or others can write it; set TMPDIR to a private directory" >&2
     exit 1
   }
-  [ ! -e "$dir/.ignore" ] && [ ! -L "$dir/.ignore" ] || {
-    echo "clones.sh: $dir/.ignore is above the temporary directory, and jscpd would read it; set TMPDIR to a directory with none above it" >&2
-    exit 1
-  }
+  for f in package.json node_modules .ignore; do
+    [ ! -e "$dir/$f" ] && [ ! -L "$dir/$f" ] || {
+      echo "clones.sh: $dir/$f is above the temporary directory, and npm or jscpd would take it; set TMPDIR to a directory with none above it" >&2
+      exit 1
+    }
+  done
 done
 
 # ponytail: a path with a quote, a backslash, a tab or a newline comes out

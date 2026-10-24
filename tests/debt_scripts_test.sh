@@ -110,12 +110,14 @@ args='jscpd@5.4.2 --min-lines 15 --no-gitignore --absolute --reporters json --ou
 rows=$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short2.ts` 1-20 |')
 umask 022
 up=$(cd "$tmp" && pwd -P)
-refused="belongs to another user or others can write it; set TMPDIR to a private directory"
+refused='belongs to another user, or a group or others can write it; set TMPDIR to a private directory'
+taken='is above the temporary directory, and npm or jscpd would take it; set TMPDIR to a directory with none above it'
 
-# clones.sh refuses a temporary directory below a shared one, as a TMPDIR of
-# /tmp on Linux: there, nothing below can run.
+# clones.sh refuses this machine's temporary directory when it is below a
+# shared one, as /tmp on Linux, or below a package.json, a node_modules or a
+# .ignore: then nothing below can run.
 out=$(PATH=$fake bash "$clones" "$tree" 2>"$tmp/err") || case $(cat "$tmp/err") in
-  *"$refused") echo 'debt_scripts_test: ok; clones.sh not run, no private temporary directory' && exit 0 ;;
+  *"$refused" | *"$taken") echo "debt_scripts_test: ok; clones.sh not run: $(cat "$tmp/err")" && exit 0 ;;
   *) fail 'clones.sh on the tree' "$(cat "$tmp/err")" ;;
 esac
 check 'the code clones, longest first' "$rows" "$out"
@@ -131,12 +133,20 @@ if out=$(env -u TMPDIR PATH="$fake" bash "$clones" "$tree" 2>"$tmp/err"); then
   case $(sed -n 2p "$FAKE_LOG") in "$(cd "$HOME/.cache" && pwd -P)/clones."*) ;; *) fail 'no TMPDIR: the run in ~/.cache' "$(cat "$FAKE_LOG")" ;; esac
   [ ! -e "$(sed -n 2p "$FAKE_LOG")" ] || fail 'no TMPDIR: the run left in ~/.cache' "$(sed -n 2p "$FAKE_LOG")"
 else
-  echo "debt_scripts_test: no TMPDIR not run: $(cat "$tmp/err")"
+  case $(cat "$tmp/err") in
+    *"$refused" | *"$taken") echo "debt_scripts_test: no TMPDIR not run: $(cat "$tmp/err")" ;;
+    *) fail 'no TMPDIR' "$(cat "$tmp/err")" ;;
+  esac
 fi
 err=$(env -u TMPDIR -u HOME PATH="$fake" bash "$clones" "$tree" 2>&1) && fail 'no TMPDIR and no HOME exits 0' "$err"
 check 'no TMPDIR and no HOME' 'clones.sh: set TMPDIR or HOME' "$err"
 err=$(TMPDIR=relative PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a relative TMPDIR exits 0' "$err"
 check 'a relative TMPDIR' 'clones.sh: TMPDIR must be an absolute path' "$err"
+err=$(cd "$tmp" && env -u TMPDIR HOME=relhome PATH="$fake" bash "$clones" "$tree" 2>&1) && fail 'a relative HOME exits 0' "$err"
+check 'a relative HOME' 'clones.sh: HOME must be an absolute path' "$err"
+[ ! -e "$tmp/relhome" ] || fail 'a relative HOME made a directory'
+err=$(TMPDIR=$tmp/missing PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a TMPDIR that does not exist exits 0' "$err"
+check 'a TMPDIR that does not exist' 'clones.sh: TMPDIR is not a directory' "$err"
 jq '.duplicates = []' "$FAKE_REPORT" >"$tmp/none.json"
 check 'no clones' 'No clones of 15 lines or more.' "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
 echo null >"$tmp/null.json"
@@ -153,25 +163,27 @@ above() {
   err=$(TMPDIR=$1 PATH=$fake bash "$clones" "$tree" 2>&1) && fail "$2 exits 0" "$err"
   check "$2" "clones.sh: $3" "$err"
 }
-ignored='is above the temporary directory, and jscpd would read it; set TMPDIR to a directory with none above it'
-mkdir -p "$tmp/above-ignore/tmp" "$tmp/above-link/tmp" "$tmp/shared/tmp" "$tmp/group/tmp" "$tmp/own/tmp"
-: >"$tmp/above-ignore/.ignore"
-above "$tmp/above-ignore/tmp" 'a .ignore above the temporary directory' "$up/above-ignore/.ignore $ignored"
-ln -s missing "$tmp/above-link/.ignore"
-above "$tmp/above-link/tmp" 'a .ignore link to nothing above' "$up/above-link/.ignore $ignored"
+for f in package.json node_modules .ignore; do
+  mkdir -p "$tmp/above-$f/tmp"
+  : >"$tmp/above-$f/$f"
+  above "$tmp/above-$f/tmp" "a $f above the temporary directory" "$up/above-$f/$f $taken"
+done
+mkdir -p "$tmp/above-link/tmp" "$tmp/shared/tmp" "$tmp/group/tmp" "$tmp/plain/tmp"
+ln -s missing "$tmp/above-link/node_modules"
+above "$tmp/above-link/tmp" 'a node_modules link to nothing above' "$up/above-link/node_modules $taken"
 chmod o+w "$tmp/shared"
 above "$tmp/shared/tmp" 'a directory that others can write above' "$up/shared, above the temporary directory, $refused"
-# A private directory passes, with a package.json and a node_modules of the
-# person's own; one that a group can write passes only when the group is the
-# person's own, as with user private groups.
-: >"$tmp/own/package.json"
-mkdir "$tmp/own/node_modules"
-check 'a package.json and a node_modules of the person above' "$rows" "$(TMPDIR=$tmp/own/tmp PATH=$fake bash "$clones" "$tree")"
+# A directory that a group can write passes only when the group is the
+# person's own, as with user private groups; that run needs $tmp itself to be
+# below private directories only, which /tmp on Linux is not.
+chgrp "$(id -g)" "$tmp/group"
 chmod g+w "$tmp/group"
-if [ "$(id -gn)" = "$(id -un)" ]; then
+if [ "$(id -gn)" != "$(id -un)" ]; then
+  above "$tmp/group/tmp" 'a directory that a group can write above' "$up/group, above the temporary directory, $refused"
+elif TMPDIR=$tmp/plain/tmp PATH=$fake bash "$clones" "$tree" >/dev/null 2>&1; then
   check 'a directory of the own group above' "$rows" "$(TMPDIR=$tmp/group/tmp PATH=$fake bash "$clones" "$tree")"
 else
-  above "$tmp/group/tmp" 'a directory that a group can write above' "$up/group, above the temporary directory, $refused"
+  echo 'debt_scripts_test: the own group not run, the test directory is below a shared one'
 fi
 
 # bunx with bun, on a PATH with no npx, where /usr/bin and /bin have none;

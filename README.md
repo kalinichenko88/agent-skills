@@ -112,7 +112,8 @@ repositories, the debt skill's `measure.sh` on a repository the test builds,
 and its `clones.sh` against a fake `npx` that answers with a report recorded
 from `jscpd` for the tree in `tests/fixtures/debt/`, and with a fake `bunx`
 when `bun` is installed. Without `node`, the test skips `clones.sh` and says
-so.
+so. One case runs `clones.sh` with no `TMPDIR`, so it makes and removes a
+directory in your `~/.cache`.
 
 To try a script that writes on a real tracker without writing to it, set
 `DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,
