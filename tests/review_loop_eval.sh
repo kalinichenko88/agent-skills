@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Gives the main model a branch with one defect and two nits, and asks it to
-# review and fix until the review is clean, one review subagent a round. It
-# prints, for each run, the counts, then each review subagent's prompt after
-# its kind: W reads the whole branch, C one commit, S is the security review.
-# It exits 1 when a run has fewer than two rounds, read the
-# whole branch more than once after round 1, ran no security review after its
-# last read of the whole branch, or did not invoke the skill. It
-# calls the model, so it costs tokens and is not part of `make check`: run it
-# by hand after a change to skills/review-loop or to its section in rules.md.
+# review and fix, one review subagent a round, with no one to answer its
+# questions. It prints, for each run, the counts, then each review subagent's
+# prompt after its kind: W reads the whole branch, C one commit, S is the
+# security review. It exits 1 when a run has fewer than two rounds, read the
+# whole branch more than once after round 1, ran more than three rounds in one
+# count, ran no security review after its last read of the whole branch, or
+# did not invoke the skill. It calls the model, so it costs tokens and is not
+# part of `make check`: run it by hand after a change to skills/review-loop or
+# to its section in rules.md.
 # It runs with this machine's other plugins and settings.
 #
 # Usage: tests/review_loop_eval.sh [runs, default 3]
@@ -19,7 +20,7 @@ runs=${1:-3}
 [ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [runs, at least 1]" >&2; exit 2; }
 logs=$(mktemp -d)
 
-task='This repository is on the branch feature. Review what the branch changes against main: dispatch one review subagent for each review round. Fix what the review finds, commit each round of fixes, and go on until the review is clean. Then stop, and list each round: what it read and what it found.'
+task='This repository is on the branch feature. Review what the branch changes against main: dispatch one review subagent for each review round. Fix what the review finds, and commit each round of fixes. No one can answer questions in this run. Then stop, and list each round: what it read and what it found.'
 
 # A repository whose feature branch adds slugify. The defect: the last
 # replace has no g flag, so "-a-" keeps its trailing dash. The nits: var, and
@@ -86,7 +87,9 @@ wait
 # a defect, so a run that follows the skill has two rounds or more. At most one
 # of them after round 1 reads the whole branch: the last pass, which a stop
 # after three rounds skips. A security review follows the last read of the
-# whole branch.
+# whole branch. Round 1, the last pass and the security review each start a
+# count of rounds. Step 4 stops a count at its third round when no one can
+# answer: round 1 and two more, or three after the others.
 # ponytail: the count reads prompt text. A prompt that names one commit and
 # the whole branch counts as one commit. A commit named another way counts as
 # the whole branch. So does a part of the security review without those words.
@@ -111,12 +114,13 @@ for log in "$logs"/run-*.jsonl; do
   whole=$(grep '[CW]' <<<"$kinds" | tail -n +2 | grep -c W || true)
   last=$(grep -n W <<<"$kinds" | tail -n 1 | cut -d: -f1)
   security=$(tail -n +"$((${last:-0} + 1))" <<<"$kinds" | grep -c S || true)
+  long=$(tr -d '\n' <<<"$kinds" | grep -oE '^WCCC|[WS]CCCC' | grep -c . || true)
   skill=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Skill")
     | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
-  echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $security security review calls after the last whole-branch read, review-loop invoked $skill times"
+  echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $long counts past three rounds, $security security review calls after the last whole-branch read, review-loop invoked $skill times"
   cut -c1-300 <<<"${prompts:-no review subagent ran}"
-  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$security" -ge 1 ] && [ "$skill" -ge 1 ] || failed=1
+  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && [ "$security" -ge 1 ] && [ "$skill" -ge 1 ] || failed=1
 done
 echo "Logs: $logs"
 exit "$failed"

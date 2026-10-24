@@ -138,8 +138,9 @@ To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 skills, the files they write with an implicit return in a method callback, as
 `.map((x) => (`, and the runs with a file that opens with a helper or a
 constant instead of its primary export. `tests/review_loop_eval.sh` counts the
-review rounds, what each one reads, and the security review after the last
-pass; its fixture has a local `origin`. Run it after a change to
+review rounds, what each one reads, the stop after three rounds, and the
+security review after the last pass. Its fixture has a local `origin`, and its
+task says that no one can answer questions. Run it after a change to
 `skills/review-loop` or to its section in `rules.md`. Both call the model, so
 they are not part of `make check`.
 
