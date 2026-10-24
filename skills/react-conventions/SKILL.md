@@ -83,10 +83,10 @@ drift apart.
 
 ## A part's own files live in its folder
 
-A feature folder has the same shape at each depth. A sub-component with a
-hook, helper or constant file of its own is a folder: its component and the
-files that only it uses. A file that two parts use goes to their nearest
-common folder. A file that two features use moves down to `shared`, as above.
+A sub-component with a hook, helper or constant file of its own is a folder:
+its component and the files that only it uses. A file that two parts use goes
+to their nearest common folder. The page is the feature's top part, so its own
+files sit at the feature root.
 
 ```
 features/orders/
@@ -100,8 +100,8 @@ features/orders/
 ```
 
 `features/orders/use-table-sort.ts`, next to `orders-table.tsx`, says that the
-whole feature uses the hook. A sub-component with no file of its own stays one
-file next to its parent.
+page uses the hook, or more than one part does. A sub-component with no file of
+its own stays one file next to its parent.
 
 ## A request's state is one union
 

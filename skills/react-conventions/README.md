@@ -1,8 +1,8 @@
 # kalinichenko:react-conventions
 
 Layer and feature boundaries in a React app, where a sub-component's own files
-go, request state as one union, and no `ref.current` in render. Each rule is one that agents broke in a test
-without it.
+go, request state as one union, and no `ref.current` in render. Each rule is
+one that agents broke in a test without it.
 
 ## When it starts
 
