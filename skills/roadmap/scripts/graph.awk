@@ -9,10 +9,10 @@
 
 $1 == "repo" { repo = $2 }
 $1 == "ms" {
-  msorder[$2] = $3; mscur[$2] = $4; mslater[$2] = $5
-  msopen[$2] = $6; msclosed[$2] = $7; mstitle[$2] = $8
+  msorder[$2] = $3; mscur[$2] = $4; mslater[$2] = $5; mstitle[$2] = $6
   mslist[++msn] = $2
 }
+$1 == "mc" { msopen[$2] = $3; msclosed[$2] = $4 }
 $1 == "md" { mdlines[$2] = ($2 in mdlines) ? mdlines[$2] "\n" $3 : $3 }
 $1 == "is" {
   isms[$2] = $3; isbug[$2] = $4; isbusy[$2] = $5; isblk[$2] = $6
