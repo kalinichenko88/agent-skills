@@ -182,22 +182,23 @@ FAKE_FAIL='comments(first' bash "$scripts/collect.sh" filing scout.md >/dev/null
   fail 'filing exits 0 when a query fails'
 check 'a failed filing leaves no file behind' "$before" "$(collects)"
 
-# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. stops
-# <script> <n> <args> copies the scripts, puts an unbound variable after the
-# n-th line that sets an EXIT trap in that script, and runs the copy with
-# /bin/bash, 3.2 on macOS. It must stop there, exit non-zero and leave nothing
-# in TMPDIR, also with a finished from the environment.
+# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script; an exit 0
+# right after the trap gives the trap the same $? on any bash. stops <script>
+# <n> <args> copies the scripts, puts that exit after the n-th line that sets an
+# EXIT trap in that script, and runs the copy with a finished from the
+# environment. It must reach the exit, exit non-zero and leave nothing in
+# TMPDIR.
 stops() {
   local script=$1 at=$2 before out
   shift 2
   rm -rf "$tmp/stopped"
   cp -R "$scripts" "$tmp/stopped"
-  awk -v at="$at" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ && ++n == at { print ": \"$unbound_after_trap\"" }' \
+  awk -v at="$at" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ && ++n == at { print "echo stop-after-trap; exit 0" }' \
     "$scripts/$script" >"$tmp/stopped/$script"
-  before=$(ls "$tmp")
-  out=$(finished=1 /bin/bash "$tmp/stopped/$script" "$@" 2>&1) && fail "$script $at exits 0 when set -u stops it" "$out"
-  case $out in *'unbound_after_trap: unbound variable'*) ;; *) fail "$script $at stops on something else" "$out" ;; esac
-  check "$script $at, stopped by set -u, leaves nothing in TMPDIR" "$before" "$(ls "$tmp")"
+  before=$(ls -A "$tmp")
+  out=$(finished=1 bash "$tmp/stopped/$script" "$@" 2>&1) && fail "$script $at exits 0 when it stops after its trap" "$out"
+  case $out in *stop-after-trap*) ;; *) fail "$script $at stops before its trap" "$out" ;; esac
+  check "$script $at, stopped after its trap, leaves nothing in TMPDIR" "$before" "$(ls -A "$tmp")"
 }
 stops collect.sh 2 filing scout.md
 printf '== Bodies\n' >"$tmp/collected"
