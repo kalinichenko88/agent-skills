@@ -4,10 +4,10 @@
 # the written files with an implicit return in a method callback, then the
 # order runs with a file that does not open with its primary export, then the
 # feature runs that put a sub-component's own hook at the feature root or in
-# `shared`. It calls
-# the model, so it costs tokens and is not part of `make check`: run it by hand
-# after a change to rules.md or to a skill's description. It runs with this
-# machine's other plugins and settings, the setup the rules must work in.
+# `shared`. It calls the model, so it costs tokens and is not part of
+# `make check`: run it by hand after a change to rules.md or to a skill's
+# description. It runs with this machine's other plugins and settings, the
+# setup the rules must work in.
 #
 # Usage: tests/skill_load_eval.sh [runs per task, default 5]
 
@@ -105,14 +105,16 @@ first() {
 # of the feature root and out of `shared`, as react-conventions asks. It prints
 # each hook it finds there. The recorded runs without the rule wrote it as
 # src/features/products/use-filter-draft.ts.
-# ponytail: it checks only that shape, a `use-*` file. A feature-level hooks/
-# folder, a hook in the grid's folder or a constant file at the feature root
-# passes; no recorded run wrote one, so add a case when a run does.
+# ponytail: it checks only that shape, a `use-*` file. Each of these passes: a
+# feature-level hooks/ folder, a hook in the grid's folder, a camelCase name, a
+# constant file at the feature root. A page's own `use-*` hook at the feature
+# root fails, though the skill allows it. No recorded run wrote any of these,
+# so add a case when a run does.
 nested() {
   local ok=0 dir found
   for dir; do
     [ -d "$dir/src/features/products" ] || { echo "no feature written: $dir" && continue; }
-    found=$(find "$dir/src" -path "$dir/src/features/products/use-*" -o -path '*/shared/*use-*')
+    found=$(find "$dir/src" -name 'use-*' \( -path "$dir/src/features/products/use-*" -o -path '*/shared/*' \))
     if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
   done
   echo "own folder: $ok of $# feature runs keep the panel's hook out of the feature root and shared"

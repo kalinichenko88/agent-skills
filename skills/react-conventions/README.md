@@ -26,7 +26,8 @@ one that agents broke in a test without it.
   before a second feature imports it.
 - **A part's own files live in its folder.** A sub-component with a hook,
   helper or constant file of its own is a folder. A file that two parts use
-  goes to their nearest common folder.
+  goes to their nearest common folder. The page's own files sit at the feature
+  root.
 - **A request's state is one union:** `idle`, `loading`, `failed` or `done`,
   not three flags that can disagree. A data library that the project already
   has holds this state instead.

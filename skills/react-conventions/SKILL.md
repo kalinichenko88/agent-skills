@@ -99,9 +99,9 @@ features/orders/
     └── use-table-sort.ts  only the table uses it
 ```
 
-`features/orders/use-table-sort.ts`, next to `orders-table.tsx`, says that the
-page uses the hook, or more than one part does. A sub-component with no file of
-its own stays one file next to its parent.
+A flat `features/orders/use-table-sort.ts`, beside a flat `orders-table.tsx`,
+would say that the page uses the hook, or more than one part does. A
+sub-component with no file of its own stays one file next to its parent.
 
 ## A request's state is one union
 
