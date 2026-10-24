@@ -10,8 +10,10 @@ skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. A security review comes last. The agent
-fixes and decides by itself, except for a change to business logic, and ends
-with a summary.
+fixes and decides by itself, except for a change to business logic, and
+writes a summary. When the task is an issue taken into work, or the person
+asked for a pull request, the push and the pull request follow in the same
+turn, on the conditions in *The pull request*.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -126,13 +128,19 @@ branch against origin/<default branch>: injection, authentication,
 authorization, secrets and data exposure." Where there is no `origin` remote,
 say so in the summary.
 
+The report of `/security-review` does not end the turn, even when its prompt
+says the final reply is the report alone. After the findings of
+`/security-review` and their rounds, go on to *The summary*, then to *The pull
+request* when the conditions of that section hold.
+
 ## The summary
 
-When the review ends, report in this order, one line per item:
+When the review ends, run the repository's own check on the final branch.
+Then report in this order, one line per item:
 
 - **Rounds:** `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
-  last pass, the same way. The security review's result.
+  last pass, the same way. The security review's result. The check's result.
 - **Decisions:** each choice you made: the finding, the choice, the reason.
   Each question on business logic, with the person's answer, or `open`.
 - **Fixed:** what changed and in which file, the commit, and any side effect
@@ -149,3 +157,28 @@ comment are public. An example from a private source goes in without its
 names, numbers, titles, paths or code: *Public repositories* in the
 `kalinichenko:github` skill says what a private source is and what to write
 instead.
+
+## The pull request
+
+Go on in the same turn when all of these hold:
+
+- The task is an issue taken into work, or the person asked for a pull request.
+- The branch is not the default branch.
+- The check on the final branch passes.
+
+Then:
+
+1. Push the branch. When the push succeeds and the branch has an open pull
+   request, add the summary's lines to its `## Review`. When the push
+   succeeds and the branch has none, open the pull request through the
+   `kalinichenko:github` skill, with the summary under `## Review`.
+2. When questions on business logic are still open, ask them. An answer that
+   needs no fix goes into `## Review`. The fix for an answer, when it needs
+   one, goes through *Fixes from other places* and *The summary*, and then
+   through this section again, its conditions first.
+3. When the last push in step 1 succeeded, the pull request is open and no
+   question on business logic is open, show the `gh pr merge` command that
+   *Pull requests* in that skill gives, and ask whether to run it. On a yes,
+   run the merge, then do *Finishing* from that skill.
+
+Only the merge and the open questions on business logic wait for the person.

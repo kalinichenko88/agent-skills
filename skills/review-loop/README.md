@@ -36,12 +36,18 @@ fixed.
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.
 - **A security review last.** `/security-review` runs once on the final
-  branch. Its fixes get rounds of `/code-review` at `xhigh`.
-- **A summary.** The rounds, the decisions with their reasons, what was fixed,
-  what was declined and why, and the issues filed. The pull request
-  description carries it under `## Review`. In a public repository, an
-  example from a private source in that section or in a reply to a review
-  comment keeps no names, numbers, titles, paths or code.
+  branch. Its fixes get rounds of their own, as the later fixes above.
+- **A summary.** First a run of the repository's check on the final branch.
+  Then the rounds, the decisions with their reasons, what was fixed, what was
+  declined and why, and the issues filed. The pull request description
+  carries the summary under `## Review`. In a public repository, an example
+  from a private source in that section or in a reply to a review comment
+  keeps no names, numbers, titles, paths or code.
+- **Then the pull request.** For an issue taken into work, or when you ask
+  for a pull request, the agent opens it after the summary and asks whether
+  to merge, in the same turn. This needs a passing check and a branch other
+  than the default branch. Only the merge and the open questions on business
+  logic wait for you.
 
 ## The ponytail step
 
