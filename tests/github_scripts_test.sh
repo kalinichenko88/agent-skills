@@ -182,23 +182,28 @@ FAKE_FAIL='comments(first' bash "$scripts/collect.sh" filing scout.md >/dev/null
   fail 'filing exits 0 when a query fails'
 check 'a failed filing leaves no file behind' "$before" "$(collects)"
 
-# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script; an exit 0
-# right after the trap gives the trap the same $? on any bash. stops <script>
-# <n> <args> copies the scripts, puts that exit after the n-th line that sets an
-# EXIT trap in that script, and runs the copy with a finished from the
-# environment. It must reach the exit, exit non-zero and leave nothing in
-# TMPDIR.
+# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. stops
+# <script> <n> <args> copies the scripts, puts a stop after the n-th line that
+# sets an EXIT trap in that script, and runs the copy with a finished from the
+# environment. Two stops: an unbound variable, the case itself, and an exit 0,
+# which gives the trap the $? of 0 of bash 3.2 on any bash. Each must exit
+# non-zero, show that it reached the stop, and leave nothing in TMPDIR.
 stops() {
-  local script=$1 at=$2 before out
+  local script=$1 at=$2 stop mark before out
   shift 2
-  rm -rf "$tmp/stopped"
-  cp -R "$scripts" "$tmp/stopped"
-  awk -v at="$at" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ && ++n == at { print "echo stop-after-trap; exit 0" }' \
-    "$scripts/$script" >"$tmp/stopped/$script"
-  before=$(ls -A "$tmp")
-  out=$(finished=1 bash "$tmp/stopped/$script" "$@" 2>&1) && fail "$script $at exits 0 when it stops after its trap" "$out"
-  case $out in *stop-after-trap*) ;; *) fail "$script $at stops before its trap" "$out" ;; esac
-  check "$script $at, stopped after its trap, leaves nothing in TMPDIR" "$before" "$(ls -A "$tmp")"
+  for stop in unbound exit; do
+    rm -rf "$tmp/stopped"
+    cp -R "$scripts" "$tmp/stopped"
+    awk -v at="$at" -v stop="$stop" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ && ++n == at {
+      print (stop == "exit" ? "echo stop-after-trap; exit 0" : ": \"$unbound_after_trap\"") }' \
+      "$scripts/$script" >"$tmp/stopped/$script"
+    mark='stop-after-trap'
+    [ "$stop" = exit ] || mark='unbound_after_trap: unbound variable'
+    before=$(ls -A "$tmp")
+    out=$(finished=1 bash "$tmp/stopped/$script" "$@" 2>&1) && fail "$script $at exits 0 after its $stop stop" "$out"
+    case $out in *"$mark"*) ;; *) fail "$script $at stops before its $stop stop" "$out" ;; esac
+    check "$script $at leaves nothing in TMPDIR after its $stop stop" "$before" "$(ls -A "$tmp")"
+  done
 }
 stops collect.sh 2 filing scout.md
 printf '== Bodies\n' >"$tmp/collected"
@@ -261,9 +266,7 @@ check 'add-finding.sh edits and comments' \
     "$(sed -n 's/^issue edit 5 --title New title --body-file //p' "$tmp/calls")")" "$(writes)"
 check 'the new body is the old one and the section' \
   "$(jq -r .data.repository.n5.body "$fixtures/tracker.json"; echo; cat "$tmp/section.md")" "$(cat "$tmp/body")"
-: >"$tmp/calls"
 stops add-finding.sh 1 5 "$tmp/section.md" 'New title'
-check 'add-finding.sh that set -u stops writes nothing' '' "$(writes)"
 
 # take-in-check.sh
 take() { bash "$scripts/take-in-check.sh" "$@" 2>&1 || echo "exit $?"; }

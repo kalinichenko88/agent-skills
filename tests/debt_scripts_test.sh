@@ -129,16 +129,22 @@ case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 check 'npx, with only the code files' \
   "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
 check 'a relative tree with CDPATH set' "$rows" "$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)"
-# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script; an exit 0
-# right after the trap gives the trap the same $? on any bash. A copy of
-# clones.sh with that exit, run with a finished from the environment, must
-# reach the exit, exit non-zero and leave nothing in TMPDIR.
+# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. A copy of
+# clones.sh gets a stop after its trap and runs with a finished from the
+# environment. Two stops: an unbound variable, the case itself, and an exit 0,
+# which gives the trap the $? of 0 of bash 3.2 on any bash. Each must exit
+# non-zero, show that it reached the stop, and leave nothing in TMPDIR.
 cp -R "$root/skills/debt/scripts" "$tmp/stopped"
-awk '{ print } !/^[ \t]*#/ && /trap .* EXIT/ { print "echo stop-after-trap; exit 0" }' "$clones" >"$tmp/stopped/clones.sh"
 mkdir "$tmp/stoptmp"
-out=$(finished=1 TMPDIR=$tmp/stoptmp PATH=$fake bash "$tmp/stopped/clones.sh" "$tree" 2>&1) && fail 'clones.sh exits 0 when it stops after its trap' "$out"
-case $out in *stop-after-trap*) ;; *) fail 'clones.sh stops before its trap' "$out" ;; esac
-check 'clones.sh, stopped after its trap, leaves nothing in TMPDIR' '' "$(ls -A "$tmp/stoptmp")"
+for stop in unbound exit; do
+  awk -v stop="$stop" '{ print } !/^[ \t]*#/ && /trap .* EXIT/ {
+    print (stop == "exit" ? "echo stop-after-trap; exit 0" : ": \"$unbound_after_trap\"") }' "$clones" >"$tmp/stopped/clones.sh"
+  mark='stop-after-trap'
+  [ "$stop" = exit ] || mark='unbound_after_trap: unbound variable'
+  out=$(finished=1 TMPDIR=$tmp/stoptmp PATH=$fake bash "$tmp/stopped/clones.sh" "$tree" 2>&1) && fail "clones.sh exits 0 after its $stop stop" "$out"
+  case $out in *"$mark"*) ;; *) fail "clones.sh stops before its $stop stop" "$out" ;; esac
+  check "clones.sh leaves nothing in TMPDIR after its $stop stop" '' "$(ls -A "$tmp/stoptmp")"
+done
 # No TMPDIR: the run goes to the person's real ~/.cache, as it does in use,
 # unless this machine's home is refused.
 if out=$(env -u TMPDIR PATH="$fake" bash "$clones" "$tree" 2>"$tmp/err"); then
