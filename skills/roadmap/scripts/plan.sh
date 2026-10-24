@@ -82,6 +82,13 @@ describe() { run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -F descrip
 # title $1 in any case. Through ENVIRON, not -v, which would read a backslash
 # in the title as an escape.
 exists() { T=$1 N=${2:-} awk -F'\t' '$1 == "ms" && $2 != ENVIRON["N"] && tolower($6) == tolower(ENVIRON["T"]) { f = 1 } END { exit !f }' <<<"$list"; }
+# Exits 0 when $1, as YYYY-MM-DD, is a day that exists, so 2026-02-30 is
+# never sent.
+day() {
+  awk -v d="$1" 'BEGIN { y = substr(d, 1, 4); m = substr(d, 6, 2) + 0; x = substr(d, 9, 2) + 0
+    last = substr("312831303130313130313031", 2 * m - 1, 2) + (m == 2 && y % 4 == 0 && (y % 100 != 0 || y % 400 == 0))
+    exit !(m >= 1 && m <= 12 && x >= 1 && x <= last) }'
+}
 issue() {
   [[ ${1#\#} =~ ^[0-9]+$ ]] || usage
   echo "${1#\#}"
@@ -145,8 +152,8 @@ case $act in
     ;;
   rename)
     [ $# -eq 3 ] || usage
-    milestone "$2"
     [ "$(tr '[:upper:]' '[:lower:]' <<<"$3")" != later ] || refuse 'a milestone does not become Later: plan.sh later puts off one task at a time'
+    milestone "$2"
     list=$(bash "$dir/read.sh" milestones)
     ! exists "$3" "$n" || refuse "$3 exists"
     run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -f title="$3" --silent
@@ -158,7 +165,7 @@ case $act in
     # older milestones. Noon UTC is the same day in each.
     case $3 in
       none) due=null ;;
-      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) due=${3}T12:00:00Z ;;
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) day "$3" || usage; due=${3}T12:00:00Z ;;
       *) usage ;;
     esac
     milestone "$2"
@@ -227,7 +234,7 @@ case $act in
       closed=$(gh api 'repos/{owner}/{repo}/milestones?state=closed&per_page=100' --paginate \
         --jq '.[] | select(.title | ascii_downcase == "later") | "\(.number)\t\(.title)"' | awk 'NR == 1')
       later=$closed
-      [ -z "$closed" ] || list=$list$'\n'"ms	${closed%%$'\t'*}	1000000000	0	1	${closed#*$'\t'}"
+      [ -z "$closed" ] || list=$list$'\n'"ms	${closed%%$'\t'*}	1000000000	0	1	${closed#*$'\t'}	-"
     fi
     own=$(awk -F'\t' -v n="$a" '$1 == "is" && $2 == n { print $3 }' <<<"$issues")
     [ -n "$own" ] || refuse "#$a is not an open issue"

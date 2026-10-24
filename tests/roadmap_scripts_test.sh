@@ -443,6 +443,9 @@ check 'due sends noon UTC' "dry run: gh api -X PATCH repos/\{owner\}/\{repo\}/mi
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" due M1 none)
 check 'due none clears it' "dry run: gh api -X PATCH repos/\{owner\}/\{repo\}/milestones/$(msno M1) -F due_on=null --silent" "$out"
 check 'due takes a day only' 2 "$(bash "$scripts/plan.sh" due M1 12/01/2026 >/dev/null 2>&1; echo $?)"
+check 'due refuses a day that does not exist' 2 "$(bash "$scripts/plan.sh" due M1 2026-02-30 >/dev/null 2>&1; echo $?)"
+check 'due takes February 29 of a leap year' 0 "$(DRY_RUN=1 bash "$scripts/plan.sh" due M1 2028-02-29 >/dev/null 2>&1; echo $?)"
+check 'due refuses February 29 of 2100' 2 "$(bash "$scripts/plan.sh" due M1 2100-02-29 >/dev/null 2>&1; echo $?)"
 # An open sub-issue with no milestone takes it from its parent, closed or not.
 reset
 put '11:-'
