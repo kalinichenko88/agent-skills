@@ -89,9 +89,9 @@ marked() { awk '{ sub(/\r$/, ""); gsub(/^[ \t]+|[ \t]+$/, "") } $0 == "Current."
 # Writes the file as the milestone's description.
 describe() { run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -F description=@"$file" --silent; }
 # Prints why the title $1 is taken: an open milestone in $list, other than
-# number $2, has it in any case, or has its M<n>. The M counts in any case, as
-# in read.sh milestone, and the number as a number, as in the order: m1 and
-# M01 are M1. Through ENVIRON, not -v, which would read a backslash in the
+# number $2, has it in any case, or has its M<n>. As in read.sh milestone and
+# the order, the M counts in any case and the number as a number: m1 and M01
+# are M1. Through ENVIRON, not -v, which would read a backslash in the
 # title as an escape.
 taken() {
   T=$1 N=${2:-} awk -F'\t' 'function m(t) { return match(t, /^[Mm][0-9]+/) ? substr(t, 2, RLENGTH - 1) + 0 : -1 }

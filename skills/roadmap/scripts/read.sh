@@ -22,7 +22,8 @@
 # Busy is in collect.sh's words: "assigned to <login>", "branch <name>", "PR #<n>
 # by <login>", with you for the account gh is logged in as. A blocker or a
 # parent in another repository is written <owner/repo>#<n>, and its parent as 0.
-# The order of a milestone is <k> for a title M<k>, 100000 + its number for
+# The order of a milestone is <k> for a title M<k>, with the M in any case, so
+# m2 is M2 as in milestone and in plan.sh. It is 100000 + its number for
 # another title, and 1000000000 for Later. A milestone is current when a line
 # of its description reads Current.; when none does, the first one that is not
 # Later is. milestone takes a whole title first, then M<n>, and exits 1 and
@@ -47,7 +48,7 @@ tsv='def tsv: map(. // "" | tostring | gsub("[\t\r\n]"; " ")) | join("\t");'
 # ponytail: 100 open milestones at most; paginate if a project ever has more.
 milestones=$tsv'def later: .title | ascii_downcase == "later";
 def order: if later then 1000000000
-  elif (.title | test("^M[0-9]+([^0-9]|$)")) then (.title | match("^M([0-9]+)").captures[0].string | tonumber)
+  elif (.title | test("^M[0-9]+([^0-9]|$)"; "i")) then (.title | match("^M([0-9]+)"; "i").captures[0].string | tonumber)
   else 100000 + .number end;
 def lines: (.description // "") | gsub("\r"; "") | split("\n") | map(gsub("^\\s+|\\s+$"; "")) | map(select(. != ""));
 map(. + {order: order, later: later, lines: lines})
