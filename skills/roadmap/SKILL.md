@@ -128,8 +128,8 @@ bash <dir>/scripts/roadmap.sh
 bash <dir>/scripts/roadmap.sh M1
 ```
 
-With no argument, it prints each open milestone in order: its progress
-(`current, 22 of 54 closed`), its description, and its open issues in
+With no argument, it prints each open milestone in order: its progress and
+due date (`current, 22 of 54 closed, due 2026-12-01`), its description, and its open issues in
 dependency order, each with its state — `free`, `blocked by #21`, `open
 sub-issues: 2`, or who has it. The progress counts the milestone's issues,
 not its pull requests; a milestone closed while the script runs shows

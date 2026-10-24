@@ -14,7 +14,7 @@
 #   is    <n> <milestone|0> <bug 1|0> <busy|-> <open blockers|-> <parent|0>
 #         <parent's milestone|0> <open sub-issues> <title>
 #   br    <n> <linked branch>
-#   ms    <n> <order> <current 1|0> <later 1|0> <title>
+#   ms    <n> <order> <current 1|0> <later 1|0> <title> <due YYYY-MM-DD|->
 #   mc    <n> <open issues> <closed issues>
 #   md    <n> <description line>
 #   pr    <n> <author|you> <closed issues|-> <files|-> <file count>
@@ -101,7 +101,7 @@ case $1 in
     gh api 'repos/{owner}/{repo}/milestones?state=open&per_page=100' --jq "$milestones"'
       | (any(.[]; .marked)) as $any | (map(select(.later | not)) | .[0].number) as $first
       | (.[] | ["ms", .number, .order, (if .marked or (($any | not) and .number == $first) then 1 else 0 end),
-          (if .later then 1 else 0 end), .title] | tsv),
+          (if .later then 1 else 0 end), .title, (.due_on // "-")[:10]] | tsv),
         (.[] | .number as $n | .lines[] | select(. != "Current.") | ["md", $n, .] | tsv)'
     ;;
   counts)

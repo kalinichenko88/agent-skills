@@ -14,8 +14,8 @@ until the person approves the whole plan. One approval covers the whole list.
 2. **Talk it through.** Ask about what the documents leave open: the order of
    the stages, what is out of scope, what must be there for the first demo.
 3. **Propose, in the chat, before any write:**
-   - the milestones in order, each with its goal and its `Done when`, plus
-     `Later`;
+   - the milestones in order, each with its goal, its `Done when` and a due
+     date if the person wants one, plus `Later`;
    - per milestone, its tasks: a title, and a body that says what and why and
      cites the document it came from. Each task fits one PR. A larger one is a
      parent with sub-issues;
@@ -23,7 +23,11 @@ until the person approves the whole plan. One approval covers the whole list.
    - which milestones are current.
 4. **After the approval, write**, in this order. `<dir>` is this skill's base
    directory.
-   - Each milestone with
+   - Each milestone that exists already with a title outside the
+     `M<n> · <name>` format, when the plan keeps it: rename it with
+     `bash <dir>/scripts/plan.sh rename '<title>' 'M1 · First demo'`, and give
+     it its description with `plan.sh describe`. Its issues stay in it.
+   - Each new milestone with
      `bash <dir>/scripts/plan.sh create 'M1 · First demo' description.md`. Its
      description file holds the goal and the `Done when` sentence:
 
@@ -42,6 +46,7 @@ until the person approves the whole plan. One approval covers the whole list.
      `plan.sh sub <parent> <child>`. A refusal names the cycle, or the
      issues that would wait on a task in `Later`: change the plan with the
      person, not the check.
+   - The due dates with `plan.sh due <milestone> <YYYY-MM-DD>`.
    - The current marks with `plan.sh current <milestone>`.
    - Last, `board.sh` (`SKILL.md`, *The board*).
 
@@ -61,4 +66,5 @@ When a milestone has no open issues left, or the person asks:
    - a milestone for each open issue that has none;
    - the new current marks: `plan.sh current` and `plan.sh not-current`.
 3. After one approval, write as at the start. `plan.sh describe <milestone>
-   <file>` changes a description and keeps its current mark.
+   <file>` changes a description and keeps its current mark. `plan.sh rename`
+   changes a title, and `plan.sh due` a due date; `none` removes it.

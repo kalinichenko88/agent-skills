@@ -4,6 +4,8 @@
 #
 #   plan.sh create <title> <description-file>
 #   plan.sh describe <milestone> <description-file>
+#   plan.sh rename <milestone> <title>
+#   plan.sh due <milestone> <YYYY-MM-DD|none>
 #   plan.sh close <milestone>
 #   plan.sh current <milestone>
 #   plan.sh not-current <milestone>
@@ -13,10 +15,12 @@
 #   plan.sh later <issue>
 #
 # A milestone is M1, Later or a whole title. A milestone is current when a
-# line of its description reads Current.; describe keeps that line. It refuses
-# what would break the plan, prints why and exits 1, and writes nothing: a
-# second milestone of one title, closing a milestone with open issues, Later
-# as current, and a link that makes a cycle, also through the blockers that a
+# line of its description reads Current.; describe keeps that line, and rename
+# keeps the description. due none clears the due date. It refuses what would
+# break the plan, prints why and exits 1, and writes nothing: a second
+# milestone of one title, a rename to Later, which would put off its tasks
+# without the check of later, closing a milestone with open issues, Later as
+# current, and a link that makes a cycle, also through the blockers that a
 # sub-issue takes from its parent. later puts a task off into the Later
 # milestone, and opens it again when it is closed, or makes it when there is
 # none. It refuses when an open issue outside Later waits on the task through
@@ -36,6 +40,8 @@ usage() {
   cat >&2 <<'EOF'
 usage: plan.sh create <title> <description-file>
        plan.sh describe <milestone> <description-file>
+       plan.sh rename <milestone> <title>
+       plan.sh due <milestone> <YYYY-MM-DD|none>
        plan.sh close <milestone>
        plan.sh current <milestone>
        plan.sh not-current <milestone>
@@ -72,6 +78,10 @@ unmarked() { awk '{ s = $0; sub(/\r$/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s) } 
 marked() { awk '{ sub(/\r$/, ""); gsub(/^[ \t]+|[ \t]+$/, "") } $0 == "Current." { f = 1 } END { exit !f }' <<<"$old"; }
 # Writes the file as the milestone's description.
 describe() { run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -F description=@"$file" --silent; }
+# Exits 0 when an open milestone in $list, other than number $2, has the
+# title $1 in any case. Through ENVIRON, not -v, which would read a backslash
+# in the title as an escape.
+exists() { T=$1 N=${2:-} awk -F'\t' '$1 == "ms" && $2 != ENVIRON["N"] && tolower($6) == tolower(ENVIRON["T"]) { f = 1 } END { exit !f }' <<<"$list"; }
 issue() {
   [[ ${1#\#} =~ ^[0-9]+$ ]] || usage
   echo "${1#\#}"
@@ -115,10 +125,7 @@ case $act in
     [ $# -eq 3 ] || usage
     title=$2
     list=$(bash "$dir/read.sh" milestones)
-    # Through ENVIRON, not -v, which would read a backslash in the title as an escape.
-    if T=$title awk -F'\t' '$1 == "ms" && tolower($6) == tolower(ENVIRON["T"]) { f = 1 } END { exit !f }' <<<"$list"; then
-      refuse "$title exists"
-    fi
+    ! exists "$title" || refuse "$title exists"
     newfile
     trimmed <"$3" >"$file"
     run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title="$title" -F description=@"$file" --silent
@@ -135,6 +142,28 @@ case $act in
     fi
     describe
     say "described $title"
+    ;;
+  rename)
+    [ $# -eq 3 ] || usage
+    milestone "$2"
+    [ "$(tr '[:upper:]' '[:lower:]' <<<"$3")" != later ] || refuse 'a milestone does not become Later: plan.sh later puts off one task at a time'
+    list=$(bash "$dir/read.sh" milestones)
+    ! exists "$3" "$n" || refuse "$3 exists"
+    run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -f title="$3" --silent
+    say "renamed $title to $3"
+    ;;
+  due)
+    [ $# -eq 3 ] || usage
+    # GitHub keeps a due date as a midnight: in UTC now, in a US time zone in
+    # older milestones. Noon UTC is the same day in each.
+    case $3 in
+      none) due=null ;;
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) due=${3}T12:00:00Z ;;
+      *) usage ;;
+    esac
+    milestone "$2"
+    run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -F due_on="$due" --silent
+    if [ "$3" = none ]; then say "$title has no due date"; else say "$title is due $3"; fi
     ;;
   close)
     [ $# -eq 2 ] || usage

@@ -219,6 +219,9 @@ check 'Later by name shows states' '- #42 Issue 42: free' "$(bash "$scripts/road
 # A cycle made by hand in GitHub ends, and both issues show.
 blocks 21 20
 check 'a cycle prints each issue once' 2 "$(bash "$scripts/roadmap.sh" | grep -cE '^- #2[01] ')"
+# A due date shows as its day: golang/go's Unplanned is due 2099-12-31T05:00:00Z.
+ms 'map(if (.title | startswith("M1 ")) then .due_on = "2099-12-31T05:00:00Z" else . end)'
+check 'a due date' "current, $(progress M1), due 2099-12-31" "$(bash "$scripts/roadmap.sh" | sed -n '/^## M1 /{n;p;}')"
 # A milestone closed between the list read and the count read has no count.
 ms '. + [{number: 998, title: "M9 · Stage 9", description: "", state: "open", open_issues: 0, closed_issues: 0}]'
 check 'a milestone with no count' 'not counted' "$(bash "$scripts/roadmap.sh" | sed -n '/^## M9 /{n;p;}')"
@@ -423,6 +426,23 @@ check 'close refuses open issues' 'refused: M1 · Stage 1 has 3 open issues: #19
 printf 'New goal.\n' >"$tmp/goal"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" describe M1 "$tmp/goal")
 check 'describe keeps the mark' "$(printf 'New goal.\n\nCurrent.')" "$(cat "$(sed -n 's/.*description=@\([^ ]*\).*/\1/p' <<<"$out")")"
+# rename sends the title alone, so the description and its mark stay.
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" rename M1 'M1 · First demo')
+check 'rename sends the title alone' "dry run: gh api -X PATCH repos/\{owner\}/\{repo\}/milestones/$(msno M1) -f title=M1\ ·\ First\ demo --silent" "$out"
+check 'rename refuses a title another milestone has, in any case' 'refused: m2 · stage 2 exists' \
+  "$(bash "$scripts/plan.sh" rename M1 'm2 · stage 2' 2>&1 || true)"
+check 'rename refuses an existing title with a backslash' 'refused: C:\new exists' "$(bash "$scripts/plan.sh" rename M1 'C:\new' 2>&1 || true)"
+check 'rename changes the case of its own title' 'renamed M1 · Stage 1 to M1 · STAGE 1' \
+  "$(bash "$scripts/plan.sh" rename M1 'M1 · STAGE 1' 2>&1)"
+check 'rename refuses Later' 'refused: a milestone does not become Later: plan.sh later puts off one task at a time' \
+  "$(bash "$scripts/plan.sh" rename M1 later 2>&1 || true)"
+# due sends noon UTC, the same day in UTC and in the US time zones that
+# GitHub keeps due dates in; none clears it.
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" due M1 2026-12-01)
+check 'due sends noon UTC' "dry run: gh api -X PATCH repos/\{owner\}/\{repo\}/milestones/$(msno M1) -F due_on=2026-12-01T12:00:00Z --silent" "$out"
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" due M1 none)
+check 'due none clears it' "dry run: gh api -X PATCH repos/\{owner\}/\{repo\}/milestones/$(msno M1) -F due_on=null --silent" "$out"
+check 'due takes a day only' 2 "$(bash "$scripts/plan.sh" due M1 12/01/2026 >/dev/null 2>&1; echo $?)"
 # An open sub-issue with no milestone takes it from its parent, closed or not.
 reset
 put '11:-'
@@ -490,7 +510,7 @@ put '19 5:Later'
 blocks 5 19
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" later 19 2>&1 || true)
 case $out in *'state=open'*'dry run: gh issue edit 19 --milestone Later'*) ;; *) fail 'later counts the issues of a closed Later as in Later' "$out" ;; esac
-check 'usage names every subcommand' 9 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
+check 'usage names every subcommand' 11 "$(bash "$scripts/plan.sh" 2>&1 | grep -c 'plan.sh ' || true)"
 
 # board.sh: a project found by title among the owner's projects, not linked
 # yet, is linked, not created again.
