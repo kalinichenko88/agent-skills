@@ -13,8 +13,8 @@ their area, so one pull request can remove the debt next to the task. A place
 larger than one pull request becomes steps that the `kalinichenko:roadmap`
 skill offers in order.
 
-First check that the project has no debt skill of its own: a `debt` skill in
-your skill list other than this one, or a file that
+First check that the project has no debt skill of its own: a skill named
+`debt` in your skill list other than this one, or a file that
 `git ls-files ':(top,glob)**/.*/**/skills/debt/SKILL.md'` prints from any
 directory of the checkout. When it has one, follow that one instead, with its
 own rules and tools, and stop here.
@@ -26,15 +26,17 @@ memory of an earlier one. `<dir>` is this skill's base directory, and
 
 ## Measure
 
-Run `git fetch -q origin` first, when there is an `origin`. The scope is a
-path from the repository's root, or the whole tree.
+Run `git -c core.hooksPath=/dev/null fetch -q origin` first, when there is an
+`origin`. The scope is a path from the repository's root, or the whole tree.
 
 Step 1 runs in your checkout. Every later step runs in `<tree>`, a checkout of
 the SHA on the "Measured on" line of step 1, and not in the working tree: a
 local commit or edit is not debt on the default branch. When that line says
 `HEAD`, the clone has no `origin/HEAD`, and local commits count. Put `<tree>`
-in your scratch directory, outside the repository, and make it right after
-step 1, with no hook and no LFS download:
+in your scratch directory, outside the repository. When a `<tree>` from an
+earlier run is there, remove it first, with
+`git worktree remove --force <tree>`. Then make it right after step 1, with no
+hook and no LFS download:
 
 ```bash
 git worktree prune
@@ -44,10 +46,9 @@ GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null worktree add --detach <tre
 No step runs a package manager (`npm`, `npx`, `bun`, `pnpm`, `yarn`) or a
 script of the project, in `<tree>` or in your checkout: a project's `.npmrc`
 or scripts can run its code. `clones.sh` of step 4 runs `jscpd` outside both,
-in a temporary directory of its own. Remove `<tree>` when the map ends, with
-`git worktree remove --force <tree>`; when a `<tree>` from an earlier run is
-there, remove it first. Run every command from the root of its checkout, so
-that all paths start there.
+in a temporary directory of its own. Remove `<tree>` the same way when the map
+ends. Run every command from the root of its checkout, so that all paths
+start there.
 
 1. **Hotspots.** `bash <dir>/scripts/measure.sh [path]` prints the code files
    by lines × the commits that touched them in 60 days, the top 15, and the SHA
@@ -95,9 +96,14 @@ that all paths start there.
    files, by the data rule of step 1 and with SQL left out, so that a copy in
    a document or a fixture cannot hide a clone. It prints the clones of 15
    lines or more, longest first, with paths from the root: each one is a
-   finding. When it exits with an error, as with neither `npx` nor `bunx` or
-   with a shared `TMPDIR`, skip this step and give its message in the report.
-   `jscpd` never goes into a `package.json`.
+   finding. *Lines* is jscpd's length, the length of the first file's range.
+   jscpd gives pairs: read the ranges, and rows that copy the same block are
+   one place, which the fewest shared helpers that remove all its rows fix.
+   Sort a clone place as the findings of step 3: a rule of step 2's files that
+   requires the copies drops it, and one that forbids them makes it a broken
+   rule, counted once. When it exits with an error, as with neither `npx` nor
+   `bunx` or with a shared `TMPDIR`, skip this step and give its message in the
+   report. `jscpd` never goes into a `package.json`.
 
 ## Choose the places
 
