@@ -66,8 +66,8 @@ does.
 The hook is plain bash with no other dependency. The github and roadmap skills'
 scripts are bash too, and they also need `gh`. The debt skill's `measure.sh`
 needs only bash, git and awk; its `clones.sh` also needs `npx` or `bunx`,
-and a private temporary directory: on Linux, `TMPDIR` or `XDG_RUNTIME_DIR`,
-not the shared `/tmp`. On native Windows, Claude Code runs
+and a `TMPDIR` that other users cannot write, or none: then it uses
+`~/.cache`. On native Windows, Claude Code runs
 them in Git Bash, so install [Git for Windows](https://git-scm.com/downloads/win):
 without it, Claude Code runs the hook in PowerShell, and the rules do not load.
 Codex on native Windows is not tested: run it in WSL. The debt skill's

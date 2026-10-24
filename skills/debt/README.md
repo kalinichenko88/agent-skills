@@ -29,9 +29,9 @@ issues labelled `debt`, each with the numbers that put it there.
   and set nothing. Documents, fixtures and SQL stay out, so a copy there hides no
   clone. It lists the clones of 15 lines or more, and the clones one shared
   helper removes are one place. It never goes into a `package.json`. When
-  `jscpd` cannot run, the step is skipped. The temporary directory must be
-  private: on Linux, `/tmp` is shared, so set `TMPDIR`, or have
-  `XDG_RUNTIME_DIR`.
+  `jscpd` cannot run, the step is skipped. The copy goes to `TMPDIR`, or to
+  `~/.cache` when `TMPDIR` is not set; a `TMPDIR` that other users can write,
+  as `/tmp` on Linux, is refused.
 - **Less code, when ponytail is installed.** Its `ponytail-audit` finds
   dependencies the platform covers, abstractions with one implementation and
   modules that only delegate. A finding the project's own rules contradict is

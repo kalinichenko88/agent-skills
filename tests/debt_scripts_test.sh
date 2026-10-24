@@ -107,14 +107,14 @@ chmod +x "$tmp/bin/npx"
 export FAKE_LOG=$tmp/runner.log FAKE_REPORT=$root/tests/fixtures/debt/jscpd-report.json
 fake=$tmp/bin:$PATH
 args='jscpd@5.4.2 --min-lines 15 --no-gitignore --absolute --reporters json --output . code'
-read4='jscpd read 4 of the 4 code files.'
-rows=$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short2.ts` 1-20 |' '' "$read4")
-private='set TMPDIR to a private directory'
+rows=$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short2.ts` 1-20 |')
+# umask 002, as with user private groups: a directory the group can write passes.
+umask 002
 
-# clones.sh refuses a temporary directory under a shared /tmp, as on Linux with
-# no XDG_RUNTIME_DIR: there, nothing below can run.
-out=$(PATH=$fake bash "$clones" "$tree" 2>&1) || case $out in
-  *"a directory that is not private is above"*)
+# clones.sh refuses a temporary directory below a shared one, as a TMPDIR of
+# /tmp on Linux: there, nothing below can run.
+out=$(PATH=$fake bash "$clones" "$tree" 2>"$tmp/err") || case $(cat "$tmp/err") in
+  *"others can write it"*)
     echo 'debt_scripts_test: ok; clones.sh not run, no private temporary directory'
     exit 0
     ;;
@@ -125,8 +125,14 @@ case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 check 'npx, with only the code files' \
   "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
 check 'a relative tree with CDPATH set' "$rows" "$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)"
+mkdir "$tmp/home"
+check 'no TMPDIR: the cache directory' "$rows" "$(env -u TMPDIR -u XDG_CACHE_HOME HOME="$tmp/home" PATH="$fake" bash "$clones" "$tree")"
+check 'the cache directory, emptied' '' "$(ls -A "$tmp/home/.cache")"
 jq '.duplicates = []' "$FAKE_REPORT" >"$tmp/none.json"
-check 'no clones' "$(printf '%s\n' 'No clones of 15 lines or more.' "$read4")" "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
+check 'no clones' 'No clones of 15 lines or more.' "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
+echo null >"$tmp/null.json"
+err=$(FAKE_REPORT=$tmp/null.json PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a report of another shape exits 0' "$err"
+check 'a report of another shape' 'clones.sh: jscpd wrote a report that cannot be read' "$err"
 
 err=$(PATH=$fake bash "$clones" "$tree" migrations 2>&1) && fail 'a path with only SQL exits 0' "$err"
 check 'a path with only SQL' 'No code files under migrations.' "$err"
@@ -136,18 +142,22 @@ err=$(FAKE_ROOT=/elsewhere PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a pa
 check 'a path outside the copy' 'clones.sh: jscpd gave a path outside the copy' "$err"
 above() {
   err=$(TMPDIR=$1 PATH=$fake bash "$clones" "$tree" 2>&1) && fail "$2 exits 0" "$err"
-  check "$2" "clones.sh: $3 is above the temporary directory; $private" "$err"
+  check "$2" "clones.sh: $3" "$err"
 }
+up=$(cd "$tmp" && pwd -P)
 for f in package.json node_modules .ignore; do
   mkdir -p "$tmp/above-$f/tmp"
   : >"$tmp/above-$f/$f"
-  above "$tmp/above-$f/tmp" "a $f above the temporary directory" "a $f"
+  above "$tmp/above-$f/tmp" "a $f above the temporary directory" \
+    "$up/above-$f/$f is above the temporary directory; set TMPDIR to a directory with none above it"
 done
 mkdir -p "$tmp/above-link/tmp" "$tmp/shared/tmp"
 ln -s missing "$tmp/above-link/node_modules"
-above "$tmp/above-link/tmp" 'a node_modules link to nothing above' 'a node_modules'
+above "$tmp/above-link/tmp" 'a node_modules link to nothing above' \
+  "$up/above-link/node_modules is above the temporary directory; set TMPDIR to a directory with none above it"
 chmod o+w "$tmp/shared"
-above "$tmp/shared/tmp" 'a directory that others can write above' 'a directory that is not private'
+above "$tmp/shared/tmp" 'a directory that others can write above' \
+  "$up/shared, above the temporary directory, belongs to another user or others can write it; set TMPDIR to a private directory"
 
 # bunx with bun, on a PATH with no npx, where /usr/bin and /bin have none;
 # bun itself, not a version manager's shim.
