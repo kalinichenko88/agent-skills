@@ -1,15 +1,15 @@
 # kalinichenko:debt
 
 A map of the technical debt: where the code is large and changes often, where
-it breaks the project's own layer rules, and, with ponytail, where it is
-over-engineered. At most three places a run become issues labelled `debt`,
-each with the numbers that put it there.
+it breaks the project's own layer rules, where it is copied, and, with
+ponytail, where it is over-engineered. At most three places a run become
+issues labelled `debt`, each with the numbers that put it there.
 
 ## When it starts
 
 - You ask where the technical debt is, or for a debt map of a path.
-- You ask to find hotspots, layer or import violations, or over-engineering,
-  and file them for refactoring.
+- You ask to find hotspots, layer or import violations, duplicated code, or
+  over-engineering, and file them for refactoring.
 - You ask to re-measure the debt issues that are already open.
 
 ## What you get
@@ -23,6 +23,16 @@ each with the numbers that put it there.
   project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks. A hit the
   rule's text leaves open is reported as borderline, not filed. With no such
   rule, the step is skipped, and the report says so.
+- **Copies, when it can.** `scripts/clones.sh` runs `jscpd`, at a pinned
+  version, with `npx` or `bunx` on a copy of the code files, in a temporary
+  directory, so the project's `.npmrc`, `bunfig.toml` and `.jscpd.json` run
+  and set nothing. Documents, fixtures and SQL stay out, so a copy there hides no
+  clone. It lists the clones of 15 lines or more, and the clones one shared
+  helper removes are one place. It never goes into a `package.json`. When
+  `jscpd` cannot run, the step is skipped. The copy goes to `TMPDIR`, or to
+  `~/.cache` when `TMPDIR` is not set. It is refused below a directory that
+  other users can write, as `/tmp` on Linux, or that holds a `package.json`,
+  a `node_modules` or a `.ignore`: then set `TMPDIR` to another directory.
 - **Less code, when ponytail is installed.** Its `ponytail-audit` finds
   dependencies the platform covers, abstractions with one implementation and
   modules that only delegate. A finding the project's own rules contradict is

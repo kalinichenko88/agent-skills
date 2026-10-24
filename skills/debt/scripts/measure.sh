@@ -19,9 +19,10 @@ set -euo pipefail
   exit 2
 }
 path=${1:-.}
+# The data rule, which clones.sh reads too.
+data=$(<"$(dirname "$0")/data.ere")
 cd "$(git rev-parse --show-toplevel)"
 ref=$(git rev-parse --abbrev-ref --verify -q origin/HEAD || echo HEAD)
-data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock|[A-Za-z]*ignore)$|(^|/)(fixtures|testdata|vendor|__snapshots__)/|(^|/)go\.sum$'
 
 # ponytail: renames are not followed, so a file moved inside the window counts
 # its commits from the move; git log --follow per file if a hotspot hides
@@ -31,9 +32,9 @@ data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock|[A-Za-z]*ignore)$|(^|/)(fi
 # out quoted and counts as code; -z and NUL records if one turns up.
 # The regex goes through ENVIRON, because awk -v turns \. into any character.
 rows=$({
-  git -c core.quotePath=false grep -I -c '' "$ref" -- "$path" || true
+  git -c core.quotePath=false grep --no-color -I -c '' "$ref" -- "$path" || true
   echo '== log'
-  git -c core.quotePath=false log --since=60.days --format= --name-only "$ref" -- "$path"
+  git -c core.quotePath=false log --no-color --since=60.days --format= --name-only "$ref" -- "$path"
 } | DATA=$data awk -v ref="$ref:" '
   $0 == "== log" { inlog = 1; next }
   !inlog {
@@ -57,6 +58,6 @@ head -n 15 <<<"$rows" | awk -F'\t' '{ printf "| `%s` | %d | %d | %d |\n", $4, $2
 echo
 echo "Measured on \`$ref\` at $(git rev-parse --short "$ref"), $(grep -c . <<<"$rows") code files."
 # The renames of the whole tree: a move into the path has its source outside it.
-moved=$(git -c core.quotePath=false log --since=60.days -M --diff-filter=R --name-only --format= "$ref" |
+moved=$(git -c core.quotePath=false log --no-color --since=60.days -M --diff-filter=R --name-only --format= "$ref" |
   sort -u | grep -cFxf <(cut -f4 <<<"$rows") || true)
 [ "$moved" -eq 0 ] || echo "Code files moved in 60 days: $moved. Their commits count from the move."
