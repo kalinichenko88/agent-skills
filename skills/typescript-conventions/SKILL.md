@@ -193,15 +193,15 @@ A model is a type or an enum. A model that two files or more use goes to the
 uses it. One model per file, named after the model. Two cases may share a
 file:
 
-- A model whose definition names one other model, as
-  `OrderDraft = Omit<Order, 'id'>`, `Order | null` or
-  `Order & { paidAt: string }`, may go into that model's file.
-- A discriminated union and its variants, which share a tag field, as
-  `Discount = PercentDiscount | FixedDiscount` with `kind`, may share the
-  union's file.
+- A model made by an operation on one other model may go into that model's
+  file: `OrderDraft = Omit<Order, 'id'>`, `PartialOrder = Partial<Order>`,
+  `MaybeOrder = Order | null`, `PaidOrder = Order & { paidAt: string }`.
+- A tagged union and its variants, which share a tag field, may share the
+  union's file: `Discount = PercentDiscount | FixedDiscount`, each variant with
+  `kind`.
 
-Every other model gets a file of its own: one that holds another, as `Order`
-holds a list of `OrderLine`, and one whose definition names two models, as
+Every other model gets a file of its own: one whose fields hold another model,
+as `Order` holds `lines: OrderLine[]`, and one made from two models, as
 `Order & Customer`. A type that only one file uses stays in that file, below
 the primary export.
 
@@ -216,7 +216,7 @@ orders/
 │   ├── order.ts         Order, and OrderDraft = Omit<Order, 'id'>
 │   ├── order-line.ts    OrderLine
 │   ├── customer.ts      Customer, by hand: no code parses it
-│   └── discount.ts      Discount = PercentDiscount | FixedDiscount
+│   └── discount.ts      Discount = PercentDiscount | FixedDiscount, by kind
 ├── schemas/
 │   ├── order.ts         orderSchema, the response of fetch-orders.ts
 │   └── order-line.ts    orderLineSchema
