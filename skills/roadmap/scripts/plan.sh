@@ -14,19 +14,20 @@
 #   plan.sh sub <parent> <child>
 #   plan.sh later <issue>
 #
-# A milestone is M1, Later or a whole title. A milestone is current when a
-# line of its description reads Current.; describe keeps that line, and rename
-# keeps the description. due none clears the due date. It refuses what would
-# break the plan, prints why and exits 1, and writes nothing: a second
-# milestone of one title, a rename to Later, which would put off its tasks
-# without the check of later, closing a milestone with open issues, Later as
-# current, and a link that makes a cycle, also through the blockers that a
-# sub-issue takes from its parent. later puts a task off into the Later
-# milestone, and opens it again when it is closed, or makes it when there is
-# none. It refuses when an open issue outside Later waits on the task through
-# any chain, or on a sub-issue of it with no milestone of its own: a task in Later that an issue
-# outside Later waits on is still offered, so it would not be put off. sub
-# refuses the same for a child that goes into Later with its parent. Putting an issue into another milestone needs no check:
+# A milestone is M1, Later or a whole title. A milestone is current when a line
+# of its description reads Current.; describe keeps that line, and rename keeps
+# the description. due takes a day that exists, and none clears the due date.
+# It refuses what would break the plan, prints why and exits 1, and writes
+# nothing: a second milestone of one title, a rename to Later, which would put
+# off its tasks without the check of later, closing a milestone with open
+# issues, Later as current, and a link that makes a cycle, also through the
+# blockers that a sub-issue takes from its parent. later puts a task off into
+# the Later milestone, and opens it again when it is closed, or makes it when
+# there is none. It refuses when an open issue outside Later waits on the task
+# through any chain, or on a sub-issue of it with no milestone of its own: a
+# task in Later that an issue outside Later waits on is still offered, so it
+# would not be put off. sub refuses the same for a child that goes into Later
+# with its parent. Putting an issue into another milestone needs no check:
 # gh issue edit <n> --milestone '<title>'.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
@@ -165,7 +166,7 @@ case $act in
     # older milestones. Noon UTC is the same day in each.
     case $3 in
       none) due=null ;;
-      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) day "$3" || usage; due=${3}T12:00:00Z ;;
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) day "$3" || { echo "plan.sh: $3 is not a day" >&2; exit 2; }; due=${3}T12:00:00Z ;;
       *) usage ;;
     esac
     milestone "$2"
