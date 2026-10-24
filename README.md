@@ -108,7 +108,7 @@ in `tests/fixtures/github/` and `tests/fixtures/roadmap/`, all from public
 repositories, and the debt skill's `measure.sh` on a repository the test builds.
 
 `make check` runs every `tests/<name>_test.sh`. A test passes only when it
-exits 0 and the last line it prints to stdout is `<name>_test: ok`: under bash
+exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
 3.2, a script that `set -u` stops exits 0 when it has an EXIT trap.
 `tests/makefile_test.sh` checks this rule. A new test script ends with its `ok`
 line.
