@@ -28,7 +28,7 @@ END {
 
 function section(m, single,   c, i, j, in_m, member, done, left, best, ok, k, e, t) {
   print "## " mstitle[m]
-  # A milestone that opened between the reads has no count.
+  # A milestone closed between the list read and the count read has no count.
   print (mscur[m] ? "current, " : "") (m in msclosed ? msclosed[m] " of " (msopen[m] + msclosed[m]) " closed" : "not counted")
   print ""
   if (mdlines[m] != "") {

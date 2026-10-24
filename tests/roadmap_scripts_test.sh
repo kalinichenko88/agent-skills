@@ -219,7 +219,7 @@ check 'Later by name shows states' '- #42 Issue 42: free' "$(bash "$scripts/road
 # A cycle made by hand in GitHub ends, and both issues show.
 blocks 21 20
 check 'a cycle prints each issue once' 2 "$(bash "$scripts/roadmap.sh" | grep -cE '^- #2[01] ')"
-# A milestone that opened after the count read has no count.
+# A milestone closed between the list read and the count read has no count.
 ms '. + [{number: 998, title: "M9 · Stage 9", description: "", state: "open", open_issues: 0, closed_issues: 0}]'
 check 'a milestone with no count' 'not counted' "$(bash "$scripts/roadmap.sh" | sed -n '/^## M9 /{n;p;}')"
 
