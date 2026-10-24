@@ -79,12 +79,10 @@ braced() {
 # prints the first line of each file that opens with something else. The
 # recorded runs that broke the rule put a helper or an Intl constant there.
 first() {
-  local ok=0 dir file line bad
+  local ok=0 dir list file line bad
   for dir; do
-    if [ -z "$(find "$dir/src" -name '*.ts' 2>/dev/null)" ]; then
-      echo "no file written: $dir/src"
-      continue
-    fi
+    list=$(find "$dir/src" -name '*.ts')
+    [ -n "$list" ] || { echo "no file written: $dir/src" && continue; }
     bad=0
     while IFS= read -r file; do
       # The first line past the imports, blank lines and comments.
@@ -93,7 +91,7 @@ first() {
         /^[[:space:]]*$/ || /^[[:space:]]*(\/\/|\/\*|\*)/ { next }
         { print; exit }' "$file")
       case $line in export*) ;; *) echo "$file: $line" && bad=1 ;; esac
-    done < <(find "$dir/src" -name '*.ts')
+    done <<<"$list"
     [ "$bad" -eq 1 ] || ok=$((ok + 1))
   done
   echo "export first: $ok of $# order runs open every file with an export"
@@ -115,10 +113,6 @@ for i in $(seq "$runs"); do
   files+=("$logs/ts-$i/src/cart-total.ts" "$logs/react-$i/src/search-panel.tsx")
 done
 braced "${files[@]}"
-orders=()
-for i in $(seq "$runs"); do
-  orders+=("$logs/order-$i")
-done
-first "${orders[@]}"
+first "$logs"/order-*/
 echo "logs: $logs"
 exit "$failed"
