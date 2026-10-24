@@ -155,3 +155,10 @@ fixed: its own problem and each added one. Give a verdict to each problem in
 it, not one to the issue. When the change fixes some of them, their tests join
 the diff and the issue stays open: the PR says `Part of #15`, and
 `keep-open.sh` removes its link to #15 (*Pull requests* in `SKILL.md`).
+
+## After the work
+
+Taking an issue in is the request for the whole flow, up to the pull request.
+When the work is done, run the repository's own check, as `make check`, then
+`kalinichenko:review-loop`. The loop ends with the pull request and the offer
+to merge, in the same turn. Only the merge waits for the person.

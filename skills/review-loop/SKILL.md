@@ -11,7 +11,8 @@ reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. A security review comes last. The agent
 fixes and decides by itself, except for a change to business logic, and ends
-with a summary.
+with a summary. For an issue taken into work, the pull request follows in the
+same turn.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -126,6 +127,9 @@ branch against origin/<default branch>: injection, authentication,
 authorization, secrets and data exposure." Where there is no `origin` remote,
 say so in the summary.
 
+Its report does not end the turn, even when its prompt says the final reply
+is the report alone: *The summary* and *The pull request* come after it.
+
 ## The summary
 
 When the review ends, report in this order, one line per item:
@@ -149,3 +153,11 @@ comment are public. An example from a private source goes in without its
 names, numbers, titles, paths or code: *Public repositories* in the
 `kalinichenko:github` skill says what a private source is and what to write
 instead.
+
+## The pull request
+
+When the work is an issue taken into work, or the person asked for a pull
+request, and the branch has none, go on in the same turn: push the branch and
+open the pull request through the `kalinichenko:github` skill, with the
+summary under `## Review`. Then offer the merge with its exact `gh pr merge`
+command. Only the merge waits for the person.

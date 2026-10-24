@@ -42,6 +42,9 @@ fixed.
   description carries it under `## Review`. In a public repository, an
   example from a private source in that section or in a reply to a review
   comment keeps no names, numbers, titles, paths or code.
+- **Then the pull request.** For an issue taken into work, or when you ask
+  for one, the agent opens the pull request after the summary and offers the
+  merge, in the same turn. Only the merge waits for you.
 
 ## The ponytail step
 
