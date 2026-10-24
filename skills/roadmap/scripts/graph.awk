@@ -96,9 +96,9 @@ function state(n,   s, w, c, k, b) {
   if (c) {
     b = w[1]
     for (k = 2; k <= c; k++) b = b ", " w[k]
-    s = s (s == "" ? "" : "; ") "blocked by " b
+    s = append(s, "; ", "blocked by " b)
   }
-  if (issubs[n] > 0) s = s (s == "" ? "" : "; ") "open sub-issues: " issubs[n]
+  if (issubs[n] > 0) s = append(s, "; ", "open sub-issues: " issubs[n])
   return s == "" ? "free" : s
 }
 

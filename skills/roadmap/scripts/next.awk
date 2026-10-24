@@ -33,7 +33,7 @@ END {
   titles = ""
   for (i = 1; i <= msn; i++) if (mscur[mslist[i]]) {
     cur[mslist[i]] = 1
-    titles = titles (titles == "" ? "" : "; ") mstitle[mslist[i]]
+    titles = append(titles, "; ", mstitle[mslist[i]])
     if (!first) first = i
   }
   print "current: " (titles == "" ? "none" : titles)

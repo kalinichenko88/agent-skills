@@ -21,6 +21,7 @@ jobs:
       # The runner's ShellCheck is 0.9.0: it reports SC2015 on lines that
       # 0.11.0, the version make check runs locally, passes.
       - name: Install ShellCheck 0.11.0
+        working-directory: ${{ runner.temp }}
         run: |
           curl -fsSLO https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
           echo '8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  shellcheck-v0.11.0.linux.x86_64.tar.xz' | sha256sum -c -
@@ -28,7 +29,13 @@ jobs:
           sudo install shellcheck-v0.11.0/shellcheck /usr/local/bin/shellcheck
           shellcheck --version
       - run: npm install -g @anthropic-ai/claude-code
-      - run: make check
+      # A TMPDIR of the job's own, as on macOS: below the shared /tmp, the debt
+      # test skips its case of a directory of the person's own group.
+      - env:
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          awk -W version 2>&1 | head -n 1
+          make check
 
   secrets:
     runs-on: ubuntu-latest
