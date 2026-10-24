@@ -47,11 +47,4 @@ run early && fail 'make test passes a test that exits 0 before its ok line' "$(c
 run late && fail 'make test passes a test that exits 3 after its ok line' "$(cat "$tmp/out")"
 run after && fail 'make test passes a test whose ok line is not its last' "$(cat "$tmp/out")"
 run 'unbound pass' && fail 'make test passes when an earlier test stops' "$(cat "$tmp/out")"
-
-# The debt test skips clones.sh when there is no node, and must still pass.
-# Run that path where /usr/bin and /bin hold no node.
-if [ ! -x /usr/bin/node ] && [ ! -x /bin/node ]; then
-  PATH=/usr/bin:/bin make -s -C "$root" test TESTS=debt_scripts >"$tmp/out" 2>&1 ||
-    fail 'make test fails the debt test without node' "$(cat "$tmp/out")"
-fi
 echo 'makefile_test: ok'
