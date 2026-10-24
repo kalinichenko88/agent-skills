@@ -95,8 +95,10 @@ that all paths start there.
    files, by the data rule of step 1 and with SQL left out, so that a copy in
    a document or a fixture cannot hide a clone. It prints the clones of 15
    lines or more, longest first, with paths from the root: each one is a
-   finding. When it exits with an error, as with neither `npx` nor `bunx`,
-   skip this step and give its message. `jscpd` never goes into a
+   finding. Its last line says how many of the code files `jscpd` read: when
+   that is fewer than it got, say so in the report. When it exits with an
+   error, as with neither `npx` nor `bunx` or with a shared temporary
+   directory, skip this step and give its message. `jscpd` never goes into a
    `package.json`.
 
 ## Choose the places

@@ -10,8 +10,10 @@
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-# A person's color.ui=always must not reach what the scripts read from git.
-export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=color.ui GIT_CONFIG_VALUE_0=always
+# A person's color.ui=always must not reach what the scripts read from git; it
+# goes after any configuration the environment already gives git.
+n=${GIT_CONFIG_COUNT:-0}
+export "GIT_CONFIG_KEY_$n=color.ui" "GIT_CONFIG_VALUE_$n=always" GIT_CONFIG_COUNT=$((n + 1))
 measure=$root/skills/debt/scripts/measure.sh
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -105,16 +107,26 @@ chmod +x "$tmp/bin/npx"
 export FAKE_LOG=$tmp/runner.log FAKE_REPORT=$root/tests/fixtures/debt/jscpd-report.json
 fake=$tmp/bin:$PATH
 args='jscpd@5.4.2 --min-lines 15 --no-gitignore --absolute --reporters json --output . code'
-rows=$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short2.ts` 1-20 |')
+read4='jscpd read 4 of the 4 code files.'
+rows=$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short2.ts` 1-20 |' '' "$read4")
+private='set TMPDIR to a private directory'
 
-check 'the code clones, longest first' "$rows" "$(PATH=$fake bash "$clones" "$tree")"
+# clones.sh refuses a temporary directory under a shared /tmp, as on Linux with
+# no XDG_RUNTIME_DIR: there, nothing below can run.
+out=$(PATH=$fake bash "$clones" "$tree" 2>&1) || case $out in
+  *"a directory that is not private is above"*)
+    echo 'debt_scripts_test: ok; clones.sh not run, no private temporary directory'
+    exit 0
+    ;;
+esac
+check 'the code clones, longest first' "$rows" "$out"
 run=$(sed -n 2p "$FAKE_LOG")
 case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 check 'npx, with only the code files' \
   "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
 check 'a relative tree with CDPATH set' "$rows" "$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)"
 jq '.duplicates = []' "$FAKE_REPORT" >"$tmp/none.json"
-check 'no clones' 'No clones of 15 lines or more in code files.' "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
+check 'no clones' "$(printf '%s\n' 'No clones of 15 lines or more.' "$read4")" "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
 
 err=$(PATH=$fake bash "$clones" "$tree" migrations 2>&1) && fail 'a path with only SQL exits 0' "$err"
 check 'a path with only SQL' 'No code files under migrations.' "$err"
@@ -122,16 +134,23 @@ err=$(PATH=$fake bash "$clones" "$tmp" 2>&1) && fail 'a tree that is not a check
 FAKE_FAIL=1 PATH=$fake bash "$clones" "$tree" 2>/dev/null && fail 'a failed jscpd exits 0'
 err=$(FAKE_ROOT=/elsewhere PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a path outside the copy exits 0' "$err"
 check 'a path outside the copy' 'clones.sh: jscpd gave a path outside the copy' "$err"
-for f in node_modules .ignore; do
+above() {
+  err=$(TMPDIR=$1 PATH=$fake bash "$clones" "$tree" 2>&1) && fail "$2 exits 0" "$err"
+  check "$2" "clones.sh: $3 is above the temporary directory; $private" "$err"
+}
+for f in package.json node_modules .ignore; do
   mkdir -p "$tmp/above-$f/tmp"
   : >"$tmp/above-$f/$f"
-  err=$(TMPDIR=$tmp/above-$f/tmp PATH=$fake bash "$clones" "$tree" 2>&1) && fail "a $f above the temporary directory exits 0" "$err"
-  check "a $f above the temporary directory" \
-    "clones.sh: $(cd "$tmp/above-$f" && pwd -P)/$f is above the temporary directory; set TMPDIR to another one" "$err"
+  above "$tmp/above-$f/tmp" "a $f above the temporary directory" "a $f"
 done
+mkdir -p "$tmp/above-link/tmp" "$tmp/shared/tmp"
+ln -s missing "$tmp/above-link/node_modules"
+above "$tmp/above-link/tmp" 'a node_modules link to nothing above' 'a node_modules'
+chmod o+w "$tmp/shared"
+above "$tmp/shared/tmp" 'a directory that others can write above' 'a directory that is not private'
 
-# bunx with bun, on a PATH with no npx and no node, where /usr/bin and /bin
-# have neither; bun itself, not a version manager's shim.
+# bunx with bun, on a PATH with no npx, where /usr/bin and /bin have none;
+# bun itself, not a version manager's shim.
 if command -v bun >/dev/null && [ ! -e /usr/bin/npx ] && [ ! -e /bin/npx ] &&
   "$(command -v bun)" --version >/dev/null 2>&1; then
   mkdir "$tmp/bunbin"
@@ -140,5 +159,7 @@ if command -v bun >/dev/null && [ ! -e /usr/bin/npx ] && [ ! -e /bin/npx ] &&
   check 'bunx with bun' "$rows" "$(PATH=$tmp/bunbin:/usr/bin:/bin bash "$clones" "$tree")"
   check 'bunx' "$(printf '%s\n' bunx "$args")" "$(sed -n '1p;3p' "$FAKE_LOG")"
   case $(sed -n 2p "$FAKE_LOG") in "$real"*) fail 'bunx ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
+else
+  echo 'debt_scripts_test: bunx not run, no bun of its own or an npx in /usr/bin or /bin'
 fi
 echo 'debt_scripts_test: ok'
