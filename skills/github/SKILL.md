@@ -17,7 +17,7 @@ so in the final report rather than inventing a substitute.
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
 | Picking an issue up — `#91` or its URL | `take-in-check.sh`; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code, and assign each one when it joins | `take-in.md` |
-| Writing to a public repository: an issue, a comment, a PR, a commit | Nothing from a private source: no names, numbers, titles, paths or code. Write "a private tracker with 100 open issues" | *Public repositories* below |
+| Writing to a repository — an issue, a comment, a PR, a commit | `gh repo view <owner/name> --json visibility` on the repository that gets it; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host | *GitHub Actions* below |
 
 A file in the last column sits next to this one, in this skill's base
@@ -138,23 +138,33 @@ gone, and correct it.
 
 ## Public repositories
 
-Before the first write to a repository — an issue, a comment, a PR title or
-description, a commit message, or a fixture or document the commit adds — read
-its visibility:
+Before the first write, read the visibility of the repository that gets the
+text: the `--repo` of the `gh` call, or the repository of the remote you push
+to. With no argument, `gh repo view` reads the checkout's default repository.
+That can be a different one, for example when `origin` and `upstream` differ.
 
 ```bash
-gh repo view --json visibility --jq .visibility
+gh repo view <owner/name> --json visibility --jq .visibility
 ```
 
-`PUBLIC` means that everybody can read the text, and search engines keep it.
-Then nothing in it comes from a private source: a repository that is `PRIVATE`
-or `INTERNAL`, a local checkout of one, a work tracker, or the data of a person
-or a customer. Read a source's visibility the same way:
-`gh repo view <owner/name> --json visibility`. A source you cannot check is
-private.
+A write is an issue, a comment, a PR title or description, or a commit: its
+message and every file it changes, code, tests, fixtures and docs included.
 
-From a private source, keep the shape of the case and its counts, and drop
-everything that names it:
+`PUBLIC` means that everybody can read the text, and search engines index it.
+A case from a private source then goes in only as its shape and its counts.
+A private source is:
+
+- A GitHub repository that prints `PRIVATE` or `INTERNAL` for the command
+  above, or that the command cannot read. A local checkout of one.
+- A source outside GitHub that needs a login: a work tracker, an internal
+  wiki, a chat.
+- The data of a person or a customer.
+
+A page that anybody can open without a login is not private: a public
+repository, docs, a package page, a CVE.
+
+From a private source, leave out each detail that names the source or its
+content:
 
 | Leave out | Write instead |
 | --- | --- |
@@ -163,13 +173,16 @@ everything that names it:
 | File paths, branch names, identifiers, code | The same case with neutral names: `src/a.ts:42`, `parseOrderCsv` → `parseRows` |
 | People and customers | The role: "a customer", "a teammate" |
 
-A fixture in a public repository is recorded from a public source, as this
-repository's own issues, never from a private one.
+Record a fixture from a public source when one has the shape, for example the
+issues of the repository you write to. When only a private source has the
+shape, keep its structure — whitespace, markup, order — and replace its text
+as the table says. Say so in the PR description.
 
-An edit does not take text back: GitHub keeps the old text of an issue, a PR
-or a comment in its edit history, and a pushed commit stays in the history of
-the branch. When private text went out, tell the person what went out and
-where. To delete the issue and file it again is their decision.
+An edit does not remove the old text. GitHub keeps the old body of an issue, a
+PR or a comment in its edit history, and an old title in the timeline. A
+pushed commit stays readable by its SHA, also after a force push. When private
+text went out, tell the person what went out and where. The person decides how
+to remove it.
 
 ## GitHub Actions
 

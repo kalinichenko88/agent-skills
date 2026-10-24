@@ -144,7 +144,8 @@ The pull request description carries the same summary under `## Review`, and
 each later fix commit adds its lines there. A later review then recognises a
 declined finding instead of arguing it again.
 
-In a public repository, the summary and each reply to a review comment are
-public text. An example from a private repository goes in without its names,
-numbers and code: *Public repositories* in the `kalinichenko:github` skill
-says what to write instead.
+In a public repository, the `## Review` section and each reply to a review
+comment are public. An example from a private source goes in without its
+names, numbers, titles, paths or code: *Public repositories* in the
+`kalinichenko:github` skill says what a private source is and what to write
+instead.
