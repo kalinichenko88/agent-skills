@@ -29,7 +29,8 @@ agent matches it and says so.
 - **The runtime before a dependency.** `Intl`, `Object.groupBy`,
   `structuredClone`, `fetch` and `AbortSignal.timeout`, at the version that
   the project pins.
-- **Files are kebab-case, one entity per file.**
+- **Files are kebab-case, one entity per file.** A file opens with its
+  primary export; its helpers, module constants and own types go below it.
 
 ## Recommended lint rules
 
