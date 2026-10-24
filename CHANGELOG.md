@@ -4,6 +4,33 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 `main`: its subject without the type, and the PR number when it has one. The
 `/release` skill writes the section; pull requests leave this file alone.
 
+## 0.6.0 - 2026-10-24
+
+### Added
+
+- Put a feature's files where they belong: a part's own files in its folder, models in models/, schemas in schemas/
+- debt: find duplicated code with jscpd on a private copy of the code files
+- roadmap: rename a milestone and set its due date with plan.sh (#67)
+- github: keep private data out of text written to a public repository
+- debt: add a skill that maps technical debt and files it as debt issues
+- Add a review-loop skill that stops review rounds and ends with a summary
+
+### Changed
+
+- Run make check and a gitleaks scan on every pull request and push to main (#80)
+- review-loop: let the eval's step 4 stop happen, and fail a count past three rounds
+- review-loop: give the eval fixture an origin and count the security review
+
+### Fixed
+
+- review-loop: go on to the pull request after the review, not stop at the security report (#83)
+- roadmap: read the M of a milestone's order in any case (#78)
+- scripts: exit non-zero when set -u stops a skill script that has an EXIT trap
+- tests: pass a test in make check only when it exits 0 with its ok line last
+- roadmap: refuse a second milestone with one `M<n>`, and stop M1 when it names two (#70)
+- roadmap: count only issues in a milestone's progress line
+- typescript: show that helpers and constants go below the primary export
+
 ## 0.5.1 - 2026-10-23
 
 ### Changed
