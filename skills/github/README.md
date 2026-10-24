@@ -26,8 +26,8 @@ time.
 - **A task runs to its pull request.** After the review, the agent runs the
   repository's check on the final branch. When it passes and the branch is
   not the default branch, the agent pushes, opens the PR and asks whether to
-  merge, with the exact command, in the same turn. Only the merge waits for
-  you.
+  merge, with the exact command, in the same turn. Only the merge and a
+  question on business logic wait for you.
 - **A task finishes with a true tracker.** The PR and every issue it closes
   are assigned to you. A PR that fixes only part of an issue keeps that issue
   open. After the merge, the `path:line` citations in open issues are checked

@@ -10,9 +10,9 @@ skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. A security review comes last. The agent
-fixes and decides by itself, except for a change to business logic, and ends
-with a summary. When the task is an issue taken into work, or the person asked
-for a pull request, the pull request follows in the same turn, on the
+fixes and decides by itself, except for a change to business logic, and
+writes a summary. When the task is an issue taken into work, or the person
+asked for a pull request, the pull request follows in the same turn, on the
 conditions in *The pull request*.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
@@ -165,15 +165,18 @@ Go on in the same turn when all of these hold:
 - The task is an issue taken into work, or the person asked for a pull
   request.
 - The branch is not the default branch.
-- The branch has no pull request yet.
 - The check on the final branch passes.
 
 Then:
 
-1. Through the `kalinichenko:github` skill, push the branch and, when the push
-   succeeds, open the pull request, with the summary under `## Review`.
+1. Push the branch. When the push succeeds and the branch has no pull
+   request, open one through the `kalinichenko:github` skill, with the
+   summary under `## Review`. When it has one, add the summary's lines to its
+   `## Review`.
 2. When the pull request is open, show the `gh pr merge` command that
-   *Pull requests* in that skill gives, and ask whether to run it. On a yes,
-   run it, then do *Finishing* from that skill.
+   *Pull requests* in that skill gives, and ask whether to run it. When a
+   question on business logic is still open, ask it first, and ask about the
+   merge after its fix is in. On a yes, run the merge, then do *Finishing*
+   from that skill.
 
-Only the merge waits for the person.
+Only the merge and a question on business logic wait for the person.
