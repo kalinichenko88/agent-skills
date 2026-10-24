@@ -60,8 +60,9 @@ that all paths start there.
    a directory may import or hold, with its exceptions. Turn each rule into one
    `git grep -n` over the scope. For a whole word use `-w`: `\b` does not work
    with `-E` on macOS. A broken pattern finds nothing, and that looks like a
-   pass: before you trust an empty result, run the pattern on a `file:line`
-   you have read that it must find, such as an import that the rule allows.
+   pass. Before you trust an empty result, run the pattern over a file you
+   have read, with a line it must find, such as an import that the rule
+   allows, and check that this line is in the output.
    A rule that a grep cannot test, such as a size or a mirrored layout, gets
    the command that can (`wc -l`, a listing), or is left out and named in the
    report. Keep a hit only when the rule's text, its exceptions included,
