@@ -18,17 +18,17 @@
 # of its description reads Current.; describe keeps that line, and rename keeps
 # the description. due takes a day that exists, and none clears the due date.
 # It refuses what would break the plan, prints why and exits 1, and writes
-# nothing: a second milestone of one title, a rename to Later, which would put
-# off its tasks without the check of later, closing a milestone with open
-# issues, Later as current, and a link that makes a cycle, also through the
-# blockers that a sub-issue takes from its parent. later puts a task off into
-# the Later milestone, and opens it again when it is closed, or makes it when
-# there is none. It refuses when an open issue outside Later waits on the task
-# through any chain, or on a sub-issue of it with no milestone of its own: a
-# task in Later that an issue outside Later waits on is still offered, so it
-# would not be put off. sub refuses the same for a child that goes into Later
-# with its parent. Putting an issue into another milestone needs no check:
-# gh issue edit <n> --milestone '<title>'.
+# nothing: a second milestone of one title or of one M<n>, a rename to Later,
+# which would put off its tasks without the check of later, closing a
+# milestone with open issues, Later as current, and a link that makes a cycle,
+# also through the blockers that a sub-issue takes from its parent. later puts
+# a task off into the Later milestone, and opens it again when it is closed, or
+# makes it when there is none. It refuses when an open issue outside Later
+# waits on the task through any chain, or on a sub-issue of it with no
+# milestone of its own: a task in Later that an issue outside Later waits on
+# is still offered, so it would not be put off. sub refuses the same for a
+# child that goes into Later with its parent. Putting an issue into another
+# milestone needs no check: gh issue edit <n> --milestone '<title>'.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
 # new description in the file that the printed command names.
@@ -79,10 +79,17 @@ unmarked() { awk '{ s = $0; sub(/\r$/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s) } 
 marked() { awk '{ sub(/\r$/, ""); gsub(/^[ \t]+|[ \t]+$/, "") } $0 == "Current." { f = 1 } END { exit !f }' <<<"$old"; }
 # Writes the file as the milestone's description.
 describe() { run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -F description=@"$file" --silent; }
-# Exits 0 when an open milestone in $list, other than number $2, has the
-# title $1 in any case. Through ENVIRON, not -v, which would read a backslash
-# in the title as an escape.
-exists() { T=$1 N=${2:-} awk -F'\t' '$1 == "ms" && $2 != ENVIRON["N"] && tolower($6) == tolower(ENVIRON["T"]) { f = 1 } END { exit !f }' <<<"$list"; }
+# Prints why the title $1 is taken: an open milestone in $list, other than
+# number $2, has it in any case, or has its M<n>. The M counts in any case, as
+# in read.sh milestone, and the number as a number, as in the order: m1 and
+# M01 are M1. Through ENVIRON, not -v, which would read a backslash in the
+# title as an escape.
+taken() {
+  T=$1 N=${2:-} awk -F'\t' 'function m(t) { return match(t, /^[Mm][0-9]+/) ? substr(t, 2, RLENGTH - 1) + 0 : -1 }
+    $1 != "ms" || $2 == ENVIRON["N"] { next }
+    tolower($6) == tolower(ENVIRON["T"]) { print ENVIRON["T"] " exists"; exit }
+    m($6) >= 0 && m($6) == m(ENVIRON["T"]) { print $6 " is M" m($6) " already"; exit }' <<<"$list"
+}
 # Exits 0 when $1, as YYYY-MM-DD, is a day that exists, so 2026-02-30 is
 # never sent.
 day() {
@@ -133,7 +140,8 @@ case $act in
     [ $# -eq 3 ] || usage
     title=$2
     list=$(bash "$dir/read.sh" milestones)
-    ! exists "$title" || refuse "$title exists"
+    why=$(taken "$title")
+    [ -z "$why" ] || refuse "$why"
     newfile
     trimmed <"$3" >"$file"
     run gh api -X POST 'repos/{owner}/{repo}/milestones' -f title="$title" -F description=@"$file" --silent
@@ -156,7 +164,8 @@ case $act in
     [ "$(tr '[:upper:]' '[:lower:]' <<<"$3")" != later ] || refuse 'a milestone does not become Later: plan.sh later puts off one task at a time'
     milestone "$2"
     list=$(bash "$dir/read.sh" milestones)
-    ! exists "$3" "$n" || refuse "$3 exists"
+    why=$(taken "$3" "$n")
+    [ -z "$why" ] || refuse "$why"
     run gh api -X PATCH "repos/{owner}/{repo}/milestones/$n" -f title="$3" --silent
     say "renamed $title to $3"
     ;;

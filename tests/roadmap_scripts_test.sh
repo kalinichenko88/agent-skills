@@ -185,6 +185,21 @@ check 'later resolves in any case' Later "$(bash "$scripts/read.sh" milestone la
 bash "$scripts/read.sh" milestone M9 2>/dev/null && fail 'an unknown milestone exits 0'
 ms 'map(if (.title | startswith("M1 ")) then .title = "M10 · Stage 10" else . end)'
 bash "$scripts/read.sh" milestone M1 2>/dev/null && fail 'M1 matches M10'
+# Two open titles that start with M1, as one made by hand on GitHub gives: M1
+# names neither, in read.sh and in each script that reads through it.
+reset
+ms '. + [.[] | select(.title == "M1 · Stage 1") | .number = 999 | .title = "M1 · Other"]'
+bash "$scripts/read.sh" milestone M1 >"$tmp/out" 2>&1 && fail 'M1 of two milestones exits 0'
+check 'M1 of two milestones names both' \
+  "$(printf 'read.sh: M1 matches more than one open milestone; name it by its whole title:\n  M1 · Stage 1\n  M1 · Other')" "$(cat "$tmp/out")"
+check 'a whole title of the two resolves' 999 "$(bash "$scripts/read.sh" milestone 'm1 · other' | cut -f1)"
+bash "$scripts/roadmap.sh" M1 >/dev/null 2>&1 && fail 'roadmap.sh M1 of two milestones exits 0'
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" current M1 2>&1) && fail 'plan.sh current M1 of two milestones exits 0'
+check 'plan.sh current M1 of two milestones gives the reason' 1 "$(grep -c '^read.sh: M1 matches more than one' <<<"$out" || true)"
+check 'plan.sh current M1 of two milestones writes nothing' 0 "$(grep -c '^dry run' <<<"$out" || true)"
+# A title that is M1 alone is its own whole title, so M1 names it.
+ms '. + [.[] | select(.title == "M1 · Stage 1") | .number = 998 | .title = "M1"]'
+check 'the whole title M1 resolves next to M1 · ...' 998 "$(bash "$scripts/read.sh" milestone M1 | cut -f1)"
 
 # read.sh prs. The recorded pull requests are the owner's, so each author is you.
 reset
@@ -434,6 +449,14 @@ check 'rename refuses a title another milestone has, in any case' 'refused: m2 �
 check 'rename refuses an existing title with a backslash' 'refused: C:\new exists' "$(bash "$scripts/plan.sh" rename M1 'C:\new' 2>&1 || true)"
 check 'rename changes the case of its own title' 'renamed M1 · Stage 1 to M1 · STAGE 1' \
   "$(bash "$scripts/plan.sh" rename M1 'M1 · STAGE 1' 2>&1)"
+check 'create refuses the M<n> of another milestone' 'refused: M1 · Stage 1 is M1 already' \
+  "$(bash "$scripts/plan.sh" create 'M1 · Another' /dev/null 2>&1 || true)"
+check 'create refuses the M<n> of another milestone in lower case' 'refused: M1 · Stage 1 is M1 already' \
+  "$(bash "$scripts/plan.sh" create 'm1 · another' /dev/null 2>&1 || true)"
+check 'rename refuses the M<n> of another milestone' 'refused: M1 · Stage 1 is M1 already' \
+  "$(bash "$scripts/plan.sh" rename M2 'M01 · Third' 2>&1 || true)"
+out=$(DRY_RUN=1 bash "$scripts/plan.sh" create 'M10 · Ten' /dev/null)
+case $out in *'dry run: gh api -X POST'*) ;; *) fail 'create takes M10 next to M1' "$out" ;; esac
 check 'rename refuses Later before it reads' 'refused: a milestone does not become Later: plan.sh later puts off one task at a time' \
   "$(bash "$scripts/plan.sh" rename NoSuch later 2>&1 || true)"
 # due sends noon UTC, the same day in UTC and in the US time zones that
