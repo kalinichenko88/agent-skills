@@ -129,6 +129,11 @@ case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 check 'npx, with only the code files' \
   "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
 check 'a relative tree with CDPATH set' "$rows" "$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)"
+# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. A copy of
+# clones.sh with an unbound variable after its trap must exit non-zero.
+cp -R "$root/skills/debt/scripts" "$tmp/stopped"
+awk '{ print } !/^[ \t]*#/ && /trap .* EXIT/ { print ": \"$unbound_after_trap\"" }' "$clones" >"$tmp/stopped/clones.sh"
+PATH=$fake bash "$tmp/stopped/clones.sh" "$tree" >/dev/null 2>&1 && fail 'clones.sh exits 0 when set -u stops it'
 # No TMPDIR: the run goes to the person's real ~/.cache, as it does in use,
 # unless this machine's home is refused.
 if out=$(env -u TMPDIR PATH="$fake" bash "$clones" "$tree" 2>"$tmp/err"); then

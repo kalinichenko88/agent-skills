@@ -72,7 +72,15 @@ milestone() {
 # trailing blank lines.
 newfile() {
   file=$(mktemp "${TMPDIR:-/tmp}/milestone.XXXXXX")
-  [ "${DRY_RUN:-}" = 1 ] || trap 'rm -f "$file"' EXIT
+  [ "${DRY_RUN:-}" = 1 ] || trap clean EXIT
+}
+# bash 3.2 runs this trap with $? at 0 when set -u stops the script, so a run
+# passes only when it set finished at its end.
+clean() {
+  local code=$?
+  [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1
+  rm -f "$file"
+  exit "$code"
 }
 trimmed() { awk '{ sub(/\r$/, ""); l[++n] = $0 } END { while (n && l[n] ~ /^[ \t]*$/) n--; for (i = 1; i <= n; i++) print l[i] }'; }
 unmarked() { awk '{ s = $0; sub(/\r$/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s) } s != "Current."' | trimmed; }
@@ -265,3 +273,4 @@ case $act in
     ;;
   *) usage ;;
 esac
+finished=1

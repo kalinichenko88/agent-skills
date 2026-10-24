@@ -227,12 +227,14 @@ case $job in
     [ -z "$old" ] || echo "already in the file:$old"
     if [ -n "$new" ]; then
       part=$(mktemp)
-      trap 'rm -f "$part"' EXIT
+      # As in clean below: a stop by set -u leaves $? at 0 here.
+      trap 'code=$?; rm -f "$part"; [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1; exit "$code"' EXIT
       # shellcheck disable=SC2086 # one number per word
       printf '%s\n' $new | entries >"$part"
       { echo; echo "== Bodies, added"; echo; cat "$part"; } >>"$file"
     fi
     echo "$(size), new from line $start"
+    finished=1
     exit 0
     ;;
   take-in) [ $# -ge 2 ] || usage ;;
@@ -246,11 +248,15 @@ limit=${COLLECT_LIMIT:-153600}
 tmp=${TMPDIR:-/tmp}
 file=$(mktemp "${tmp%/}/collect.XXXXXX")
 hits=$(mktemp) part=$(mktemp)
-# A failed run leaves no half-written file behind.
+# A failed run leaves no half-written file behind. bash 3.2 runs this trap with
+# $? at 0 when set -u stops the script, so a run passes only when it set
+# finished at its end.
 clean() {
   local code=$?
+  [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1
   rm -f "$hits" "$part"
   [ "$code" = 0 ] || rm -f "$file"
+  exit "$code"
 }
 trap clean EXIT
 echo "# collect.sh $job in $repo" >"$file"
@@ -313,3 +319,4 @@ left=$((limit - $(wc -c <"$file")))
 } >>"$file"
 size
 echo
+finished=1

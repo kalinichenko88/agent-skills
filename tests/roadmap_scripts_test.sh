@@ -457,6 +457,12 @@ check 'rename refuses the M<n> of another milestone' 'refused: M1 · Stage 1 is 
   "$(bash "$scripts/plan.sh" rename M2 'M01 · Third' 2>&1 || true)"
 out=$(DRY_RUN=1 bash "$scripts/plan.sh" create 'M10 · Ten' /dev/null)
 case $out in *'dry run: gh api -X POST'*) ;; *) fail 'create takes M10 next to M1' "$out" ;; esac
+# bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. A copy of
+# plan.sh with an unbound variable after its trap must exit non-zero.
+rm -rf "$tmp/stopped"
+cp -R "$scripts" "$tmp/stopped"
+awk '{ print } !/^[ \t]*#/ && /trap .* EXIT/ { print ": \"$unbound_after_trap\"" }' "$scripts/plan.sh" >"$tmp/stopped/plan.sh"
+bash "$tmp/stopped/plan.sh" create 'M10 · Ten' /dev/null >/dev/null 2>&1 && fail 'create exits 0 when set -u stops it'
 check 'rename refuses Later before it reads' 'refused: a milestone does not become Later: plan.sh later puts off one task at a time' \
   "$(bash "$scripts/plan.sh" rename NoSuch later 2>&1 || true)"
 # due sends noon UTC, the same day in UTC and in the US time zones that

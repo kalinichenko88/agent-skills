@@ -68,7 +68,15 @@ esac
 }
 # A template, because macOS's mktemp -d alone does not read TMPDIR.
 run=$(mktemp -d "${base%/}/clones.XXXXXX")
-trap 'rm -rf "$run"' EXIT
+# bash 3.2 runs this trap with $? at 0 when set -u stops the script, so a run
+# passes only when it set finished at its end.
+clean() {
+  local code=$?
+  [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1
+  rm -rf "$run"
+  exit "$code"
+}
+trap clean EXIT
 run=$(cd "$run" && pwd -P)
 # A group may write only when it is the person's own, as with user private
 # groups: one with the person's name.
@@ -123,3 +131,4 @@ GIT_LFS_SKIP_SMUDGE=1 git -C "$tree" checkout-index --prefix="$run/code/" --stdi
   }
   console.log(rows.length ? ["| Lines | File | Other file |", "| ---: | --- | --- |", ...rows].join("\n") : "No clones of 15 lines or more.");
 ')
+finished=1
