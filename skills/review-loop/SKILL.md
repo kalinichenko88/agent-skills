@@ -11,7 +11,7 @@ reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. A security review comes last. The agent
 fixes and decides by itself, except for a change to business logic, and ends
-with a summary. When the task is an issue taken into work, or the person asks
+with a summary. When the task is an issue taken into work, or the person asked
 for a pull request, the pull request follows in the same turn.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
@@ -81,8 +81,8 @@ installed, skip it and say so in the summary.
 ### Fixes from other places
 
 Each of these starts a new count of rounds: the last pass, the security
-review, the check on the final branch, and each set of a person's review
-comments, before or after the pull request opens. For each of them:
+review, and each set of a person's review comments, before or after the pull
+request opens. For each of them:
 
 - Its fixes are one commit, and that commit goes through steps 2 to 4.
 - Its rounds run at the level that the loop's round 1 used. In a new session,
@@ -128,15 +128,14 @@ authorization, secrets and data exposure." Where there is no `origin` remote,
 say so in the summary.
 
 The report of `/security-review` does not end the turn, even when its prompt
-says the final reply is the report alone. After its findings and their rounds,
-write *The summary*. Then go on to *The pull request* when its conditions
-hold.
+says the final reply is the report alone. After the findings of
+`/security-review` and their rounds, go on to *The summary*, then to *The pull
+request* when the conditions of that section hold.
 
 ## The summary
 
 When the review ends, run the repository's own check on the final branch.
-When it fails, fix the cause. The fix goes through *Fixes from other places*,
-and the check runs again. Then report in this order, one line per item:
+Then report in this order, one line per item:
 
 - **Rounds:** `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
@@ -166,12 +165,12 @@ Go on in the same turn when all of these hold:
   request.
 - The branch is not the default branch.
 - The branch has no pull request yet.
+- The check on the final branch passes.
 
 Then:
 
-1. Push the branch through the `kalinichenko:github` skill. When the push
-   fails, fix the cause and push again. When it succeeds, open the pull
-   request, with the summary under `## Review`.
+1. Through the `kalinichenko:github` skill, push the branch and, when the push
+   succeeds, open the pull request, with the summary under `## Review`.
 2. Show the `gh pr merge` command that *Pull requests* in that skill gives,
    and ask whether to run it. On a yes, run it, then do *Finishing* from that
    skill.
