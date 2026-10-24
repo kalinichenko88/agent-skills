@@ -74,22 +74,22 @@ check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$rep
 err=$(cd "$repo" && bash "$measure" tests 2>&1) && fail 'a path with only data exits 0' "$err"
 check 'a path with only data' 'No code files under tests on HEAD.' "$err"
 
-# clones.sh, with a fake npx: it writes down its name, where it ran, what it
-# got and the files it was given, and writes the report that jscpd 5.4.2 wrote
-# for this tree. The README, the fixture and the SQL hold copies of the code
-# there, and jscpd never got them.
-{ command -v node || command -v bun; } >/dev/null || {
-  echo 'debt_scripts_test: ok; clones.sh not run, no node or bun'
+# clones.sh, on the tree that tests/fixtures/debt/jscpd-report.json was
+# recorded from, with a fake npx: it writes down its name, where it ran, what it
+# got and the files it was given, and answers with that report. The README, the
+# fixture, node_modules and the SQL hold copies of the code, and jscpd never
+# gets them.
+command -v node >/dev/null || {
+  echo 'debt_scripts_test: ok; clones.sh not run, no node'
   exit 0
 }
 clones=$root/skills/debt/scripts/clones.sh
 tree=$tmp/tree
-mkdir -p "$tree/src/sub" "$tree/tests/fixtures" "$tree/migrations" "$tmp/bin" "$tmp/project/tmp"
-for f in src/a.ts src/sub/e.ts tests/fixtures/x.ts README.md; do seq 30 >"$tree/$f"; done
-for f in src/short1.ts 'src/short|2.ts' migrations/001.sql migrations/002.sql; do seq 10 >"$tree/$f"; done
+bash "$root/tests/fixtures/debt/tree.sh" "$tree"
 git -C "$tree" init -q
 git -C "$tree" add -A
 real=$(cd "$tree" && pwd -P)
+mkdir "$tmp/bin"
 cat >"$tmp/bin/npx" <<'EOF'
 #!/usr/bin/env bash
 { basename "$0"; pwd -P; echo "$*"; (cd "${!#}" && find . -type f | LC_ALL=C sort); } >"$FAKE_LOG"
@@ -99,21 +99,32 @@ EOF
 chmod +x "$tmp/bin/npx"
 export FAKE_LOG=$tmp/runner.log FAKE_REPORT=$root/tests/fixtures/debt/jscpd-report.json
 fake=$tmp/bin:$PATH
-args='jscpd@latest --min-lines 15 --absolute --reporters json --output . code'
+args='jscpd@5.4.2 --min-lines 15 --no-gitignore --absolute --reporters json --output . code'
+rows=$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short2.ts` 1-20 |')
 
-out=$(PATH=$fake bash "$clones" "$tree")
-check 'the code clones, longest first' \
-  "$(printf '%s\n' '| Lines | File | Other file |' '| ---: | --- | --- |' '| 30 | `src/a.ts` 1-30 | `src/sub/e.ts` 1-30 |' '| 20 | `src/short1.ts` 1-20 | `src/short\|2.ts` 1-20 |')" "$out"
-check 'npx, with only the code files' "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts './src/short|2.ts' ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
-case $(sed -n 2p "$FAKE_LOG") in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
-out=$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)
-check 'a relative tree with CDPATH set' '| Lines | File | Other file |' "$(head -n 1 <<<"$out")"
-check 'a path with only SQL' 'No code files under migrations.' "$(PATH=$fake bash "$clones" "$tree" migrations)"
+check 'the code clones, longest first' "$rows" "$(PATH=$fake bash "$clones" "$tree")"
+run=$(sed -n 2p "$FAKE_LOG")
+case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
+check 'npx with its run directory as the prefix, and only the code files' \
+  "$(printf '%s\n' npx "--prefix $run --yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
+check 'a relative tree with CDPATH set' "$rows" "$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)"
+jq '.duplicates = []' "$FAKE_REPORT" >"$tmp/none.json"
+check 'no clones' 'No clones of 15 lines or more in code files.' "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
 
-: >"$tmp/project/package.json"
-err=$(TMPDIR=$tmp/project/tmp PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a package.json above the temporary directory exits 0' "$err"
-check 'a package.json above the temporary directory' \
-  "clones.sh: $(cd "$tmp/project" && pwd -P)/package.json is above the temporary directory; set TMPDIR to another one" "$err"
+err=$(PATH=$fake bash "$clones" "$tree" migrations 2>&1) && fail 'a path with only SQL exits 0' "$err"
+check 'a path with only SQL' 'No code files under migrations.' "$err"
+err=$(PATH=$fake bash "$clones" "$tmp" 2>&1) && fail 'a tree that is not a checkout exits 0' "$err"
+jq '.duplicates = [] | .statistics.total.sources = 0' "$FAKE_REPORT" >"$tmp/empty.json"
+FAKE_REPORT=$tmp/empty.json PATH=$fake bash "$clones" "$tree" 2>/dev/null && fail 'a report of no file exits 0'
 FAKE_FAIL=1 PATH=$fake bash "$clones" "$tree" 2>/dev/null && fail 'a failed jscpd exits 0'
 FAKE_ROOT=/elsewhere PATH=$fake bash "$clones" "$tree" 2>/dev/null && fail 'a path outside the copy exits 0'
+
+# bunx with bun, on a PATH with no npx and no node.
+if command -v bun >/dev/null; then
+  mkdir "$tmp/bunbin"
+  cp "$tmp/bin/npx" "$tmp/bunbin/bunx"
+  ln -s "$(command -v bun)" "$tmp/bunbin/bun"
+  check 'bunx with bun' "$rows" "$(PATH=$tmp/bunbin:/usr/bin:/bin bash "$clones" "$tree")"
+  check 'bunx in its run directory' "$(printf '%s\n' bunx "$args")" "$(sed -n '1p;3p' "$FAKE_LOG")"
+fi
 echo 'debt_scripts_test: ok'

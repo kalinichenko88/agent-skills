@@ -69,7 +69,8 @@ needs only bash, git and awk; its `clones.sh` also needs `npx` or `bunx`. On
 native Windows, Claude Code runs
 them in Git Bash, so install [Git for Windows](https://git-scm.com/downloads/win):
 without it, Claude Code runs the hook in PowerShell, and the rules do not load.
-Codex on native Windows is not tested: run it in WSL.
+Codex on native Windows is not tested: run it in WSL. Neither is the debt
+skill's `clones.sh`: there, its step is skipped with an error.
 
 The roadmap skill's board needs the `project` scope on the `gh` token. Run
 once on each machine:
@@ -108,8 +109,9 @@ roadmap skills' scripts against a fake `gh` that answers from payloads recorded
 in `tests/fixtures/github/` and `tests/fixtures/roadmap/`, all from public
 repositories, the debt skill's `measure.sh` on a repository the test builds,
 and its `clones.sh` against a fake `npx` that answers with a report recorded
-from `jscpd` in `tests/fixtures/debt/`. Without `node` or `bun`, the
-test skips `clones.sh` and says so.
+from `jscpd` for the tree in `tests/fixtures/debt/`, and with a fake `bunx`
+when `bun` is installed. Without `node`, the test skips `clones.sh` and says
+so.
 
 To try a script that writes on a real tracker without writing to it, set
 `DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,

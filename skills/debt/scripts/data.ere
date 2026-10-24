@@ -1,1 +1,1 @@
-\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock|[A-Za-z]*ignore)$|(^|/)(fixtures|testdata|vendor|__snapshots__)/|(^|/)go\.sum$
+\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock|[A-Za-z]*ignore)$|(^|/)(fixtures|testdata|vendor|node_modules|__snapshots__)/|(^|/)go\.sum$

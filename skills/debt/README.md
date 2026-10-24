@@ -23,10 +23,10 @@ issues labelled `debt`, each with the numbers that put it there.
   project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks. A hit the
   rule's text leaves open is reported as borderline, not filed. With no such
   rule, the step is skipped, and the report says so.
-- **Copies, when it can.** `scripts/clones.sh` runs the newest `jscpd` with
-  `npx` or `bunx` on a copy of the code files, in a temporary directory, so
-  the project's `.npmrc`, `bunfig.toml` and `.jscpd.json` run and set
-  nothing. Documents, fixtures and SQL stay out, so a copy there hides no
+- **Copies, when it can.** `scripts/clones.sh` runs `jscpd`, at a pinned
+  version, with `npx` or `bunx` on a copy of the code files, in a temporary
+  directory, so the project's `.npmrc`, `bunfig.toml` and `.jscpd.json` run
+  and set nothing. Documents, fixtures and SQL stay out, so a copy there hides no
   clone. It lists the clones of 15 lines or more, and the clones one shared
   helper removes are one place. It never goes into a `package.json`. When
   `jscpd` cannot run, the step is skipped.

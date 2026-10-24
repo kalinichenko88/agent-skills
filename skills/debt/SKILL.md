@@ -90,13 +90,14 @@ that all paths start there.
       implementation, a layer that only delegates and that no rule requires. A
       fix of a few lines, in one file or in a few, is a small cut: it goes into
       the report, for the Boy Scout Rule when someone next works there.
-4. **Duplication.** `bash <dir>/scripts/clones.sh <tree> [path]` runs the
-   newest `jscpd` on a copy of the scope's code files, by the data rule of
-   step 1 and with SQL left out, so that a copy in a document or a fixture
-   cannot hide a clone. It prints the clones of 15 lines or more, longest
-   first, with paths from the root: each one is a finding. When it exits with
-   an error, as with neither `npx` nor `bunx`, skip this step and give its
-   message. `jscpd` never goes into a `package.json`.
+4. **Duplication.** `bash <dir>/scripts/clones.sh <tree> [path]` runs
+   `jscpd`, at the version the script pins, on a copy of the scope's code
+   files, by the data rule of step 1 and with SQL left out, so that a copy in
+   a document or a fixture cannot hide a clone. It prints the clones of 15
+   lines or more, longest first, with paths from the root: each one is a
+   finding. When it exits with an error, as with neither `npx` nor `bunx`,
+   skip this step and give its message. `jscpd` never goes into a
+   `package.json`.
 
 ## Choose the places
 
@@ -157,7 +158,8 @@ at most 600 words, tables and code blocks not counted:
    move with the next pull request, and the SHA dates the evidence.
 2. `## What is broken`: the rule, quoted with its file and heading, or the
    measurement that makes the place a hotspot. The evidence names each file
-   and symbol, with the command and its count.
+   and symbol, with the command and its count. A clone is named by its two
+   files and its length in lines, from `clones.sh`, without its line ranges.
 3. `## The split`: the modules after the change, and what each one owns.
 4. `## The order`: one pull request per step, each with the tests and checks
    that prove it unchanged, by name. Run none of them here: their counts belong
