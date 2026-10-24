@@ -107,11 +107,10 @@ roadmap skills' scripts against a fake `gh` that answers from payloads recorded
 in `tests/fixtures/github/` and `tests/fixtures/roadmap/`, all from public
 repositories, and the debt skill's `measure.sh` on a repository the test builds.
 
-`make check` runs each name in `TESTS`, in the `Makefile`, as
-`tests/<name>_test.sh`. A test passes only when it prints the line
-`<name>_test: ok`, not when it exits 0: under bash 3.2, a script that `set -u`
-stops exits 0 when it has an EXIT trap. `tests/makefile_test.sh` checks this
-rule. A new test script ends with its `ok` line, and its name goes into `TESTS`.
+`make check` runs every `tests/<name>_test.sh`. A test passes only when it
+exits 0 and its last line is `<name>_test: ok`: under bash 3.2, a script that
+`set -u` stops exits 0 when it has an EXIT trap. `tests/makefile_test.sh` checks
+this rule. A new test script ends with its `ok` line.
 
 To try a script that writes on a real tracker without writing to it, set
 `DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,
