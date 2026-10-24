@@ -16,7 +16,7 @@ each with the numbers that put it there.
 
 - **Hotspots, measured.** `scripts/measure.sh` ranks the code files by lines ×
   the commits that touched them in 60 days. Tests count; documents, lockfiles,
-  fixtures and dotfiles are left out. It needs only bash, git and awk. A high
+  fixtures and ignore files are left out. It needs only bash, git and awk. A high
   score alone files nothing: the file must hold more than one concern, with a
   split that can be named and that the project's rules allow.
 - **Your rules, not the skill's.** A layer violation is a rule from the

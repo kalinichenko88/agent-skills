@@ -15,9 +15,9 @@ skill offers in order.
 
 First check that the project has no debt skill of its own: a `debt` skill in
 your skill list other than this one, or a file that
-`git ls-files ':(top)*.*/skills/debt/SKILL.md'` prints from any directory of
-the checkout. When it has one, follow that one instead, with its own rules
-and tools, and stop here.
+`git ls-files ':(top,glob)**/.*/**/skills/debt/SKILL.md'` prints from any
+directory of the checkout. When it has one, follow that one instead, with its
+own rules and tools, and stop here.
 
 The map changes no file in the working tree and opens no pull request. Every
 number in an issue comes from a command's output in this run, never from
@@ -51,7 +51,7 @@ that all paths start there.
 1. **Hotspots.** `bash <dir>/scripts/measure.sh [path]` prints the code files
    by lines × the commits that touched them in 60 days, the top 15, and the SHA
    it read. Tests and migrations are code and count; documents, lockfiles,
-   fixtures and dotfiles are data and are left out. It does not follow
+   fixtures and ignore files are data and are left out. It does not follow
    renames, and its last line counts the code files the window moved. When
    they are a large share of the scope, the commit counts start at the move,
    and a score is close to the file's size: say so in the report.
@@ -59,15 +59,15 @@ that all paths start there.
    `CLAUDE.md`, `AGENTS.md` and the ones in the scope's directories — for what
    a directory may import or hold, with its exceptions. Turn each rule into one
    `git grep -n` over the scope. For a whole word use `-w`: `\b` does not work
-   with `-E` on macOS. Run each pattern first where it must find a line: over
-   a directory that the rule allows, or over the rule's own exception. A broken
-   pattern finds nothing, and that looks like a pass. A rule that a grep cannot
-   test, such as a size or a mirrored layout, gets the command that can
-   (`wc -l`, a listing), or is left out and named in the report. Keep a hit
-   only when the rule's text, its exceptions included, forbids it. A hit that
-   the text leaves open is *borderline*: name it in the report, and file none.
-   The map carries no rules of its own: with no such rule in the instruction
-   files, skip this step and say so.
+   with `-E` on macOS. A broken pattern finds nothing, and that looks like a
+   pass: before you trust an empty result, run the pattern on a `file:line`
+   you have read that it must find, such as an import that the rule allows.
+   A rule that a grep cannot test, such as a size or a mirrored layout, gets
+   the command that can (`wc -l`, a listing), or is left out and named in the
+   report. Keep a hit only when the rule's text, its exceptions included,
+   forbids it. A hit that the text leaves open is *borderline*: name it in the
+   report, and file none. The map carries no rules of its own: with no such
+   rule in the instruction files, skip this step and say so.
 3. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
    in your skill list; else skip this step and say so. It takes no path and
    loads as instructions, so in Claude Code send it to one subagent right
