@@ -23,9 +23,10 @@ time.
   needs no decision goes into the current PR. Anything else joins an open
   issue on the same code, up to two added findings per issue. Only when no
   issue can take it is a new one filed.
-- **A task runs to its pull request.** After the review, the agent pushes,
-  opens the PR and offers the merge with the exact command, in the same turn.
-  Only the merge waits for you.
+- **A task runs to its pull request.** After the review and a last run of the
+  repository's check, the agent pushes, opens the PR and asks whether to
+  merge, with the exact command, in the same turn. Only the merge waits for
+  you.
 - **A task finishes with a true tracker.** The PR and every issue it closes
   are assigned to you. A PR that fixes only part of an issue keeps that issue
   open. After the merge, the `path:line` citations in open issues are checked
