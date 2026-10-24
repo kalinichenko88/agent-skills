@@ -43,6 +43,8 @@ there.
   sub-issue per step, linked with the roadmap skill's `plan.sh`, so
   `kalinichenko:roadmap` offers them in order.
 - **The default branch, and no edits.** Every count comes from `origin/HEAD`,
-  or `HEAD` in a clone without it, not from your local changes. The map
-  changes no file in the working tree and opens no pull request. A project
-  with a debt skill of its own keeps using that one.
+  not from your local changes; in a clone without it, from `HEAD`, and the
+  report says so. The later steps read a checkout of that commit outside the
+  repository, made with no hooks. The map changes no file in the working tree
+  and opens no pull request. A project with a debt skill of its own keeps
+  using that one.

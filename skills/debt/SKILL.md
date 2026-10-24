@@ -25,10 +25,18 @@ Run `git fetch -q origin` first, when there is an `origin`. The scope is a
 path from the repository's root, or the whole tree.
 
 Step 1 runs in your checkout. Every later step runs in `<tree>`, a checkout of
-the SHA on the "Measured on" line of step 1 in your scratch directory, and not
-in the working tree: a local commit or edit is not debt on the default branch.
-Make it right after step 1 with `git worktree add --detach <tree> <sha>`, and
-remove it when the map ends with `git worktree remove --force <tree>`; when a
+the SHA on the "Measured on" line of step 1, and not in the working tree: a
+local commit or edit is not debt on the default branch. When that line says
+`HEAD`, the clone has no `origin/HEAD`, and local commits count. Put `<tree>`
+in your scratch directory, outside the repository, and make it right after
+step 1, with no hook and no LFS download:
+
+```bash
+git worktree prune
+GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null worktree add --detach <tree> <sha>
+```
+
+Remove it when the map ends, with `git worktree remove --force <tree>`; when a
 `<tree>` from an earlier run is there, remove it first. Run every command from
 the root of its checkout, so that all paths start there.
 
@@ -166,4 +174,5 @@ The issues filed, re-measured and named, with their numbers; *next*, with
 scores; the borderline hits; the small cuts, one line each with the score of
 the file it names; the ponytail findings dropped, with the rule; the lines the
 kept findings would save, not ponytail's own `net:`; the steps skipped and
-why; the share of moved code files when it was large; the SHA measured.
+why; the share of moved code files when it was large; the SHA measured, and
+that it was `HEAD` when it was.
