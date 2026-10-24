@@ -1,0 +1,45 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # Not ubuntu-latest, which moves under the workflow. 26.04 ships
+    # ShellCheck 0.11.0, the version make check runs locally.
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm install -g @anthropic-ai/claude-code
+      # make check on macOS runs BWK awk, and the runner's awk can be gawk. CI
+      # takes mawk, the default awk on Debian and Ubuntu, and the one the
+      # scripts broke on.
+      - run: |
+          sudo update-alternatives --set awk /usr/bin/mawk
+          awk -W version 2>&1 | head -n 1
+          shellcheck --version | sed -n 2p
+      - run: make check
+
+  secrets:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false

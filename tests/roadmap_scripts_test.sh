@@ -234,6 +234,10 @@ check 'a current milestone' "current, $(progress M1)" "$(sed -n '/^## M1 /{n;p;}
 # closed issues. The line counts issues only.
 check 'a milestone that is not current, without its pull requests' "$(progress M2)" "$(sed -n '/^## M2 /{n;p;}' <<<"$out")"
 check 'Later shows titles only' '- #42 Issue 42' "$(sed -n '/^## Later/,/^## /p' <<<"$out" | grep '^- ')"
+# The description shows line by line, one blank line under the progress line.
+ms 'map(if (.title | startswith("M2 ")) then .description = "Goal of stage 2.\nDone when it shows." else . end)'
+check 'the description lines' "$(printf '%s\n\nGoal of stage 2.\nDone when it shows.' "$(progress M2)")" \
+  "$(bash "$scripts/roadmap.sh" | sed -n '/^## M2 /,/^- /p' | sed -n '2,5p')"
 check 'Later by name shows states' '- #42 Issue 42: free' "$(bash "$scripts/roadmap.sh" Later | grep '^- ')"
 # A cycle made by hand in GitHub ends, and both issues show.
 blocks 21 20

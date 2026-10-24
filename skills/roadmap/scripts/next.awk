@@ -19,7 +19,7 @@ $1 == "pr" {
   pk = split($4, pc, ",")
   for (i = 1; i <= pk; i++) if (pc[i] in istitle) {
     open_pr[$2] = 1
-    if ($5 != "-") wipfiles[pc[i]] = (pc[i] in wipfiles ? wipfiles[pc[i]] "," : "") $5
+    if ($5 != "-") wipfiles[pc[i]] = append(wipfiles[pc[i]], ",", $5)
   }
 }
 
@@ -33,7 +33,7 @@ END {
   titles = ""
   for (i = 1; i <= msn; i++) if (mscur[mslist[i]]) {
     cur[mslist[i]] = 1
-    titles = titles (titles == "" ? "" : "; ") mstitle[mslist[i]]
+    titles = append(titles, "; ", mstitle[mslist[i]])
     if (!first) first = i
   }
   print "current: " (titles == "" ? "none" : titles)
