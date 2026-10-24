@@ -7,8 +7,8 @@
 #
 # The path is from the repository's root; without one, the whole tree. It reads
 # origin/HEAD when the clone has it, else HEAD, through git, so it runs from any
-# directory of any checkout. Documents, lockfiles, fixtures and other data are
-# not code and are left out.
+# directory of any checkout. Documents, lockfiles, fixtures, dotfiles and other
+# data are not code and are left out.
 #
 # Needs only bash, git and awk.
 
@@ -21,7 +21,7 @@ set -euo pipefail
 path=${1:-.}
 cd "$(git rev-parse --show-toplevel)"
 ref=$(git rev-parse --abbrev-ref --verify -q origin/HEAD || echo HEAD)
-data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock|[a-z]*ignore)$|(^|/)(fixtures|testdata|vendor|__snapshots__)/|(^|/)go\.sum$'
+data='\.(md|txt|rst|json|ya?ml|toml|csv|svg|snap|lock)$|(^|/)(fixtures|testdata|vendor|__snapshots__)/|(^|/)(go\.sum|\.[^/]+|LICENSE[^/]*|CODEOWNERS)$'
 
 # ponytail: renames are not followed, so a file moved inside the window counts
 # its commits from the move; git log --follow per file if a hotspot hides

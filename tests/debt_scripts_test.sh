@@ -2,7 +2,7 @@
 # Runs the debt skill's measure.sh on a repository it builds: a hot file, a
 # large file last changed 90 days ago, a file whose name holds a colon, one
 # whose name ends as a document's does, and one with a non-ASCII name, a
-# document, a fixture and a .gitignore that are data, not code, and a file moved into src/,
+# document, a fixture, dotfiles and a LICENSE that are data, not code, and a file moved into src/,
 # one moved inside it, and a moved document.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
@@ -42,6 +42,8 @@ seq 7 >"$repo/mvnw.cmd"
 seq 3 >"$repo/src/заказ.sh"
 seq 50 >"$repo/заметки.md"
 seq 6 >"$repo/src/.gitignore"
+seq 6 >"$repo/.editorconfig"
+seq 6 >"$repo/LICENSE"
 commit 'add a:b, mvnw.cmd and two non-ASCII names'
 seq 5 >"$repo/first.sh"
 seq 4 >"$repo/src/old.sh"
