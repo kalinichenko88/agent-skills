@@ -38,7 +38,8 @@ GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null worktree add --detach <tre
 
 Remove it when the map ends, with `git worktree remove --force <tree>`; when a
 `<tree>` from an earlier run is there, remove it first. Run every command from
-the root of its checkout, so that all paths start there.
+the root of its checkout, so that all paths start there; step 3 is the one
+exception.
 
 1. **Hotspots.** `bash <dir>/scripts/measure.sh [path]` prints the code files
    by lines × the commits that touched them in 60 days, the top 15, and the SHA
@@ -59,8 +60,12 @@ the root of its checkout, so that all paths start there.
    of its own: with no such rule in the instruction files, skip this step and
    say so.
 3. **Duplication**, with the newest `jscpd`. The runner is `bunx` in a Bun
-   project, else `npx --yes`; with neither, skip this step and say so. Run
-   `<runner> jscpd@latest --min-lines 8 --reporters json --output <scratch> --ignore "**/node_modules/**,**/fixtures/**,**/testdata/**,**/vendor/**,**/__snapshots__/**,**/*.md,**/*.json,**/*.yml,**/*.yaml,**/*.sql" <scope>`.
+   project, else `npx --yes`; with neither, skip this step and say so. Run it
+   from an empty directory in your scratch directory, not from `<tree>`: npm
+   reads the `.npmrc` of the directory it runs in, and a project's `.npmrc` can
+   run the project's code. Give it the scope in `<tree>`, and strip `<tree>/`
+   from the paths of its report:
+   `<runner> jscpd@latest --min-lines 8 --reporters json --output <scratch> --ignore "**/node_modules/**,**/fixtures/**,**/testdata/**,**/vendor/**,**/__snapshots__/**,**/*.md,**/*.json,**/*.yml,**/*.yaml,**/*.sql" <tree>/<scope>`.
    A clone of 15 lines or more is a finding. `jscpd` never goes into a
    `package.json`.
 4. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
@@ -68,8 +73,8 @@ the root of its checkout, so that all paths start there.
    loads as instructions, so in Claude Code send it to one subagent, before you
    read the project's rules: "Invoke the `ponytail:ponytail-audit` skill, audit
    only `<scope>` of `<tree>`, and return its lines as it prints them, every
-   path of each finding in its `[path]` and relative to `<tree>`." In Codex, run it yourself
-   before step 2. Then sort its findings, in this order, each part of a bundled
+   path of each finding in its `[path]` and relative to `<tree>`." In Codex,
+   run it yourself before step 2. Then sort its findings, in this order, each part of a bundled
    finding on its own:
    1. **Against the project's rules.** Drop a part that a rule of the
       instruction files of step 2 contradicts or requires: ponytail counts a
