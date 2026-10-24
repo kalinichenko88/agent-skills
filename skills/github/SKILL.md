@@ -17,7 +17,7 @@ so in the final report rather than inventing a substitute.
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
 | Picking an issue up — `#91` or its URL | `take-in-check.sh`; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code, and assign each one when it joins | `take-in.md` |
-| Writing to a repository — an issue, a comment, a PR, a commit | `gh repo view <owner/name> --json visibility` on the repository that gets it; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |
+| Writing to a repository — an issue, a comment, a PR, a branch, a commit | `gh repo view <owner/name or URL> --json visibility` on each repository that gets it; fails: as `PUBLIC`; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host | *GitHub Actions* below |
 
 A file in the last column sits next to this one, in this skill's base
@@ -138,30 +138,34 @@ gone, and correct it.
 
 ## Public repositories
 
-Before the first write, read the visibility of the repository that gets the
-text: the `--repo` of the `gh` call, or the repository of the remote you push
-to. With no argument, `gh repo view` reads the checkout's default repository.
-That can be a different one, for example when `origin` and `upstream` differ.
+Before the first write to each repository, read the visibility of the
+repository that gets the text. Give `gh repo view` that repository: the
+`--repo` or the URL of the `gh` call, or the URL of the remote you push to. A
+`gh` call with neither writes to the checkout's default repository, the one
+that `gh repo view` prints with no argument. That default can differ from the
+remote that `git push` uses, for example when `origin` and `upstream` differ.
 
 ```bash
-gh repo view <owner/name> --json visibility --jq .visibility
+gh repo view <owner/name or URL> --json visibility --jq .visibility
 ```
 
-A write is an issue, a comment, a PR title or description, or a commit: its
-message and every file it changes, code, tests, fixtures and docs included.
+When the command fails for that repository, write as if it printed `PUBLIC`.
+
+A write is an issue, a comment, a PR title or description, a branch name, a
+tag, a release, or a commit. A commit is its message and each file it changes:
+code, tests, fixtures and docs.
 
 `PUBLIC` means that everybody can read the text, and search engines index it.
-A case from a private source then goes in only as its shape and its counts.
-A private source is:
+In a public repository, a case from a private source goes in only as its shape
+and its counts. A source is public only when anybody can open it without a
+login: a public repository, docs, a package page, a CVE record. Every other
+source is private:
 
-- A GitHub repository that prints `PRIVATE` or `INTERNAL` for the command
-  above, or that the command cannot read. A local checkout of one.
-- A source outside GitHub that needs a login: a work tracker, an internal
-  wiki, a chat.
+- A repository for which the command prints `PRIVATE` or `INTERNAL`, or
+  fails. A local checkout of one.
+- A work tracker, a wiki or a chat.
+- A log or a file that the person gives you.
 - The data of a person or a customer.
-
-A page that anybody can open without a login is not private: a public
-repository, docs, a package page, a CVE.
 
 From a private source, leave out each detail that names the source or its
 content:
@@ -175,14 +179,16 @@ content:
 
 Record a fixture from a public source when one has the shape, for example the
 issues of the repository you write to. When only a private source has the
-shape, keep its structure — whitespace, markup, order — and replace its text
-as the table says. Say so in the PR description.
+shape, keep its structure and every character the case depends on —
+whitespace, markup, order, a keyword — and replace the rest of its text as the
+table says. Write in the PR description that the fixture is a rewritten
+private payload, without a name of the source.
 
 An edit does not remove the old text. GitHub keeps the old body of an issue, a
-PR or a comment in its edit history, and an old title in the timeline. A
-pushed commit stays readable by its SHA, also after a force push. When private
-text went out, tell the person what went out and where. The person decides how
-to remove it.
+PR or a comment in its edit history, and an old title in the timeline. After a
+force push, the PR timeline still shows the old commit's SHA, and the commit
+stays readable by it. So check before the write. When private text went out,
+tell the person what went out and where. The person decides what to do.
 
 ## GitHub Actions
 

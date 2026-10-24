@@ -31,10 +31,11 @@ time.
   under it, and no `Co-Authored-By:` trailer. A merge is a squash with one
   list for the whole branch.
 - **Nothing private in a public repository.** Before an issue, a comment, a
-  PR or a commit goes out, the agent reads the visibility of the repository
-  that gets it. In a public one, a case from a private repository or tracker
-  goes in with counts and neutral names: "a private tracker with 100 open
-  issues", not its name, numbers, titles, paths or code.
+  PR, a branch or a commit goes out, the agent reads the visibility of the
+  repository that gets it. In a public one, a case from a private source — a
+  private repository, a work tracker, a chat — goes in with counts and
+  neutral names: "a private tracker with 100 open issues", not its name,
+  numbers, titles, paths, code or people.
 - **Actions on the latest major.** Each `uses:` is checked against the GitHub
   API. The language runtime in CI is not older than the one on your machine.
 

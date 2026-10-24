@@ -39,9 +39,9 @@ fixed.
   branch. Its fixes get rounds of `/code-review` at `xhigh`.
 - **A summary.** The rounds, the decisions with their reasons, what was fixed,
   what was declined and why, and the issues filed. The pull request
-  description carries it under `## Review`. In a public repository, that
-  section and the replies to review comments give an example from a private
-  repository or tracker without its names, numbers, titles, paths or code.
+  description carries it under `## Review`. In a public repository, an
+  example from a private source in that section or in a reply to a review
+  comment keeps no names, numbers, titles, paths or code.
 
 ## The ponytail step
 
