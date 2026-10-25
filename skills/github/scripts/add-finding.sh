@@ -9,8 +9,9 @@
 # and that holds fewer than two added findings. All of this is read again just
 # before the write. Otherwise it prints why and exits 1, and writes nothing.
 # Run it for one host at a time: it reads the body and writes it back whole.
-# When the comment fails, run it again: a body that holds the section gets only
-# the comment.
+# When the comment or the label fails, run the same command again. A body that
+# holds the section already skips the check for a full host and stays as it
+# is: the rerun sets the title and the label again and comments.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
 # new body in the file that the printed command names.
@@ -27,8 +28,6 @@ n=${1#\#} section=$2 title=$3 label=${4:-}
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 refuse() {
   echo "#$n: $1: file a new issue that says Related to #$n, and comment on #$n"
-  # A dry run has no trap to remove the body.
-  [ -z "${body:-}" ] || rm -f "$body"
   exit 1
 }
 
@@ -52,22 +51,24 @@ body=$(mktemp "${tmp%/}/body.XXXXXX")
 clean() {
   local code=$?
   [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1
-  rm -f "$body"
+  # A dry run that finished keeps the new body to be read.
+  if [ "${DRY_RUN:-}" != 1 ] || [ "$code" != 0 ]; then rm -f "$body"; fi
   exit "$code"
 }
 finished=
-# A dry run keeps the new body to be read.
-[ "${DRY_RUN:-}" = 1 ] || trap clean EXIT
+trap clean EXIT
 gh issue view "$n" --json body --jq .body >"$body"
 
-# A body that holds the section already is a rerun after a failed comment:
-# the edit went through, so only the comment is left to write.
+args=(issue edit "$n" --title "$title")
+# A body that holds the section already is a rerun after a failed comment or
+# label: gh writes the label apart from the body. The title and the label are
+# set again, and the body stays.
 if ! grep -qxF "## Also: $problem" "$body"; then
   [ "$also" -lt 2 ] || refuse "it holds $also added findings already"
   { echo; cat "$section"; } >>"$body"
-  args=(issue edit "$n" --title "$title" --body-file "$body")
-  [ -z "$label" ] || args+=(--add-label "$label")
-  run gh "${args[@]}"
+  args+=(--body-file "$body")
 fi
+[ -z "$label" ] || args+=(--add-label "$label")
+run gh "${args[@]}"
 run gh issue comment "$n" --body "Added to the body: $problem."
 finished=1
