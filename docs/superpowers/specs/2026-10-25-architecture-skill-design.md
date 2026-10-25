@@ -130,8 +130,10 @@ yes. Its parts:
 
 - a bird's-eye view;
 - a codemap: names, not links to code;
-- the modules, by area of the business, and their public APIs (see
-  *Modules and layers*);
+- the modules, by area of the business: each one's name, its folder, and the
+  rule for its public API, as "its `index.ts`", not the API itself, which the
+  code states and each new export would make false (see *Modules and
+  layers*);
 - the layers: which folders and classes play each role;
 - the invariants, numbered `I-1`, `I-2` and on;
 - the limits of decomposition (see *Decomposition*);
@@ -140,7 +142,11 @@ yes. Its parts:
 
 Each invariant has one MUST statement, a `Check:` line or the words "review
 only", and the ADR that set it, when one did. A review finding cites `I-3`,
-and an ADR says "amends I-3". There is no NON-NEGOTIABLE mark: an invariant
+and an ADR says "amends I-3". An ADR that amends `I-3` changes its statement
+and its `Check:` line in the same commit, so the check passes again. A FAIL is
+then always a defect: no reader looks for an ADR to excuse one. A `Check:`
+line of any kind can carry an `except` list: the paths that break it now, as
+known debt (see *Decomposition*). There is no NON-NEGOTIABLE mark: an invariant
 that the project can break is not an invariant. The invariants are the
 project's constitution, as in Spec Kit, but a section of this file and not a
 file of their own: two files go stale faster, and then one must say which of
@@ -163,8 +169,7 @@ An example, for its shape:
 **`docs/adr/NNNN-title.md`**: one decision per file. A file is never renamed
 or deleted, so a link to it does not rot. The template:
 
-`# NNNN Title`, then Status (proposed | accepted | rejected | superseded by
-NNNN), Date, Context, Options considered (at least two, one line each),
+`# NNNN Title`, then Status (accepted | rejected | superseded by NNNN), Date, Context, Options considered (at least two, one line each),
 Decision ("We will …"), Consequences (good and bad), Invariants (the ones it
 adds or amends, as `I-n`, or none), Confirmation (the check that enforces it:
 a `Check:` line, a lint rule, a test, or "review only").
@@ -200,16 +205,20 @@ and asks the person only what it cannot find:
 3. **The simplest way.** The ladder: do nothing → a setting → what the code
    already has → extend what exists → new code, as little as works. The first
    step that solves the problem is the answer.
-4. **How it fits.** The module, by area of the business, and the layer, by
-   role, where it goes. The code that already does similar work, with
-   `path:line`.
+4. **What it touches.** Facts only: the code that already does similar work,
+   with `path:line`, and the modules it touches. Where the new code goes, by
+   module and by layer, is decided at the moment of a decision, not here.
 
 The result is a short block of the four answers at the start of the spec, or
 in the conversation when there is no spec. When the problem has no proof, or a
 simpler way exists, the skill says so plainly, with the proof, and puts the
-simpler way first. The person decides; the skill never stops the work. With
-`superpowers:brainstorming` installed, the block gives the brainstorming facts
-from the code before its first question.
+simpler way first. The person decides; the skill never stops the work.
+
+With `superpowers:brainstorming` in the session, its order holds: its first
+message is the opt-out line and one question, and it reads the code only after
+the person says yes to that. So the block comes at its recon step, after that
+yes, or with its first playback, and again at the start of the spec. Never
+before its first question.
 
 ## The moment of a decision
 
@@ -237,11 +246,14 @@ spec. The steps:
    files and concepts, and the cost of the next likely change in the same
    area. No option adds an abstraction with one implementation or a layer for
    a future need.
-6. **The gate.** The main session checks the recommended option against each
-   invariant of the area, with `invariants.sh` for the ones that have a check:
-   it keeps it, or it breaks it. A broken invariant ends in one of two ways:
-   change the design, or write an ADR that amends the invariant, with its
-   "simpler alternative rejected because". Never a silent exception.
+6. **The gate.** The main session checks the recommended option against the
+   text of each invariant of the area and its `Check:` line: it keeps it, or
+   it breaks it. The option is not in the tree yet, so `invariants.sh` cannot
+   judge it; the script runs once the edit exists, before its commit, and
+   again in the review. A broken invariant ends in one of two ways: change the
+   design, or write an ADR that amends the invariant, its statement and its
+   `Check:` line, with its "simpler alternative rejected because". Never a
+   silent exception.
 7. Decide whether the decision needs an ADR (see *ADRs*). Most decisions do
    not.
 8. **A second reader** for a decision that needs an ADR. One subagent that
@@ -264,9 +276,15 @@ the steps of the migration, through `kalinichenko:github` and
 `kalinichenko:roadmap`. The principle comes into the project as a whole, not
 one file at a time. The person chooses at the decision.
 
+Consistency first covers the principles of this skill only. A rule of a
+conventions skill keeps its own text: `react-conventions` says that an upward
+import that already exists is debt, not a precedent, and forbids another one
+beside it. Only an accepted ADR of the project overrides a convention.
+
 The ADR is written when the decision is final: in the pull request with the
-code, and the merge accepts it. A spec or a plan names the ADR that the work
-will add, and does not write it.
+code, with the status `accepted`. The review of the pull request is where it
+is argued, and the merge makes it true. A spec or a plan names the ADR that
+the work will add, by its title, and does not write it.
 
 A finding outside the task, such as two competing ways that the task does not
 touch, becomes an issue through `kalinichenko:github`. When the decision is
@@ -301,9 +319,11 @@ letter: which of its folders is which module, and which plays which role.
   product in a controller or a component. The logic reaches the network or the
   database only through the data layer. Validation happens once, at the edge.
   One way to do one kind of work.
-- **Hide what can change.** The types and the errors of an external API, a
-  database or a library stay behind the data layer. They do not reach the
-  logic or the edge.
+- **Hide what can change.** The calls to an external API, a database or a
+  library live in one place of the data layer, so a change of the vendor
+  touches one module. Whether their types pass through to the logic is the
+  project's decision: a mapper comes with a second source or a real change,
+  not before, by the non-goal on interfaces.
 - **The cost of a change is the measure.** A change to one rule of the product
   that needs edits in many modules shows a wrong border. Change coupling in
   #100 measures it.
@@ -325,17 +345,18 @@ convention that it replaces.
 ## Decomposition
 
 - **Signals**, from the debt skill's scripts: the size of a file and of a
-  module (`wc -l`, the count of files), the growth in 60 days (`measure.sh`),
-  and the copies (`clones.sh`). With #100: the import graph and change
-  coupling.
+  module (`wc -l`, the count of files), how hot a file is (`measure.sh`: its
+  lines times the commits that touched it in 60 days), and the copies
+  (`clones.sh`). With #100: the import graph and change coupling.
 - **The limits are the project's**: invariants with a `lines` check for a
-  file and a `files` check for a folder. The skill proposes each number from
-  the project's own code, and keeps no number of its own.
-- **The `except` list is the debt list, and it only shrinks.** The files and
-  folders already past a limit go into the check's `except` list, so the check
-  passes now. `invariants.sh` prints each of them with its size, as known
-  debt. One that drops below the limit leaves the list. One joins it only in a
-  pull request that also files its debt issue, by *When to split* below. A new
+  file and a `files` check for a folder. The skill keeps no number of its own.
+  It proposes, for each, the size that 90% of the project's code files, or
+  folders, stay under, rounded; the person confirms or changes it.
+- **The `except` list is the debt list.** The files and folders already past
+  a limit go into the check's `except` list, so the check passes now.
+  `invariants.sh` prints each of them with its size, as known debt. A path
+  that drops below the limit leaves the list. A path joins it only in a pull
+  request that also files its debt issue, by *When to split* below. A new
   number for the limit needs an ADR.
 - **At the decision**, when the change goes into a file or a module past its
   limit, or into a file that does more than one job, the skill names the
@@ -369,8 +390,9 @@ A decision needs an ADR when:
    ADR supersedes the old one, and the old one is not edited, except its
    Status line.
 
-No ADR when the choice is local, cheap to undo, or a lint rule or a documented
-convention already enforces it. An option that the person rejects for a
+No ADR when none of the four holds: the choice is local and cheap to undo, or
+a lint rule or a documented convention already enforces it. The four win: a
+new external dependency needs an ADR, however small. An option that the person rejects for a
 lasting reason gets an ADR with the status `rejected`, so that the next agent
 does not offer it again.
 
@@ -394,8 +416,10 @@ feature's commits.
 2. It proposes: the codemap; the modules and the role of each folder; only
    the patterns that the code keeps everywhere and that are not obvious; the
    limits of decomposition from the project's own sizes.
-3. Each proposed invariant has a check that passes on the current tree. A
-   check that fails now is not an invariant: it is debt, named in the report.
+3. Each proposed invariant has a check that passes on the current tree. When
+   it fails now and the person wants the invariant, the paths that break it go
+   into its `except` list, as known debt. Otherwise it stays out, and the
+   report names it as debt.
 4. The person confirms or corrects each item.
 5. No ADR for an old decision, except one: when two competing ways exist and
    the person picks one of them.
@@ -419,8 +443,9 @@ fourth kind: "A does not import B", from the import graph.
 
 The output is one line per invariant, `I-1 PASS` or `I-2 FAIL`, and under each
 FAIL what it found: the `git grep` lines, or the files and folders and their
-sizes. Under a PASS of a `lines` or `files` check, each path of its `except`
-list that is past the limit is printed with its size, as known debt. An
+sizes. Under a PASS, each path of its `except` list that still breaks the
+check is printed, as known debt: with its lines for `grep`, with its size for
+`lines` and `files`. An
 invariant with no `Check:` line prints `I-4 review only`. The exit status
 is 0 when no check fails, 1 when one fails, and 2 for a wrong call or a
 `Check:` line that the script cannot read; then it names that line.
@@ -456,21 +481,31 @@ Only in a project that has an architecture file or an ADR folder, as
 of round 1 of `kalinichenko:review-loop` against them, once, beside round 1,
 for `high` and `xhigh` changes. Elsewhere it does not run, so a review in
 another repository costs nothing more; the reuse angle of `/code-review`
-covers part of the copies there. It runs `invariants.sh HEAD` first, and
-`clones.sh` on a read-only checkout of the head, keeping the clones that touch
-a file the branch changed. Its findings:
+covers part of the copies there. Instead, review-loop's summary says once per
+pull request, in one line and with no subagent, that
+`kalinichenko:architecture` can write the first file, unless the project's
+`CLAUDE.md` says that it keeps none. So a project that never loaded the skill
+still hears of it.
+
+The lens runs `invariants.sh <base>` and `invariants.sh HEAD` first. A FAIL at
+both is not the branch's: it is a finding outside the task, an issue through
+`kalinichenko:github`, or one already filed. A FAIL at the head only is the
+branch's. Then it runs `clones.sh` on a read-only checkout of the head,
+keeping the clones that touch a file the branch changed. Its findings:
 
 - a second structure beside an existing one. A change that follows the
   project's own way, by *Consistency first*, is not one, even when that way
   breaks a principle;
 - a module that uses another not through its public API, or against the
   direction, or in a cycle;
-- a broken invariant, cited as `I-n`, with no ADR that amends it;
+- a FAIL that the branch added, cited as `I-n`. An ADR that amends the
+  invariant changes its check, so it leaves no FAIL to excuse;
 - a decision that needs an ADR, and has none;
 - a change against an accepted ADR, with no ADR that supersedes it;
 - a passage of `docs/ARCHITECTURE.md` that the change made false;
-- a file or a module that the branch grew past its limit, with no split, or a
-  path of an `except` list that the branch grew;
+- a file or a module that the branch grew past its limit, with no split and
+  no debt issue; or a path of an `except` list that the branch grew when its
+  split only moves code, which *When to split* puts into this pull request;
 - a copy of existing code that the three conditions say to extract;
 - a shared helper with a flag or a branch for each caller.
 
@@ -496,8 +531,12 @@ TS tree with path aliases. The same edges: take codebase-memory-mcp. More
 missing or wrong edges: take the set per language, dependency-cruiser for
 `package.json`, `ruff analyze graph` for Python, `go list -json` for `go.mod`,
 and skip the rest with a line that says so. `graph.sh <tree>` follows the shape
-of `clones.sh`: a pinned version, a private copy, no package manager and no
-script of the project. Its uses: the codemap of a first
+of `clones.sh`: a pinned version, run through `npx` or `bunx` in a private
+directory, on a copy of the code files, with no package manager and no script
+of the project in the project's tree. Unlike `clones.sh`, the copy keeps the
+files that each tool reads as data: `tsconfig.json` for dependency-cruiser's
+path aliases, `go.mod` and `go.sum` for `go list`, `pyproject.toml` for ruff.
+The trial gives both tools the same copy. Its uses: the codemap of a first
 `docs/ARCHITECTURE.md`, the edges and cycles that a branch adds, the cycles in
 the debt map, and the check "A does not import B".
 
