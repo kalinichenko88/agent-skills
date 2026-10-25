@@ -26,7 +26,8 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    `origin/main` — local commits the remote does not have.
 2. **Read what is unreleased.** `last=$(git describe --tags --abbrev=0 --match 'v[0-9]*')`, then
    `git log --format='%h %s' "$last"..HEAD` and `git diff --name-only "$last"..HEAD`.
-   No commits since the tag: stop, there is nothing to release. If
+   A log line is the short hash, a space and the subject; steps 3 and 4 read
+   the subject. No commits since the tag: stop, there is nothing to release. If
    `jq -r .version .codex-plugin/plugin.json` is not `${last#v}`, stop: the field
    moved outside a release, and that has to be undone first. The same for
    `CHANGELOG.md`: if `grep -m1 '^## ' CHANGELOG.md` is not `## ${last#v} ...`,
@@ -52,12 +53,25 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    line is the scope in parentheses, then the subject without its type:
    `feat(github): check the citations (#24)` becomes `- (github) check the
    citations (#24)`. Every line has a scope. A subject with no scope gets one
-   from the files its commit changes, `git show --name-only --format= <hash>`:
-   the skill or area they belong to, as earlier subjects name it —
-   `skills/typescript-conventions/` is `typescript`, `.github/workflows/` is
-   `ci`. Files of several areas get each name, in alphabetical order:
-   `(react, typescript)`. Breaking subjects (`!`) get `(breaking)` after the PR
-   number. When `hooks/hooks.json` changed, the first line under `### Changed`
+   from the files its commit changes, `git show --name-only --format= <hash>`.
+   Each file gives the area it belongs to:
+
+   | Files | Area |
+   | --- | --- |
+   | `skills/<name>/`, `docs/<name>/` | the skill without `-conventions`: `typescript` |
+   | `.claude/skills/<name>/` | `<name>`: `release` |
+   | `rules.md` | `rules` |
+   | `hooks/` | `hooks` |
+   | `.github/workflows/` | `ci` |
+   | `.codex-plugin/`, `.agents/` | `codex` |
+   | a test or a fixture | the area of the files it tests |
+
+   Any other file gives no area: the root `README.md`, `CHANGELOG.md`, the
+   `Makefile`, `.gitattributes`, `.claude-plugin/`. A manifest's description
+   that only lists a new skill gives no area too. The scope is the areas in
+   alphabetical order, comma-separated: `(react, typescript)`. Four or more
+   areas, or none, give `(plugin)`. Breaking subjects (`!`) get `(breaking)` at
+   the end of the line. When `hooks/hooks.json` changed, the first line under `### Changed`
    is `- (codex) trust the hooks again in /hooks (breaking)`, so the reader
    sees why the bump is major.
 5. **Bump and check.**

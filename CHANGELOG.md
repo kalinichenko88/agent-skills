@@ -14,11 +14,11 @@ section; pull requests leave this file alone.
 - (roadmap) rename a milestone and set its due date with plan.sh (#67)
 - (github) keep private data out of text written to a public repository
 - (debt) add a skill that maps technical debt and files it as debt issues
-- (review-loop) add a review-loop skill that stops review rounds and ends with a summary
+- (review-loop, rules) add a review-loop skill that stops review rounds and ends with a summary
 
 ### Changed
 
-- (ci) run make check and a gitleaks scan on every pull request and push to main (#80)
+- (ci, roadmap) run make check and a gitleaks scan on every pull request and push to main (#80)
 - (review-loop) let the eval's step 4 stop happen, and fail a count past three rounds
 - (review-loop) give the eval fixture an origin and count the security review
 
@@ -38,7 +38,7 @@ section; pull requests leave this file alone.
 
 - (react, typescript) say in the conventions READMEs that rules.md starts them before the first write (#45)
 - (github, roadmap) show every scenario picture in the github and roadmap READMEs (#44)
-- (docs) give each skill a README with its pictures (#43)
+- (plugin) give each skill a README with its pictures (#43)
 
 ### Fixed
 
@@ -112,4 +112,4 @@ section; pull requests leave this file alone.
 ### Changed
 
 - (rules) rewrap the GitHub paragraph split mid-sentence
-- (codex) drop what Codex already discovers on its own
+- (codex, hooks) drop what Codex already discovers on its own
