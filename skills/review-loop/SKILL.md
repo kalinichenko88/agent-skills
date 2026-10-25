@@ -47,11 +47,14 @@ the ask in step 4.
 When that text comes with code, the code review reads the range of each
 round: `/code-review` at the level of the code alone, or `/review` in Codex.
 The agent does not act on its findings in that text, and does not count
-them. Each round also sends the subagent the same range, and the subagent
-reviews only the text, against the code. A fix commit that changes only that
-text goes to the subagent alone. A round confirms no defect when neither
-review does. Other documents next to code stay with the code review, with no
-subagent.
+them. Each round, the last pass included, also sends the subagent the same
+range, and the subagent reviews only the text, against the code. Two kinds of
+fix commit go to one review only. A commit that changes no code goes to the
+subagent alone. A commit that changes only code goes to the code review
+alone, but when that text names the code it changes, as a script or a flag,
+the subagent also reads the commit against that text. A round confirms no
+defect when neither review does. Other documents next to code stay with the
+code review, with no subagent.
 
 A review subagent and Codex's `/review` have no levels.
 
