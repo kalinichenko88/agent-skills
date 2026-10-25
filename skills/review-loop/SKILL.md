@@ -44,17 +44,14 @@ code and the scripts it names. Why: on a skill's own branch, eight runs of
 were in the sentences the run before had written. The rounds stopped only at
 the ask in step 4.
 
-When that text comes with code, the code review reads the range of each
-round: `/code-review` at the level of the code alone, or `/review` in Codex.
+When that text comes with code, the rounds and the last pass have two
+reviews. The code review, `/code-review` at the level of the code alone or
+`/review` in Codex, reads each range that changes anything but that text.
 The agent does not act on its findings in that text, and does not count
-them. Each round, the last pass included, also sends the subagent the same
-range, and the subagent reviews only the text, against the code. Two kinds of
-fix commit go to one review only. A commit that changes no code goes to the
-subagent alone. A commit that changes only code goes to the code review
-alone, but when that text names the code it changes, as a script or a flag,
-the subagent also reads the commit against that text. A round confirms no
-defect when neither review does. Other documents next to code stay with the
-code review, with no subagent.
+them. The subagent reads each range that changes that text, or code that the
+text names, as a script or a flag. It reviews only the text, against the
+code. A round confirms no defect when neither review does. Other documents
+next to code stay with the code review, with no subagent.
 
 A review subagent and Codex's `/review` have no levels.
 
