@@ -84,8 +84,8 @@ case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 5 co
 check 'a move into the path and one inside it' 'Code files moved in 60 days: 2. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
 # A fetch that lands during a run, after a force push: the git on PATH moves
 # origin/main back to the commit before the moves on each call that names it.
-# Each git call of measure.sh reads something else on that commit, so a run
-# that reads the name more than once prints another output than the one above.
+# The files, their commits, the SHA and the moves all differ on that commit, so
+# a run that reads the name more than once prints another output than above.
 back=$(git -C "$tmp/clone" rev-parse main~1)
 mkdir "$tmp/fetchbin"
 cat >"$tmp/fetchbin/git" <<EOF
@@ -94,8 +94,10 @@ cat >"$tmp/fetchbin/git" <<EOF
 case \$* in *origin/main*) "$(command -v git)" update-ref refs/remotes/origin/main $back ;; esac
 EOF
 chmod +x "$tmp/fetchbin/git"
-check 'a fetch during the run' "$out" "$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src)"
+got=$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src)
+check 'a fetch during the run' "$out" "$got"
 check 'a fetch during the run moved origin/main' "$back" "$(git -C "$tmp/clone" rev-parse origin/main)"
+
 out=$(cd "$repo" && bash "$measure" big.sh)
 check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$repo" rev-parse --short HEAD), 1 code files." "$(tail -n 1 <<<"$out")"
 
