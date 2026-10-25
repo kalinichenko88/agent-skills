@@ -19,8 +19,9 @@
 #              src/shared/use-cases/ folder, a hook in a shared/ folder inside
 #              the feature
 # A change to a check that moves a verdict changes the output and fails here.
-# Last, it gives the eval an argument too many, with a stub claude: the eval
-# must refuse before it starts a paid run.
+# Last, it gives the eval an argument too many, as `--check <folder> extra` and
+# `3 --check <folder>`, with a stub claude: the eval must refuse before it
+# starts a paid run.
 
 set -eu
 
@@ -77,8 +78,9 @@ EOF
 chmod +x "$stub/claude"
 # A folder that cannot run the stub, or a claude function, leaves the real
 # claude in its place.
-[ "$(PATH="$stub:$PATH" command -v claude)" = "$stub/claude" ] || {
-  echo "FAIL: claude is not the stub $stub/claude"
+found=$(PATH="$stub:$PATH" command -v claude || true)
+[ "$found" = "$stub/claude" ] || {
+  echo "FAIL: claude is '$found', not the stub $stub/claude"
   exit 1
 }
 refused() {
