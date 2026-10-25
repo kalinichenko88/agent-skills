@@ -27,8 +27,8 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
   that ends: rounds that read only the last fixes, one last pass over the
   whole branch when the loop needed more than one round, Codex as a second
-  reviewer at `xhigh`, a security review, and a summary of what was decided
-  and fixed.
+  reviewer for `xhigh` changes in Claude Code, a security review, and a
+  summary of what was decided and fixed.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
   over-engineering, filed as at most three `debt` issues a run.

@@ -98,21 +98,24 @@ installed, skip it and say so in the summary.
    second whole-branch pass: the rounds that reread the whole branch are the
    ones that did not stop.
 
-### A second model at `xhigh`
+### A second model for `xhigh` changes
 
 At `xhigh` in Claude Code, Codex reads the whole branch once per review. Start
 it in the background when the last pass starts. When the loop had one round,
-start it when that round confirms no defect. When step 4 skips the last pass,
-skip this step too.
+start it when that round confirms no defect and its nits are committed. When
+step 4 skips the last pass, skip this step too. Change no code while Codex
+runs: its fixes and those of the last pass are one commit.
 
 ```bash
 bash <dir>/scripts/codex-review.sh <base>
 ```
 
 `<dir>` is this skill's base directory, and `<base>` is the base of step 1.
-The script prints Codex's findings as JSON, and they go through *The
-findings*. When it prints `skipped:`, the Codex CLI is not installed or not
-logged in: go on without it, and say so in the summary.
+The script prints Codex's findings as JSON. Each one goes through *The
+findings*, also one in the text of a skill or a prompt. When the script
+prints `skipped:`, the Codex CLI is not installed or not logged in. When it
+exits with an error, Codex failed. In both cases, go on without Codex, and
+give the reason in the summary.
 
 Why: on three branches of this plugin that a `/code-review` loop had
 finished, Codex found three defects that no round had reported, in 45 to 74
@@ -161,8 +164,8 @@ through *The findings* below, and the reply names the fix commit.
 
 After the last pass, the Codex review and their rounds, run `/security-review`
 once, on the final branch. It reads the branch against origin's default
-branch and takes no target, so it never runs inside the loop. Its findings go through *The
-findings*, and its fixes through *Fixes from other places*. In
+branch and takes no target, so it never runs inside the loop. Its findings go
+through *The findings*, and its fixes through *Fixes from other places*. In
 Codex: `/review` with the custom instructions "Find security defects on this
 branch against origin/<default branch>: injection, authentication,
 authorization, secrets and data exposure." Where there is no `origin` remote,
@@ -180,8 +183,9 @@ Then report in this order, one line per item:
 
 - **Rounds:** `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
-  last pass, the same way. At `xhigh`, the Codex review the same way, or why
-  it did not run. The security review's result. The check's result.
+  last pass, the same way. At `xhigh`, the Codex review: its range and the
+  count of findings it confirmed, or why it did not run. The security
+  review's result. The check's result.
 - **Decisions:** each choice you made: the finding, the choice, the reason.
   Each question on business logic, with the person's answer, or `open`.
 - **Fixed:** what changed and in which file, the commit, and any side effect
