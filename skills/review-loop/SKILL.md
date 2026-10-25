@@ -36,14 +36,13 @@ request goes through."
 run only when the person asks; `ultra` is billed.
 
 A change to documents only takes no `/code-review`: one review subagent reads
-the documents against the code they describe, the rest of their own text, and
-the other documents that describe the same thing, and the rounds below apply
-to it. The text of a
-skill or a prompt, as a `SKILL.md` or `rules.md`, counts as a document,
-though it is the product. Why: on a skill's own branch, eight runs of
-`/code-review high` found 9 or 10 findings each. From the second run on, most
-were in the sentences the run before had written. The rounds stopped only at
-the ask in step 4.
+the text the range changes against the code it describes, the rest of its
+document, and the other documents that describe the same thing, and the
+rounds below apply to it. The text of a skill or a prompt, as a `SKILL.md` or
+`rules.md`, counts as a document, though it is the product. Why: on a skill's
+own branch, eight runs of `/code-review high` found 9 or 10 findings each.
+From the second run on, most were in the sentences the run before had
+written. The rounds stopped only at the ask in step 4.
 
 When that text comes with code, each range of the rounds and the last pass
 goes to one review or to both, by what it changes. The code review,
