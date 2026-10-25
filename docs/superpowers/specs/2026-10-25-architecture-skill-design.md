@@ -464,12 +464,15 @@ debt of a PASS. It reads the checks at the ref and runs them on both trees, so
 the base needs no architecture file, and a check that the branch amends is the
 same at both. Before it compares, it follows renames: a path that
 `git diff -M <base> <ref>` shows as renamed is compared with its old path, so
-a moved file brings no `new` hit. `git diff` names files only: a folder is
-renamed when all its code files at the base moved into one folder at the ref. A hit of `grep` is matched by its path and
-the text of its line, not by its line number, which moves. Identical hits are
-counted: when the ref has more hits with one path and one text than the base,
-the extra ones are new. A hit of `lines` or `files` is new when its path is
-past the limit at the ref and not at the base, or bigger than at the base.
+a moved file brings no `new` hit. `git diff` names files only, so the old
+path of a folder comes from its own code files, not those of its subfolders:
+it is the folder at the base that held the most of them, each followed back
+through its rename. With none of them at the base, the folder has no old path.
+A hit of `grep` is matched by its path and the text of its line, not by its
+line number, which moves. Identical hits are counted: when the ref has more
+hits with one path and one text than the base, the extra ones are new. A hit
+of `lines` or `files` is new when it has no old path, or when its old path is
+not past the limit at the base or is smaller there.
 
 The output is one line per invariant, `I-1 PASS` or `I-2 FAIL`, and under each
 FAIL what it found: the `git grep` lines, or the files and folders and their
@@ -552,8 +555,8 @@ rounds. #60 keeps the tests lens and the task lens.
 Step 2 of `kalinichenko:debt` also runs `invariants.sh` in its `<tree>`. Each
 FAIL is a broken rule whose issue cites `I-n`. A path of the `debt` list of a
 `grep` check is a broken rule too. A path of the `debt` list of a `lines` or
-`files` check is a hotspot, weighed by the debt skill's own rule for a place:
-a place, or *next*. An invariant with no `Check:` line is named
+`files` check is a hotspot, weighed by the debt skill's own rule for a place,
+read for a folder as for a file: a place, or *next*. An invariant with no `Check:` line is named
 in the report. Step 4 sorts each clone place by the three conditions of
 *Decomposition*: a place that fails one is a copy kept on purpose, named in
 the report and not filed. `docs/ARCHITECTURE.md` is the
