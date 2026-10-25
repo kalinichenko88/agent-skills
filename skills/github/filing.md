@@ -116,10 +116,13 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
 ```
 
 When `main` does not have the defect, file nothing, and tell the person one of
-these:
+these. The plugin version under *Write the issue* below shows which one
+applies.
 
 - A plugin installed in Claude Code: update the plugin.
-- A plugin installed in Codex: the fix comes with the next release.
+- A plugin installed in Codex: update it with
+  `codex plugin marketplace upgrade kalinichenko`. When the version does not
+  change, the next release has the fix.
 - A plugin that runs from a checkout, as with `claude --plugin-dir`: the file
   and the line of the defect, and that `main` does not have it.
 
