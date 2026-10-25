@@ -200,6 +200,8 @@ Then report in this order, one line per item:
   a fix had elsewhere.
 - **Declined:** each finding that did not survive, with the reason.
 - **Filed:** the issues opened or added to, with their numbers.
+- **Docs:** the docs the branch changed, or `docs impact: none` and why, as
+  *Docs move with the change* in `rules.md` asks.
 
 The pull request description carries the same summary under `## Review`, and
 each later fix commit adds its lines there. A later review then recognises a

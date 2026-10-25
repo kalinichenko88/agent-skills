@@ -5,8 +5,9 @@
 # prompt after its kind: W reads the whole branch, C one commit, S is the
 # security review. It exits 1 when a run has fewer than two rounds, read the
 # whole branch more than once after round 1, ran more than three rounds in one
-# count, ran no security review after its last read of the whole branch, or
-# did not invoke the skill. It calls the model, so it costs tokens and is not
+# count, ran no security review after its last read of the whole branch, did
+# not invoke the skill, or ended on a report that names no docs. It calls the
+# model, so it costs tokens and is not
 # part of `make check`: run it by hand after a change to skills/review-loop or
 # to its section in rules.md.
 # It runs with this machine's other plugins and settings.
@@ -120,9 +121,12 @@ for log in "$logs"/run-*.jsonl; do
   skill=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Skill")
     | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
-  echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $long counts past three rounds, $security security review calls after the last whole-branch read, review-loop invoked $skill times"
+  # The last report is the summary, and rules.md wants the docs named in it:
+  # a Docs item, or "docs impact: none".
+  docs=$(jq -rR 'fromjson? | select(.type == "result") | .result' "$log" | grep -ciE 'docs( impact)?:' || true)
+  echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $long counts past three rounds, $security security review calls after the last whole-branch read, review-loop invoked $skill times, $docs docs lines in the last report"
   cut -c1-300 <<<"${prompts:-no review subagent ran}"
-  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && [ "$security" -ge 1 ] && [ "$skill" -ge 1 ] || failed=1
+  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && [ "$security" -ge 1 ] && [ "$skill" -ge 1 ] && [ "$docs" -ge 1 ] || failed=1
 done
 echo "Logs: $logs"
 exit "$failed"

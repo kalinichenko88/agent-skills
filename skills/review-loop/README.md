@@ -49,7 +49,8 @@ a security review last, and a summary of what was decided and fixed.
   branch. Its fixes get rounds of their own, as the later fixes above.
 - **A summary.** First a run of the repository's check on the final branch.
   Then the rounds, the decisions with their reasons, what was fixed, what was
-  declined and why, and the issues filed. The pull request description
+  declined and why, the issues filed, and the docs the branch changed, or why
+  it changed none. The pull request description
   carries the summary under `## Review`. In a public repository, an example
   from a private source in that section or in a reply to a review comment
   keeps no names, numbers, titles, paths or code.
