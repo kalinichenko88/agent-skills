@@ -115,18 +115,10 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
   repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
-When `main` does not have the defect, file nothing, and tell the person one of
-these:
-
-- In Codex: update the plugin with
-  `codex plugin marketplace upgrade kalinichenko`. When the defect is still
-  there after the upgrade, the next release has the fix.
-- In Claude Code, when this skill's base directory is under
-  `~/.claude/plugins/cache/`: update the plugin with
-  `claude plugin update kalinichenko@kalinichenko`.
-- In Claude Code, with any other base directory: the plugin runs from a
-  checkout, as with `claude --plugin-dir`. Give the file and the line of the
-  defect, and say that `main` does not have it.
+When `main` does not have the defect, file nothing. Tell the person that `main`
+does not have it, give the file and the line, and give the link
+`https://github.com/kalinichenko88/agent-skills#update`, which says how to
+update the plugin.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
