@@ -44,12 +44,14 @@ fail() {
 }
 check() { [ "$2" = "$3" ] || fail "$1" "$(printf 'want: %s\ngot:  %s' "$2" "$3")"; }
 
-# A branch with one commit past its base.
+# A branch with one commit past its base, which adds a file.
 repo=$tmp/repo
 git init -q -b main "$repo"
 git -C "$repo" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m base
 base=$(git -C "$repo" rev-parse HEAD)
-git -C "$repo" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m change
+echo change >"$repo/a.txt"
+git -C "$repo" add a.txt
+git -C "$repo" -c user.name=t -c user.email=t@example.com commit -q -m change
 head=$(git -C "$repo" rev-parse HEAD)
 review() { (cd "$repo" && PATH="$tmp/bin:$PATH" bash "$script" "$@"); }
 # A PATH with git and no codex.
@@ -95,12 +97,21 @@ grep -qF 'no-such-commit is not a commit' "$tmp/err" || fail 'the usage error na
 
 code=0
 out=$(nocodex no-such-commit 2>&1) || code=$?
-check 'a bad base is a usage error with no codex too, not a skip' 2 "$code"
-check 'with no codex, the usage error says nothing of a skip' '' "$(grep skipped <<<"$out" || true)"
+check 'a bad base is a usage error with no codex too, not a skip' \
+  '2 codex-review.sh: no-such-commit is not a commit' "$code $out"
+
+# GIT_CEILING_DIRECTORIES keeps git from finding a repository above $tmp.
+mkdir "$tmp/outside"
+code=0
+(cd "$tmp/outside" && GIT_CEILING_DIRECTORIES="$tmp" PATH="$tmp/bin:$PATH" bash "$script" "$base") \
+  >/dev/null 2>"$tmp/err" || code=$?
+check 'a working directory outside a repository is a usage error' 2 "$code"
+check 'the usage error names the working directory' \
+  "codex-review.sh: $tmp/outside is not in a git repository" "$(cat "$tmp/err")"
 
 code=0
-(cd "$tmp" && PATH="$tmp/bin:$PATH" bash "$script" "$base") >/dev/null 2>"$tmp/err" || code=$?
-check 'a working directory outside the repository is a usage error' 2 "$code"
-grep -qF "$tmp is not in a git repository" "$tmp/err" || fail 'the usage error names the working directory' "$(cat "$tmp/err")"
+review HEAD >/dev/null 2>"$tmp/err" || code=$?
+check 'a range that changes nothing is a usage error, not a clean review' 2 "$code"
+grep -qF 'changes nothing' "$tmp/err" || fail 'the usage error says the range changes nothing' "$(cat "$tmp/err")"
 
 echo 'review_loop_scripts_test: ok'

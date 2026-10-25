@@ -118,7 +118,7 @@ the text of a skill or a prompt.
 - Exit 2: the call was wrong. Correct the base or the working directory, and
   run it again.
 - `skipped:`: the Codex CLI is not installed or not logged in.
-- Any other error: Codex did not run to its end.
+- Any other error: Codex failed, or it wrote no findings.
 
 After `skipped:` or another error, go on without Codex, and give the reason
 in the summary.
