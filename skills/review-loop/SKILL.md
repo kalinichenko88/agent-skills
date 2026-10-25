@@ -111,12 +111,17 @@ bash <dir>/scripts/codex-review.sh <base>
 ```
 
 `<dir>` is this skill's base directory, and `<base>` is the base of step 1.
-The script prints Codex's findings as JSON. Each one goes through *The
-findings*, also one in the text of a skill or a prompt. When the script
-prints `skipped:`, the Codex CLI is not installed or not logged in. When it
-exits 1, Codex failed. In both cases, go on without Codex, and give the
-reason in the summary. When it exits 2, the call was wrong: correct the base
-or the directory, and run it again.
+Run it from the working tree of the branch under review. The script prints
+Codex's findings as JSON. Each one goes through *The findings*, also one in
+the text of a skill or a prompt.
+
+- Exit 2: the call was wrong. Correct the base or the working directory, and
+  run it again.
+- `skipped:`: the Codex CLI is not installed or not logged in.
+- Any other error: Codex did not run to its end.
+
+After `skipped:` or another error, go on without Codex, and give the reason
+in the summary.
 
 Why: on three branches of this plugin that a `/code-review` loop had
 finished, Codex found three defects that no round had reported, in 45 to 74

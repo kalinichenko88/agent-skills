@@ -63,6 +63,7 @@ check 'codex runs in the read-only sandbox' read-only "$(grep -A1 -xF -- -s "$tm
 grep -qxF -- '--ephemeral' "$tmp/args" || fail 'codex keeps no session files' "$(cat "$tmp/args")"
 grep -qF "git diff $base...$head" "$tmp/args" ||
   fail 'the prompt names the range of the whole branch, from the merge base to the SHA of HEAD' "$(cat "$tmp/args")"
+rm -f "$tmp/args"
 review HEAD~1 >/dev/null
 grep -qF "git diff $base...$head" "$tmp/args" || fail 'a base given as a name goes into the prompt as its SHA' "$(cat "$tmp/args")"
 check 'the schema asks for the fields of a finding' 'file line summary failure_scenario' \
@@ -90,10 +91,16 @@ check 'no codex on PATH: skipped, with the reason' 'skipped: the codex CLI is no
 code=0
 review no-such-commit >/dev/null 2>"$tmp/err" || code=$?
 check 'a base that is not a commit is a usage error' 2 "$code"
-grep -qF 'no-such-commit' "$tmp/err" || fail 'the usage error names the base' "$(cat "$tmp/err")"
+grep -qF 'no-such-commit is not a commit' "$tmp/err" || fail 'the usage error names the base' "$(cat "$tmp/err")"
 
 code=0
 out=$(nocodex no-such-commit 2>&1) || code=$?
-check 'a bad base is a usage error with no codex too, not a skip' "2 codex-review.sh: no-such-commit is not a commit" "$code $out"
+check 'a bad base is a usage error with no codex too, not a skip' 2 "$code"
+check 'with no codex, the usage error says nothing of a skip' '' "$(grep skipped <<<"$out" || true)"
+
+code=0
+(cd "$tmp" && PATH="$tmp/bin:$PATH" bash "$script" "$base") >/dev/null 2>"$tmp/err" || code=$?
+check 'a working directory outside the repository is a usage error' 2 "$code"
+grep -qF "$tmp is not in a git repository" "$tmp/err" || fail 'the usage error names the working directory' "$(cat "$tmp/err")"
 
 echo 'review_loop_scripts_test: ok'
