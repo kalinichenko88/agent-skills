@@ -464,7 +464,8 @@ debt of a PASS. It reads the checks at the ref and runs them on both trees, so
 the base needs no architecture file, and a check that the branch amends is the
 same at both. Before it compares, it follows the renames of files: a file
 that `git diff -M <base> <ref>` shows as renamed is compared with its old
-path, so a moved file brings no `new` hit. A folder is compared by its path
+path, so a file moved within the paths of a check brings no `new` hit. A
+folder is compared by its path
 only, because `git diff` names no folder renames. So when a branch only
 renames a folder of a `debt` list, and renames it in the list too, its known
 debt shows as `new`; the lens reads the diff and sees the move.
