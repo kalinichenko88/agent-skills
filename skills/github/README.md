@@ -11,7 +11,7 @@ time.
 - You name an issue on its own — `#91` or its URL — to start work on it.
 - You find something worth fixing that is outside the task.
 - You check whether a finding is already filed.
-- A rule, a skill or a script of this plugin turns out to be wrong.
+- A rule, a skill or a script of this plugin is wrong.
 - You create or edit a GitHub Actions workflow.
 
 ## What you get

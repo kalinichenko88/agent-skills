@@ -83,9 +83,12 @@ it is.
 ## A defect in this plugin
 
 The global prompt says when a defect in this plugin becomes an issue; this
-section says how. The plugin is the global prompt, the `kalinichenko:` skills,
-their scripts and the hooks. Its tracker is `kalinichenko88/agent-skills`, and
-every `gh` call below names it with `--repo`.
+section says how. The plugin is the global prompt, the hooks, the
+`kalinichenko:` skills and their scripts. Its tracker is
+`kalinichenko88/agent-skills`, and every `gh` call below names it with
+`--repo`, so the project's remote does not matter. Only this section and
+*Public repositories* in `SKILL.md` apply. The sections above, `tracker.md` and
+its scripts work on the checkout's tracker, not on this one.
 
 **Make sure the plugin is wrong.** Read the rule or the script again, all of
 it. These are defects:
@@ -95,44 +98,62 @@ it. These are defects:
 - A rule, followed as written, gives a wrong result.
 - A rule names a file, a script, a flag or a command that does not exist.
 
-These are not: a step you skipped or read wrong — go back and do it as written;
-a bug in the person's project; a bug in another plugin, in Claude Code or in
-Codex.
+These are not defects:
+
+- A step you skipped or read wrong. Go back and do it as written.
+- A bug in the person's project.
+- A bug in another plugin, in Claude Code or in Codex.
 
 **A subagent files nothing.** It names the defect in its report. The agent that
 sent it asks the person.
 
-**Search first**, by the name of the script, the skill or the rule's heading:
+**Read the files on `main`.** The installed copy can be older:
 
 ```bash
-gh issue list --repo kalinichenko88/agent-skills --state all --search "<name>"
-gh pr list --repo kalinichenko88/agent-skills --state merged --search "<name>"
+gh api -H "Accept: application/vnd.github.raw" \
+  repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
-- An open issue has the same report: file nothing. If the defect adds a surface
-  or a reproduction, that goes in a comment, after the same question.
-- A merged pull request fixed it after the installed version: file nothing.
-  Tell the person to update the plugin.
-- A merged pull request fixed it, and the installed version has the fix: the
-  new issue starts `Regression of #12`.
+When `main` does not have the defect, file nothing. Tell the person to update
+the plugin. Codex gets a fix only with the next release.
 
-**Write the issue.** The tracker is public, and the person's project is a
-private source: *Public repositories* in `SKILL.md` applies in full. Write the
-case again as the smallest reproduction, with neutral names. Paths inside the
-plugin, as `skills/github/scripts/collect.sh:42`, stay as they are. The title
-starts with the skill, as `github: collect.sh ...`, and states the problem. The
-body says:
+**Search**, by the name of the script, the skill or the rule's heading:
 
-- The plugin version. In Claude Code, it is the name of the folder that holds
-  `skills/` in this skill's base directory, as `a5b733322e79`. In Codex, it is
-  `version` in the plugin's `.codex-plugin/plugin.json`. Write the version, not
-  the path.
+```bash
+gh issue list --repo kalinichenko88/agent-skills --state all --limit 200 \
+  --search "<name>" --json number,title,state,stateReason
+gh pr list --repo kalinichenko88/agent-skills --state merged --limit 200 \
+  --search "<name>" --json number,title
+```
+
+- An open issue has the same report: file nothing. When the defect shows
+  another path or a new reproduction, write it as a comment. Ask before you
+  write it, as *Ask the person* below says.
+- A closed issue has the same report, and its `stateReason` is not
+  `COMPLETED`: file nothing. It was decided. Give the person its number.
+- An issue or a pull request fixed it before, and `main` has the defect again:
+  file a new issue. Its body starts `Regression of #12`.
+
+**Write the issue.** The tracker is public. Take the person's project as a
+private source, whatever its visibility, and apply *Public repositories* in
+`SKILL.md` to it. Write the case again as the smallest reproduction, with
+neutral names. Paths inside the plugin, as
+`skills/github/scripts/collect.sh:42`, stay as they are. The title states the
+problem and starts with the part of the plugin: the skill, as `github:`,
+`rules:` for the global prompt, `hooks:` for a hook. The body says:
+
+- The plugin version. In Claude Code, this skill's base directory ends in
+  `<version>/skills/github`, as `a5b733322e79/skills/github`. A plugin that
+  runs from a checkout, as with `claude --plugin-dir`, has the version
+  `git rev-parse --short=12 HEAD` of that checkout. In Codex, it is `version`
+  in the plugin's `.codex-plugin/plugin.json`. Write the version, not the path.
 - The tool: Claude Code or Codex.
 - The file and the line in the plugin, and what the rule or the script says.
 - What happened, and what you expected.
 - The steps that show it again.
 
-Label it `bug`. Assign nobody.
+Put no label on it and assign nobody: only a person with access to the
+repository can set them.
 
 **Ask the person** at the end of the task, or at once when the defect blocks
 it. Show the full title and body, and say that the repository is public. File
@@ -141,11 +162,12 @@ answer, files nothing; put the draft in the final report. After the yes, write
 the body to a file outside the checkout and run:
 
 ```bash
-gh issue create --repo kalinichenko88/agent-skills --title "<title>" --body-file "$body_file" --label bug
+gh issue create --repo kalinichenko88/agent-skills \
+  --title "<title>" --body-file "$body_file"
 ```
 
-When `gh` cannot write — it is not installed, or `gh auth status` fails — give
-the person the draft and the link
+When `gh` is not installed, `gh auth status` fails or the call fails, give the
+person the draft and the link
 `https://github.com/kalinichenko88/agent-skills/issues/new`.
 
 List the issue number in the final report.

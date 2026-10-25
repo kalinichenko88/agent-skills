@@ -10,9 +10,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   acting on them and load the review loop before the first review of a change,
   load the TypeScript conventions before the first write to a TypeScript file
   and the React conventions before the first write to a React component or
-  hook, and, after the person says yes, file a defect in this plugin in this
-  repository's tracker. In Claude Code a Haiku subagent does the
-  reading for two of them: it counts the real payloads before a bug fix, and
+  hook. After the person says yes, it reports a defect in this plugin to the
+  plugin's own tracker. In Claude Code a Haiku subagent does the reading for
+  two of them: it counts the real payloads before a bug fix, and
   finds the docs a change made false. A plugin has no slot for a `CLAUDE.md` or `AGENTS.md`, so
   `hooks/rules.sh` injects it at the start of every session and every subagent.
 - **[`kalinichenko:github`](skills/github/README.md)** — commits, pull

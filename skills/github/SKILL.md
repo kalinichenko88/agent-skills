@@ -7,8 +7,10 @@ description: Use when touching a repository's GitHub surface — writing a commi
 
 Everything here needs `gh` authenticated against a GitHub remote. Where it is
 not — `gh auth status` fails, or the remote is elsewhere — skip the step and say
-so in the final report rather than inventing a substitute. *Public
-repositories* is the one exception: there, the target counts as public.
+so in the final report rather than inventing a substitute. There are two
+exceptions. In *Public repositories*, the target counts as public. *A defect in
+this plugin* in `filing.md` names its tracker, so the remote does not matter
+there.
 
 | Moment | What must happen | Read first |
 | --- | --- | --- |
