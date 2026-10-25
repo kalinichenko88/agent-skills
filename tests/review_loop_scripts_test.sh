@@ -118,12 +118,14 @@ grep -qF 'changes nothing' "$tmp/err" || fail 'the usage error says the range ch
 [ ! -f "$tmp/args" ] || fail 'a range that changes nothing: codex exec does not run'
 
 # A commit with no history in common with HEAD.
+rm -f "$tmp/args"
 orphan=$(git -C "$repo" -c user.name=t -c user.email=t@example.com \
   commit-tree -m orphan "$(git -C "$repo" hash-object -t tree /dev/null)")
 code=0
 review "$orphan" >/dev/null 2>"$tmp/err" || code=$?
 check 'a range that git cannot diff is a usage error, not a clean review' 2 "$code"
 grep -qF 'git cannot diff' "$tmp/err" || fail 'the usage error says git cannot diff the range' "$(cat "$tmp/err")"
+grep -qF 'no merge base' "$tmp/err" || fail "the usage error keeps git's own reason for the range" "$(cat "$tmp/err")"
 [ ! -f "$tmp/args" ] || fail 'a range that git cannot diff: codex exec does not run'
 
 echo 'review_loop_scripts_test: ok'

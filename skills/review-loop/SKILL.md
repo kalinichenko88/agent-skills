@@ -115,8 +115,9 @@ Run it from the working tree of the branch under review. The script prints
 Codex's findings as JSON. Each one goes through *The findings*, also one in
 the text of a skill or a prompt.
 
-- Exit 2: the call was wrong. Correct the base or the working directory, and
-  run it again. When neither is wrong, go on without Codex.
+- Exit 2: the script did not run Codex. When the call is wrong, as a wrong
+  base, working directory or argument, correct it and run the script again.
+  Otherwise, go on without Codex.
 - `skipped:`: the Codex CLI is not installed or not logged in. Go on without
   Codex.
 - Any other error: the run failed, as when Codex fails or writes no findings

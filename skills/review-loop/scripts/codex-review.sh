@@ -9,9 +9,9 @@
 # When the Codex CLI is not installed or not logged in, it prints
 # "skipped: <why>" and exits 0: the review goes on without Codex. When codex
 # fails or writes no findings file, it prints the end of Codex's log on stderr
-# and exits 1. A wrong call exits 2, as a working directory outside a
-# repository, a base that is not a commit, or a range that git cannot diff or
-# that changes nothing.
+# and exits 1. It exits 2 and runs no Codex for a wrong call, as a base that is
+# not a commit or a working directory outside a repository, and for a range
+# that git cannot diff or that changes nothing.
 #
 # Needs bash, git and the Codex CLI.
 
