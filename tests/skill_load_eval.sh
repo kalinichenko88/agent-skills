@@ -11,14 +11,17 @@
 # to rules.md or to a skill's description. It runs with this machine's other
 # plugins and settings, the setup the rules must work in.
 #
+# With --check, it runs only the checks, on the logs folder of an earlier run.
+# tests/skill_load_checks_test.sh runs them so on tests/fixtures/skill_load in
+# `make check`.
+#
 # Usage: tests/skill_load_eval.sh [runs per task, default 5]
+#        tests/skill_load_eval.sh --check <logs folder>
 
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-runs=${1:-5}
-[ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [runs per task, at least 1]" >&2; exit 2; }
-logs=$(mktemp -d)
+usage() { echo "usage: $0 [runs per task, at least 1] | --check <logs folder>" >&2; exit 2; }
 
 ts_task='Add src/cart-total.ts to this project. A cart item has an id, a name, a unit price in cents and a quantity. Export a function that returns the cart total in cents, skipping items with quantity 0, and a function that returns the names of the items whose unit price is over a given limit. Write the file, then reply with its contents.'
 order_task='Add an order feature to this project, in src/. An order has an id, a customer and a list of lines. A line has a product id, a quantity and a unit price in cents. A customer has an id, a name and a discount, which is either a percent or a fixed amount in cents. Add a function that returns the order total in cents after the customer discount, and a function that returns a text summary of the order, one row per line and the total at the end, each in its own file. Both functions use the same order, line, customer and discount types. Write the files, then reply with the path and the contents of every file you wrote.'
@@ -45,14 +48,20 @@ $1
 }
 
 # count <skill> <log>...: the runs whose subagent invoked the skill before its
-# first Write or Edit. A run with no write at all does not count.
+# first write: a Write, an Edit, or a Bash call that writes a TypeScript file
+# with `>` or `tee`. A run with no write at all does not count.
+# ponytail: a Bash write by another command, as `cp` or `sed -i`, is not a
+# write here. The one recorded run that wrote through Bash used
+# `cat > <file> <<'EOF'`.
 count() {
   local skill=$1 loaded=0 log calls
   shift
   for log; do
     calls=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id != null)
       | .message.content[] | select(.type == "tool_use")
-      | if .name == "Skill" then .input.skill else .name end' "$log")
+      | if .name == "Skill" then .input.skill
+        elif .name == "Bash" and (.input.command | test("(>|\\btee( -a)?) *[^ ;&|<>]*\\.[cm]?tsx?\\b")) then "Write"
+        else .name end' "$log")
     if [ -z "$calls" ]; then
       echo "no subagent ran, see $log"
     elif awk '/^(Write|Edit)$/ { printf "%s", seen; exit } { seen = seen $0 "\n" }' <<<"$calls" |
@@ -167,21 +176,28 @@ schemas() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
-for i in $(seq "$runs"); do
-  run "$ts_task" "$logs/ts-$i.jsonl" &
-  run "$react_task" "$logs/react-$i.jsonl" &
-  run "$order_task" "$logs/order-$i.jsonl" &
-  run "$feature_task" "$logs/feature-$i.jsonl" '"zod":"^4.6.0"' &
-done
-wait
+if [ "${1:-}" = --check ]; then
+  [ -d "${2:-}" ] || usage
+  logs=$2
+else
+  runs=${1:-5}
+  [ "$runs" -ge 1 ] 2>/dev/null || usage
+  logs=$(mktemp -d)
+  for i in $(seq "$runs"); do
+    run "$ts_task" "$logs/ts-$i.jsonl" &
+    run "$react_task" "$logs/react-$i.jsonl" &
+    run "$order_task" "$logs/order-$i.jsonl" &
+    run "$feature_task" "$logs/feature-$i.jsonl" '"zod":"^4.6.0"' &
+  done
+  wait
+fi
 
 failed=0
 count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl "$logs"/order-*.jsonl "$logs"/feature-*.jsonl
 count react-conventions "$logs"/react-*.jsonl "$logs"/feature-*.jsonl
 files=()
-for i in $(seq "$runs"); do
-  files+=("$logs/ts-$i/src/cart-total.ts" "$logs/react-$i/src/search-panel.tsx")
-done
+for log in "$logs"/ts-*.jsonl; do files+=("${log%.jsonl}/src/cart-total.ts"); done
+for log in "$logs"/react-*.jsonl; do files+=("${log%.jsonl}/src/search-panel.tsx"); done
 braced "${files[@]}"
 first "$logs"/order-*/
 models "$logs"/order-*/
