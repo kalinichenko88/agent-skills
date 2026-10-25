@@ -50,8 +50,9 @@ $1
 # count <skill> <log>...: the runs whose subagent invoked the skill before its
 # first write: a Write, an Edit, or a Bash call that writes a TypeScript file
 # with `>` or `tee`. A run with no write at all does not count.
-# ponytail: it finds a `>` or a `tee`, then a `.ts` path, anywhere in the
-# command text. So `=> x.ts` in a here-document is a write too, and `cp`,
+# ponytail: it finds `>`, `tee` or `tee -a`, then spaces or none, then a path
+# with `.ts`, `.tsx`, `.mts` or `.cts` in it, at any place in the command text.
+# So `=> x.ts` in a here-document and `> a.ts.bak` are writes too, and `cp`,
 # `sed -i`, `tee --append` or `tee a.log b.ts` is not. The one recorded run that
 # wrote through Bash used `cat > <file> <<'EOF'`, and no recorded Bash call had
 # a `=>`.
