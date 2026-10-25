@@ -28,9 +28,9 @@ time.
   a rule, a skill or a script of this plugin is wrong, it writes an issue for
   `kalinichenko88/agent-skills`: the plugin version, the file and line, and
   the steps that show it again, with neutral names. In a checkout of
-  `agent-skills`, it is an ordinary finding. Anywhere else, it shows you the
-  issue and files it only after you say yes. Nothing from your project goes
-  in.
+  `agent-skills`, the defect is an ordinary finding. Anywhere else, the agent
+  shows you the issue and files it only after you say yes. Nothing from your
+  project goes in.
 - **A task runs to its pull request.** After the review, the agent runs the
   repository's check on the final branch. When it passes and the branch is
   not the default branch, the agent pushes, opens the PR and asks whether to
