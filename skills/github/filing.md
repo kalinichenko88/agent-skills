@@ -116,9 +116,9 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
 ```
 
 When `main` does not have the defect, file nothing. Tell the person that `main`
-does not have it, give the file and the line, and give the link
-`https://github.com/kalinichenko88/agent-skills#update`, which says how to
-update the plugin.
+does not have the defect. Give the file and the line of the defect in the copy
+that runs. For an installed plugin, give the link
+`https://github.com/kalinichenko88/agent-skills#update`: it says how to update.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
