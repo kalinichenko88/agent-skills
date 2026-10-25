@@ -117,9 +117,8 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
 
 When `main` does not have the defect, file nothing. Tell the person to update
 the plugin. In Codex, tell the person that the fix comes with the next
-release. A plugin that runs from a checkout, as with `claude --plugin-dir`, can
-be newer than `main`: in this section, read that checkout's files in place of
-`main`.
+release. A plugin can also run from a checkout, as with `claude --plugin-dir`.
+Then tell the person that `main` does not have the defect.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
