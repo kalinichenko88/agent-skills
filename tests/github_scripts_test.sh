@@ -44,7 +44,7 @@ case "$1 $2" in
   'pr list') list prs ;;
   'issue view')
     jq ".data.repository.n$3 | {body, assignees: [.assignees.nodes[]?]}" "$FAKE/graphql.json" | jq -r "$filter" ;;
-  'issue edit') while [ "$1" != --body-file ]; do shift; done; cp "$2" "$FAKE/body" ;;
+  'issue edit') while [ $# -gt 0 ] && [ "$1" != --body-file ]; do shift; done; [ $# = 0 ] || cp "$2" "$FAKE/body" ;;
   'issue comment') ;;
   'issue develop')
     case $3 in
@@ -255,6 +255,7 @@ out=$(DRY_RUN=1 add bug)
 case $out in *'dry run: gh issue edit 5 --title New\ title --body-file '*'--add-label bug'*'dry run: gh issue comment 5'*) ;;
   *) fail 'add-finding.sh with DRY_RUN=1 prints its writes' "$out" ;;
 esac
+[ -f "$(sed -n 's/.*--body-file \([^ ]*\) .*/\1/p' <<<"$out")" ] || fail 'a dry run keeps the body it names'
 check 'add-finding.sh with DRY_RUN=1 runs no write' '' "$(writes)"
 
 # Without it, the body keeps the old text and gains the section.
@@ -267,6 +268,42 @@ check 'add-finding.sh edits and comments' \
 check 'the new body is the old one and the section' \
   "$(jq -r .data.repository.n5.body "$fixtures/tracker.json"; echo; cat "$tmp/section.md")" "$(cat "$tmp/body")"
 stops add-finding.sh 1 5 "$tmp/section.md" 'New title'
+
+# The comment fails after the edit. The rerun reads the edited body, finds the
+# section there, adds the label again without the body or the title, and
+# comments, on a host with no added finding before and on one with one before.
+for change in . '.body += "\n## Also: one\n"'; do
+  answer "$change"
+  rm -f "$tmp/body"
+  FAKE_FAIL='issue comment' add bug >/dev/null 2>&1 && fail 'add-finding.sh passed with a failed comment'
+  [ -f "$tmp/body" ] || fail "add-finding.sh did not edit before the comment ($change)"
+  answer ".body = $(jq -Rs . "$tmp/body")"
+  : >"$tmp/calls"
+  out=$(add bug) || fail "a rerun of add-finding.sh after a failed comment ($change)" "$out"
+  check "a rerun after a failed comment leaves the body ($change)" \
+    "$(printf 'issue edit 5 --add-label bug\nissue comment 5 --body Added to the body: the scout misses a cited line.')" \
+    "$(writes)"
+  check "the body holds the section once ($change)" 1 \
+    "$(grep -cxF '## Also: the scout misses a cited line' "$tmp/body")"
+done
+
+# A dry rerun with no label prints only the comment, and removes the body that
+# no printed edit names.
+rm -f "$tmp"/body.*
+answer '.body += "\n## Also: the scout misses a cited line\n"'
+check 'a dry rerun with no label only comments' \
+  'dry run: gh issue comment 5 --body Added\ to\ the\ body:\ the\ scout\ misses\ a\ cited\ line.' "$(DRY_RUN=1 add)"
+check 'a dry rerun leaves no body' '' "$(find "$tmp" -maxdepth 1 -name 'body.*')"
+
+# A refusal before the body read leaves the file that the caller's $body
+# names. One after it, in a dry run, removes its own body.
+touch "$tmp/keep"
+for change in '.state = "CLOSED"' '.body += "\n## Also: one\n## Also: two\n"'; do
+  answer "$change"
+  body=$tmp/keep DRY_RUN=1 add >/dev/null && fail "add-finding.sh passed on a refused host ($change)"
+  [ -f "$tmp/keep" ] || fail "a refusal removed the file that \$body names ($change)"
+  check "a refused dry run leaves no body ($change)" '' "$(find "$tmp" -maxdepth 1 -name 'body.*')"
+done
 
 # take-in-check.sh
 take() { bash "$scripts/take-in-check.sh" "$@" 2>&1 || echo "exit $?"; }

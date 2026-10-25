@@ -9,9 +9,15 @@
 # and that holds fewer than two added findings. All of this is read again just
 # before the write. Otherwise it prints why and exits 1, and writes nothing.
 # Run it for one host at a time: it reads the body and writes it back whole.
+# When gh stops it with an error, the step is not done. A rerun with the same
+# section file, unchanged, finishes it after the cause of the error is gone.
+# If the error says that the label is not found, correct the label or remove
+# it before the rerun. When the body holds the section already, the rerun does
+# not check for a full host and does not change the body or the title. It adds
+# the label, if the command names one, and leaves the one-line comment.
 #
-# DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
-# new body in the file that the printed command names.
+# DRY_RUN=1 prints the commands that would write, and runs none. When it adds
+# the section, it keeps the new body in the file that the printed edit names.
 # Needs only bash and gh: every filter is gh's own --jq.
 
 set -euo pipefail
@@ -40,7 +46,6 @@ host=$(bash "$(dirname "$0")/collect.sh" status "$n")
 
 [ "$state" = open ] || refuse "it is $state"
 [ "$taken" = no ] || refuse "someone works on it: $status"
-[ "$also" -lt 2 ] || refuse "it holds $also added findings already"
 
 tmp=${TMPDIR:-/tmp}
 body=$(mktemp "${tmp%/}/body.XXXXXX")
@@ -49,17 +54,25 @@ body=$(mktemp "${tmp%/}/body.XXXXXX")
 clean() {
   local code=$?
   [ "$code" != 0 ] || [ -n "${finished:-}" ] || code=1
-  rm -f "$body"
+  # A dry run that finished keeps the new body that its printed edit names.
+  if [ "$keep" != 1 ] || [ "$code" != 0 ]; then rm -f "$body"; fi
   exit "$code"
 }
-finished=
-# A dry run keeps the new body to be read.
-[ "${DRY_RUN:-}" = 1 ] || trap clean EXIT
+finished='' keep=''
+trap clean EXIT
 gh issue view "$n" --json body --jq .body >"$body"
-{ echo; cat "$section"; } >>"$body"
 
-args=(issue edit "$n" --title "$title" --body-file "$body")
+args=()
+# A body that holds the section already is a rerun after an error from gh. gh
+# writes the body and the title in one request and the label in another, so
+# the rerun sends only the label again.
+if ! grep -qxF "## Also: $problem" "$body"; then
+  [ "$also" -lt 2 ] || refuse "it holds $also added findings already"
+  { echo; cat "$section"; } >>"$body"
+  args=(--title "$title" --body-file "$body")
+  keep=${DRY_RUN:-}
+fi
 [ -z "$label" ] || args+=(--add-label "$label")
-run gh "${args[@]}"
+[ ${#args[@]} = 0 ] || run gh issue edit "$n" "${args[@]}"
 run gh issue comment "$n" --body "Added to the body: $problem."
 finished=1
