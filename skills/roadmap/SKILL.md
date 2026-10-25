@@ -1,6 +1,6 @@
 ---
 name: roadmap
-description: Use when planning a product's roadmap or milestones, asking which task to take next or what can run in parallel, asking what is left to close a milestone, putting a task off to Later, re-planning after a milestone closes, or when an agent needs the project's roadmap as context.
+description: Use when planning a product's roadmap or milestones, asking which task to take next or what can run in parallel, asking what is left to close a milestone, putting a task off to Later, re-planning after a milestone closes, triaging new issues that have no label or no milestone, or when an agent needs the project's roadmap as context.
 ---
 
 # Planning on GitHub
@@ -23,6 +23,7 @@ say so and stop.
 | An agent needs the roadmap as context | `roadmap.sh` | *The roadmap* below |
 | Start a roadmap | read `docs/`, propose, one approval, then write | `planning.md` |
 | A milestone has no open issues left, or the person asks to re-plan | the same, from that milestone | `planning.md`, *Re-planning* |
+| Open issues have no label or no milestone, or the person asks to triage | duplicates first; a verdict, a label and a milestone for each; one approval, then write | `triage.md` |
 | The person wants the board | `board.sh`; pass on the two settings it prints | *The board* below |
 
 A file in the last column sits next to this one, in this skill's base
@@ -138,7 +139,8 @@ its description, and its open issues in dependency order, each with its state
 — `free`, `blocked by #21`, `open sub-issues: 2`, or who has it. The progress
 counts the milestone's issues, not its pull requests; a milestone closed while
 the script runs shows `not counted`. `Later` shows titles only. Issues with no
-milestone come last, as a count with their numbers. With a milestone — `M1`,
+milestone come last, as a count with their numbers: they wait for triage
+(`triage.md`). With a milestone — `M1`,
 `Later` or a whole title — it prints that milestone alone, with its states,
 and with the open issues it waits on in other milestones, each marked with
 where it is.

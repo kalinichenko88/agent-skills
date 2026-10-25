@@ -63,7 +63,7 @@ When a milestone has no open issues left, or the person asks:
      (`plan.sh later <n>`), or none (`gh issue edit <n> --remove-milestone`);
    - the next milestone's issues and links, planned again from what the
      closed one taught;
-   - a milestone for each open issue that has none;
+   - a milestone for each open issue that has none, by `triage.md`;
    - the new current marks: `plan.sh current` and `plan.sh not-current`.
 3. After one approval, write as at the start. `plan.sh describe <milestone>
    <file>` changes a description and keeps its current mark. `plan.sh rename`
