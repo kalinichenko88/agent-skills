@@ -2,8 +2,8 @@
 
 A review that ends: rounds that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
-than one round, a security review last, and a summary of what was decided and
-fixed.
+than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
+a security review last, and a summary of what was decided and fixed.
 
 ## When it starts
 
@@ -32,10 +32,16 @@ fixed.
 - **One last look at the whole branch.** When the loop needed more than one
   round, one pass reads the whole branch again after it stops, to see how the
   fixes fit the rest. It never runs twice.
-- **Later fixes are reviewed too.** The fixes from the last pass, the security
-  review or your review comments, also after the pull request opens, are one
-  commit with rounds of its own: at the level of the loop's round 1, or
-  `xhigh` for a fix to security code.
+- **A second model for `xhigh` changes.** In Claude Code, Codex reads the
+  whole branch once: beside the last pass, or after round 1 when the loop
+  needed only one round. Its findings go through the same checks. Without the
+  Codex CLI or its login, or when Codex fails, the step is skipped, and the
+  summary says so.
+- **Later fixes are reviewed too.** The fixes from the last pass and the Codex
+  review are one commit. The fixes from the security review are one commit,
+  and so are those from each set of your review comments, also after the pull
+  request opens. Each of these commits has rounds of its own: at the level of
+  the loop's round 1, or `xhigh` for a fix to security code.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.
@@ -72,3 +78,18 @@ codex plugin add ponytail@ponytail
 It is not a dependency of this plugin. Codex plugins cannot declare one. In
 Claude Code a dependency would also turn on ponytail's always-on mode, a hook
 that needs `node`, for everyone who installs `kalinichenko`.
+
+## The Codex step
+
+The Codex step needs the Codex CLI, logged in:
+
+```sh
+npm install -g @openai/codex
+codex login
+```
+
+It runs `codex exec` in Codex's read-only sandbox, with your Codex config: your
+model and reasoning effort apply. It does not need OpenAI's
+`codex@openai-codex` plugin for Claude Code: the agent cannot call that
+plugin's review commands. You can still run its `/codex:adversarial-review`
+yourself.

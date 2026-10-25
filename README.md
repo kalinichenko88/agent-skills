@@ -26,8 +26,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
 - **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
   that ends: rounds that read only the last fixes, one last pass over the
-  whole branch when the loop needed more than one round, a security review,
-  and a summary of what was decided and fixed.
+  whole branch when the loop needed more than one round, Codex as a second
+  reviewer for `xhigh` changes in Claude Code, a security review, and a
+  summary of what was decided and fixed.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
   over-engineering, filed as at most three `debt` issues a run.
@@ -116,7 +117,9 @@ and its `clones.sh` against a fake `npx` that answers with a report recorded
 from `jscpd` for the tree in `tests/fixtures/debt/`, and with a fake `bunx`
 when `bun` is installed. Without `node`, the test skips `clones.sh` and says
 so. One case runs `clones.sh` with no `TMPDIR`, so it makes and removes a
-directory in your `~/.cache`.
+directory in your `~/.cache`. The review-loop skill's `codex-review.sh` runs
+against a fake `codex` that answers with findings recorded from `codex exec`
+on this repository, in `tests/fixtures/review-loop/`.
 
 `make check` runs every `tests/<name>_test.sh`. A test passes only when it
 exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
