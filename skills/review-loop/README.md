@@ -19,7 +19,9 @@ fixed.
   its `ponytail-review` runs once before the first round, and its cuts are one
   commit. Without ponytail the step is skipped, and the summary says so.
 - **A level with a reason.** `low` to `xhigh` by the weight of the change, and
-  one sentence that says why. `ultra` only when you ask for it.
+  one sentence that says why. `ultra` only when you ask for it. Documents,
+  and the text of a skill or a prompt, get one review subagent in place of
+  `/code-review`. Text next to code does not raise the level.
 - **Rounds that read less.** The first round reads the whole branch. Each round
   of fixes is one commit, and the next round reads only that commit.
 - **A stop.** The loop ends at the first round that confirms no defect. Nits

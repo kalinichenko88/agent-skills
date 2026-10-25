@@ -33,9 +33,20 @@ request goes through."
 | `xhigh` | Security, data loss, concurrency, or architecture across modules or apps. |
 
 `medium` is not a default: each level needs its own reason. `max` and `ultra`
-run only when the person asks; `ultra` is billed. A change to documents only
-takes no `/code-review`: one review subagent reads the documents against the
-code they describe, and the rounds below apply to it.
+run only when the person asks; `ultra` is billed.
+
+A change to documents only takes no `/code-review`: one review subagent reads
+the documents against the code they describe, and the rounds below apply to
+it. The text of a skill or a prompt, as a `SKILL.md` or `rules.md`, is a
+document here, though it is the product: the subagent reads it against the
+code and the scripts it names. When the change has code too, the level of
+`/code-review` comes from the code alone. Each round then also sends the
+subagent, with the text only: `git diff <base>..HEAD -- <the text files>` in
+step 1, `git show <sha> -- <the text files>` in step 2. A round confirms no
+defect when neither review does. Why: on a skill's own branch, eight runs of
+`/code-review high` found 9 or 10 findings each. From the second run on, most
+were in the sentences the run before had written. The rounds stopped only at
+the ask in step 4.
 
 A review subagent and Codex's `/review` have no levels.
 
