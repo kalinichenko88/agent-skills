@@ -9,11 +9,12 @@
 # and that holds fewer than two added findings. All of this is read again just
 # before the write. Otherwise it prints why and exits 1, and writes nothing.
 # Run it for one host at a time: it reads the body and writes it back whole.
-# When gh stops it with an error, run it again with the same section file once
-# the cause of the error is gone. If the error says that the label is not
-# found, first correct the label or remove it. When the body holds the section
-# already, the rerun does not check for a full host and does not change the
-# body or the title. It adds the label, if the command names one, and comments.
+# When gh stops it with an error, the step is not done. A rerun with the same
+# section file, unchanged, finishes it after the cause of the error is gone.
+# If the error says that the label is not found, correct the label or remove
+# it before the rerun. When the body holds the section already, the rerun does
+# not check for a full host and does not change the body or the title. It adds
+# the label, if the command names one, and leaves the one-line comment.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. When it adds
 # the section, it keeps the new body in the file that the printed edit names.
