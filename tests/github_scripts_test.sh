@@ -268,6 +268,21 @@ check 'the new body is the old one and the section' \
   "$(jq -r .data.repository.n5.body "$fixtures/tracker.json"; echo; cat "$tmp/section.md")" "$(cat "$tmp/body")"
 stops add-finding.sh 1 5 "$tmp/section.md" 'New title'
 
+# The comment fails after the edit. The rerun reads the edited body, finds the
+# section there and only comments, on a host with no added finding before and
+# on one with one before.
+for change in . '.body += "\n## Also: one\n"'; do
+  answer "$change"
+  FAKE_FAIL='issue comment' add >/dev/null 2>&1 && fail 'add-finding.sh passed with a failed comment'
+  answer ".body = $(jq -Rs . "$tmp/body")"
+  : >"$tmp/calls"
+  out=$(add) || fail "a rerun of add-finding.sh after a failed comment ($change)" "$out"
+  check "a rerun after a failed comment only comments ($change)" \
+    'issue comment 5 --body Added to the body: the scout misses a cited line.' "$(writes)"
+  check "the body holds the section once ($change)" 1 \
+    "$(grep -cxF '## Also: the scout misses a cited line' "$tmp/body")"
+done
+
 # take-in-check.sh
 take() { bash "$scripts/take-in-check.sh" "$@" 2>&1 || echo "exit $?"; }
 answer . .data.repository.issue take-in-5.json

@@ -51,8 +51,10 @@ than it closes. Per finding, the scout's groups decide:
   before it writes, so the findings you added in this run count too. It adds
   the section to the end of the body, sets the title, adds the label, and
   leaves a one-line comment, because a body edit notifies nobody. A busy host
-  or a full one it refuses, and writes nothing. Run it for one host at a time,
-  never two at once: it reads the body and writes it back whole.
+  or a full one it refuses, and writes nothing. A rerun after a failed comment
+  finds the section in the body and writes only the comment. Run it for one
+  host at a time, never two at once: it reads the body and writes it back
+  whole.
 - **No free host** — file a new issue:
   - One issue per finding. Title states the problem, body says where it is
     (`path:line`), how it shows up, and why it was out of scope here.

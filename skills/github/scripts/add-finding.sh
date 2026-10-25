@@ -9,6 +9,8 @@
 # and that holds fewer than two added findings. All of this is read again just
 # before the write. Otherwise it prints why and exits 1, and writes nothing.
 # Run it for one host at a time: it reads the body and writes it back whole.
+# When the comment fails, run it again: a body that holds the section gets only
+# the comment.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. It keeps the
 # new body in the file that the printed command names.
@@ -25,6 +27,8 @@ n=${1#\#} section=$2 title=$3 label=${4:-}
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 refuse() {
   echo "#$n: $1: file a new issue that says Related to #$n, and comment on #$n"
+  # A dry run has no trap to remove the body.
+  [ -z "${body:-}" ] || rm -f "$body"
   exit 1
 }
 
@@ -40,7 +44,6 @@ host=$(bash "$(dirname "$0")/collect.sh" status "$n")
 
 [ "$state" = open ] || refuse "it is $state"
 [ "$taken" = no ] || refuse "someone works on it: $status"
-[ "$also" -lt 2 ] || refuse "it holds $also added findings already"
 
 tmp=${TMPDIR:-/tmp}
 body=$(mktemp "${tmp%/}/body.XXXXXX")
@@ -56,10 +59,15 @@ finished=
 # A dry run keeps the new body to be read.
 [ "${DRY_RUN:-}" = 1 ] || trap clean EXIT
 gh issue view "$n" --json body --jq .body >"$body"
-{ echo; cat "$section"; } >>"$body"
 
-args=(issue edit "$n" --title "$title" --body-file "$body")
-[ -z "$label" ] || args+=(--add-label "$label")
-run gh "${args[@]}"
+# A body that holds the section already is a rerun after a failed comment:
+# the edit went through, so only the comment is left to write.
+if ! grep -qxF "## Also: $problem" "$body"; then
+  [ "$also" -lt 2 ] || refuse "it holds $also added findings already"
+  { echo; cat "$section"; } >>"$body"
+  args=(issue edit "$n" --title "$title" --body-file "$body")
+  [ -z "$label" ] || args+=(--add-label "$label")
+  run gh "${args[@]}"
+fi
 run gh issue comment "$n" --body "Added to the body: $problem."
 finished=1
