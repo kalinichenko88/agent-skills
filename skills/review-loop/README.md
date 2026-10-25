@@ -35,12 +35,13 @@ a security review last, and a summary of what was decided and fixed.
 - **A second model for `xhigh` changes.** In Claude Code, Codex reads the
   whole branch once: beside the last pass, or after round 1 when the loop
   needed only one round. Its findings go through the same checks. Without the
-  Codex CLI, or when Codex fails, the step is skipped, and the summary says
-  so.
-- **Later fixes are reviewed too.** The fixes from the last pass, the Codex
-  review, the security review or your review comments, also after the pull
-  request opens, are one commit with rounds of its own: at the level of the
-  loop's round 1, or `xhigh` for a fix to security code.
+  Codex CLI or its login, or when Codex fails, the step is skipped, and the
+  summary says so.
+- **Later fixes are reviewed too.** The fixes from the last pass and the Codex
+  review are one commit. The fixes from the security review are one commit,
+  and so are those from each set of your review comments, also after the pull
+  request opens. Each of these commits has rounds of its own: at the level of
+  the loop's round 1, or `xhigh` for a fix to security code.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.

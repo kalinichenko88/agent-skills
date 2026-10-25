@@ -103,7 +103,7 @@ installed, skip it and say so in the summary.
 At `xhigh` in Claude Code, Codex reads the whole branch once per review. Start
 it in the background when the last pass starts. When the loop had one round,
 start it when that round confirms no defect and its nits are committed. When
-step 4 skips the last pass, skip this step too. Change no code while Codex
+step 4 skips the last pass, skip this step too. Change no file while Codex
 runs: its fixes and those of the last pass are one commit.
 
 ```bash
@@ -114,8 +114,9 @@ bash <dir>/scripts/codex-review.sh <base>
 The script prints Codex's findings as JSON. Each one goes through *The
 findings*, also one in the text of a skill or a prompt. When the script
 prints `skipped:`, the Codex CLI is not installed or not logged in. When it
-exits with an error, Codex failed. In both cases, go on without Codex, and
-give the reason in the summary.
+exits 1, Codex failed. In both cases, go on without Codex, and give the
+reason in the summary. When it exits 2, the call was wrong: correct the base
+or the directory, and run it again.
 
 Why: on three branches of this plugin that a `/code-review` loop had
 finished, Codex found three defects that no round had reported, in 45 to 74

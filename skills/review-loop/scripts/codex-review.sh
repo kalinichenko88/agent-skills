@@ -8,8 +8,8 @@
 #
 # When the Codex CLI is not installed or not logged in, it prints
 # "skipped: <why>" and exits 0: the review goes on without Codex. When codex
-# fails or writes no findings, it prints the end of Codex's log on stderr and
-# exits 1.
+# fails or writes no findings file, it prints the end of Codex's log on stderr
+# and exits 1. A wrong call, as a base that is not a commit, exits 2.
 #
 # Needs bash, git and the Codex CLI.
 
@@ -19,12 +19,12 @@ set -euo pipefail
   echo 'usage: codex-review.sh <base>' >&2
   exit 2
 }
-base=$1
-git rev-parse -q --verify "$base^{commit}" >/dev/null || {
-  echo "codex-review.sh: $base is not a commit" >&2
+# Both ends of the range as SHAs, so a later commit or fetch does not move it.
+# Codex still reads the files around the diff from the working tree.
+base=$(git rev-parse -q --verify "$1^{commit}") || {
+  echo "codex-review.sh: $1 is not a commit" >&2
   exit 2
 }
-# The commit that Codex reads, so a later commit does not change its range.
 head=$(git rev-parse HEAD)
 
 command -v codex >/dev/null || {

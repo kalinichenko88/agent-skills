@@ -52,6 +52,10 @@ base=$(git -C "$repo" rev-parse HEAD)
 git -C "$repo" -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m change
 head=$(git -C "$repo" rev-parse HEAD)
 review() { (cd "$repo" && PATH="$tmp/bin:$PATH" bash "$script" "$@"); }
+# A PATH with git and no codex.
+mkdir "$tmp/nocodex"
+ln -s "$(command -v git)" "$tmp/nocodex/git"
+nocodex() { (cd "$repo" && PATH="$tmp/nocodex" "$BASH" "$script" "$@"); }
 
 out=$(review "$base")
 check 'prints the findings that codex wrote, and nothing of its session' "$(cat "$fixtures/codex-findings.json")" "$out"
@@ -59,6 +63,8 @@ check 'codex runs in the read-only sandbox' read-only "$(grep -A1 -xF -- -s "$tm
 grep -qxF -- '--ephemeral' "$tmp/args" || fail 'codex keeps no session files' "$(cat "$tmp/args")"
 grep -qF "git diff $base...$head" "$tmp/args" ||
   fail 'the prompt names the range of the whole branch, from the merge base to the SHA of HEAD' "$(cat "$tmp/args")"
+review HEAD~1 >/dev/null
+grep -qF "git diff $base...$head" "$tmp/args" || fail 'a base given as a name goes into the prompt as its SHA' "$(cat "$tmp/args")"
 check 'the schema asks for the fields of a finding' 'file line summary failure_scenario' \
   "$(jq -r '.properties.findings.items.required | join(" ")' "$tmp/schema.json")"
 check 'the recorded findings fit the schema' 'true' \
@@ -79,8 +85,7 @@ rm -f "$tmp/args"
 check 'not logged in: skipped, with the reason' 'skipped: codex is not logged in' "$(FAKE_LOGGED_IN=0 review "$base")"
 [ ! -f "$tmp/args" ] || fail 'not logged in: codex exec does not run'
 
-check 'no codex on PATH: skipped, with the reason' 'skipped: the codex CLI is not installed' \
-  "$(cd "$repo" && PATH=/usr/bin:/bin bash "$script" "$base")"
+check 'no codex on PATH: skipped, with the reason' 'skipped: the codex CLI is not installed' "$(nocodex "$base")"
 
 code=0
 review no-such-commit >/dev/null 2>"$tmp/err" || code=$?
@@ -88,7 +93,7 @@ check 'a base that is not a commit is a usage error' 2 "$code"
 grep -qF 'no-such-commit' "$tmp/err" || fail 'the usage error names the base' "$(cat "$tmp/err")"
 
 code=0
-(cd "$repo" && PATH=/usr/bin:/bin bash "$script" no-such-commit) >/dev/null 2>&1 || code=$?
-check 'a bad base is a usage error with no codex too, not a skip' 2 "$code"
+out=$(nocodex no-such-commit 2>&1) || code=$?
+check 'a bad base is a usage error with no codex too, not a skip' "2 codex-review.sh: no-such-commit is not a commit" "$code $out"
 
 echo 'review_loop_scripts_test: ok'
