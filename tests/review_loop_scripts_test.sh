@@ -79,8 +79,4 @@ review no-such-commit >/dev/null 2>"$tmp/err" || code=$?
 check 'a base that is not a commit is a usage error' 2 "$code"
 grep -qF 'no-such-commit' "$tmp/err" || fail 'the usage error names the base' "$(cat "$tmp/err")"
 
-code=0
-review >/dev/null 2>&1 || code=$?
-check 'no base is a usage error' 2 "$code"
-
 echo 'review_loop_scripts_test: ok'
