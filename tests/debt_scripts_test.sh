@@ -98,7 +98,7 @@ mkdir "$tmp/fetchbin"
 cat >"$tmp/fetchbin/git" <<EOF
 #!/usr/bin/env bash
 "$(command -v git)" "\$@" || exit
-case " \$* " in *' grep '*) [ -e "$tmp/fetched" ] || { : >"$tmp/fetched"; "$(command -v git)" fetch -q >/dev/null; } ;; esac
+case " \$* " in *' grep '*) "$(command -v git)" fetch -q ;; esac
 EOF
 chmod +x "$tmp/fetchbin/git"
 out=$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src)
