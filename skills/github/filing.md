@@ -84,7 +84,9 @@ it is.
 
 The global prompt says when a defect in this plugin becomes an issue; this
 section says how. The plugin is the global prompt, the hooks, the
-`kalinichenko:` skills and their scripts. Its tracker is
+`kalinichenko:` skills and their scripts. The global prompt is `rules.md` and
+the hooks are in `hooks/`, at the plugin root: two directories above this
+skill's base directory. Its tracker is
 `github.com/kalinichenko88/agent-skills`. Every `gh` call below names it with
 its host, so the project's remote and `GH_HOST` do not matter. Only this
 section and *Public repositories* in `SKILL.md` apply: the sections above,
@@ -115,9 +117,9 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
   repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
-A file that is not on `main` does not have the defect. When `gh` cannot read
-`main` — it is not installed, or `gh auth status --hostname github.com` fails —
-skip this step and the search, and go on to *Write the issue*.
+A file that is not on `main`, when `gh` prints `HTTP 404`, does not have the
+defect. When the read fails in any other way, skip this step and the search,
+and go on to *Write the issue*.
 
 When `main` does not have the defect, file nothing. Tell the person that `main`
 does not have the defect. Give the file and the line of the defect in the copy
@@ -145,13 +147,22 @@ gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
 ```
 
 - An open issue has the same report: file nothing. When the defect shows
-  another path or a new reproduction, write it as a comment. Ask before you
-  write it, as *Ask the person* below says.
+  another part of the plugin or a new reproduction, write it as a comment, by
+  *Write the issue* below. Ask before you write it, as *Ask the person* below
+  says.
 - An open pull request fixes it: file nothing. Give the person its number.
 - A pull request closed without a merge does not decide the case. Name it in
   the issue you file.
-- A closed issue has the same report, and its `stateReason` is not
-  `COMPLETED`: file nothing. It was decided. Give the person its number.
+- A closed issue has the same report, and its `stateReason` is `NOT_PLANNED`:
+  file nothing. It was decided. Give the person its number.
+- A closed issue with the `stateReason` `DUPLICATE`: judge the issue that it
+  duplicates by these bullets instead. This call gives its number:
+
+  ```bash
+  gh api --hostname github.com graphql -f query='{ repository(owner:
+    "kalinichenko88", name: "agent-skills") { issue(number: <n>) {
+    duplicateOf { number } } } }'
+  ```
 - `main` has the defect again, and a closed issue with `COMPLETED` or a
   merged pull request fixed it before: file a new issue. Its body starts
   `Regression of #12`.

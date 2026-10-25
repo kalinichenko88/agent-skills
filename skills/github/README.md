@@ -78,4 +78,6 @@ also checks the `path:line` citations in issues against the code.
 ## Needs
 
 `bash` and `gh`, authenticated against a GitHub remote. Without them, the
-skill skips its GitHub steps and says so.
+skill skips its GitHub steps and says so. A defect in this plugin needs only
+`gh` logged in to github.com. Without it, you get the draft of the issue and
+a link to file it by hand.
