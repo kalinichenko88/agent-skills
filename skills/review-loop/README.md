@@ -32,6 +32,9 @@ fixed.
 - **One last look at the whole branch.** When the loop needed more than one
   round, one pass reads the whole branch again after it stops, to see how the
   fixes fit the rest. It never runs twice.
+- **A second model at `xhigh`.** In Claude Code, Codex reads the whole branch
+  once, beside the last pass, and its findings go through the same checks.
+  Without the Codex CLI the step is skipped, and the summary says so.
 - **Later fixes are reviewed too.** The fixes from the last pass, the security
   review or your review comments, also after the pull request opens, are one
   commit with rounds of its own: at the level of the loop's round 1, or
@@ -72,3 +75,16 @@ codex plugin add ponytail@ponytail
 It is not a dependency of this plugin. Codex plugins cannot declare one. In
 Claude Code a dependency would also turn on ponytail's always-on mode, a hook
 that needs `node`, for everyone who installs `kalinichenko`.
+
+## The Codex step
+
+The Codex step needs the Codex CLI, logged in:
+
+```sh
+npm install -g @openai/codex
+codex login
+```
+
+It runs `codex exec` in Codex's read-only sandbox, so it does not need the
+`openai-codex` plugin for Claude Code: the agent cannot call that plugin's
+review commands. You can still run its `/codex:adversarial-review` yourself.

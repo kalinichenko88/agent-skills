@@ -9,7 +9,8 @@ A review runs in rounds. An over-engineering review comes first, when its
 skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
-reads the whole branch again, once. A security review comes last. The agent
+reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
+whole branch once too. A security review comes last. The agent
 fixes and decides by itself, except for a change to business logic, and
 writes a summary. When the task is an issue taken into work, or the person
 asked for a pull request, the push and the pull request follow in the same
@@ -97,11 +98,32 @@ installed, skip it and say so in the summary.
    second whole-branch pass: the rounds that reread the whole branch are the
    ones that did not stop.
 
+### A second model at `xhigh`
+
+At `xhigh` in Claude Code, Codex reads the whole branch once per review. Start
+it in the background when the last pass starts. When the loop had one round,
+start it when that round confirms no defect. When step 4 skips the last pass,
+skip this step too.
+
+```bash
+bash <dir>/scripts/codex-review.sh <base>
+```
+
+`<dir>` is this skill's base directory, and `<base>` is the base of step 1.
+The script prints Codex's findings as JSON, and they go through *The
+findings*. When it prints `skipped:`, the Codex CLI is not installed or not
+logged in: go on without it, and say so in the summary.
+
+Why: on three branches of this plugin that a `/code-review` loop had
+finished, Codex found three defects that no round had reported, in 45 to 74
+seconds each.
+
 ### Fixes from other places
 
-Each of these starts a new count of rounds: the last pass, the security
-review, and each set of a person's review comments, before or after the pull
-request opens. For each of them:
+Each of these starts a new count of rounds: the last pass, the Codex review,
+the security review, and each set of a person's review comments, before or
+after the pull request opens. When the last pass and the Codex review both
+find defects, their fixes are one commit. For each of them:
 
 - Its fixes are one commit, and that commit goes through steps 2 to 4.
 - Its rounds run at the level that the loop's round 1 used. In a new session,
@@ -137,9 +159,9 @@ through *The findings* below, and the reply names the fix commit.
 
 ## The security review
 
-After the last pass and its rounds, run `/security-review` once, on the final
-branch. It reads the branch against origin's default branch and takes no
-target, so it never runs inside the loop. Its findings go through *The
+After the last pass, the Codex review and their rounds, run `/security-review`
+once, on the final branch. It reads the branch against origin's default
+branch and takes no target, so it never runs inside the loop. Its findings go through *The
 findings*, and its fixes through *Fixes from other places*. In
 Codex: `/review` with the custom instructions "Find security defects on this
 branch against origin/<default branch>: injection, authentication,
@@ -158,7 +180,8 @@ Then report in this order, one line per item:
 
 - **Rounds:** `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
-  last pass, the same way. The security review's result. The check's result.
+  last pass, the same way. At `xhigh`, the Codex review the same way, or why
+  it did not run. The security review's result. The check's result.
 - **Decisions:** each choice you made: the finding, the choice, the reason.
   Each question on business logic, with the person's answer, or `open`.
 - **Fixed:** what changed and in which file, the commit, and any side effect
