@@ -89,7 +89,7 @@ section says how. The plugin is the global prompt, the hooks, the
 its host, so the project's remote and `GH_HOST` do not matter. Only this
 section and *Public repositories* in `SKILL.md` apply: the sections above,
 `tracker.md` and its scripts work on the checkout's tracker. In a checkout of
-`agent-skills` itself, this section does not apply: the sections above do.
+`agent-skills` itself, this section does not apply: the sections above apply.
 
 **Make sure the plugin is wrong.** Read the rule or the script again, all of
 it. These are defects:
@@ -117,7 +117,9 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
 
 When `main` does not have the defect, file nothing. Tell the person to update
 the plugin. In Codex, tell the person that the fix comes with the next
-release.
+release. A plugin that runs from a checkout, as with `claude --plugin-dir`, can
+be newer than `main`: in this section, read that checkout's files in place of
+`main`.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
@@ -142,11 +144,13 @@ gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
   another path or a new reproduction, write it as a comment. Ask before you
   write it, as *Ask the person* below says.
 - An open pull request fixes it: file nothing. Give the person its number.
+- A pull request closed without a merge does not decide the case. Name it in
+  the issue you file.
 - A closed issue has the same report, and its `stateReason` is not
   `COMPLETED`: file nothing. It was decided. Give the person its number.
-- A closed issue with `COMPLETED` has the same report, or a merged pull
-  request fixed it, and `main` has the defect again: file a new issue. Its
-  body starts `Regression of #12`.
+- `main` has the defect again, and a closed issue with `COMPLETED` or a
+  merged pull request fixed it before: file a new issue. Its body starts
+  `Regression of #12`.
 
 **Write the issue.** The tracker is public. Take the person's project as a
 private source, whatever its visibility, and apply *Public repositories* in

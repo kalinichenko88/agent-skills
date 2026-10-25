@@ -27,8 +27,9 @@ time.
 - **A defect in the plugin reaches its tracker.** When the agent finds that
   a rule, a skill or a script of this plugin is wrong, it writes an issue for
   `kalinichenko88/agent-skills`: the plugin version, the file and line, and
-  the steps that show it again, with neutral names. It shows you the issue
-  and files it only after you say yes. Nothing from your project goes in.
+  the steps that show it again, with neutral names. Outside this repository,
+  it shows you the issue and files it only after you say yes. Nothing from
+  your project goes in.
 - **A task runs to its pull request.** After the review, the agent runs the
   repository's check on the final branch. When it passes and the branch is
   not the default branch, the agent pushes, opens the PR and asks whether to
