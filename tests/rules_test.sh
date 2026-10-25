@@ -51,4 +51,12 @@ for event in SessionStart SubagentStart; do
     exit 1
   }
 done
+# A review subagent gets these rules too, as the loop above proves, and
+# *Out-of-scope findings* tells it to file an issue without asking. One
+# sentence must tell every read-only subagent, a review one included, to file
+# nothing.
+tr '\n' ' ' <"$root/rules.md" | grep -qE 'read-only subagent[^.]* review[^.]* files nothing' || {
+  echo "FAIL: SubagentStart: no sentence tells a read-only review subagent to file nothing"
+  exit 1
+}
 echo 'rules_test: ok'

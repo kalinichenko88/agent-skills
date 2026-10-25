@@ -107,7 +107,7 @@ Claude Code, `/review` in Codex, a review subagent — and when a person's revie
 comments arrive, invoke the `kalinichenko:review-loop` skill. It sets the
 level, what each round reads and when the rounds stop, the security review,
 which findings to fix or decide without asking, and the summary at the end. A
-review subagent that only reads does not load it. An agent that acts on a
+read-only review subagent does not load it. An agent that acts on a
 finding, with the skill or without it, first verifies it against the real
 code: a confident wrong fix is worse than the defect.
 
@@ -138,9 +138,11 @@ touches a repository's GitHub surface goes through the `kalinichenko:github`
 skill. Invoke it before the first `git commit`, `gh` call or workflow edit, not
 after: it carries commit trailers, PR ownership and merge style, issue filing,
 keeping issues true as the code moves, which open issues ride along with a task,
-and action pinning. A read-only subagent sent with the skill's `scout.md`,
-or with the roadmap skill's `lanes.md`, follows that file instead: it does not
-load the skill and files nothing.
+and action pinning. A read-only subagent, as a review or a Haiku subagent
+above, files nothing, whatever the rules below say. It does not load the
+skill. It names each finding in its report, and the agent that sent it decides
+on each one. One sent with the skill's `scout.md`, or with the roadmap skill's
+`lanes.md`, follows that file instead.
 
 Three rules stay here in full, because they have to fire when nobody is thinking
 about GitHub at all.
