@@ -83,19 +83,22 @@ check 'a path, in a clone' '`src/hot.sh` `src/a:b.sh` `src/kept.sh` `src/new.sh`
 case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 5 code files.') ;; *) fail 'the clone reads origin/main' "$out" ;; esac
 check 'a move into the path and one inside it' 'Code files moved in 60 days: 2. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
 # A fetch that lands during a run, after a force push: the git on PATH moves
-# origin/main back to the commit before the moves on each call that names it.
-# On that commit src/ holds other files, kept.sh and new.sh have no commits,
-# nothing moved and the SHA is another, so a run that reads the name more than
-# once prints another output than above.
-back=$(git -C "$tmp/clone" rev-parse main~1)
+# origin/main back to the commit before the moves after each call that names
+# origin/, but the --abbrev-ref call that reads only the branch's name. On that
+# commit src/ has old.sh in place of kept.sh and new.sh, nothing has moved and
+# the SHA is another, so a run that reads the branch more than once prints
+# another output than above.
 mkdir "$tmp/fetchbin"
-cat >"$tmp/fetchbin/git" <<EOF
+cat >"$tmp/fetchbin/git" <<'EOF'
 #!/usr/bin/env bash
-"$(type -P git)" "\$@" || exit
-case \$* in *origin/main*) "$(type -P git)" update-ref refs/remotes/origin/main $back ;; esac
+# The test puts this directory first on PATH; the real git comes after it.
+PATH=${PATH#*:}
+git "$@" || exit
+case $* in *--abbrev-ref*) ;; *origin/*) git update-ref refs/remotes/origin/main "$BACK" ;; esac
 EOF
 chmod +x "$tmp/fetchbin/git"
-got=$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src) || fail 'a fetch during the run exits non-zero' "$got"
+back=$(git -C "$tmp/clone" rev-parse main~1)
+got=$(cd "$tmp/clone" && BACK=$back PATH=$tmp/fetchbin:$PATH bash "$measure" src)
 check 'a fetch during the run' "$out" "$got"
 check 'a fetch during the run moved origin/main' "$back" "$(git -C "$tmp/clone" rev-parse origin/main)"
 
@@ -146,7 +149,7 @@ run=$(sed -n 2p "$FAKE_LOG")
 case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 check 'npx, with only the code files' \
   "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
-out=$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree) || fail 'a relative tree with CDPATH set exits non-zero' "$out"
+out=$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)
 check 'a relative tree with CDPATH set' "$rows" "$out"
 # bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. A copy of
 # clones.sh gets a stop after its trap and runs with a finished from the
@@ -186,7 +189,7 @@ check 'a relative HOME' 'clones.sh: HOME must be an absolute path' "$err"
 err=$(TMPDIR=$tmp/missing PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a TMPDIR that does not exist exits 0' "$err"
 check 'a TMPDIR that does not exist' 'clones.sh: TMPDIR is not a directory' "$err"
 jq '.duplicates = []' "$FAKE_REPORT" >"$tmp/none.json"
-out=$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree") || fail 'no clones exits non-zero' "$out"
+out=$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")
 check 'no clones' 'No clones of 15 lines or more.' "$out"
 echo null >"$tmp/null.json"
 err=$(FAKE_REPORT=$tmp/null.json PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a report of another shape exits 0' "$err"
@@ -220,7 +223,7 @@ chmod g+w "$tmp/group"
 if [ "$(id -gn)" != "$(id -un)" ]; then
   above "$tmp/group/tmp" 'a directory that a group can write above' "$up/group, above the temporary directory, $refused"
 elif TMPDIR=$tmp/plain/tmp PATH=$fake bash "$clones" "$tree" >/dev/null 2>&1; then
-  out=$(TMPDIR=$tmp/group/tmp PATH=$fake bash "$clones" "$tree") || fail 'a directory of the own group above exits non-zero' "$out"
+  out=$(TMPDIR=$tmp/group/tmp PATH=$fake bash "$clones" "$tree")
   check 'a directory of the own group above' "$rows" "$out"
 else
   echo 'debt_scripts_test: the own group not run, the test directory is below a shared one'
@@ -233,7 +236,7 @@ if command -v bun >/dev/null && [ ! -e /usr/bin/npx ] && [ ! -e /bin/npx ] &&
   mkdir "$tmp/bunbin"
   cp "$tmp/bin/npx" "$tmp/bunbin/bunx"
   ln -s "$(command -v bun)" "$tmp/bunbin/bun"
-  out=$(PATH=$tmp/bunbin:/usr/bin:/bin bash "$clones" "$tree") || fail 'bunx with bun exits non-zero' "$out"
+  out=$(PATH=$tmp/bunbin:/usr/bin:/bin bash "$clones" "$tree")
   check 'bunx with bun' "$rows" "$out"
   check 'bunx' "$(printf '%s\n' bunx "$args")" "$(sed -n '1p;3p' "$FAKE_LOG")"
   case $(sed -n 2p "$FAKE_LOG") in "$real"*) fail 'bunx ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
