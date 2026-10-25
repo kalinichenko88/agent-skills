@@ -4,7 +4,8 @@
 # whose name ends as a document's does, one with a non-ASCII name, and a
 # dotfile that is code; a document, a fixture and ignore files that are data,
 # not code; and a file moved into src/, one moved inside it, and a moved
-# document. Then clones.sh, with a fake npx.
+# document; and a fetch that lands during a run. Then clones.sh, with a fake
+# npx.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -86,6 +87,24 @@ check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$rep
 
 err=$(cd "$repo" && bash "$measure" tests 2>&1) && fail 'a path with only data exits 0' "$err"
 check 'a path with only data' 'No code files under tests on HEAD.' "$err"
+
+# A fetch that lands during a run, as an IDE's auto-fetch does: the git on PATH
+# fetches once, right after the git grep, and moves origin/main to a commit
+# that changes src/hot.sh. The table and the SHA must still be the clone's.
+was=$(git -C "$tmp/clone" rev-parse --short origin/main)
+seq 80 >"$repo/src/hot.sh"
+commit 'change hot once more'
+mkdir "$tmp/fetchbin"
+cat >"$tmp/fetchbin/git" <<EOF
+#!/usr/bin/env bash
+"$(command -v git)" "\$@" || exit
+case " \$* " in *' grep '*) [ -e "$tmp/fetched" ] || { : >"$tmp/fetched"; "$(command -v git)" fetch -q >/dev/null; } ;; esac
+EOF
+chmod +x "$tmp/fetchbin/git"
+out=$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src)
+check 'a fetch during the run moved origin/main' "$(git -C "$repo" rev-parse HEAD)" "$(git -C "$tmp/clone" rev-parse origin/main)"
+check 'a fetch during the run: the hot row' '| `src/hot.sh` | 55 | 3 | 165 |' "$(grep -F '`src/hot.sh`' <<<"$out")"
+check 'a fetch during the run: the measured line' "Measured on \`origin/main\` at $was, 5 code files." "$(grep '^Measured on' <<<"$out")"
 
 # clones.sh, on the tree that tests/fixtures/debt/jscpd-report.json was
 # recorded from, with a fake npx: it writes down its name, where it ran, what it

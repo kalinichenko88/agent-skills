@@ -23,6 +23,8 @@ path=${1:-.}
 data=$(<"$(dirname "$0")/data.ere")
 cd "$(git rev-parse --show-toplevel)"
 ref=$(git rev-parse --abbrev-ref --verify -q origin/HEAD || echo HEAD)
+# One SHA for every git call below: a fetch during the run moves the name.
+sha=$(git rev-parse --verify "$ref^{commit}")
 
 # ponytail: renames are not followed, so a file moved inside the window counts
 # its commits from the move; git log --follow per file if a hotspot hides
@@ -32,15 +34,15 @@ ref=$(git rev-parse --abbrev-ref --verify -q origin/HEAD || echo HEAD)
 # out quoted and counts as code; -z and NUL records if one turns up.
 # The regex goes through ENVIRON, because awk -v turns \. into any character.
 rows=$({
-  git -c core.quotePath=false grep --no-color -I -c '' "$ref" -- "$path" || true
+  git -c core.quotePath=false grep --no-color -I -c '' "$sha" -- "$path" || true
   echo '== log'
-  git -c core.quotePath=false log --no-color --since=60.days --format= --name-only "$ref" -- "$path"
-} | DATA=$data awk -v ref="$ref:" '
+  git -c core.quotePath=false log --no-color --since=60.days --format= --name-only "$sha" -- "$path"
+} | DATA=$data awk -v sha="$sha:" '
   $0 == "== log" { inlog = 1; next }
   !inlog {
-    # ref:path:count; the path can hold a colon, the count cannot.
+    # sha:path:count; the path can hold a colon, the count cannot.
     n = $0; sub(/.*:/, "", n)
-    f = substr($0, length(ref) + 1, length($0) - length(ref) - length(n) - 1)
+    f = substr($0, length(sha) + 1, length($0) - length(sha) - length(n) - 1)
     if (f !~ ENVIRON["DATA"]) lines[f] = n
     next
   }
@@ -56,8 +58,8 @@ echo '| File | Lines | Commits in 60 days | Score |'
 echo '| --- | ---: | ---: | ---: |'
 head -n 15 <<<"$rows" | awk -F'\t' '{ printf "| `%s` | %d | %d | %d |\n", $4, $2, $3, $1 }'
 echo
-echo "Measured on \`$ref\` at $(git rev-parse --short "$ref"), $(grep -c . <<<"$rows") code files."
+echo "Measured on \`$ref\` at $(git rev-parse --short "$sha"), $(grep -c . <<<"$rows") code files."
 # The renames of the whole tree: a move into the path has its source outside it.
-moved=$(git -c core.quotePath=false log --no-color --since=60.days -M --diff-filter=R --name-only --format= "$ref" |
+moved=$(git -c core.quotePath=false log --no-color --since=60.days -M --diff-filter=R --name-only --format= "$sha" |
   sort -u | grep -cFxf <(cut -f4 <<<"$rows") || true)
 [ "$moved" -eq 0 ] || echo "Code files moved in 60 days: $moved. Their commits count from the move."
