@@ -142,7 +142,7 @@ and action pinning. A read-only subagent sent with the skill's `scout.md`,
 or with the roadmap skill's `lanes.md`, follows that file instead: it does not
 load the skill and files nothing.
 
-Two rules stay here in full, because they have to fire when nobody is thinking
+Three rules stay here in full, because they have to fire when nobody is thinking
 about GitHub at all.
 
 **Out-of-scope findings become issues.** Anything worth fixing that is **not**
@@ -155,6 +155,15 @@ line and carries the how: a search of the tracker first, adding to an open
 issue on the same code before opening a new one, existing labels only, and every
 number listed in the final report. Where there is no GitHub remote or
 `gh auth status` fails, name the finding in the final report instead.
+
+**A defect in this plugin goes to its tracker, after the person says yes.**
+These rules, a `kalinichenko:` skill and its scripts are the plugin. When one of
+them is wrong — a script fails on valid input, two rules contradict, a rule
+followed as written gives a wrong result — that is an issue for
+`kalinichenko88/agent-skills`, not for the project you work in. A step you
+skipped is not a defect. Do not derail the task. Unlike the rule above, ask
+first: show the person the title and the body, with nothing from their project
+in it, and file only after a yes. The skill's `filing.md` carries the how.
 
 **Never add a `Co-Authored-By:` trailer** to a commit message — no Claude, no
 model name, no `noreply@anthropic.com`.
