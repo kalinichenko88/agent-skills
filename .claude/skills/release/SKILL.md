@@ -25,7 +25,7 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    --ff-only origin/main`. Stop if that fails, or if `HEAD` is still not
    `origin/main` — local commits the remote does not have.
 2. **Read what is unreleased.** `last=$(git describe --tags --abbrev=0 --match 'v[0-9]*')`, then
-   `git log --format=%s "$last"..HEAD` and `git diff --name-only "$last"..HEAD`.
+   `git log --format='%h %s' "$last"..HEAD` and `git diff --name-only "$last"..HEAD`.
    No commits since the tag: stop, there is nothing to release. If
    `jq -r .version .codex-plugin/plugin.json` is not `${last#v}`, stop: the field
    moved outside a release, and that has to be undone first. The same for
@@ -49,12 +49,17 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    with today's date. One line per subject from step 2, in `git log` order,
    grouped by type under `### Added` (`feat`), `### Changed` (every other type)
    and `### Fixed` (`fix`), in that order; leave out a group with no lines. A
-   line is the subject without its type: `feat(github): check the citations
-   (#24)` becomes `- github: check the citations (#24)`, and a subject with no
-   scope keeps its sentence, first letter upper-case. Breaking subjects (`!`)
-   get `(breaking)` after the PR number. When `hooks/hooks.json` changed, the
-   first line under `### Changed` is `- Codex: trust the hooks again in
-   /hooks (breaking)`, so the reader sees why the bump is major.
+   line is the scope in parentheses, then the subject without its type:
+   `feat(github): check the citations (#24)` becomes `- (github) check the
+   citations (#24)`. Every line has a scope. A subject with no scope gets one
+   from the files its commit changes, `git show --name-only --format= <hash>`:
+   the skill or area they belong to, as earlier subjects name it —
+   `skills/typescript-conventions/` is `typescript`, `.github/workflows/` is
+   `ci`. Files of several areas get each name, in alphabetical order:
+   `(react, typescript)`. Breaking subjects (`!`) get `(breaking)` after the PR
+   number. When `hooks/hooks.json` changed, the first line under `### Changed`
+   is `- (codex) trust the hooks again in /hooks (breaking)`, so the reader
+   sees why the bump is major.
 5. **Bump and check.**
    `tmp=$(mktemp) && jq --arg v "$version" '.version = $v' .codex-plugin/plugin.json >"$tmp" && mv "$tmp" .codex-plugin/plugin.json`,
    then `make check`. If the check fails, restore both files and stop.

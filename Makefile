@@ -7,6 +7,7 @@ check: lint test
 lint:
 	claude plugin validate .
 	jq empty .codex-plugin/plugin.json hooks/hooks.json
+	! grep -n '^- ' CHANGELOG.md | grep -v '^[0-9]*:- ([a-z][a-z, -]*) '
 	shellcheck hooks/*.sh tests/*.sh skills/github/scripts/*.sh skills/roadmap/scripts/*.sh skills/debt/scripts/*.sh tests/fixtures/debt/*.sh
 
 # A test passes only when it exits 0 and its last non-empty line on stdout is
