@@ -84,21 +84,21 @@ case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 5 co
 check 'a move into the path and one inside it' 'Code files moved in 60 days: 2. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
 # A fetch that lands during a run, after a force push: the git on PATH moves
 # origin/main back to the commit before the moves after each call that names
-# origin/, but the --abbrev-ref call that reads only the branch's name. On that
-# commit src/ has old.sh in place of kept.sh and new.sh, nothing has moved and
-# the SHA is another, so a run that reads the branch more than once prints
+# origin/, except the --abbrev-ref call, which reads only the branch's name. On
+# that commit src/ has old.sh in place of kept.sh and new.sh, nothing has moved
+# and the SHA is another, so a run that reads the branch more than once prints
 # another output than above.
 mkdir "$tmp/fetchbin"
 cat >"$tmp/fetchbin/git" <<'EOF'
 #!/usr/bin/env bash
-# The test puts this directory first on PATH; the real git comes after it.
-PATH=${PATH#*:}
+# The test's PATH, without this directory: the real git.
+PATH=$REAL_PATH
 git "$@" || exit
 case $* in *--abbrev-ref*) ;; *origin/*) git update-ref refs/remotes/origin/main "$BACK" ;; esac
 EOF
 chmod +x "$tmp/fetchbin/git"
 back=$(git -C "$tmp/clone" rev-parse main~1)
-got=$(cd "$tmp/clone" && BACK=$back PATH=$tmp/fetchbin:$PATH bash "$measure" src)
+got=$(cd "$tmp/clone" && export BACK=$back REAL_PATH=$PATH && PATH=$tmp/fetchbin:$PATH bash "$measure" src)
 check 'a fetch during the run' "$out" "$got"
 check 'a fetch during the run moved origin/main' "$back" "$(git -C "$tmp/clone" rev-parse origin/main)"
 
