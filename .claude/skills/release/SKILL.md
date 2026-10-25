@@ -64,7 +64,8 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    | `hooks/` | `hooks` |
    | `.github/workflows/` | `ci` |
    | `.codex-plugin/`, `.agents/` | `codex` |
-   | a test, and a fixture of that test | the area of the code the test runs: `tests/rules_test.sh` runs `hooks/rules.sh`, so `hooks` |
+   | `tests/<name>_eval.sh` | the skills whose use it counts: `tests/review_loop_eval.sh` gives `review-loop` |
+   | any other test, and a fixture of a test | the area of the code the test runs: `tests/rules_test.sh` runs `hooks/rules.sh`, so `hooks` |
 
    Any other file gives no area: the root `README.md`, `CHANGELOG.md`, the
    `Makefile`, `.gitattributes`, `.claude-plugin/`. A manifest's description
