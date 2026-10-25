@@ -25,8 +25,9 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    --ff-only origin/main`. Stop if that fails, or if `HEAD` is still not
    `origin/main` — local commits the remote does not have.
 2. **Read what is unreleased.** `last=$(git describe --tags --abbrev=0 --match 'v[0-9]*')`, then
-   `git log --format=%s "$last"..HEAD` and `git diff --name-only "$last"..HEAD`.
-   No commits since the tag: stop, there is nothing to release. If
+   `git log --format='%h %s' "$last"..HEAD` and `git diff --name-only "$last"..HEAD`.
+   A log line is the short hash, a space and the subject; steps 3 and 4 read
+   the subject. No commits since the tag: stop, there is nothing to release. If
    `jq -r .version .codex-plugin/plugin.json` is not `${last#v}`, stop: the field
    moved outside a release, and that has to be undone first. The same for
    `CHANGELOG.md`: if `grep -m1 '^## ' CHANGELOG.md` is not `## ${last#v} ...`,
@@ -49,12 +50,31 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    with today's date. One line per subject from step 2, in `git log` order,
    grouped by type under `### Added` (`feat`), `### Changed` (every other type)
    and `### Fixed` (`fix`), in that order; leave out a group with no lines. A
-   line is the subject without its type: `feat(github): check the citations
-   (#24)` becomes `- github: check the citations (#24)`, and a subject with no
-   scope keeps its sentence, first letter upper-case. Breaking subjects (`!`)
-   get `(breaking)` after the PR number. When `hooks/hooks.json` changed, the
-   first line under `### Changed` is `- Codex: trust the hooks again in
-   /hooks (breaking)`, so the reader sees why the bump is major.
+   line is the scope in parentheses, then the subject without its type:
+   `feat(github): check the citations (#24)` becomes `- (github) check the
+   citations (#24)`. Every line has a scope. A subject with no scope gets one
+   from the files its commit changes, `git show --name-only --format= <hash>`.
+   Each file gives the area it belongs to:
+
+   | Files | Area |
+   | --- | --- |
+   | `skills/<name>/`, and `docs/<name>/` when `skills/<name>/` exists | the skill without `-conventions`: `typescript` |
+   | `.claude/skills/<name>/` | `<name>`: `release` |
+   | `rules.md` | `rules` |
+   | `hooks/` | `hooks` |
+   | `.github/workflows/` | `ci` |
+   | `.codex-plugin/`, `.agents/` | `codex` |
+   | `tests/<name>_eval.sh` | the areas of the skills whose use it counts: `tests/skill_load_eval.sh` gives `react` and `typescript` |
+   | any other test, and a fixture of a test | the area of the code the test runs: `tests/rules_test.sh` runs `hooks/rules.sh`, so `hooks` |
+
+   Any other file gives no area: the root `README.md`, `CHANGELOG.md`, the
+   `Makefile`, `.gitattributes`, `.claude-plugin/`. A manifest's description
+   that only lists a new skill gives no area too. The scope is the areas in
+   alphabetical order, comma-separated: `(react, typescript)`. Four or more
+   areas, or none, give `(plugin)`. Breaking subjects (`!`) get `(breaking)` at
+   the end of the line. When `hooks/hooks.json` changed, the first line under `### Changed`
+   is `- (codex) trust the hooks again in /hooks (breaking)`, so the reader
+   sees why the bump is major.
 5. **Bump and check.**
    `tmp=$(mktemp) && jq --arg v "$version" '.version = $v' .codex-plugin/plugin.json >"$tmp" && mv "$tmp" .codex-plugin/plugin.json`,
    then `make check`. If the check fails, restore both files and stop.
