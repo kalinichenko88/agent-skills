@@ -6,14 +6,14 @@
 # the order runs that put the order, its line, the customer or the discount
 # outside models/, or two of them in one file. It counts the feature runs that
 # put a sub-component's own hook at the feature root or in `shared`, and the
-# feature runs with a zod schema outside schemas/. It calls the model, so it
-# costs tokens and is not part of `make check`: run it by hand after a change
-# to rules.md or to a skill's description. It runs with this machine's other
-# plugins and settings, the setup the rules must work in.
+# feature runs with a zod schema outside schemas/. Its runs call the model, so
+# they cost tokens and are not part of `make check`: run it by hand after a
+# change to rules.md or to a skill's description. It runs with this machine's
+# other plugins and settings, the setup the rules must work in.
 #
 # With --check, it runs only the checks, on the logs folder of an earlier run.
-# tests/skill_load_checks_test.sh runs them so on tests/fixtures/skill_load in
-# `make check`.
+# `make check` runs them so on tests/fixtures/skill_load, through
+# tests/skill_load_checks_test.sh.
 #
 # Usage: tests/skill_load_eval.sh [runs per task, default 5]
 #        tests/skill_load_eval.sh --check <logs folder>
@@ -49,7 +49,8 @@ $1
 
 # count <skill> <log>...: the runs whose subagent invoked the skill before its
 # first write: a Write, an Edit, or a Bash call that writes a TypeScript file
-# with `>` or `tee`. A run with no write at all does not count.
+# with `>` or `tee`. A run with no write at all counts as one that did not
+# invoke it.
 # ponytail: it finds `>`, `tee` or `tee -a`, then spaces or none, then a path
 # with `.ts`, `.tsx`, `.mts` or `.cts` in it, at any place in the command text.
 # So `=> x.ts` in a here-document and `> a.ts.bak` are writes too, and `cp`,
@@ -180,9 +181,12 @@ schemas() {
 }
 
 if [ "${1:-}" = --check ]; then
-  [ -d "${2:-}" ] || usage
+  [ "$#" -eq 2 ] || usage
+  [ -d "$2" ] || usage
   logs=${2%/}
 else
+  # An argument too many, as `3 --check <folder>`, must not start paid runs.
+  [ "$#" -le 1 ] || usage
   runs=${1:-5}
   [ "$runs" -ge 1 ] 2>/dev/null || usage
   logs=$(mktemp -d)

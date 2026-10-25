@@ -62,4 +62,10 @@ out=$(tests/skill_load_eval.sh --check tests/fixtures/skill_load/ 2>&1) || code=
   diff <(expected) <(printf '%s\n' "$out") || true
   exit 1
 }
+code=0
+tests/skill_load_eval.sh --check tests/fixtures/skill_load extra 2>/dev/null || code=$?
+[ "$code" = 2 ] || {
+  echo "FAIL: --check with an argument too many exited $code, not 2"
+  exit 1
+}
 echo 'skill_load_checks_test: ok'
