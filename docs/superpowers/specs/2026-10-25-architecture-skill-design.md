@@ -471,8 +471,10 @@ debt shows as `new`; the lens reads the diff and sees the move.
 A hit of `grep` is matched by its path and the text of its line, not by its
 line number, which moves. Identical hits are counted: when the ref has more
 hits with one path and one text than the base, the extra ones are new. A hit
-of `lines` or `files` is new when, at the base, its old path (for a folder,
-its path) is missing, is not past the limit, or is smaller.
+of `lines` or `files` is new when the run on the base has no hit at its old
+path (for a folder, its path), or a smaller one there. So a file that the
+branch moves into the paths of a check, or out of its `except` paths, brings
+a `new` hit.
 
 The output is one line per invariant, `I-1 PASS` or `I-2 FAIL`, and under each
 FAIL what it found: the `git grep` lines, or the files and folders and their
