@@ -84,17 +84,18 @@ case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 5 co
 check 'a move into the path and one inside it' 'Code files moved in 60 days: 2. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
 # A fetch that lands during a run, after a force push: the git on PATH moves
 # origin/main back to the commit before the moves on each call that names it.
-# The files, their commits, the SHA and the moves all differ on that commit, so
-# a run that reads the name more than once prints another output than above.
+# On that commit src/ holds other files, kept.sh and new.sh have no commits,
+# nothing moved and the SHA is another, so a run that reads the name more than
+# once prints another output than above.
 back=$(git -C "$tmp/clone" rev-parse main~1)
 mkdir "$tmp/fetchbin"
 cat >"$tmp/fetchbin/git" <<EOF
 #!/usr/bin/env bash
-"$(command -v git)" "\$@" || exit
-case \$* in *origin/main*) "$(command -v git)" update-ref refs/remotes/origin/main $back ;; esac
+"$(type -P git)" "\$@" || exit
+case \$* in *origin/main*) "$(type -P git)" update-ref refs/remotes/origin/main $back ;; esac
 EOF
 chmod +x "$tmp/fetchbin/git"
-got=$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src)
+got=$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src) || fail 'a fetch during the run exits non-zero' "$got"
 check 'a fetch during the run' "$out" "$got"
 check 'a fetch during the run moved origin/main' "$back" "$(git -C "$tmp/clone" rev-parse origin/main)"
 
@@ -145,7 +146,8 @@ run=$(sed -n 2p "$FAKE_LOG")
 case $run in "$real"*) fail 'jscpd ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 check 'npx, with only the code files' \
   "$(printf '%s\n' npx "--yes $args" ./src/a.ts ./src/short1.ts ./src/short2.ts ./src/sub/e.ts)" "$(sed 2d "$FAKE_LOG")"
-check 'a relative tree with CDPATH set' "$rows" "$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree)"
+out=$(cd "$tmp" && CDPATH=$tmp PATH=$fake bash "$clones" tree) || fail 'a relative tree with CDPATH set exits non-zero' "$out"
+check 'a relative tree with CDPATH set' "$rows" "$out"
 # bash 3.2 runs an EXIT trap with $? at 0 when set -u stops a script. A copy of
 # clones.sh gets a stop after its trap and runs with a finished from the
 # environment. Two stops: an unbound variable, the case itself, and an exit 0,
@@ -184,7 +186,8 @@ check 'a relative HOME' 'clones.sh: HOME must be an absolute path' "$err"
 err=$(TMPDIR=$tmp/missing PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a TMPDIR that does not exist exits 0' "$err"
 check 'a TMPDIR that does not exist' 'clones.sh: TMPDIR is not a directory' "$err"
 jq '.duplicates = []' "$FAKE_REPORT" >"$tmp/none.json"
-check 'no clones' 'No clones of 15 lines or more.' "$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree")"
+out=$(FAKE_REPORT=$tmp/none.json PATH=$fake bash "$clones" "$tree") || fail 'no clones exits non-zero' "$out"
+check 'no clones' 'No clones of 15 lines or more.' "$out"
 echo null >"$tmp/null.json"
 err=$(FAKE_REPORT=$tmp/null.json PATH=$fake bash "$clones" "$tree" 2>&1) && fail 'a report of another shape exits 0' "$err"
 check 'a report of another shape' 'clones.sh: jscpd wrote no report that can be read' "$err"
@@ -217,7 +220,8 @@ chmod g+w "$tmp/group"
 if [ "$(id -gn)" != "$(id -un)" ]; then
   above "$tmp/group/tmp" 'a directory that a group can write above' "$up/group, above the temporary directory, $refused"
 elif TMPDIR=$tmp/plain/tmp PATH=$fake bash "$clones" "$tree" >/dev/null 2>&1; then
-  check 'a directory of the own group above' "$rows" "$(TMPDIR=$tmp/group/tmp PATH=$fake bash "$clones" "$tree")"
+  out=$(TMPDIR=$tmp/group/tmp PATH=$fake bash "$clones" "$tree") || fail 'a directory of the own group above exits non-zero' "$out"
+  check 'a directory of the own group above' "$rows" "$out"
 else
   echo 'debt_scripts_test: the own group not run, the test directory is below a shared one'
 fi
@@ -229,7 +233,8 @@ if command -v bun >/dev/null && [ ! -e /usr/bin/npx ] && [ ! -e /bin/npx ] &&
   mkdir "$tmp/bunbin"
   cp "$tmp/bin/npx" "$tmp/bunbin/bunx"
   ln -s "$(command -v bun)" "$tmp/bunbin/bun"
-  check 'bunx with bun' "$rows" "$(PATH=$tmp/bunbin:/usr/bin:/bin bash "$clones" "$tree")"
+  out=$(PATH=$tmp/bunbin:/usr/bin:/bin bash "$clones" "$tree") || fail 'bunx with bun exits non-zero' "$out"
+  check 'bunx with bun' "$rows" "$out"
   check 'bunx' "$(printf '%s\n' bunx "$args")" "$(sed -n '1p;3p' "$FAKE_LOG")"
   case $(sed -n 2p "$FAKE_LOG") in "$real"*) fail 'bunx ran in the tree' "$(cat "$FAKE_LOG")" ;; esac
 else
