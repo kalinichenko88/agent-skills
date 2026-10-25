@@ -116,15 +116,17 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
 ```
 
 When `main` does not have the defect, file nothing, and tell the person one of
-these. The plugin version under *Write the issue* below shows which one
-applies.
+these:
 
-- A plugin installed in Claude Code: update the plugin.
-- A plugin installed in Codex: update it with
-  `codex plugin marketplace upgrade kalinichenko`. When the version does not
-  change, the next release has the fix.
-- A plugin that runs from a checkout, as with `claude --plugin-dir`: the file
-  and the line of the defect, and that `main` does not have it.
+- In Codex: update the plugin with
+  `codex plugin marketplace upgrade kalinichenko`. When the defect is still
+  there after the upgrade, the next release has the fix.
+- In Claude Code, when this skill's base directory is under
+  `~/.claude/plugins/cache/`: update the plugin with
+  `claude plugin update kalinichenko@kalinichenko`.
+- In Claude Code, with any other base directory: the plugin runs from a
+  checkout, as with `claude --plugin-dir`. Give the file and the line of the
+  defect, and say that `main` does not have it.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
