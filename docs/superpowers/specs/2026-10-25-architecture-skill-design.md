@@ -462,17 +462,17 @@ line that says so and exits 0.
 `new` each hit that the base does not have, under a FAIL and under the known
 debt of a PASS. It reads the checks at the ref and runs them on both trees, so
 the base needs no architecture file, and a check that the branch amends is the
-same at both. Before it compares, it follows renames: a path that
-`git diff -M <base> <ref>` shows as renamed is compared with its old path, so
-a moved file brings no `new` hit. `git diff` names files only, so the old
-path of a folder comes from its own code files, not those of its subfolders:
-it is the folder at the base that held the most of them, each followed back
-through its rename. With none of them at the base, the folder has no old path.
+same at both. Before it compares, it follows the renames of files: a file
+that `git diff -M <base> <ref>` shows as renamed is compared with its old
+path, so a moved file brings no `new` hit. A folder is compared by its path
+only, because `git diff` names no folder renames. So when a branch only
+renames a folder of a `debt` list, and renames it in the list too, its known
+debt shows as `new`; the lens reads the diff and sees the move.
 A hit of `grep` is matched by its path and the text of its line, not by its
 line number, which moves. Identical hits are counted: when the ref has more
 hits with one path and one text than the base, the extra ones are new. A hit
-of `lines` or `files` is new when it has no old path, or when its old path is
-not past the limit at the base or is smaller there.
+of `lines` or `files` is new when, at the base, its old path (for a folder,
+its path) is missing, is not past the limit, or is smaller.
 
 The output is one line per invariant, `I-1 PASS` or `I-2 FAIL`, and under each
 FAIL what it found: the `git grep` lines, or the files and folders and their
