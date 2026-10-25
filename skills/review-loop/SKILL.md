@@ -44,13 +44,15 @@ code and the scripts it names. Why: on a skill's own branch, eight runs of
 were in the sentences the run before had written. The rounds stopped only at
 the ask in step 4.
 
-When that text comes with code, the rounds and the last pass have two
-reviews. The code review, `/code-review` at the level of the code alone or
-`/review` in Codex, reads each range that changes anything but that text.
-The agent does not act on its findings in that text, and does not count
-them. The subagent reads each range that changes that text, or code that the
-text names, as a script or a flag. It reviews only the text, against the
-code. A round confirms no defect when neither review does. Other documents
+When that text comes with code, each range of the rounds and the last pass
+goes to one review or to both, by what it changes. The code review,
+`/code-review` at the level of the code alone or `/review` in Codex, reads
+each range that changes anything but that text. The agent does not act on
+its findings in that text, and does not count them. The subagent reads each
+range that changes that text, or code that the text names, as a script or a
+flag. It reviews only the text against the code: the sentences the range
+changes, and the sentences that name the code it changes. A round confirms
+no defect when neither review does. Other documents
 next to code stay with the code review, with no subagent.
 
 A review subagent and Codex's `/review` have no levels.
