@@ -7,8 +7,10 @@ description: Use when touching a repository's GitHub surface — writing a commi
 
 Everything here needs `gh` authenticated against a GitHub remote. Where it is
 not — `gh auth status` fails, or the remote is elsewhere — skip the step and say
-so in the final report rather than inventing a substitute. *Public
-repositories* is the one exception: there, the target counts as public.
+so in the final report rather than inventing a substitute. There are two
+exceptions. In *Public repositories*, the target counts as public. *A defect in
+this plugin* in `filing.md` names its tracker, so the remote does not matter
+there.
 
 | Moment | What must happen | Read first |
 | --- | --- | --- |
@@ -16,6 +18,7 @@ repositories* is the one exception: there, the target counts as public.
 | `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15`: `keep-open.sh` after it; then read what it closes | *Pull requests* below |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch; then *Finishing* | *Pull requests* below |
 | Finding something out of scope | Small, safe, needs no decision: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
+| A rule, a skill or a script of this plugin is wrong | Search `kalinichenko88/agent-skills`; show the person the issue, with nothing from their project; file it only after a yes. In a checkout of `agent-skills`: the row above | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
 | Picking an issue up — `#91` or its URL | `take-in-check.sh`; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code, and assign each one when it joins; after the work, the check and the review, then the PR and the question whether to merge, in the same turn, on the conditions in *The pull request* of `kalinichenko:review-loop` | `take-in.md` |
 | Writing to a repository — an issue, a comment, a PR, a branch, a commit | `gh repo view <owner/name> --json visibility` on each repository that gets it, and when it fails, take it as `PUBLIC`; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |

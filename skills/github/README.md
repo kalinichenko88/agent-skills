@@ -11,6 +11,7 @@ time.
 - You name an issue on its own — `#91` or its URL — to start work on it.
 - You find something worth fixing that is outside the task.
 - You check whether a finding is already filed.
+- A rule, a skill or a script of this plugin is wrong.
 - You create or edit a GitHub Actions workflow.
 
 ## What you get
@@ -23,6 +24,13 @@ time.
   needs no decision goes into the current PR. Anything else joins an open
   issue on the same code, up to two added findings per issue. Only when no
   issue can take it is a new one filed.
+- **A defect in the plugin reaches its tracker.** When the agent finds that
+  a rule, a skill or a script of this plugin is wrong, it writes an issue for
+  `kalinichenko88/agent-skills`: the plugin version, the file and line, and
+  the steps that show it again, with neutral names. In a checkout of
+  `agent-skills`, the defect is an ordinary finding. Anywhere else, the agent
+  shows you the issue and files it only after you say yes. Nothing from your
+  project goes in.
 - **A task runs to its pull request.** After the review, the agent runs the
   repository's check on the final branch. When it passes and the branch is
   not the default branch, the agent pushes, opens the PR and asks whether to
@@ -70,4 +78,6 @@ also checks the `path:line` citations in issues against the code.
 ## Needs
 
 `bash` and `gh`, authenticated against a GitHub remote. Without them, the
-skill skips its GitHub steps and says so.
+skill skips its GitHub steps and says so. A defect in this plugin needs only
+`gh` logged in to github.com. Without it, you get the draft of the issue and
+a link to file it by hand.
