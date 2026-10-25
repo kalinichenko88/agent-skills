@@ -49,8 +49,10 @@ logs: tests/fixtures/skill_load
 EOF
 }
 
+# The folder ends in a slash: the paths in the output must still have none
+# doubled.
 code=0
-out=$(tests/skill_load_eval.sh --check tests/fixtures/skill_load 2>&1) || code=$?
+out=$(tests/skill_load_eval.sh --check tests/fixtures/skill_load/ 2>&1) || code=$?
 [ "$code" = 1 ] || {
   printf 'FAIL: --check exited %s, not 1\n%s\n' "$code" "$out"
   exit 1
