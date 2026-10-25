@@ -44,14 +44,14 @@ code and the scripts it names. Why: on a skill's own branch, eight runs of
 were in the sentences the run before had written. The rounds stopped only at
 the ask in step 4.
 
-When that text comes with code, `/code-review` takes the level of the code
-alone, and its findings in that text do not count: the subagent reviews the
-text. Each round sends the subagent the text only:
-`git diff <base>..HEAD -- <the text files>` in step 1,
-`git show <sha> -- <the text files>` in step 2. A fix commit that changes
-only that text goes to the subagent alone. A round confirms no defect when
-neither review does. Other documents next to code stay in the range of
-`/code-review`, with no subagent.
+When that text comes with code, the code review reads the range of each
+round: `/code-review` at the level of the code alone, or `/review` in Codex.
+The agent does not act on its findings in that text, and does not count
+them. Each round also sends the subagent the same range, and the subagent
+reviews only the text, against the code. A fix commit that changes only that
+text goes to the subagent alone. A round confirms no defect when neither
+review does. Other documents next to code stay with the code review, with no
+subagent.
 
 A review subagent and Codex's `/review` have no levels.
 
