@@ -50,8 +50,9 @@ goes to one review or to both, by what it changes. The code review,
 each range that changes anything but that text. The agent does not act on
 its findings in that text, and does not count them. The subagent reads each
 range that changes that text, or code that the text names, as a script or a
-flag. It reviews only the text against the code: the sentences the range
-changes, and the sentences that name the code it changes. A round confirms
+flag. It reviews only the text: the sentences the range changes and the
+sentences that name the code it changes, against the code and the rest of
+the text. A round confirms
 no defect when neither review does. Other documents
 next to code stay with the code review, with no subagent.
 
