@@ -62,10 +62,22 @@ out=$(tests/skill_load_eval.sh --check tests/fixtures/skill_load/ 2>&1) || code=
   diff <(expected) <(printf '%s\n' "$out") || true
   exit 1
 }
-code=0
-tests/skill_load_eval.sh --check tests/fixtures/skill_load extra 2>/dev/null || code=$?
-[ "$code" = 2 ] || {
-  echo "FAIL: --check with an argument too many exited $code, not 2"
-  exit 1
+
+# refused <argument>...: the eval must exit 2 with its usage and start no run.
+# The claude on PATH is a stub that records each call, so a broken guard costs
+# no tokens.
+stub=$(mktemp -d)
+trap 'rm -rf "$stub"' EXIT
+printf '#!/usr/bin/env bash\ntouch "%s/called"\n' "$stub" >"$stub/claude"
+chmod +x "$stub/claude"
+refused() {
+  local code=0 err
+  err=$(PATH="$stub:$PATH" tests/skill_load_eval.sh "$@" 2>&1 >/dev/null) || code=$?
+  if [ "$code" != 2 ] || [ "${err#usage:}" = "$err" ] || [ -e "$stub/called" ]; then
+    echo "FAIL: '$*' exited $code with '$err': it must exit 2 with the usage and not run claude"
+    exit 1
+  fi
 }
+refused --check tests/fixtures/skill_load extra
+refused 3 --check tests/fixtures/skill_load
 echo 'skill_load_checks_test: ok'
