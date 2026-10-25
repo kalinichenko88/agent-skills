@@ -108,17 +108,21 @@ These are not defects:
 **A subagent files nothing.** It names the defect in its report. The agent that
 sent it asks the person.
 
-**Read the files on `main`.** The copy that runs can be older:
+**Read the files on `main`.** The copy that runs can be older than `main`:
 
 ```bash
 gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
   repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
+A file that is not on `main` does not have the defect. When `gh` cannot read
+`main` — it is not installed, or `gh auth status --hostname github.com` fails —
+skip this step and the search, and go on to *Write the issue*.
+
 When `main` does not have the defect, file nothing. Tell the person that `main`
 does not have the defect. Give the file and the line of the defect in the copy
 that runs. Give the link
-`https://github.com/kalinichenko88/agent-skills#update`: it says how to update
+`https://github.com/kalinichenko88/agent-skills#update`, and say that it is for
 an installed plugin.
 
 **Search**, by the name of the script, the skill or the rule's heading:
