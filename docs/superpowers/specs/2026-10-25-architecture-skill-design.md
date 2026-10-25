@@ -218,9 +218,10 @@ simpler way first. The person decides; the skill never stops the work.
 
 With `superpowers:brainstorming` in the session, its order holds: its first
 message is the opt-out line and one question, and it reads the code only after
-the person says yes to its offer to look. So the block comes once, in the
-message that reports what that look found. With no such look, the block comes
-only at the start of the spec. Never before its first question.
+the person says yes to its offer to look. So the block comes first in the
+message that reports what that look found, and again at the start of the
+spec. With no such look, it comes only where the paragraph above puts it.
+Never before its first question.
 
 ## The moment of a decision
 
@@ -289,8 +290,9 @@ The ADR is written when the decision is final: in the pull request with the
 code, with the status `accepted`. The review of the pull request is where it
 is argued, and the merge makes it true. An ADR file that
 `git diff <base>..HEAD` adds is under review: the lens and the person argue
-it. One that exists at the base is settled. A spec or a plan names the ADR
-that the work will add, by its title, and does not write it.
+it. One that exists at the base is settled. A branch that changes it past its
+Status line breaks *ADRs* below, and the lens reports that. A spec or a plan
+names the ADR that the work will add, by its title, and does not write it.
 
 A finding outside the task, such as two competing ways that the task does not
 touch, becomes an issue through `kalinichenko:github`. When the decision is
@@ -418,14 +420,17 @@ feature's commits.
 
 1. One subagent (see *Models*) reads a few typical files of each area, as
    Agent OS's `/discover-standards` does, with `measure.sh` to find the areas
-   that change most, and with the graphs of #100 when they run.
+   that change most, and with the graphs of #100 when they run. It loads the
+   conventions skills that the project's languages call for, as
+   `kalinichenko:react-conventions` for React, so that step 5 sees where the
+   code differs from them.
 2. It proposes: the codemap; the modules and the role of each folder; only
    the patterns that the code keeps everywhere and that are not obvious; the
    limits of decomposition from the project's own sizes.
 3. Each proposed invariant has a check that passes on the current tree. When
    it fails now and the person wants the invariant, the paths that break it go
-   into its `debt` list, as known debt. These paths need no issue now: step 2
-   of the debt map ranks them beside the FAILs, so they get issues over time.
+   into its `debt` list, as known debt. These paths need no issue now: the
+   debt map weighs them later by its own rules (see *The debt map*).
    Otherwise the invariant stays out, and the report names it as debt.
 4. The person confirms or corrects each item.
 5. No ADR for an old decision, except in two cases: when two competing ways
@@ -457,10 +462,13 @@ line that says so and exits 0.
 `new` each hit that the base does not have, under a FAIL and under the known
 debt of a PASS. It reads the checks at the ref and runs them on both trees, so
 the base needs no architecture file, and a check that the branch amends is the
-same at both. A hit of `grep` is matched by its path and the text of its line,
-not by its line number, which moves. A hit of `lines` or `files` is new when
-its path is past the limit at the ref and not at the base, or bigger than at
-the base.
+same at both. Before it compares, it follows renames: a path that
+`git diff -M <base> <ref>` shows as renamed is compared with its old path, so
+a moved file brings no `new` hit. A hit of `grep` is matched by its path and
+the text of its line, not by its line number, which moves. Identical hits are
+counted: when the ref has more hits with one path and one text than the base,
+the extra ones are new. A hit of `lines` or `files` is new when its path is
+past the limit at the ref and not at the base, or bigger than at the base.
 
 The output is one line per invariant, `I-1 PASS` or `I-2 FAIL`, and under each
 FAIL what it found: the `git grep` lines, or the files and folders and their
@@ -469,9 +477,8 @@ is printed, as known debt: with its lines for `grep`, with its size for
 `lines` and `files`. A path of the `debt` list that no longer breaks it is
 printed as no longer debt, so that the list shrinks. The `except` paths are
 never printed. An invariant with no `Check:` line prints `I-4 review only`.
-The exit status
-is 0 when no check fails, 1 when one fails, and 2 for a wrong call or a
-`Check:` line that the script cannot read; then it names that line.
+The exit status is 0 when no check fails, 1 when one fails, and 2 for a wrong
+call or a `Check:` line that the script cannot read; then it names that line.
 
 The script builds each `git grep` call itself, with `--` before the paths, and
 puts the pattern in its own argument. No text of `docs/ARCHITECTURE.md` runs as
@@ -521,10 +528,13 @@ the clones that touch a file the branch changed. Its findings:
   breaks a principle;
 - a module that uses another not through its public API, or against the
   direction, or in a cycle;
-- a FAIL that the branch added, cited as `I-n`. An ADR that amends the
-  invariant changes its check, so it leaves no FAIL to excuse;
+- a `new` hit, cited as `I-n`: each one under a FAIL, and each `grep` hit
+  under the known debt of a PASS, as a second `fetch(` call in a path of the
+  `debt` list. An ADR that amends the invariant changes its check, so it
+  leaves no FAIL to excuse;
 - a decision that needs an ADR, and has none;
-- a change against an accepted ADR, with no ADR that supersedes it;
+- a change against an accepted ADR, with no ADR that supersedes it, or an
+  edit of an accepted ADR past its Status line;
 - a passage of `docs/ARCHITECTURE.md` that the change made false;
 - a file or a module that the branch grew past its limit, with no split and
   no debt issue; or a path of a `debt` list that the branch grew when its
@@ -539,12 +549,14 @@ rounds. #60 keeps the tests lens and the task lens.
 ## The debt map (#98)
 
 Step 2 of `kalinichenko:debt` also runs `invariants.sh` in its `<tree>`. Each
-FAIL is a broken rule whose issue cites `I-n`. Each path of a `debt` list is a
-place too, ranked beside the FAILs, so the known debt gets issues over time.
-An invariant with no `Check:` line is named in the report. Step 4 sorts each
-clone place by the three conditions of *Decomposition*: a place that fails
-one is a copy kept on
-purpose, named in the report and not filed. `docs/ARCHITECTURE.md` is the
+FAIL is a broken rule whose issue cites `I-n`. A path of the `debt` list of a
+`grep` check is a broken rule too. A path of the `debt` list of a `lines` or
+`files` check is a hotspot, weighed by the debt skill's own rule: a place when
+the file or the folder holds more than one concern and the split can be named;
+a large file or folder of one concern goes into *next*. An invariant with no `Check:` line is named
+in the report. Step 4 sorts each clone place by the three conditions of
+*Decomposition*: a place that fails one is a copy kept on purpose, named in
+the report and not filed. `docs/ARCHITECTURE.md` is the
 project's own file, so the debt skill still carries no rules of its own
 (PR #58).
 
@@ -565,8 +577,9 @@ project's tree. Each tool has its own runner, and an absent runner gives a
   `clones.sh`;
 - ruff: `uvx ruff@<pin>`, when `uvx` is on `PATH`;
 - `go list`: the `go` on `PATH`, with no network and no other toolchain
-  (`GOPROXY=off`, `GOTOOLCHAIN=local`), so a module that is not in the cache,
-  or a `toolchain` line of `go.mod`, gives an error line, not a download.
+  (`GOPROXY=off`, `GOTOOLCHAIN=local`). A module that is not in the cache, or
+  a `go` line of `go.mod` newer than the local `go`, gives an error line, not
+  a download.
 
 Unlike `clones.sh`, the copy keeps the files that the tools read as data and
 that `data.ere` leaves out: `tsconfig.json`, `go.sum`, `pyproject.toml`
