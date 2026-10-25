@@ -117,9 +117,9 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
   repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
-A file that is not on `main`, when `gh` prints `HTTP 404`, does not have the
-defect. When the read fails in any other way, skip this step and the search,
-and go on to *Write the issue*.
+When `gh` prints `HTTP 404` for the file that holds the defect, `main` does not
+have that file and does not have the defect. When the read fails in any other
+way, skip this step and the search, and go on to *Write the issue*.
 
 When `main` does not have the defect, file nothing. Tell the person that `main`
 does not have the defect. Give the file and the line of the defect in the copy
@@ -147,22 +147,26 @@ gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
 ```
 
 - An open issue has the same report: file nothing. When the defect shows
-  another part of the plugin or a new reproduction, write it as a comment, by
-  *Write the issue* below. Ask before you write it, as *Ask the person* below
-  says.
+  another file of the plugin or a new reproduction, write it as a comment, as
+  *Write the issue* below says. Ask before you write it, as *Ask the person*
+  below says.
 - An open pull request fixes it: file nothing. Give the person its number.
 - A pull request closed without a merge does not decide the case. Name it in
   the issue you file.
 - A closed issue has the same report, and its `stateReason` is `NOT_PLANNED`:
   file nothing. It was decided. Give the person its number.
 - A closed issue with the `stateReason` `DUPLICATE`: judge the issue that it
-  duplicates by these bullets instead. This call gives its number:
+  duplicates by these bullets instead. This call names it:
 
   ```bash
   gh api --hostname github.com graphql -f query='{ repository(owner:
     "kalinichenko88", name: "agent-skills") { issue(number: <n>) {
-    duplicateOf { number } } } }'
+    duplicateOf { number repository { nameWithOwner } } } } }'
   ```
+
+  When `nameWithOwner` is not `kalinichenko88/agent-skills`, the report went
+  to another tracker: file nothing, and give the person that issue's
+  repository and number.
 - `main` has the defect again, and a closed issue with `COMPLETED` or a
   merged pull request fixed it before: file a new issue. Its body starts
   `Regression of #12`.

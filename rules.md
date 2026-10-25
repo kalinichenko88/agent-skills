@@ -158,9 +158,9 @@ number listed in the final report. Where there is no GitHub remote or
 
 **A defect in this plugin goes to its tracker, after the person says yes.**
 These rules, the hooks, a `kalinichenko:` skill and its scripts are the plugin.
-When one of them is wrong — a script fails on valid input, two rules say
-opposite things, a rule followed as written gives a wrong result — that is an
-issue for `kalinichenko88/agent-skills`, not for the project you work in. In a
+One of them can be wrong: a script fails on valid input, two rules say opposite
+things, or a rule followed as written gives a wrong result. That is an issue
+for `kalinichenko88/agent-skills`, not for the project you work in. In a
 checkout of `agent-skills`, the rule above applies instead. A step you skipped
 is not a defect. Do not derail the task. Unlike the rule above, ask first: show
 the person the title and the body, with nothing from their project in it, and
