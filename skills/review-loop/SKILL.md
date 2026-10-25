@@ -116,12 +116,13 @@ Codex's findings as JSON. Each one goes through *The findings*, also one in
 the text of a skill or a prompt.
 
 - Exit 2: the call was wrong. Correct the base or the working directory, and
-  run it again.
-- `skipped:`: the Codex CLI is not installed or not logged in.
-- Any other error: Codex failed, or it wrote no findings.
+  run it again. When neither is wrong, go on without Codex.
+- `skipped:`: the Codex CLI is not installed or not logged in. Go on without
+  Codex.
+- Any other error: the run failed, as when Codex fails or writes no findings
+  file. Go on without Codex.
 
-After `skipped:` or another error, go on without Codex, and give the reason
-in the summary.
+When you go on without Codex, give the reason in the summary.
 
 Why: on three branches of this plugin that a `/code-review` loop had
 finished, Codex found three defects that no round had reported, in 45 to 74

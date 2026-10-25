@@ -106,12 +106,24 @@ code=0
 (cd "$tmp/outside" && GIT_CEILING_DIRECTORIES="$tmp" PATH="$tmp/bin:$PATH" bash "$script" "$base") \
   >/dev/null 2>"$tmp/err" || code=$?
 check 'a working directory outside a repository is a usage error' 2 "$code"
-check 'the usage error names the working directory' \
-  "codex-review.sh: $tmp/outside is not in a git repository" "$(cat "$tmp/err")"
+grep -qF 'fatal: not a git repository' "$tmp/err" || fail "the usage error keeps git's own reason" "$(cat "$tmp/err")"
+grep -qxF "codex-review.sh: no git repository at $tmp/outside" "$tmp/err" ||
+  fail 'the usage error names the working directory' "$(cat "$tmp/err")"
 
+rm -f "$tmp/args"
 code=0
 review HEAD >/dev/null 2>"$tmp/err" || code=$?
 check 'a range that changes nothing is a usage error, not a clean review' 2 "$code"
 grep -qF 'changes nothing' "$tmp/err" || fail 'the usage error says the range changes nothing' "$(cat "$tmp/err")"
+[ ! -f "$tmp/args" ] || fail 'a range that changes nothing: codex exec does not run'
+
+# A commit with no history in common with HEAD.
+orphan=$(git -C "$repo" -c user.name=t -c user.email=t@example.com \
+  commit-tree -m orphan "$(git -C "$repo" hash-object -t tree /dev/null)")
+code=0
+review "$orphan" >/dev/null 2>"$tmp/err" || code=$?
+check 'a range that git cannot diff is a usage error, not a clean review' 2 "$code"
+grep -qF 'git cannot diff' "$tmp/err" || fail 'the usage error says git cannot diff the range' "$(cat "$tmp/err")"
+[ ! -f "$tmp/args" ] || fail 'a range that git cannot diff: codex exec does not run'
 
 echo 'review_loop_scripts_test: ok'

@@ -9,8 +9,9 @@
 # When the Codex CLI is not installed or not logged in, it prints
 # "skipped: <why>" and exits 0: the review goes on without Codex. When codex
 # fails or writes no findings file, it prints the end of Codex's log on stderr
-# and exits 1. A wrong call exits 2: a working directory outside a repository,
-# a base that is not a commit, or a range that changes nothing.
+# and exits 1. A wrong call exits 2, as a working directory outside a
+# repository, a base that is not a commit, or a range that git cannot diff or
+# that changes nothing.
 #
 # Needs bash, git and the Codex CLI.
 
@@ -20,8 +21,8 @@ set -euo pipefail
   echo 'usage: codex-review.sh <base>' >&2
   exit 2
 }
-git rev-parse --git-dir >/dev/null 2>&1 || {
-  echo "codex-review.sh: $PWD is not in a git repository" >&2
+git rev-parse --git-dir >/dev/null || {
+  echo "codex-review.sh: no git repository at $PWD" >&2
   exit 2
 }
 # Both ends of the range as SHAs, so a later commit or fetch does not move it.
@@ -31,11 +32,21 @@ base=$(git rev-parse -q --verify "$1^{commit}") || {
   exit 2
 }
 head=$(git rev-parse HEAD)
-# An empty range, as from another working tree, would read as a clean review.
-! git diff --quiet "$base...$head" || {
-  echo "codex-review.sh: $base...$head changes nothing: run it from the working tree of the branch under review" >&2
-  exit 2
-}
+# A range that is empty, as from another working tree, or that git cannot
+# diff would read as a clean review.
+status=0
+git diff --quiet "$base...$head" || status=$?
+case $status in
+  1) ;;
+  0)
+    echo "codex-review.sh: $base...$head changes nothing: is this the working tree of the branch under review?" >&2
+    exit 2
+    ;;
+  *)
+    echo "codex-review.sh: git cannot diff $base...$head" >&2
+    exit 2
+    ;;
+esac
 
 command -v codex >/dev/null || {
   echo 'skipped: the codex CLI is not installed'
