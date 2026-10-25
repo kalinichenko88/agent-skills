@@ -85,10 +85,11 @@ it is.
 The global prompt says when a defect in this plugin becomes an issue; this
 section says how. The plugin is the global prompt, the hooks, the
 `kalinichenko:` skills and their scripts. Its tracker is
-`kalinichenko88/agent-skills`, and every `gh` call below names it with
-`--repo`, so the project's remote does not matter. Only this section and
-*Public repositories* in `SKILL.md` apply. The sections above, `tracker.md` and
-its scripts work on the checkout's tracker, not on this one.
+`github.com/kalinichenko88/agent-skills`. Every `gh` call below names it with
+its host, so the project's remote and `GH_HOST` do not matter. Only this
+section and *Public repositories* in `SKILL.md` apply: the sections above,
+`tracker.md` and its scripts work on the checkout's tracker. In a checkout of
+`agent-skills` itself, this section applies too: ask first.
 
 **Make sure the plugin is wrong.** Read the rule or the script again, all of
 it. These are defects:
@@ -110,20 +111,29 @@ sent it asks the person.
 **Read the files on `main`.** The installed copy can be older:
 
 ```bash
-gh api -H "Accept: application/vnd.github.raw" \
+gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
   repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
 When `main` does not have the defect, file nothing. Tell the person to update
-the plugin. Codex gets a fix only with the next release.
+the plugin; in Codex, that the fix comes with the next release. A checkout of
+`agent-skills` can be newer than `main`: there, read its own files.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
 ```bash
-gh issue list --repo kalinichenko88/agent-skills --state all --limit 200 \
-  --search "<name>" --json number,title,state,stateReason
-gh pr list --repo kalinichenko88/agent-skills --state merged --limit 200 \
-  --search "<name>" --json number,title
+gh issue list --repo github.com/kalinichenko88/agent-skills --state all \
+  --limit 200 --search "<name>" --json number,title,state,stateReason
+gh pr list --repo github.com/kalinichenko88/agent-skills --state merged \
+  --limit 200 --search "<name>" --json number,title
+```
+
+A title does not show the report. Read each issue that can match in full, with
+its comments, and the diff of each pull request that can match:
+
+```bash
+gh issue view <n> --repo github.com/kalinichenko88/agent-skills --comments
+gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
 ```
 
 - An open issue has the same report: file nothing. When the defect shows
@@ -131,8 +141,9 @@ gh pr list --repo kalinichenko88/agent-skills --state merged --limit 200 \
   write it, as *Ask the person* below says.
 - A closed issue has the same report, and its `stateReason` is not
   `COMPLETED`: file nothing. It was decided. Give the person its number.
-- An issue or a pull request fixed it before, and `main` has the defect again:
-  file a new issue. Its body starts `Regression of #12`.
+- A closed issue with `COMPLETED`, or a merged pull request, has the same
+  report, and `main` has the defect again: file a new issue. Its body starts
+  `Regression of #12`.
 
 **Write the issue.** The tracker is public. Take the person's project as a
 private source, whatever its visibility, and apply *Public repositories* in
@@ -156,14 +167,17 @@ Put no label on it and assign nobody: only a person with access to the
 repository can set them.
 
 **Ask the person** at the end of the task, or at once when the defect blocks
-it. Show the full title and body, and say that the repository is public. File
-only after a yes for this text: a changed text needs a new yes. A no, or no
-answer, files nothing; put the draft in the final report. After the yes, write
-the body to a file outside the checkout and run:
+it. Show the full text: the title and the body of an issue, or the body of a
+comment. Say that the repository is public. Write only after a yes for this
+text: a changed text needs a new yes. A no, or no answer, writes nothing; put
+the draft in the final report. After the yes, write the body to a file outside
+the checkout and run one of:
 
 ```bash
-gh issue create --repo kalinichenko88/agent-skills \
+gh issue create --repo github.com/kalinichenko88/agent-skills \
   --title "<title>" --body-file "$body_file"
+gh issue comment <n> --repo github.com/kalinichenko88/agent-skills \
+  --body-file "$body_file"
 ```
 
 When `gh` is not installed, `gh auth status` fails or the call fails, give the
