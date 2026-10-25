@@ -4,15 +4,15 @@
 # wrote, in the layout an eval run leaves. ts-1, react-1, feature-1, the log of
 # order-2 and the tree of order-1 are one recorded run, trimmed to what the
 # checks read. The other runs change it into a case that a check must fail or
-# must pass:
+# must pass. order-3 and feature-2 to feature-4 have no log: count reads only
+# the logs, and the other checks read only the trees.
 #   ts-2       the Skill call after the first Write; `.filter((item) => item…`
 #   react-2    no react-conventions; `{results.map((result) => (`
 #   order-1    every file written through Bash, as `cat > <file> <<'EOF'`
 #   order-2    the four models in src/order.ts; order-summary.ts opens with
 #              its Intl constant
 #   order-3    Order and OrderLine in one file in models/
-#   feature-2  the panel's hook at the feature root; the schema beside the
-#              fetch, and no schemas/ folder
+#   feature-2  the panel's hook at the feature root, and no schemas/ folder
 #   feature-3  the panel's hook in src/shared/hooks; a second schema beside
 #              the fetch
 #   feature-4  what nested must pass: src/shared/reuse-cache.ts, a
@@ -29,8 +29,8 @@ cd "$root"
 # here-document inside $().
 expected() {
   cat <<'EOF'
-typescript-conventions: 10 of 11 subagents invoked it before the first write
-react-conventions: 5 of 6 subagents invoked it before the first write
+typescript-conventions: 6 of 7 subagents invoked it before the first write
+react-conventions: 2 of 3 subagents invoked it before the first write
 tests/fixtures/skill_load/ts-2/src/cart-total.ts:20:    .filter((item) => item.unitPriceCents > limitCents)
 tests/fixtures/skill_load/react-2/src/search-panel.tsx:68:          {results.map((result) => (
 brace rule: 2 of 4 written files have no implicit arrow return
