@@ -36,10 +36,10 @@ request goes through."
 run only when the person asks; `ultra` is billed.
 
 A change to documents only takes no `/code-review`: one review subagent reads
-the documents against the code they describe, and the rounds below apply to
-it. The text of a skill or a prompt, as a `SKILL.md` or `rules.md`, counts
-as a document, though it is the product: the subagent reads it against the
-code and the scripts it names. Why: on a skill's own branch, eight runs of
+the documents against the code they describe and against the other documents
+that describe the same thing, and the rounds below apply to it. The text of a
+skill or a prompt, as a `SKILL.md` or `rules.md`, counts as a document,
+though it is the product. Why: on a skill's own branch, eight runs of
 `/code-review high` found 9 or 10 findings each. From the second run on, most
 were in the sentences the run before had written. The rounds stopped only at
 the ask in step 4.
@@ -50,11 +50,10 @@ goes to one review or to both, by what it changes. The code review,
 each range that changes anything but that text. The agent does not act on
 its findings in that text, and does not count them. The subagent reads each
 range that changes that text, or code that the text names, as a script or a
-flag. It reviews only the text: the sentences the range changes and the
-sentences that name the code it changes, against the code and the rest of
-the text. A round confirms
-no defect when neither review does. Other documents
-next to code stay with the code review, with no subagent.
+flag. It reviews the text the range changes and the text that names the code
+it changes, as for a change to documents only. A round confirms no defect
+when neither review does. Other documents next to code stay with the code
+review, with no subagent.
 
 A review subagent and Codex's `/review` have no levels.
 
