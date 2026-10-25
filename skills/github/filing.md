@@ -117,9 +117,9 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
   repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
-When `gh` prints `HTTP 404` for the file that holds the defect, `main` does not
-have that file and does not have the defect. When the read fails in any other
-way, skip this step and the search, and go on to *Write the issue*.
+When `gh` prints `HTTP 404`, the file moved or is gone, and the read does not
+decide the case: go on to the search. When the read fails in any other way,
+skip this step and the search, and go on to *Write the issue*.
 
 When `main` does not have the defect, file nothing. Tell the person that `main`
 does not have the defect. Give the file and the line of the defect in the copy
@@ -146,27 +146,30 @@ gh issue view <n> --repo github.com/kalinichenko88/agent-skills \
 gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
 ```
 
-- An open issue has the same report: file nothing. When the defect shows
-  another file of the plugin or a new reproduction, write it as a comment, as
-  *Write the issue* below says. Ask before you write it, as *Ask the person*
-  below says.
+- An open issue has the same report: file nothing. When the same defect is in
+  another file of the plugin, or you have a new reproduction, write it as a
+  comment, as *Write the issue* below says. Ask before you write it, as *Ask
+  the person* below says.
 - An open pull request fixes it: file nothing. Give the person its number.
 - A pull request closed without a merge does not decide the case. Name it in
   the issue you file.
 - A closed issue has the same report, and its `stateReason` is `NOT_PLANNED`:
   file nothing. It was decided. Give the person its number.
 - A closed issue with the `stateReason` `DUPLICATE`: judge the issue that it
-  duplicates by these bullets instead. This call names it:
+  duplicates by these bullets instead. This call gives its repository, number
+  and state:
 
   ```bash
   gh api --hostname github.com graphql -f query='{ repository(owner:
     "kalinichenko88", name: "agent-skills") { issue(number: <n>) {
-    duplicateOf { number repository { nameWithOwner } } } } }'
+    duplicateOf { number state stateReason
+    repository { nameWithOwner } } } } }'
   ```
 
-  When `nameWithOwner` is not `kalinichenko88/agent-skills`, the report went
-  to another tracker: file nothing, and give the person that issue's
-  repository and number.
+  When `nameWithOwner` is not `kalinichenko88/agent-skills`, the report is in
+  another tracker: file nothing, and give the person that issue's repository
+  and number. When `duplicateOf` is `null`, or the call fails, the issue does
+  not decide the case: name it in the issue you file.
 - `main` has the defect again, and a closed issue with `COMPLETED` or a
   merged pull request fixed it before: file a new issue. Its body starts
   `Regression of #12`.
