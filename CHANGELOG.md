@@ -5,6 +5,17 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 0.8.0 - 2026-10-25
+
+### Added
+
+- (review-loop) run Codex as a second reviewer once per review at xhigh (#93)
+
+### Fixed
+
+- (github) make a rerun of add-finding.sh after a failed comment or label add the section once (#94)
+- (debt) resolve the ref to one SHA in measure.sh, so a fetch during a run cannot mix two commits (#95)
+
 ## 0.7.0 - 2026-10-25
 
 ### Added
