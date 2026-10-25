@@ -108,7 +108,7 @@ These are not defects:
 **A subagent files nothing.** It names the defect in its report. The agent that
 sent it asks the person.
 
-**Read the files on `main`.** The installed copy can be older:
+**Read the files on `main`.** The copy that runs can be older:
 
 ```bash
 gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
@@ -117,8 +117,9 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
 
 When `main` does not have the defect, file nothing. Tell the person that `main`
 does not have the defect. Give the file and the line of the defect in the copy
-that runs. For an installed plugin, give the link
-`https://github.com/kalinichenko88/agent-skills#update`: it says how to update.
+that runs. Give the link
+`https://github.com/kalinichenko88/agent-skills#update`: it says how to update
+an installed plugin.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
