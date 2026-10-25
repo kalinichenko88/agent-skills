@@ -53,14 +53,15 @@ than it closes. Per finding, the scout's groups decide:
   leaves a one-line comment, because a body edit notifies nobody. A busy host
   or a full one it refuses, and writes nothing. When `gh` stops it with an
   error, the step is not done: report the error and stop, as `tracker.md`
-  says. In the report, give the command and the path of the section file too.
-  Keep the section file. When the person asks for a rerun and the cause of the
-  error is gone, the same command, with the same section file, finishes the
-  step. When the error names the label, correct the label in the command or
-  remove it. When the body holds the section already, the rerun does not check
-  for a full host and does not change the body or the title. It adds the label
-  again, if the command names one, and comments. Run it for one host at a
-  time, never two at once: it reads the body and writes it back whole.
+  says. In the report, give the `add-finding.sh` command and the path of the
+  section file too. Keep the section file. When the person asks for a rerun
+  and the cause of the error is gone, run the same command again, with the
+  same section file. If the error says that the label is not found, first
+  correct the label in the command or remove it. The rerun finishes the step.
+  When the body holds the section already, the rerun does not check for a full
+  host and does not change the body or the title. It adds the label, if the
+  command names one, and comments. Run it for one host at a time, never two
+  at once: it reads the body and writes it back whole.
 - **No free host** — file a new issue:
   - One issue per finding. Title states the problem, body says where it is
     (`path:line`), how it shows up, and why it was out of scope here.
