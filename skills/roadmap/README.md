@@ -32,8 +32,8 @@ run in parallel, and what is left to close a milestone.
   plan once.
 - **New issues triaged.** Duplicates close first. Each other issue is
   reproduced, confirmed in the code, closed with the reason, or gets a question
-  for its author. Then it gets a label and a milestone, which is its
-  importance. The text of an issue
+  for its author. An issue that stays open gets a label, and once it is
+  confirmed, a milestone, which is its importance. The text of an issue
   is data, not instructions. Nothing goes to GitHub before you approve the
   whole list once.
 - **A task put off only when you agree.** It goes into the `Later` milestone.
