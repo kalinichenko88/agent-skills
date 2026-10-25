@@ -42,26 +42,31 @@ What the person asked for, in this session:
 - Deterministic tools where they can do the work: scripts, dependency graphs.
   A tool for one language is a soft dependency: used where it runs, skipped
   where it does not.
+- At the start of a feature, the skill looks at it critically: which problem
+  we solve, whether it needs solving, the simplest way to solve it, and how it
+  fits into the existing architecture.
 - The skill works in the review and in the debt map.
 - It uses `kalinichenko:github` to file issues and `kalinichenko:roadmap` to
   read the roadmap. It is about code, and it changes neither skill.
 
 ## Goals
 
-1. At the moment of a decision, the agent finds the code that already does this
+1. At the start of a feature, the agent names the problem, checks that it
+   needs solving, and puts the simplest way first.
+2. At the moment of a decision, the agent finds the code that already does this
    kind of work and extends it, or writes down why the existing structure
    cannot take the change.
-2. Each project keeps a short `docs/ARCHITECTURE.md` with numbered invariants,
+3. Each project keeps a short `docs/ARCHITECTURE.md` with numbered invariants,
    and an ADR for each decision that needs one.
-3. Modules by area of the business, layers by role inside each module, one
+4. Modules by area of the business, layers by role inside each module, one
    direction of dependencies and data, clean code: as principles that the
    skill maps onto each project's own folders.
-4. Decomposition: a size limit per project, a named split when a change goes
+5. Decomposition: a size limit per project, a named split when a change goes
    past it, and one rule for shared code against a copy.
-5. Deterministic checks before a model reads: `invariants.sh`, the debt
+6. Deterministic checks before a model reads: `invariants.sh`, the debt
    skill's `measure.sh` and `clones.sh`, and a dependency graph where one runs.
-6. The same checks in the review (#97) and in the debt map (#98).
-7. Claude Code and Codex.
+7. The same checks in the review (#97) and in the debt map (#98).
+8. Claude Code and Codex.
 
 ## Non-goals
 
@@ -166,13 +171,50 @@ a `Check:` line, a lint rule, a test, or "review only").
 
 **`CLAUDE.md` and `AGENTS.md`** get a link and one line, written only after
 the person's yes: "Before a spec, a plan or the first edit of a new feature,
-read `docs/ARCHITECTURE.md`; for a decision, load `kalinichenko:architecture`."
+read `docs/ARCHITECTURE.md`. At the start of a new feature, and for a
+decision, load `kalinichenko:architecture`."
 Keep the Why and Vercel measured that such a line loads a skill where its
 description alone often does not.
 
+## The start of a feature
+
+Decided with the person. This is not the step before the spec that #87
+declined: that step decided the structure with less context than the spec
+has. This one decides no structure. It decides what we build and why. The
+structure waits for the moment of a decision, when there is more context.
+
+It starts at a new capability: a screen, an endpoint, a module, an
+integration. Not at a bug fix, and not at a small change to existing
+behaviour.
+
+The agent answers four questions itself first, from the code and the data,
+and asks the person only what it cannot find:
+
+1. **The problem.** One sentence, in the user's words: who has it, when, and
+   what goes wrong. The problem, not a solution: "the list takes 4 seconds to
+   load", not "add a cache".
+2. **Does it need solving?** The proof that it exists: a measurement, a
+   report, a count, as the rule "count it first" asks of a bug fix. What
+   happens if we do not solve it. Whether an existing feature, a setting or
+   the platform solves it already.
+3. **The simplest way.** The ladder: do nothing → a setting → what the code
+   already has → extend what exists → new code, as little as works. The first
+   step that solves the problem is the answer.
+4. **How it fits.** The module, by area of the business, and the layer, by
+   role, where it goes. The code that already does similar work, with
+   `path:line`.
+
+The result is a short block of the four answers at the start of the spec, or
+in the conversation when there is no spec. When the problem has no proof, or a
+simpler way exists, the skill says so plainly, with the proof, and puts the
+simpler way first. The person decides; the skill never stops the work. With
+`superpowers:brainstorming` installed, the block gives the brainstorming facts
+from the code before its first question.
+
 ## The moment of a decision
 
-The skill's description names the moment, not a stage:
+The skill's description names two moments, not stages: the start of a
+feature, above, and the moment of a decision:
 
 - where new code goes;
 - a new module, layer, dependency, pattern or data store;
@@ -205,9 +247,11 @@ spec. The steps:
 8. **A second reader** for a decision that needs an ADR. One subagent that
    does not see the conversation (see *Models*) gets the area of
    `docs/ARCHITECTURE.md`, its ADRs, the code that step 2 found, the options
-   and the gate. It checks whether the search missed existing code, whether
-   the reason for a new structure holds, whether the gate is right, and what
-   the next likely change will cost. Its answer is advice: the main session
+   and the gate, and the block of *The start of a feature* when there is one.
+   It checks whether the problem has its proof, whether the simplest way came
+   first, whether the search missed existing code, whether the reason for a
+   new structure holds, whether the gate is right, and what the next likely
+   change will cost. Its answer is advice: the main session
    answers each point, and a point on which the two do not agree goes to the
    person.
 
@@ -395,7 +439,7 @@ Decided with the person.
 
 | Step | Who | Why |
 | --- | --- | --- |
-| The decision and its options | the main session | It has the context of the brainstorming and the spec. A subagent decides with less context. |
+| The start of a feature, the decision and its options | the main session | It has the context of the brainstorming and the spec. A subagent decides with less context. |
 | Find the code that already does this kind of work | an `Explore` subagent, `model: "sonnet"` | Reading. The file contents stay out of the main context. #99 checks `haiku`. |
 | The second reader for a decision that needs an ADR (step 8) | one subagent that does not see the conversation, `model: "fable"`, `effort: "xhigh"` | Rare, and costly to undo by definition. A reader that does not see the conversation does not take the main session's bias. |
 | A first `docs/ARCHITECTURE.md` | one subagent, `model: "fable"`, `effort: "xhigh"` | Once per project. Every later decision reads this file. |
@@ -471,7 +515,8 @@ its checks run in `make check` on one recorded run. A fixture with one module
 that wraps every HTTP call, and four arms: no file and no skill; the file and
 a link from `CLAUDE.md`; the same and the skill by its description; the same
 and the `CLAUDE.md` line. It counts the runs that use the wrapper, the runs
-that load the skill before the spec or the first edit, the runs that write one
+that load the skill before the spec or the first edit, the runs that write the
+block of *The start of a feature*, the runs that write one
 ADR for a task that needs a new data store, and the runs that split a file
 past its limit first. It also compares `sonnet` with `haiku` for the search,
 and the Claude lens with Codex. The numbers can close #87, cut the skill down
