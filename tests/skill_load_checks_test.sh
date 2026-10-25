@@ -19,6 +19,8 @@
 #              src/shared/use-cases/ folder, a hook in a shared/ folder inside
 #              the feature
 # A change to a check that moves a verdict changes the output and fails here.
+# Last, it gives the eval an argument too many, with a stub claude: the eval
+# must refuse before it starts a paid run.
 
 set -eu
 
@@ -65,14 +67,23 @@ out=$(tests/skill_load_eval.sh --check tests/fixtures/skill_load/ 2>&1) || code=
 
 # refused <argument>...: the eval must exit 2 with its usage and start no run.
 # The claude on PATH is a stub that records each call, so a broken guard costs
-# no tokens.
+# no tokens, and the logs of such a run go into the stub's folder.
 stub=$(mktemp -d)
 trap 'rm -rf "$stub"' EXIT
-printf '#!/usr/bin/env bash\ntouch "%s/called"\n' "$stub" >"$stub/claude"
+cat >"$stub/claude" <<'EOF'
+#!/usr/bin/env bash
+touch "$(dirname "$0")/called"
+EOF
 chmod +x "$stub/claude"
+# A folder that cannot run the stub, or a claude function, leaves the real
+# claude in its place.
+[ "$(PATH="$stub:$PATH" command -v claude)" = "$stub/claude" ] || {
+  echo "FAIL: claude is not the stub $stub/claude"
+  exit 1
+}
 refused() {
   local code=0 err
-  err=$(PATH="$stub:$PATH" tests/skill_load_eval.sh "$@" 2>&1 >/dev/null) || code=$?
+  err=$(PATH="$stub:$PATH" TMPDIR="$stub" tests/skill_load_eval.sh "$@" 2>&1 >/dev/null) || code=$?
   if [ "$code" != 2 ] || [ "${err#usage:}" = "$err" ] || [ -e "$stub/called" ]; then
     echo "FAIL: '$*' exited $code with '$err': it must exit 2 with the usage and not run claude"
     exit 1
