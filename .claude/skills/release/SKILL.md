@@ -64,7 +64,7 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    | `hooks/` | `hooks` |
    | `.github/workflows/` | `ci` |
    | `.codex-plugin/`, `.agents/` | `codex` |
-   | `tests/<name>_eval.sh` | the skills whose use it counts: `tests/review_loop_eval.sh` gives `review-loop` |
+   | `tests/<name>_eval.sh` | the areas of the skills whose use it counts: `tests/skill_load_eval.sh` gives `react` and `typescript` |
    | any other test, and a fixture of a test | the area of the code the test runs: `tests/rules_test.sh` runs `hooks/rules.sh`, so `hooks` |
 
    Any other file gives no area: the root `README.md`, `CHANGELOG.md`, the
