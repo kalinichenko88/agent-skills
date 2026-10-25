@@ -270,7 +270,7 @@ check 'the new body is the old one and the section' \
 stops add-finding.sh 1 5 "$tmp/section.md" 'New title'
 
 # The comment fails after the edit. The rerun reads the edited body, finds the
-# section there, sets the title and the label again without the body, and
+# section there, adds the label again without the body or the title, and
 # comments, on a host with no added finding before and on one with one before.
 for change in . '.body += "\n## Also: one\n"'; do
   answer "$change"
@@ -281,15 +281,22 @@ for change in . '.body += "\n## Also: one\n"'; do
   : >"$tmp/calls"
   out=$(add bug) || fail "a rerun of add-finding.sh after a failed comment ($change)" "$out"
   check "a rerun after a failed comment leaves the body ($change)" \
-    "$(printf 'issue edit 5 --title New title --add-label bug\nissue comment 5 --body Added to the body: the scout misses a cited line.')" \
+    "$(printf 'issue edit 5 --add-label bug\nissue comment 5 --body Added to the body: the scout misses a cited line.')" \
     "$(writes)"
   check "the body holds the section once ($change)" 1 \
     "$(grep -cxF '## Also: the scout misses a cited line' "$tmp/body")"
 done
 
-# A refusal in a dry run removes its own body, and no file that the caller's
-# $body names.
+# A dry rerun with no label prints only the comment, and removes the body that
+# no printed edit names.
 rm -f "$tmp"/body.*
+answer '.body += "\n## Also: the scout misses a cited line\n"'
+check 'a dry rerun with no label only comments' \
+  'dry run: gh issue comment 5 --body Added\ to\ the\ body:\ the\ scout\ misses\ a\ cited\ line.' "$(DRY_RUN=1 add)"
+check 'a dry rerun leaves no body' '' "$(find "$tmp" -maxdepth 1 -name 'body.*')"
+
+# A refusal before the body read leaves the file that the caller's $body
+# names. One after it, in a dry run, removes its own body.
 touch "$tmp/keep"
 for change in '.state = "CLOSED"' '.body += "\n## Also: one\n## Also: two\n"'; do
   answer "$change"
