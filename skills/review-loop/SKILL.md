@@ -33,9 +33,27 @@ request goes through."
 | `xhigh` | Security, data loss, concurrency, or architecture across modules or apps. |
 
 `medium` is not a default: each level needs its own reason. `max` and `ultra`
-run only when the person asks; `ultra` is billed. A change to documents only
-takes no `/code-review`: one review subagent reads the documents against the
-code they describe, and the rounds below apply to it.
+run only when the person asks; `ultra` is billed.
+
+A change to documents only takes no `/code-review`: one review subagent reads
+the text the range changes against the code it describes, the rest of its
+document, and the other documents that describe the same thing, and the
+rounds below apply to it. The text of a skill or a prompt, as a `SKILL.md` or
+`rules.md`, counts as a document, though it is the product. Why: on a skill's
+own branch, eight runs of `/code-review high` found 9 or 10 findings each.
+From the second run on, most were in the sentences the run before had
+written. The rounds stopped only at the ask in step 4.
+
+When that text comes with code, each range of the rounds and the last pass
+goes to one review or to both, by what it changes. The code review,
+`/code-review` at the level of the code alone or `/review` in Codex, reads
+each range that changes anything but that text. The agent does not act on
+its findings in that text, and does not count them. The subagent reads each
+range that changes that text, or code that the text names, as a script or a
+flag. It reviews the text the range changes and the text that names the code
+it changes, as for a change to documents only. A round confirms no defect
+when neither review does. Other documents next to code stay with the code
+review, with no subagent.
 
 A review subagent and Codex's `/review` have no levels.
 
