@@ -5,6 +5,21 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 0.7.0 - 2026-10-25
+
+### Added
+
+- (github) file a defect in this plugin in its own tracker, after the person says yes (#84)
+
+### Changed
+
+- (release) put the scope in parentheses at the start of every changelog line (#92)
+- (skill-load) run the eval checks on a recorded run in make check, and count a Bash write
+
+### Fixed
+
+- (review-loop) review a skill's or a prompt's text as a document, not with /code-review (#88)
+
 ## 0.6.0 - 2026-10-24
 
 ### Added
