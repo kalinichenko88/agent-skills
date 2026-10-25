@@ -117,9 +117,18 @@ gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
   repos/kalinichenko88/agent-skills/contents/<path>
 ```
 
-When `gh` prints `HTTP 404`, the file moved or is gone, and the read does not
-decide the case: go on to the search. When the read fails in any other way,
-skip this step and the search, and go on to *Write the issue*.
+When `gh` prints `HTTP 404`, `main` has no file at that path. Find the file
+that holds the rule or the script now in this list, and read it there:
+
+```bash
+gh api --hostname github.com \
+  "repos/kalinichenko88/agent-skills/git/trees/main?recursive=1" \
+  --jq '.tree[].path'
+```
+
+When no file on `main` holds the rule or the script, `main` does not have the
+defect. When the read fails in any other way, skip this step and the search,
+and go on to *Write the issue*.
 
 When `main` does not have the defect, file nothing. Tell the person that `main`
 does not have the defect. Give the file and the line of the defect in the copy
@@ -146,10 +155,10 @@ gh issue view <n> --repo github.com/kalinichenko88/agent-skills \
 gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
 ```
 
-- An open issue has the same report: file nothing. When the same defect is in
-  another file of the plugin, or you have a new reproduction, write it as a
-  comment, as *Write the issue* below says. Ask before you write it, as *Ask
-  the person* below says.
+- An open issue has the same report: file nothing. The same defect can be in
+  another file of the plugin, or you can have a new reproduction. Then write
+  it as a comment, as *Write the issue* below says. Ask before you write it,
+  as *Ask the person* below says.
 - An open pull request fixes it: file nothing. Give the person its number.
 - A pull request closed without a merge does not decide the case. Name it in
   the issue you file.
@@ -167,8 +176,8 @@ gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
   ```
 
   When `nameWithOwner` is not `kalinichenko88/agent-skills`, the report is in
-  another tracker: file nothing, and give the person that issue's repository
-  and number. When `duplicateOf` is `null`, or the call fails, the issue does
+  another tracker. File nothing. Give the person that issue's repository and
+  number. When `duplicateOf` is `null`, or the call fails, the issue does
   not decide the case: name it in the issue you file.
 - `main` has the defect again, and a closed issue with `COMPLETED` or a
   merged pull request fixed it before: file a new issue. Its body starts
