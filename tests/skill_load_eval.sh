@@ -50,9 +50,9 @@ $1
 # count <skill> <log>...: the runs whose subagent invoked the skill before its
 # first write: a Write, an Edit, or a Bash call that writes a TypeScript file
 # with `>` or `tee`. A run with no write at all does not count.
-# ponytail: a Bash write by another command, as `cp` or `sed -i`, is not a
-# write here. The one recorded run that wrote through Bash used
-# `cat > <file> <<'EOF'`.
+# ponytail: it sees `>`, `>>`, `tee` or `tee -a` just before the path. Another
+# form, as `cp`, `sed -i`, `tee --append` or `tee a.log b.ts`, is not a write
+# here. The one recorded run that wrote through Bash used `cat > <file> <<'EOF'`.
 count() {
   local skill=$1 loaded=0 log calls
   shift
@@ -196,12 +196,13 @@ failed=0
 count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl "$logs"/order-*.jsonl "$logs"/feature-*.jsonl
 count react-conventions "$logs"/react-*.jsonl "$logs"/feature-*.jsonl
 files=()
-for log in "$logs"/ts-*.jsonl; do files+=("${log%.jsonl}/src/cart-total.ts"); done
-for log in "$logs"/react-*.jsonl; do files+=("${log%.jsonl}/src/search-panel.tsx"); done
+for dir in "$logs"/ts-*/; do files+=("${dir}src/cart-total.ts"); done
+for dir in "$logs"/react-*/; do files+=("${dir}src/search-panel.tsx"); done
 braced "${files[@]}"
-first "$logs"/order-*/
-models "$logs"/order-*/
-nested "$logs"/feature-*/
-schemas "$logs"/feature-*/
+orders=("$logs"/order-*/) features=("$logs"/feature-*/)
+first "${orders[@]%/}"
+models "${orders[@]%/}"
+nested "${features[@]%/}"
+schemas "${features[@]%/}"
 echo "logs: $logs"
 exit "$failed"

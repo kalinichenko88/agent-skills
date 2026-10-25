@@ -34,16 +34,16 @@ react-conventions: 2 of 3 subagents invoked it before the first write
 tests/fixtures/skill_load/ts-2/src/cart-total.ts:20:    .filter((item) => item.unitPriceCents > limitCents)
 tests/fixtures/skill_load/react-2/src/search-panel.tsx:68:          {results.map((result) => (
 brace rule: 2 of 4 written files have no implicit arrow return
-tests/fixtures/skill_load/order-2//src/order-summary.ts: const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+tests/fixtures/skill_load/order-2/src/order-summary.ts: const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 export first: 2 of 3 order runs open every file with an export
-tests/fixtures/skill_load/order-2//src/order.ts
-tests/fixtures/skill_load/order-3//src/orders/models/order.ts
+tests/fixtures/skill_load/order-2/src/order.ts
+tests/fixtures/skill_load/order-3/src/orders/models/order.ts
 models: 1 of 3 order runs keep each model in a file of its own in models/
-tests/fixtures/skill_load/feature-2//src/features/products/use-filter-draft.ts
-tests/fixtures/skill_load/feature-3//src/shared/hooks/use-filter-draft.ts
+tests/fixtures/skill_load/feature-2/src/features/products/use-filter-draft.ts
+tests/fixtures/skill_load/feature-3/src/shared/hooks/use-filter-draft.ts
 own folder: 2 of 4 feature runs keep the panel's hook out of the feature root and shared
-no schemas/ folder: tests/fixtures/skill_load/feature-2/
-tests/fixtures/skill_load/feature-3//src/features/products/products-api.ts
+no schemas/ folder: tests/fixtures/skill_load/feature-2
+tests/fixtures/skill_load/feature-3/src/features/products/products-api.ts
 schemas: 2 of 4 feature runs declare their zod schemas only in schemas/
 logs: tests/fixtures/skill_load
 EOF
