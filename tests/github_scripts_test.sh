@@ -287,9 +287,10 @@ for change in . '.body += "\n## Also: one\n"'; do
     "$(grep -cxF '## Also: the scout misses a cited line' "$tmp/body")"
 done
 
-# A web edit can store the body with \r\n line ends, as cli/cli#14753 has. A
-# rerun still finds the section, and with no label it sends no edit.
-answer '.body += "\r\n\r\n## Also: the scout misses a cited line\r\n\r\nWhere: scout.md:26.\r\n"'
+# A web edit can store the body with \r\n line ends: body-cli-14753.json is
+# recorded from cli/cli#14753, which mixes them with \n. A rerun still finds
+# the section, and with no label it sends no edit.
+answer ".body = $(jq .body "$fixtures/body-cli-14753.json") + \"\r\n\r\n## Also: the scout misses a cited line\r\n\r\nWhere: scout.md:26.\r\n\""
 : >"$tmp/calls"
 add >/dev/null
 check 'a rerun finds a section with \r\n line ends' \
