@@ -82,27 +82,25 @@ out=$(cd "$tmp/clone" && bash "$measure" src)
 check 'a path, in a clone' '`src/hot.sh` `src/a:b.sh` `src/kept.sh` `src/new.sh` `src/заказ.sh`' "$(grep -o '^| `[^`]*`' <<<"$out" | cut -c3- | paste -sd' ' -)"
 case $(grep '^Measured on' <<<"$out") in 'Measured on `origin/main` at '*', 5 code files.') ;; *) fail 'the clone reads origin/main' "$out" ;; esac
 check 'a move into the path and one inside it' 'Code files moved in 60 days: 2. Their commits count from the move.' "$(tail -n 1 <<<"$out")"
+# A fetch that lands during a run, after a force push: the git on PATH moves
+# origin/main back to the commit before the moves on each call that names it.
+# Each git call of measure.sh reads something else on that commit, so a run
+# that reads the name more than once prints another output than the one above.
+back=$(git -C "$tmp/clone" rev-parse main~1)
+mkdir "$tmp/fetchbin"
+cat >"$tmp/fetchbin/git" <<EOF
+#!/usr/bin/env bash
+"$(command -v git)" "\$@" || exit
+case \$* in *origin/main*) "$(command -v git)" update-ref refs/remotes/origin/main $back ;; esac
+EOF
+chmod +x "$tmp/fetchbin/git"
+check 'a fetch during the run' "$out" "$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src)"
+check 'a fetch during the run moved origin/main' "$back" "$(git -C "$tmp/clone" rev-parse origin/main)"
 out=$(cd "$repo" && bash "$measure" big.sh)
 check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$repo" rev-parse --short HEAD), 1 code files." "$(tail -n 1 <<<"$out")"
 
 err=$(cd "$repo" && bash "$measure" tests 2>&1) && fail 'a path with only data exits 0' "$err"
 check 'a path with only data' 'No code files under tests on HEAD.' "$err"
-
-# A fetch that lands during a run, after a force push: the git on PATH moves
-# origin/main back one commit, to before the moves, right after the call that
-# resolves it to a SHA. Every part of the output differs on that commit, and
-# all of it must stay as it was.
-want=$(cd "$tmp/clone" && bash "$measure" src)
-mkdir "$tmp/fetchbin"
-cat >"$tmp/fetchbin/git" <<EOF
-#!/usr/bin/env bash
-"$(command -v git)" "\$@" || exit
-case \$* in *'^{commit}'*) "$(command -v git)" update-ref refs/remotes/origin/main origin/main~1 ;; esac
-EOF
-chmod +x "$tmp/fetchbin/git"
-out=$(cd "$tmp/clone" && PATH=$tmp/fetchbin:$PATH bash "$measure" src)
-check 'a fetch during the run moved origin/main' "$(git -C "$tmp/clone" rev-parse main~1)" "$(git -C "$tmp/clone" rev-parse origin/main)"
-check 'a fetch during the run' "$want" "$out"
 
 # clones.sh, on the tree that tests/fixtures/debt/jscpd-report.json was
 # recorded from, with a fake npx: it writes down its name, where it ran, what it
