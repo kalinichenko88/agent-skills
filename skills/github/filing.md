@@ -99,9 +99,6 @@ These are not: a step you skipped or read wrong — go back and do it as written
 a bug in the person's project; a bug in another plugin, in Claude Code or in
 Codex.
 
-**In a checkout of `agent-skills` itself**, the defect is an ordinary finding:
-file it by the sections above, without the question.
-
 **A subagent files nothing.** It names the defect in its report. The agent that
 sent it asks the person.
 
