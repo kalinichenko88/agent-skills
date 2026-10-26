@@ -145,7 +145,7 @@ nested() {
     found=$(find "$dir/src" -type f -name 'use-*' \( -path "$feature/use-*" -o -path "$dir/src/shared/*" \) |
       while IFS= read -r file; do
         hook=$(basename "${file%.*}")
-        if [ "$file" = "$feature/$(basename "$file")" ] && grep -qsE "from ['\"]\./${hook}(\.[jt]sx?)?['\"]" "$feature"/*-page.tsx; then
+        if [ "$file" = "$feature/$(basename "$file")" ] && grep -qsE "from ['\"]\./${hook}['\"]" "$feature"/*-page.tsx; then
           continue
         fi
         echo "$file"
