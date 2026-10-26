@@ -111,8 +111,9 @@ Pattern 4 holds for the `.md` files of each skill.
    `Needs` line. The `Needs` line names bash and each other program that
    the script calls, except the base tools of macOS and Linux, as `sed`,
    `sort`, `tr` and `mktemp`. awk is a base tool too, but the line names
-   it: the awk programs are code, and I-4 checks them. `usage` prints the `#   name.sh` lines of the header
-   with one line, the same in each script (ADR 0001):
+   it: the awk programs are code, and I-4 checks them. `usage` prints the
+   `#   name.sh` lines of the header with one line, the same in each script
+   (ADR 0001):
    `sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2`. It reads the
    script through `$0`, so it runs before the script changes its directory.
 2. `set -euo pipefail`. A script that sets an EXIT trap empties `finished`
