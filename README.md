@@ -73,9 +73,9 @@ not. Editing `rules.md` does not need a new trust; changing `hooks/hooks.json`
 does.
 
 The hook needs only bash, `env` and `dirname`. The github and roadmap
-skills' scripts are bash too, and they also need `gh`; the roadmap scripts
-need awk too. The debt skill's `measure.sh`
-needs only bash, git and awk; its `clones.sh` also needs `npx` or `bunx`,
+skills' scripts are bash too, and they also need `gh`, git and awk. The
+debt skill's `measure.sh` needs only bash, git and awk; its `clones.sh`
+also needs `npx` or `bunx`,
 and a `TMPDIR` that other users cannot write, or none: then it uses
 `~/.cache`. The architecture skill's `invariants.sh` needs only bash, git and
 awk. On native Windows, Claude Code runs

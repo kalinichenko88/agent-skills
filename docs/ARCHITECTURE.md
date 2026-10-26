@@ -92,15 +92,18 @@ Where the split does not fit:
 
 - The rules of the product are prose in `SKILL.md`, and the model runs
   them. No code holds them, and no check sees them.
-- A script holds its roles as sections, not as folders.
+- A script holds its roles as sections of one file, not as folders. Some
+  take a role from a sibling: roadmap's `read.sh` reads the tracker for
+  `roadmap.sh`, `next.sh` and `plan.sh`, the `.awk` files hold the logic of
+  those three, and github's `add-finding.sh` reads the tracker through
+  `collect.sh`.
 
 ## Patterns
 
 The first five hold for each `.sh` script in `skills/*/scripts/`.
 
 1. The header is the contract: what the script does, its
-   `#   name.sh <args>` lines, and `DRY_RUN` when it writes to GitHub. A
-   wrong call exits 2, with the usage or the reason on stderr.
+   `#   name.sh <args>` lines, and `DRY_RUN` when it writes to GitHub.
 2. `set -euo pipefail`. A script that sets an EXIT trap empties `finished`
    before it and sets `finished=1` at each good end; the trap turns an exit
    of 0 without it into 1, because bash 3.2 runs the trap with `$?` at 0
@@ -128,7 +131,7 @@ reads for the rest.
 
 - **I-1.** `hooks/rules.sh` MUST escape `rules.md` in bash: it calls no text
   tool, as `jq`, `awk` or `sed`.
-  Check: grep `(^|[[:space:]|(;])(jq|[gmn]?awk|g?sed|[ef]?grep|tr|cut|head|tail|iconv|perl|python3?|node|ruby)([[:space:]]|$)` in `hooks`.
+  Check: grep `(^|[[:space:]|(;/])(jq|[gmn]?awk|g?sed|[ef]?grep|tr|cut|head|tail|iconv|perl|python3?|node|ruby)([[:space:]<>|);]|$)` in `hooks`.
 - **I-2.** A script in `skills/` or `hooks/` MUST NOT call `jq`: a filter is
   `gh`'s own `--jq`, and the hook escapes by hand.
   Check: grep `(^|[[:space:]|(;/])jq([[:space:]<>|);]|$)` in `skills` `hooks`.
@@ -136,7 +139,7 @@ reads for the rest.
   case attribute; no `mapfile`, `readarray`, `coproc`, `;&`, `;;&`, `|&`,
   `&>>` or `-v` test; no negative index; no case change as `${x,,}` or
   `${x@U}`.
-  Check: grep `(^|[[:space:];(])(declare|local|typeset)([[:space:]]+-[a-zA-Z]+)*[[:space:]]+-[a-zA-Z]*[Anlu]|mapfile|readarray|coproc|;;?&([[:space:]]|$)|\|&[[:space:]]|\[\[?[[:space:]]+(![[:space:]]+)?-v[[:space:]]|\$\{[A-Za-z_0-9]+(\[[^]]*\])?([,^]|@[A-Za-z])|\$\{[A-Za-z_0-9]+\[-[0-9]|&>>` in `skills` `hooks` `tests`.
+  Check: grep `(^|[[:space:];(])(declare|local|typeset)([[:space:]]+-[a-zA-Z]+)*[[:space:]]+-[a-zA-Z]*[Anlu]|mapfile|readarray|coproc|;;?&([[:space:]]|$)|\|&|(\[\[?|test|&&|\|\|)[[:space:]]+(![[:space:]]+)?-v[[:space:]]|\$\{[A-Za-z_0-9]+(\[[^]]*\])?([,^]|@[A-Za-z])|\$\{[A-Za-z_0-9]+\[-[0-9]|&>>` in `skills` `hooks` `tests`.
 - **I-4.** awk code MUST run on BWK awk, mawk and gawk: no gawk extension.
   Check: grep `gensub|asorti?[[:space:]]*\(|strftime|systime|mktime|strtonum|PROCINFO|IGNORECASE|FPAT|FIELDWIDTHS|ARGIND|BEGINFILE|ENDFILE|patsplit|isarray|typeof|@(include|load|namespace)|\\[y<>]|match[[:space:]]*\([^,]*,[^,]*,[[:space:]]*[A-Za-z_][A-Za-z_0-9]*[[:space:]]*\)` in `skills` `hooks` `tests`.
 - **I-5.** A script MUST NOT read a file of another skill. The one
