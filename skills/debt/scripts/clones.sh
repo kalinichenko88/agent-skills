@@ -30,7 +30,7 @@ unset CDPATH
 jscpd=jscpd@5.4.2
 
 [ $# -ge 1 ] && [ $# -le 2 ] || {
-  echo 'usage: clones.sh <tree> [path]' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 data=$(<"$(dirname "$0")/data.ere")

@@ -15,7 +15,7 @@
 set -euo pipefail
 
 [ $# -le 1 ] || {
-  echo 'usage: measure.sh [path]' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 path=${1:-.}

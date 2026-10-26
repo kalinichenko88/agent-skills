@@ -103,10 +103,18 @@ Where the split does not fit:
 
 ## Patterns
 
-The first five hold for each `.sh` script in `skills/*/scripts/`.
+Patterns 1, 2, 3 and 5 hold for each `.sh` script in `skills/*/scripts/`.
+Pattern 4 holds for the `.md` files of each skill.
 
 1. The header is the contract: what the script does, its
-   `#   name.sh <args>` lines, and `DRY_RUN` when it writes to GitHub.
+   `#   name.sh <args>` lines, `DRY_RUN` when it writes to GitHub, and a
+   `Needs` line. The `Needs` line names bash and each other program that
+   the script calls, except the POSIX tools as `sed`, `sort` and `tr`. awk
+   is a POSIX tool, but the line names it: the awk programs are code, and
+   I-4 checks them. `usage` prints the `#   name.sh` lines of the header
+   with one line, the same in each script (ADR 0001):
+   `sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2`. It reads the
+   script through `$0`, so it runs before the script changes its directory.
 2. `set -euo pipefail`. A script that sets an EXIT trap empties `finished`
    before it and sets `finished=1` at each good end; the trap turns an exit
    of 0 without it into 1, because bash 3.2 runs the trap with `$?` at 0
@@ -114,7 +122,7 @@ The first five hold for each `.sh` script in `skills/*/scripts/`.
    `skills/github/scripts/collect.sh` is the shape.
 3. A script is one file: `run`, `clean` and `usage` are copied, not sourced.
    It finds its siblings by `$(dirname "$0")`.
-4. The text of a skill runs a script with `bash`, as
+4. The `.md` files of a skill run a script with `bash`, as
    `bash <dir>/scripts/<name>.sh`: a script can lack the executable bit.
    `<dir>` is the skill's base directory, and `<skills>` is the directory
    above it.
@@ -194,4 +202,6 @@ hold 10. A new number needs an ADR.
 
 ## ADRs
 
-None yet. An accepted ADR goes in `docs/adr/NNNN-title.md` and on this list.
+An accepted ADR goes in `docs/adr/NNNN-title.md` and on this list.
+
+- [0001 Each script prints its usage from its header](adr/0001-usage-from-the-header.md)

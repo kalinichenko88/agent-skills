@@ -17,11 +17,12 @@
 # checkout, for "a branch only".
 #
 # DRY_RUN=1 prints the commands that would write, and runs none.
+# Needs only bash, gh, git and awk.
 
 set -euo pipefail
 
 [ $# -eq 2 ] || { [ $# -eq 3 ] && [ "$3" = --here ]; } || {
-  echo 'usage: worktree.sh <n> <branch> [--here]' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 n=$1 branch=$2 here=${3:-}

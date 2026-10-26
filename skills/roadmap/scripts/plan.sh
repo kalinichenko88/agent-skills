@@ -38,19 +38,7 @@
 set -euo pipefail
 
 usage() {
-  cat >&2 <<'EOF'
-usage: plan.sh create <title> <description-file>
-       plan.sh describe <milestone> <description-file>
-       plan.sh rename <milestone> <title>
-       plan.sh due <milestone> <YYYY-MM-DD|none>
-       plan.sh close <milestone>
-       plan.sh current <milestone>
-       plan.sh not-current <milestone>
-       plan.sh block <issue> <blocker>
-       plan.sh unblock <issue> <blocker>
-       plan.sh sub <parent> <child>
-       plan.sh later <issue>
-EOF
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }

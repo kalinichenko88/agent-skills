@@ -14,7 +14,7 @@
 set -euo pipefail
 
 [ $# -le 1 ] || {
-  echo 'usage: roadmap.sh [milestone]' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 dir=$(dirname "$0")
