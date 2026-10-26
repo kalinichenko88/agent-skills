@@ -22,7 +22,6 @@
 # Needs only bash, git and awk.
 
 set -euo pipefail
-unset CDPATH
 
 usage() {
   echo 'usage: invariants.sh [--new-since <base>] [ref]' >&2
@@ -170,7 +169,6 @@ was=
 if [ -n "$base" ]; then
   was=$(git -c core.quotePath=false diff --no-color --no-ext-diff -z -M --name-status "$base" ${sha:+"$sha"} | tr '\0' '\n' | awk '
     /^R/ { getline old; getline new; print new "\t" old; next }
-    /^C/ { getline; getline; next }
     { getline }') || die 'git diff failed'
 fi
 
@@ -186,23 +184,26 @@ lib='
   }
 '
 
+# ggrep <option>...: git grep with the options over the paths of the check,
+# with \036 for its NUL bytes. A status past 1 is an error, not "no match".
+ggrep() {
+  local out code=0
+  out=$(git -c core.quotePath=false --literal-pathspecs grep --no-color --null -I "$@" "${where[@]}" -- "${ins[@]}" | tr '\0' '\036') || code=$?
+  [ "$code" -le 1 ] || die "$id: git grep failed"
+  printf '%s\n' "$out"
+}
+
 # listing: the code files under the paths of the check, one a line as
 # path<TAB>lines.
 listing() {
-  local out code=0
-  out=$(git -c core.quotePath=false --literal-pathspecs grep --no-color --null -I -c -e '' "${where[@]}" -- "${ins[@]}" | tr '\0' '\036') || code=$?
-  [ "$code" -le 1 ] || die "$id: git grep failed"
-  printf '%s\n' "$out" | DATA=$data PREFIX=$prefix awk -F'\036' '
+  ggrep -c -e '' | DATA=$data PREFIX=$prefix awk -F'\036' '
     NF { f = substr($1, length(ENVIRON["PREFIX"]) + 1); if (f !~ ENVIRON["DATA"]) printf "%s\t%s\n", f, $2 }'
 }
 
 # grep_hits: the lines that the pattern finds, as path<TAB>line<TAB>text,
 # with no data file and no except path.
 grep_hits() {
-  local out code=0
-  out=$(git -c core.quotePath=false --literal-pathspecs grep --no-color --null -n -I -E -e "$arg" "${where[@]}" -- "${ins[@]}" | tr '\0' '\036') || code=$?
-  [ "$code" -le 1 ] || die "$id: git grep failed"
-  printf '%s\n' "$out" | DATA=$data EXCEPT=$except_ PREFIX=$prefix awk -F'\036' "$lib"'
+  ggrep -n -E -e "$arg" | DATA=$data EXCEPT=$except_ PREFIX=$prefix awk -F'\036' "$lib"'
     NF {
       f = substr($1, length(ENVIRON["PREFIX"]) + 1)
       if (f ~ ENVIRON["DATA"] || under_any(f, ENVIRON["EXCEPT"])) next
