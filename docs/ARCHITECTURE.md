@@ -34,7 +34,7 @@ it: an invariant on it is review only.
   files, and `scripts/`.
 - `tests/<name>_test.sh` — the tests that `make check` runs.
   `tests/<name>_eval.sh` — the evals. They call the model, except in the
-  modes that I-7 names.
+  runs that I-7 describes.
   `tests/fixtures/<area>/` — recorded payloads and trees.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
@@ -67,7 +67,8 @@ trigger, the header of each script in `scripts/`, and each file or section
 that another module names. One skill uses another by its name,
 `kalinichenko:<name>`, by a path to one of its files, as
 `<skills>/github/tracker.md`, or by a script's header. So before a rename of
-a file or a section, grep the whole repository for its name.
+a file or a section, grep the whole repository for its name, and for a
+section also for its anchor, as `#the-ponytail-step`.
 
 **Direction in text.** `rules.md` names github, roadmap, review-loop and
 the two conventions. architecture names debt, github, roadmap and
@@ -93,7 +94,8 @@ In a skill with scripts:
 Where the split does not fit:
 
 - Most rules of the product are prose in `SKILL.md` and the `.md` files
-  beside it, and the model runs them. No `Check:` line sees the prose.
+  beside it, and the model runs them. No `Check:` line sees the prose;
+  `tests/rules_test.sh` checks a few of its sentences.
 - Inside a script, the roles are parts of the file, not folders. A script
   can take part of a role from a sibling in its folder, as `roadmap.sh`,
   `next.sh` and `plan.sh` take some reads from `read.sh` and the graph
