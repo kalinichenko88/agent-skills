@@ -59,6 +59,10 @@ run in parallel, and what is left to close a milestone.
 
 ![Close a milestone: you get a clear path to the end of M1, and the next stage ready when it closes](../../docs/roadmap/03-close.webp)
 
+### Triage new issues
+
+![Triage new issues: you get every new issue checked, labelled and in the milestone its importance asks for](../../docs/roadmap/04-triage.webp)
+
 ## How it works
 
 Scripts in `scripts/` read the plan through the GitHub API and rank the free
