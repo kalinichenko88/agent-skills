@@ -30,7 +30,8 @@ run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; els
 
 # Without --branch-repo, gh makes a new branch of a linked branch's name in
 # this repository, so only this repository's linked branches count. When every
-# linked branch is a fork's, the script stops and the person decides.
+# linked branch is in another repository, the script stops and the person
+# decides.
 list=$(gh issue develop --list "$n")
 linked=''
 if [ -n "$list" ]; then

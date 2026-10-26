@@ -60,16 +60,17 @@ bash <dir>/scripts/worktree.sh 91 fix/91-electron-binary-in-lanes
 It assigns the issue to you, branches from the remote's default branch, links
 the branch to the issue, and prints the path to work in as its last line. A
 branch linked to the issue in this repository wins over the name you gave. A
-branch already checked out is worked on where it is. A session already in a worktree,
-as one started with `claude --worktree` or `codex --worktree`, checks the
-branch out where it is, and so does `--here`.
+branch already checked out is worked on where it is. A session already in a
+worktree, as one started with `claude --worktree` or `codex --worktree`,
+checks the branch out where it is, and so does `--here`.
 
 A linked branch in another repository does not win: without `--branch-repo`,
 `gh` would make a new branch with the same name here. When every linked branch
 is in another repository, as a fork's, the script stops before it assigns or
 makes anything, and prints their URLs. Say so and wait for the person: a
-rerun with another name stops the same way. When the person removes those
-links in the issue's *Development* panel, a rerun goes on.
+rerun with another name stops the same way. A branch in another repository
+can be someone else's: find out whose it is, as for the warning below. When it
+is not, and the person removes those links, a rerun goes on.
 
 A linked branch on an issue that nobody is assigned to can be someone else's:
 the script warns, and does not assign the issue to you. Find out whose the
