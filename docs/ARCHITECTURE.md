@@ -18,10 +18,11 @@ start of each session and each subagent. A skill loads when its
 `description` matches the moment. The plugin installs as a copy of the whole
 repository.
 
-To the checks, Markdown, JSON and everything under `fixtures/` are data
-(`skills/debt/scripts/data.ere`). The code they see is every other file
-that git tracks: the bash and awk under `skills/`, `hooks/` and `tests/`,
-the `Makefile`, and small files as `LICENSE` and `data.ere`. The text of a
+To the checks, the files that `skills/debt/scripts/data.ere` matches are
+data, as Markdown, JSON, YAML and everything under `fixtures/`. The code
+they see is the other text files: the bash and awk under `skills/`,
+`hooks/` and `tests/`, the `Makefile`, and small files as `LICENSE` and
+`data.ere`. The text of a
 skill is the product, but no check sees it: an invariant on it is review
 only.
 
@@ -67,11 +68,11 @@ uses another by its name, `kalinichenko:<name>`, in text, or by a script's
 usage block. In code, one link exists: `invariants.sh` reads the debt
 skill's `data.ere` (I-5).
 
-**Direction in text.** `rules.md` names github, review-loop and the two
-conventions. architecture names debt, github, roadmap and
+**Direction in text.** `rules.md` names github, roadmap, review-loop and
+the two conventions. architecture names debt, github, roadmap and
 react-conventions. debt names github, roadmap and review-loop. roadmap
-names github. github and review-loop name each other: one cycle, in text
-only.
+names github. react-conventions names typescript-conventions. github and
+review-loop name each other: one cycle, in text only.
 
 **Where a module's files are.** A module's test and fixtures are outside its
 folder, in `tests/`: the Makefile finds a test by `tests/<name>_test.sh`. So
@@ -91,18 +92,15 @@ Where the split does not fit:
 
 - The rules of the product are prose in `SKILL.md`, and the model runs
   them. No code holds them, and no check sees them.
-- A script is one file with the roles as sections, not folders. Only
-  roadmap moves some of them into files of their own: `read.sh` reads the
-  tracker for `roadmap.sh`, `next.sh` and `plan.sh`, and the `.awk` files
-  hold the logic that they share.
+- A script holds its roles as sections, not as folders.
 
 ## Patterns
 
-The first five hold for each script in `skills/*/scripts/`.
+The first five hold for each `.sh` script in `skills/*/scripts/`.
 
 1. The header is the contract: what the script does, its
-   `#   name.sh <args>` lines, what it refuses, and `DRY_RUN` when it
-   writes. A wrong call prints the usage to stderr and exits 2.
+   `#   name.sh <args>` lines, and `DRY_RUN` when it writes to GitHub. A
+   wrong call exits 2, with the usage or the reason on stderr.
 2. `set -euo pipefail`. A script that sets an EXIT trap empties `finished`
    before it and sets `finished=1` at each good end; the trap turns an exit
    of 0 without it into 1, because bash 3.2 runs the trap with `$?` at 0
@@ -110,9 +108,10 @@ The first five hold for each script in `skills/*/scripts/`.
    `skills/github/scripts/collect.sh` is the shape.
 3. A script is one file: `run`, `clean` and `usage` are copied, not sourced.
    It finds its siblings by `$(dirname "$0")`.
-4. A `SKILL.md` runs a script as `bash <dir>/scripts/<name>.sh`, because
-   packaging can drop the executable bit. `<dir>` is the skill's base
-   directory, and `<skills>` is the directory above it.
+4. The text of a skill runs a script with `bash`, as
+   `bash <dir>/scripts/<name>.sh`: a script can lack the executable bit.
+   `<dir>` is the skill's base directory, and `<skills>` is the directory
+   above it.
 5. A regex goes to awk through `ENVIRON`, not `-v`: `-v` reads a backslash
    as an escape.
 6. A test prints `<name>_test: ok` as its last line. `make test` passes a
@@ -129,20 +128,21 @@ reads for the rest.
 
 - **I-1.** `hooks/rules.sh` MUST escape `rules.md` in bash: it calls no text
   tool, as `jq`, `awk` or `sed`.
-  Check: grep `(^|[[:space:]|(;])(jq|awk|sed|grep|tr|cut|perl|python3?)([[:space:]]|$)` in `hooks`.
+  Check: grep `(^|[[:space:]|(;])(jq|[gmn]?awk|g?sed|[ef]?grep|tr|cut|head|tail|iconv|perl|python3?|node|ruby)([[:space:]]|$)` in `hooks`.
 - **I-2.** A script in `skills/` or `hooks/` MUST NOT call `jq`: a filter is
   `gh`'s own `--jq`, and the hook escapes by hand.
-  Check: grep `(^|[[:space:]|(;])jq([[:space:]]|$)` in `skills` `hooks`.
-- **I-3.** Bash code MUST run on bash 3.2: no associative array or nameref,
-  no `mapfile`, `readarray`, `coproc`, `;&`, `;;&`, `|&` or `[[ -v`, and no
-  case change as `${x,,}`.
-  Check: grep `(declare|local|typeset)[[:space:]]+-[a-zA-Z]*[An]|mapfile|readarray|coproc|;;?&[[:space:]]*$|\|&[[:space:]]|\[\[[[:space:]]+-v[[:space:]]|\$\{[A-Za-z_0-9]+(\[[^]]*\])?[,^]` in `skills` `hooks` `tests`.
+  Check: grep `(^|[[:space:]|(;/])jq([[:space:]<>|);]|$)` in `skills` `hooks`.
+- **I-3.** Bash code MUST run on bash 3.2: no associative array, nameref or
+  case attribute; no `mapfile`, `readarray`, `coproc`, `;&`, `;;&`, `|&`,
+  `&>>` or `-v` test; no negative index; no case change as `${x,,}` or
+  `${x@U}`.
+  Check: grep `(^|[[:space:];(])(declare|local|typeset)([[:space:]]+-[a-zA-Z]+)*[[:space:]]+-[a-zA-Z]*[Anlu]|mapfile|readarray|coproc|;;?&([[:space:]]|$)|\|&[[:space:]]|\[\[?[[:space:]]+(![[:space:]]+)?-v[[:space:]]|\$\{[A-Za-z_0-9]+(\[[^]]*\])?([,^]|@[A-Za-z])|\$\{[A-Za-z_0-9]+\[-[0-9]|&>>` in `skills` `hooks` `tests`.
 - **I-4.** awk code MUST run on BWK awk, mawk and gawk: no gawk extension.
-  Check: grep `gensub|asorti?[[:space:]]*\(|strftime|systime|mktime|strtonum|PROCINFO|IGNORECASE|FPAT|BEGINFILE|ENDFILE|patsplit|@include` in `skills` `hooks` `tests`.
+  Check: grep `gensub|asorti?[[:space:]]*\(|strftime|systime|mktime|strtonum|PROCINFO|IGNORECASE|FPAT|FIELDWIDTHS|ARGIND|BEGINFILE|ENDFILE|patsplit|isarray|typeof|@(include|load|namespace)|\\[y<>]|match[[:space:]]*\([^,]*,[^,]*,[[:space:]]*[A-Za-z_][A-Za-z_0-9]*[[:space:]]*\)` in `skills` `hooks` `tests`.
 - **I-5.** A script MUST NOT read a file of another skill. The one
   exception is `invariants.sh`, which reads the debt skill's `data.ere`: one
   data rule for `measure.sh`, `clones.sh` and the checks.
-  Check: grep `\.\./\.\.|skills/[a-z-]+/` in `skills` `hooks` except `skills/architecture/scripts/invariants.sh`.
+  Check: grep `\.\./(\.\.|[a-z-]+/)|skills/[a-z-]+/` in `skills` `hooks` except `skills/architecture/scripts/invariants.sh`.
 - **I-6.** A script that writes to GitHub MUST take `DRY_RUN=1`: then it
   prints each write and runs none. Review only.
 - **I-7.** `make test` MUST reach no network and call no model: a fake
