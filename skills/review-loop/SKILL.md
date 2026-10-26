@@ -11,11 +11,11 @@ reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
 whole branch once too. At `high` and `xhigh`, one review reads the tests of
-the whole branch once. A security review comes last. The agent
-fixes and decides by itself, except for a change to business logic, and
-writes a summary. When the task is an issue taken into work, or the person
-asked for a pull request, the push and the pull request follow in the same
-turn, on the conditions in *The pull request*.
+the whole branch once. A security review comes last. The agent fixes and
+decides by itself, except for a change to business logic, and writes a
+summary. When the task is an issue taken into work, or the person asked for a
+pull request, the push and the pull request follow in the same turn, on the
+conditions in *The pull request*.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -133,20 +133,21 @@ seconds each.
 
 ### A review of the tests
 
-When the change is `high` or `xhigh` by the table in *The level*, by its code
-alone when the text of a skill comes with code, one review reads the tests of
-the whole branch once per review. A change to documents only has none. Start
-it when the last pass starts. When the loop had one round, start it when that
-round confirms no defect and its nits are committed. When step 4 skips the
-last pass, skip this step too. Change no file while it runs. `<dir>` is this
-skill's base directory, `<base>` is the base of step 1, and `<head>` is the
-SHA of `HEAD`. Its findings go through *The findings*. In Claude Code, one
-review subagent gets this prompt:
+Take the level from the table in *The level*. When the text of a skill or a
+prompt comes with code, take the level of the code alone. At `high` or
+`xhigh`, one review subagent, or `/review` in Codex, reads the tests of the
+whole branch once. A change to documents only gets no review of the tests.
+Start it when the last pass starts. When the loop had one round, start it
+when that round confirms no defect and its nits are committed. When step 4
+skips the last pass, skip this step too. Change no file while it runs.
+`<dir>` is this skill's base directory, `<base>` is the base of step 1, and
+`<head>` is the SHA of `HEAD`. Its findings go through *The findings*. The
+subagent gets this prompt:
 
 ```
 Read <dir>/tests-lens.md and do what it says.
-Range: <base>..<head>.
-Tree: <the working tree of the branch>.
+Range: <base>..<head>
+Tree: <the working tree of the branch>
 ```
 
 In Codex: `/review` with the same three lines as its custom instructions.
@@ -154,11 +155,11 @@ In Codex: `/review` with the same three lines as its custom instructions.
 Why: on nine merged pull requests of three projects, each with a finished
 `/code-review` loop, this review found 11 defects in tests that the loop had
 not reported, in seven of the nine. Of the 11, six were redundant or heavy
-tests. Five came from a fix after round 1: that fix added a test or changed
-the code, and an older test stayed, redundant or stale. So the review reads
-the branch at the end of the loop, not beside round 1. A second lens, on the
-change against its issue, found nothing new on the same nine, so the skill
-has none.
+tests. Five of the 11, of any kind, came from a fix after round 1: that fix
+added a test or changed the code, and an older test stayed, redundant or
+stale. So the review reads the branch at the end of the loop, not beside
+round 1. A second review, of the change against its issue, found nothing new
+on the same nine, so the skill has none.
 
 ### Fixes from other places
 

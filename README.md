@@ -181,10 +181,10 @@ on `tests/fixtures/skill_load`: two recorded runs and a case that fails each
 check. A change to a check updates the output that the test expects.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
 It checks that no count of rounds goes past three, that the review of the
-tests runs once next to the last pass, and that a security review follows the
-last pass. Its fixture has a local `origin`, and its task says that no one
-can answer questions. Run it after a change to `skills/review-loop` or to its
-section in `rules.md`. Both call the model, so
+tests runs once next to the last pass and never without one, and that a
+security review follows the last pass. Its fixture has a local `origin`, and
+its task says that no one can answer questions. Run it after a change to
+`skills/review-loop` or to its section in `rules.md`. Both call the model, so
 their runs are not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as

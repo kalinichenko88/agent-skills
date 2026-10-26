@@ -92,11 +92,11 @@ wait
 # after three rounds skips. A security review follows the last read of the
 # whole branch. The review of the tests is an Agent call, of any kind, whose
 # prompt names tests-lens.md. It is not a round. The skill sends it once, next
-# to the last read of the whole branch: the last pass, or round 1 when the
-# loop had one round. A stop after three rounds skips it, as it skips the last
-# pass. Round 1, the last pass, the review of the tests and the security
-# review each start a count of rounds. Step 4 stops a count at its third round
-# when no one can answer: round 1 and two more, or three after the others.
+# to the last pass, as round 1 always has a defect here; a stop after three
+# rounds skips both. Round 1, the last pass, the review of the tests and the
+# security review each start a count of rounds. Step 4 stops a count at its
+# third round when no one can answer: round 1 and two more, or three after the
+# others.
 # ponytail: the count reads prompt text. A prompt that names one commit and
 # the whole branch counts as one commit. A commit named another way counts as
 # the whole branch. So does a part of the security review without those words,
@@ -104,9 +104,8 @@ wait
 # says "security review" is taken for one: it can pass a run that ran none,
 # and it can hide a second read of the whole branch. A round taken for the
 # whole branch, the review of the tests or the security review starts a new
-# count, so it can hide a count past three rounds. A run with one clean round
-# and no review of the tests passes. Whether the last pass ran is left to the
-# printed prompts.
+# count, so it can hide a count past three rounds. Whether the last pass ran
+# is left to the printed prompts.
 commit='git( -C [^ ]+)? show( --?[a-z-]+)* ([0-9a-f]{7,}|HEAD)\.?([^.~^0-9A-Za-z]|$)|[0-9a-f]{7,}\^\.\.[0-9a-f]{7,}'
 secrev='security[ -]review|hard exclusions'
 failed=0
@@ -136,10 +135,10 @@ for log in "$logs"/run-*.jsonl; do
   # The skill wants the review of the tests named there too, at level high.
   result=$(jq -rR 'fromjson? | select(.type == "result") | .result' "$log")
   docs=$(grep -ciE 'docs( impact)?:' <<<"$result" || true)
-  named=$(grep -ciE 'tests? review|review of the tests|tests-lens' <<<"$result" || true)
+  named=$(grep -ciE '(^|[^a-z])tests? review|review of the tests|tests-lens' <<<"$result" || true)
   echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $long counts past three rounds, $tests reviews of the tests ($paired next to the last whole-branch read), $security security review calls after the last whole-branch read, review-loop invoked $skill times, $docs docs lines and $named lines on the review of the tests in the last report"
   cut -c1-300 <<<"${prompts:-no review subagent ran}"
-  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && { { [ "$tests" -eq 1 ] && [ "$paired" -eq 1 ]; } || { [ "$tests" -eq 0 ] && [ "$whole" -eq 0 ]; }; } && [ "$security" -ge 1 ] && [ "$skill" -ge 1 ] && [ "$docs" -ge 1 ] && [ "$named" -ge 1 ] || failed=1
+  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && [ "$tests" -eq "$whole" ] && [ "$paired" -eq "$tests" ] && [ "$security" -ge 1 ] && [ "$skill" -ge 1 ] && [ "$docs" -ge 1 ] && [ "$named" -ge 1 ] || failed=1
 done
 echo "Logs: $logs"
 exit "$failed"
