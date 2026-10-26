@@ -19,7 +19,8 @@ time.
 - **A task starts clean.** When you name an issue, the agent first tells you
   its number, its title and, in two or three sentences, what it asks. In
   Claude Code, when your message is the issue alone, the session takes the
-  issue's number and title as its name. Its duplicates close before the work
+  issue's number and the first words of its title as its name, at most 40
+  characters. Its duplicates close before the work
   starts. The work gets a worktree named for what it does, as
   `fix/91-what-it-does`. Every open bug and debt issue in the same area is
   checked, so one PR can close them with the task.

@@ -67,7 +67,7 @@ jq '.title = "a \"b\" \\ c\td"' "$fixtures/issue.json" >"$tmp/issue.json"
 out=$(run claude-prompt.json '#133') || fail "escape: exit $?"
 check 'escape: the title' '#133 a "b" \ c d' "$(field sessionTitle)"
 
-# The name is at most 40 characters, cut at a word end. The first two are
+# The name is at most 40 characters, cut at a word end. The first five are
 # titles of this tracker; a Russian title counts in characters, not bytes; a
 # word longer than the limit is cut inside. Each line is the title|the name.
 while IFS='|' read -r issue_title name; do
@@ -77,6 +77,9 @@ while IFS='|' read -r issue_title name; do
 done <<'EOF'
 architecture: first-file.md asks for patterns in step 2, but its parts of the file have no place for them|#133 first-file.md asks for patterns
 architecture: I-8 fails on main: tests/architecture_scripts_test.sh has 353 lines, past the limit of 330|#133 I-8 fails on main
+roadmap: no step triages a new issue: no check of its report, no label, no importance, no milestone|#133 no step triages a new issue
+react-conventions has no rule for a component that holds several jobs: loading, creating and form state in one body|#133 react-conventions has no rule
+skill scripts: an unbound variable exits 0 through the EXIT trap, and collect.sh keeps its half-written file|#133 an unbound variable exits 0 through
 Хук ставит в имя сессии весь заголовок issue, и имя получается длинным|#133 Хук ставит в имя сессии весь
 skills/architecture/scripts/invariants.sh fails on bash 3.2|#133 skills/architecture/scripts/invaria
 EOF
