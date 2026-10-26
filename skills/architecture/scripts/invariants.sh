@@ -135,15 +135,27 @@ records=$(printf '%s\n' "$text" | awk '
     if (id != "") printf "%s\036%s\036%s\036%s\036%s\036%s\n", id, kind, arg, list["in"], list["except"], list["debt"]
     id = ""
   }
-  { sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line); ind = length($0) - length(line) }
+  # ind: the column where the text starts. A tab moves to the next multiple
+  # of 4, as in Markdown.
+  {
+    sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line)
+    ind = 0
+    for (c = 1; c <= length($0) - length(line); c++) ind = substr($0, c, 1) == "\t" ? ind + 4 - ind % 4 : ind + 1
+  }
   # A fenced block of backticks or tildes ends at a line of the same
-  # character, as long or longer, with nothing after it, indented as far as
-  # the opening line or up to 3 more. A non-blank line indented less before
-  # that, as at the end of the list item that holds the fence, is an error:
-  # the lines that the fence hides could hold a check.
+  # character, as long or longer, with nothing but spaces or tabs after it,
+  # indented up to 3 past the margin of the list item that holds the fence.
+  # The script does not know that margin. A fence at column 0 is in no list
+  # item, so its margin is 0. For an indented fence, a closing line at its
+  # indent closes it, one 1 to 3 past it is an error, and one 4 or more past
+  # it is a line of code. A non-blank line indented less, as at the end of
+  # that list item, is an error too: the lines that the fence hides could hold
+  # a check.
   fence != "" {
-    if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/ && ind >= indent && ind < indent + 4) fence = ""
-    else if (line != "" && ind < indent) stop("a code fence at line " opened " does not close before line " NR)
+    if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/ && ind >= indent && ind < indent + 4) {
+      if (ind > indent && indent > 0) stop("a code fence at line " opened " has a closing line indented past it, at line " NR)
+      fence = ""
+    } else if (line != "" && ind < indent) stop("a code fence at line " opened " does not close before line " NR)
     next
   }
   # A line that starts with neither a space nor a tab ends the invariant.
