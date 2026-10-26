@@ -7,7 +7,7 @@ set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 script=$root/skills/review-loop/scripts/codex-review.sh
-fixtures=$root/tests/fixtures/review-loop
+fixtures=$root/tests/fixtures/review_loop
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 

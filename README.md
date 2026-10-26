@@ -130,7 +130,7 @@ when `bun` is installed. Without `node`, the test skips `clones.sh` and says
 so. One case runs `clones.sh` with no `TMPDIR`, so it makes and removes a
 directory in your `~/.cache`. The review-loop skill's `codex-review.sh` runs
 against a fake `codex` that answers with findings recorded from `codex exec`
-on this repository, in `tests/fixtures/review-loop/`. The architecture skill's
+on this repository, in `tests/fixtures/review_loop/`. The architecture skill's
 `invariants.sh` runs on repositories the test builds: each kind of check, the
 `debt` lists, `--new-since` over renamed files, and the calls that must stop
 with exit 2.
