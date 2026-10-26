@@ -20,15 +20,21 @@ issues labelled `debt`, each with the numbers that put it there.
   score alone files nothing: the file must hold more than one concern, with a
   split that can be named and that the project's rules allow.
 - **Your rules, not the skill's.** A layer violation is a rule from the
-  project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks. A hit the
-  rule's text leaves open is reported as borderline, not filed. With no such
-  rule, the step is skipped, and the report says so.
+  project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks, or an
+  invariant of its `docs/ARCHITECTURE.md` that the architecture skill's
+  `invariants.sh` finds broken; its issue cites the invariant, as `I-1`. A
+  hit on the `debt` list of a grep check is a broken rule too; a file or a
+  folder on the `debt` list of a size check is weighed as a hotspot. A hit
+  the rule's text leaves open is reported as borderline, not filed. With
+  no such rule, the step is skipped, and the report says so.
 - **Copies, when it can.** `scripts/clones.sh` runs `jscpd`, at a pinned
   version, with `npx` or `bunx` on a copy of the code files, in a temporary
   directory, so the project's `.npmrc`, `bunfig.toml` and `.jscpd.json` run
   and set nothing. Documents, fixtures and SQL stay out, so a copy there hides no
   clone. It lists the clones of 15 lines or more, and the clones one shared
-  helper removes are one place. It never goes into a `package.json`. When
+  helper removes are one place. A copy that the architecture skill keeps on
+  purpose, by its three conditions for shared code, is reported, not filed.
+  It never goes into a `package.json`. When
   `jscpd` cannot run, the step is skipped. The copy goes to `TMPDIR`, or to
   `~/.cache` when `TMPDIR` is not set. It is refused below a directory that
   other users can write, as `/tmp` on Linux, or that holds a `package.json`,

@@ -4,8 +4,8 @@
 # whose name ends as a document's does, one with a non-ASCII name, and a
 # dotfile that is code; a document, a fixture and ignore files that are data,
 # not code; and a file moved into src/, one moved inside it, and a moved
-# document; and a fetch that lands during a run. Then clones.sh, with a fake
-# npx.
+# document; and a fetch that lands during a run. Then the architecture skill's
+# invariants.sh, as step 2 runs it, and clones.sh, with a fake npx.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -107,6 +107,20 @@ check 'no moved line when nothing moved' "Measured on \`HEAD\` at $(git -C "$rep
 
 err=$(cd "$repo" && bash "$measure" tests 2>&1) && fail 'a path with only data exits 0' "$err"
 check 'a path with only data' 'No code files under tests on HEAD.' "$err"
+
+# Step 2 runs the architecture skill's invariants.sh in <tree>, a detached
+# worktree outside the repository: a feature file that calls fetch breaks I-1.
+grep -q 'bash <skills>/architecture/scripts/invariants\.sh' "$root/skills/debt/SKILL.md" ||
+  fail 'step 2 of the debt skill does not run invariants.sh'
+mkdir -p "$repo/src/api" "$repo/src/feature"
+echo 'export const get = (u) => fetch(u);' >"$repo/src/api/client.ts"
+echo "const r = fetch('/list');" >"$repo/src/feature/list.ts"
+printf '%s\n' '## Invariants' '' '- **I-1.** Only `src/api/client.ts` calls `fetch`.' \
+  '  Check: grep `fetch\(` in `src/` except `src/api/client.ts`.' >"$repo/docs/ARCHITECTURE.md"
+commit 'add an invariant and a feature file that breaks it'
+git -C "$repo" -c core.hooksPath=/dev/null worktree add -q --detach "$tmp/measured" HEAD
+out=$(cd "$tmp/measured" && bash "$root/skills/architecture/scripts/invariants.sh") && fail 'a broken invariant exits 0' "$out"
+check 'step 2: one broken rule, I-1' "$(printf '%s\n' 'I-1 FAIL' "  src/feature/list.ts:1:const r = fetch('/list');")" "$out"
 
 # clones.sh, on the tree that tests/fixtures/debt/jscpd-report.json was
 # recorded from, with a fake npx: it writes down its name, where it ran, what it
