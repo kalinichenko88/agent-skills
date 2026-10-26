@@ -123,11 +123,18 @@ campground rule as Robert C. Martin put it in *Clean Code*: every check-in
 leaves the module a little better than the check-out found it, and a codebase
 that only ever receives that kind of care does not rot.
 
-It covers what the task already has open — a stale comment, a dead variable, a
-misleading name, a broken link, a wrong `path:line` in a doc — and the fix is
-small, safe and needs no decision. Fix it now and list it in the PR description
-as not part of the task. A finding that fails one of those three is not a Boy
-Scout fix; it is an issue. Cleaner than you found it is not the same as rebuilt.
+It covers the files the task edits and the files next to them in the same
+module: the module as the project's instruction file or a conventions skill
+draws it, or else the directory of a file the task edits. For a test, that is
+the directory of the code it tests; a test helper gives no directory. A test
+belongs only to the module of the code it tests. A finding there, from
+a stale comment or a broken link to a bug in the next function, goes into this
+change when it meets three conditions. It is clear: there is one way to fix it,
+and nothing outside the module relies on what it changes. It is smaller than
+the task's own diff, and all such fixes together are smaller too. Dropping it
+leaves the task whole. A bug brings its test. List each one in the PR
+description as not part of the task. A finding that fails one condition is an
+issue. Cleaner than you found it is not the same as rebuilt.
 
 ## Code conventions (always)
 
@@ -155,9 +162,9 @@ about GitHub at all.
 **Out-of-scope findings become issues.** Anything worth fixing that is **not**
 part of the current task — a bug, a latent defect, an improvement worth making
 later — gets filed as an issue instead of being fixed inline or dropped in the
-chat. Do not derail the task to fix it; do not ask first. If it is small, safe
-and needs no decision, it goes into the current PR instead — the Boy Scout Rule
-above — listed in the description as not part of the task. The skill draws that
+chat. Do not derail the task to fix it; do not ask first. If the Boy Scout Rule
+above takes it, it goes into the current PR instead, listed in the description
+as not part of the task. The skill draws that
 line and carries the how: a search of the tracker first, adding to an open
 issue on the same code before opening a new one, existing labels only, and every
 number listed in the final report. Where there is no GitHub remote or

@@ -75,4 +75,19 @@ tr '\n' ' ' <"$root/rules.md" | grep -qE '\. In `superpowers:subagent-driven-dev
   echo "FAIL: no sentence keeps the per-task review of subagent-driven development and invokes review-loop after the last task"
   exit 1
 }
+# A fix outside the task goes into its PR or into an issue by one scope: the
+# task's module. Each place that draws that line names the module, and none
+# keeps the three tests without it (#103).
+for f in rules.md skills/github/filing.md skills/github/take-in.md \
+  skills/github/SKILL.md skills/github/README.md; do
+  text=$(tr -s '[:space:]' ' ' <"$root/$f")
+  grep -qE "(same|task's) module" <<<"$text" || {
+    echo "FAIL: $f: a fix goes into the task's PR with no module scope"
+    exit 1
+  }
+  if grep -qi 'small, safe' <<<"$text"; then
+    echo "FAIL: $f: a fix goes into the PR by size and safety alone, with no module"
+    exit 1
+  fi
+done
 echo 'rules_test: ok'
