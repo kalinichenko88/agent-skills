@@ -10,10 +10,10 @@ fixtures=$root/tests/fixtures/hooks
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir "$tmp/bin"
-# The hook gives the --jq filter last.
+# The hook gives the issue third and the --jq filter last.
 cat >"$tmp/bin/gh" <<'EOF'
 #!/usr/bin/env bash
-echo "$*" >>"$FAKE/calls"
+echo "$1 $2 $3" >>"$FAKE/calls"
 [ -z "${FAKE_FAIL:-}" ] || { echo 'gh: HTTP 502' >&2; exit 1; }
 jq -r "${!#}" "$FAKE/issue.json"
 EOF
@@ -36,25 +36,25 @@ run() {
 }
 field() { jq -r ".hookSpecificOutput.$1" <<<"$out"; }
 calls() { cat "$tmp/calls" 2>/dev/null || true; }
-recorded='#133 github: filing.md forbids a new label, so a debt issue from architecture or review-loop gets bug or no label'
+recorded='#133 filing.md forbids a new label'
 
 cp "$fixtures/issue.json" "$tmp/issue.json"
 out=$(run claude-prompt.json '#133') || fail "#133: exit $?"
 check '#133: the title' "$recorded" "$(field sessionTitle)"
 check '#133: the event' UserPromptSubmit "$(field hookEventName)"
-check '#133: gh reads the issue' 'issue view 133' "$(calls | cut -d' ' -f1-3)"
+check '#133: gh reads the issue' 'issue view 133' "$(calls)"
 
 url=https://github.com/kalinichenko88/agent-skills/issues/133
 out=$(run claude-prompt.json "$url") || fail "URL: exit $?"
 check 'URL: the title' "$recorded" "$(field sessionTitle)"
-check 'URL: gh reads the issue' "issue view $url" "$(calls | cut -d' ' -f1-3)"
+check 'URL: gh reads the issue' "issue view $url" "$(calls)"
 
 # Claude Code sent "  #91  " as it was typed. The prompts below are JSON text:
 # \n is a pasted newline. Each line is the prompt|the issue gh gets.
 while IFS='|' read -r prompt issue; do
   out=$(run claude-prompt.json "$prompt") || fail "$prompt: exit $?"
   check "$prompt: the title" "$recorded" "$(field sessionTitle)"
-  check "$prompt: gh reads the issue" "issue view $issue" "$(calls | cut -d' ' -f1-3)"
+  check "$prompt: gh reads the issue" "issue view $issue" "$(calls)"
 done <<EOF
   #133  |133
 $url\n|$url
@@ -66,6 +66,20 @@ EOF
 jq '.title = "a \"b\" \\ c\td"' "$fixtures/issue.json" >"$tmp/issue.json"
 out=$(run claude-prompt.json '#133') || fail "escape: exit $?"
 check 'escape: the title' '#133 a "b" \ c d' "$(field sessionTitle)"
+
+# The name is at most 40 characters, cut at a word end. The first two are
+# titles of this tracker; a Russian title counts in characters, not bytes; a
+# word longer than the limit is cut inside. Each line is the title|the name.
+while IFS='|' read -r issue_title name; do
+  jq --arg t "$issue_title" '.title = $t' "$fixtures/issue.json" >"$tmp/issue.json"
+  out=$(run claude-prompt.json '#133') || fail "$issue_title: exit $?"
+  check "$issue_title: the title" "$name" "$(field sessionTitle)"
+done <<'EOF'
+architecture: first-file.md asks for patterns in step 2, but its parts of the file have no place for them|#133 first-file.md asks for patterns
+architecture: I-8 fails on main: tests/architecture_scripts_test.sh has 353 lines, past the limit of 330|#133 I-8 fails on main
+Хук ставит в имя сессии весь заголовок issue, и имя получается длинным|#133 Хук ставит в имя сессии весь
+skills/architecture/scripts/invariants.sh fails on bash 3.2|#133 skills/architecture/scripts/invaria
+EOF
 cp "$fixtures/issue.json" "$tmp/issue.json"
 
 # None of these is an issue on its own: no title, and no gh call. gh would
