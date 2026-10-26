@@ -13,7 +13,8 @@ product is text that a model reads: `rules.md`, the base prompt, and one
 have one correct result: read the tracker, write the plan, measure the code,
 run the checks. The model does the rest.
 
-Both hosts read the same files. `hooks/rules.sh` injects `rules.md` at the
+Both hosts read the same skills and `rules.md`; each host has its own
+manifest. `hooks/rules.sh` injects `rules.md` at the
 start of each session and each subagent. A skill loads when its
 `description` matches the moment. The plugin installs as a copy of the whole
 repository.
@@ -22,18 +23,18 @@ To the checks, the files that `skills/debt/scripts/data.ere` matches are
 data, as Markdown, JSON, YAML and everything under `fixtures/`. The code
 they see is the other text files: the bash and awk under `skills/`,
 `hooks/` and `tests/`, the `Makefile`, and small files as `LICENSE` and
-`data.ere`. The text of a
-skill is the product, but no check sees it: an invariant on it is review
-only.
+`data.ere`. The text of a skill is the product, but no `Check:` line sees
+it: an invariant on it is review only.
 
 ## Codemap
 
 - `rules.md` — the base prompt. `hooks/rules.sh` and `hooks/hooks.json`
   inject it.
-- `skills/<name>/` — one skill: `SKILL.md`, `README.md`, the `.md` files
-  that `SKILL.md` sends the reader to, and `scripts/`.
+- `skills/<name>/` — one skill: `SKILL.md`, `README.md`, its other `.md`
+  files, and `scripts/`.
 - `tests/<name>_test.sh` — the tests that `make check` runs.
-  `tests/<name>_eval.sh` — the evals; they call the model and run by hand.
+  `tests/<name>_eval.sh` — the evals; they call the model when a person
+  runs them.
   `tests/fixtures/<area>/` — recorded payloads and trees.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
@@ -62,17 +63,20 @@ Each skill is a module, by the area of work it serves.
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |
 
 **Public API.** A skill's API is its `SKILL.md`, whose `description` is the
-trigger, and the usage block at the top of each script in `scripts/`. The
-other `.md` files are read when `SKILL.md` sends the reader there. One skill
-uses another by its name, `kalinichenko:<name>`, in text, or by a script's
-usage block. In code, one link exists: `invariants.sh` reads the debt
-skill's `data.ere` (I-5).
+trigger, the header of each script in `scripts/`, and each `.md` file or
+section that another module names. One skill uses another by its name,
+`kalinichenko:<name>`, by a path to one of its files, as
+`<skills>/github/tracker.md`, or by a script's header. So before a rename of
+a file or a section, grep the other skills and `rules.md` for it. In code,
+two links exist: `invariants.sh` reads the debt skill's `data.ere` (I-5),
+and `tests/rules_test.sh` greps sentences of github's `.md` files.
 
 **Direction in text.** `rules.md` names github, roadmap, review-loop and
 the two conventions. architecture names debt, github, roadmap and
 react-conventions. debt names github, roadmap and review-loop. roadmap
 names github. react-conventions names typescript-conventions. github and
-review-loop name each other: one cycle, in text only.
+review-loop name each other, and github, review-loop and the two
+conventions name the global prompt back. These cycles are in text only.
 
 **Where a module's files are.** A module's test and fixtures are outside its
 folder, in `tests/`: the Makefile finds a test by `tests/<name>_test.sh`. So
@@ -90,8 +94,10 @@ In a skill with scripts:
 
 Where the split does not fit:
 
-- The rules of the product are prose in `SKILL.md`, and the model runs
-  them. No code holds them, and no check sees them.
+- Most rules of the product are prose in `SKILL.md`, and the model runs
+  them. A script holds only a rule with one correct result, as the refusals
+  of `plan.sh`. No `Check:` line sees the prose; `tests/rules_test.sh`
+  greps some of its sentences.
 - Inside a script, the roles are parts of the file, not folders. A script
   can take part of a role from a sibling in its folder, as `roadmap.sh`,
   `next.sh` and `plan.sh` take some reads from `read.sh` and the graph
@@ -149,8 +155,9 @@ reads for the rest.
   prints each write and runs none. Review only.
 - **I-7.** `make test` MUST reach no network and call no model: a fake
   first on `PATH` takes the place of each tool that would. A test that calls
-  the model is a `tests/<name>_eval.sh`, which `make test` does not run.
-  Review only.
+  the model is a `tests/<name>_eval.sh`. `make test` runs an eval only in a
+  mode, or with a stub, that calls no model, as
+  `tests/skill_load_checks_test.sh` does. Review only.
 
 ## Limits of decomposition
 
@@ -161,8 +168,8 @@ hold 10. A new number needs an ADR.
 - **I-8.** A code file MUST have at most 330 lines.
   Check: lines 330 in `.` debt `skills/architecture/scripts/invariants.sh` `tests/github_scripts_test.sh` `tests/roadmap_scripts_test.sh`.
 - **I-9.** A folder MUST hold at most 10 code files of its own. `tests/` is
-  out of the check: it stays flat, because the Makefile finds a test only as
-  `tests/<name>_test.sh`.
+  out of the check: its test scripts stay at its top, because the Makefile
+  finds a test only as `tests/<name>_test.sh`.
   Check: files 10 in `.` except `tests`.
 
 ## Cross-cutting concerns
