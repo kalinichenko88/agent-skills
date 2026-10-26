@@ -65,29 +65,36 @@ than it closes. Per finding, the scout's groups decide:
   bash <dir>/scripts/add-finding.sh 12 "$section_file" "<a title that names every problem in it>" [label]
   ```
 
-  `[label]` is the finding's label from `gh label list`, if one fits and the
-  host does not have it. The script reads `status:` and `also:` again just
-  before it writes, so the findings you added in this run count too. It adds
-  the section to the end of the body, sets the title, adds the label, and
-  leaves a one-line comment, because a body edit notifies nobody. A busy host
-  or a full one it refuses, and writes nothing. When `gh` stops it with an
-  error, the step is not done: report the error and stop, as `tracker.md`
-  says. In the report, give the `add-finding.sh` command and the path of the
-  section file too. Keep the section file, and do not change it. A rerun waits
-  until the person asks for it and the cause of the error is gone. If the
-  error says that the label is not found, correct the label in the command or
-  remove it. Then run the command again, with the same section file. The rerun
-  finishes the step. When the body holds the section already, the rerun
-  does not check for a full host and does not change the body or the title.
-  It adds the label, if the command names one, and leaves the one-line
-  comment. Run it for one host at a time, never two at once: it reads the body
-  and writes it back whole.
+  `[label]` is the finding's label when the host does not have it, chosen as
+  *No free host* below says. For a debt finding, when the repository has no
+  debt label, create `debt` first. The script reads `status:` and `also:`
+  again just before it writes, so the findings you added in this run count
+  too. It adds the section to the end of the body, sets the title, adds the
+  label, and leaves a one-line comment, because a body edit notifies nobody.
+  A busy host or a full one it refuses, and writes nothing. When `gh` stops it
+  with an error, the step is not done: report the error and stop, as
+  `tracker.md` says. In the report, give the `add-finding.sh` command and the
+  path of the section file too. Keep the section file, and do not change it.
+  A rerun waits until the person asks for it and the cause of the error is
+  gone. If the error says that the label is not found, correct the label in
+  the command or remove it. A debt finding keeps its debt label: when the
+  repository has none, create `debt` as *No free host* says. Then run the
+  command again, with the same section file. The rerun finishes the step.
+  When the body holds the section already, the rerun does not check for a full
+  host and does not change the body or the title. It adds the label, if the
+  command names one, and leaves the one-line comment. Run it for one host at a
+  time, never two at once: it reads the body and writes it back whole.
 - **No free host** — file a new issue:
   - One issue per finding. Title states the problem, body says where it is
     (`path:line`), how it shows up, and why it was out of scope here.
   - Label it from the labels the repository already has — `gh label list`
     first, then `--label` with the ones that fit. Never invent a new label; if
-    nothing fits, file it unlabelled.
+    nothing fits, file it unlabelled. The one exception is debt: a file or a
+    folder to split, a break of a layer rule, copies to extract into shared
+    code, or over-engineering. A debt finding takes the label `debt`, or the
+    repository's own name for that label in `gh label list`. When there is
+    neither, create `debt` first:
+    `gh label create debt --description "Structural debt to refactor" --color 5319e7`.
   - A host that someone works on, or that holds two added findings: write
     `Related to #12` in the new body, and leave a one-line comment on the host
     that names the new issue. Do not edit its body.

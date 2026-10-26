@@ -12,9 +12,11 @@
 # When gh stops it with an error, the step is not done. A rerun with the same
 # section file, unchanged, finishes it after the cause of the error is gone.
 # If the error says that the label is not found, correct the label or remove
-# it before the rerun. When the body holds the section already, the rerun does
-# not check for a full host and does not change the body or the title. It adds
-# the label, if the command names one, and leaves the one-line comment.
+# it before the rerun. A debt finding keeps its debt label: when the
+# repository has none, create `debt` first, as filing.md says. When the body
+# holds the section already, the rerun does not check for a full host and does
+# not change the body or the title. It adds the label, if the command names
+# one, and leaves the one-line comment.
 #
 # DRY_RUN=1 prints the commands that would write, and runs none. When it adds
 # the section, it keeps the new body in the file that the printed edit names.

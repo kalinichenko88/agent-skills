@@ -99,4 +99,25 @@ for f in rules.md skills/github/filing.md skills/github/take-in.md \
     exit 1
   fi
 done
+# architecture and review-loop file a debt issue through filing.md. With no
+# `debt` label in the repository, "never invent a new label" left it `bug` or
+# unlabelled (#133). Each place that gives the labels rule, for a new issue or
+# for a host, names the exception. Each line loses one leading #, so a phrase
+# can span a script's comment lines.
+while IFS='|' read -r f phrase; do
+  sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
+    echo "FAIL: $f: a debt finding with no debt label gets another label or none: no \"$phrase\""
+    exit 1
+  }
+done <<'EOF'
+rules.md|existing labels only (`debt` is created for a debt finding when no debt label exists)
+skills/github/filing.md|The one exception is debt: a file or a folder to split,
+skills/github/filing.md|create `debt` first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`
+skills/github/filing.md|For a debt finding, when the repository has no debt label, create `debt` first.
+skills/github/filing.md|A debt finding keeps its debt label: when the repository has none, create `debt`
+skills/github/scripts/add-finding.sh|A debt finding keeps its debt label: when the repository has none, create `debt`
+skills/roadmap/triage.md|except `debt` for a debt issue
+skills/roadmap/triage.md|when a row's label is `debt` and the repository has no debt label, create `debt`
+skills/roadmap/planning.md|except `debt` for a debt issue
+EOF
 echo 'rules_test: ok'
