@@ -6,9 +6,9 @@
 #
 # The reasons: an issue in another repository than this checkout's, a closed
 # issue, an assignee, a linked branch, and an open pull request that closes the
-# issue. Your own assignee and pull request are reasons too, with the login
-# "you": another session of yours, on this computer or on another one, can work
-# on the issue.
+# issue. You as an assignee, and an open pull request of yours that closes the
+# issue, are reasons too, with the login "you": another session of yours, on
+# this computer or on another one, can work on the issue.
 #
 # Needs only bash and gh: every filter is gh's own --jq.
 
@@ -62,7 +62,7 @@ reasons=$(gh api graphql -f owner="${repo%/*}" -f name="${repo#*/}" -F n="$n" -f
     .data.repository.issue
     | (select(.state != "OPEN") | "closed"),
       (.assignees.nodes[] | "assigned to \(.login | who)"),
-      (.linkedBranches.nodes[].ref | select(.)
+      (.linkedBranches.nodes[].ref
         | "branch \(.name), \(.compare.behindBy) commits ahead of \($main), last commit \(.target.committedDate)"),
       (.closedByPullRequestsReferences.nodes[] | select(.state == "OPEN")
         | "PR #\(.number) by \(.author.login | who) is open and closes it")')

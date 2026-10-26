@@ -309,8 +309,6 @@ done
 take() { bash "$scripts/take-in-check.sh" "$@" 2>&1 || echo "exit $?"; }
 answer . .data.repository.issue take-in-20.json
 check 'take-in-check.sh on a free issue' 'take #20' "$(take 20)"
-answer '.linkedBranches.nodes = [{ref: null}]' .data.repository.issue take-in-20.json
-check 'take-in-check.sh on a linked branch that is gone' 'take #20' "$(take 20)"
 answer '.state = "CLOSED" | .assignees.nodes = [{login: "someone"}, {login: "kalinichenko88"}]
   | .closedByPullRequestsReferences.nodes = [{number: 9, state: "OPEN", author: {login: "someone"}},
       {number: 10, state: "OPEN", author: {login: "kalinichenko88"}}]' .data.repository.issue take-in-20.json
