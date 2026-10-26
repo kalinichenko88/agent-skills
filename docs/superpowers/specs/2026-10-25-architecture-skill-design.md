@@ -539,13 +539,16 @@ still hears of it.
 
 The lens runs `invariants.sh --new-since <base> HEAD` first. Each `new` hit
 is the branch's. When the branch left the invariant as it was and moved no
-file out from under a path of its `debt` list, a FAIL with no `new` hit was on
-the base already: it is a finding outside the task, an issue through
-`kalinichenko:github`, or one already filed. When the branch added or changed
-the invariant, or moved a file out from under a path of its `debt` list, `new`
-does not tell the branch's hits. Then the lens
-runs `invariants.sh <base>` too, which reads the base's own architecture
-file: a hit that its output does not have is the branch's. Then it runs
+file into or out from under a path of its `debt` list, a FAIL with no `new`
+hit was on the base already: it is a finding outside the task, an issue
+through `kalinichenko:github`, or one already filed. Otherwise `new` does not
+tell the branch's hits. Then the lens runs `invariants.sh <base>` too, which
+reads the base's own architecture file. It matches each hit as `new` does: by
+path, with a renamed file under its old path, and by the text of a `grep`
+hit, not by its line number. A hit under a FAIL at the head is the branch's
+when the base does not have it under a FAIL, or has a smaller size. A `debt`
+hit at the head is the branch's when the base does not have it, or has it
+under a FAIL. Then it runs
 `clones.sh` on a read-only checkout of the head, keeping the clones that touch
 a file the branch changed. Its findings:
 

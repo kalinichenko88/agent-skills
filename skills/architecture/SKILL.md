@@ -326,13 +326,15 @@ Under each invariant: the hits that break it; then `debt`, the hits under a
 path of its `debt` list; then `no longer debt`, a path of the list with no
 hit, which leaves the list. With `--new-since`, `new` marks each hit that the
 base does not have: those are the branch's. When the branch left the
-invariant as it was and moved no file out from under a path of its `debt`
-list, a FAIL with no `new` hit was on the base already: it is a finding
-outside the task. When the branch added or changed the invariant, or moved a
-file out from under a path of its `debt` list, `new` does not tell the
-branch's hits. Then run `invariants.sh <base>` too,
-which reads the base's own architecture file: a hit that its output does not
-have is the branch's.
+invariant as it was and moved no file into or out from under a path of its
+`debt` list, a FAIL with no `new` hit was on the base already: it is a
+finding outside the task. Otherwise `new` does not tell the branch's hits.
+Then run `invariants.sh <base>` too, which reads the base's own architecture
+file. Match each hit as `new` does: by path, with a renamed file under its old
+path, and by the text of a `grep` hit, not by its line number. A hit under a
+FAIL at the head is the branch's when the base does not have it under a FAIL,
+or has a smaller size. A `debt` hit at the head is the branch's when the base
+does not have it, or has it under a FAIL.
 
 - **Exit 0:** no invariant fails.
 - **Exit 1:** one fails. A hit of the change is a defect: fix the code, or
