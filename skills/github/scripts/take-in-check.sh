@@ -6,9 +6,8 @@
 #
 # The reasons: an issue in another repository than this checkout's, a closed
 # issue, an assignee, a linked branch, and an open pull request that closes the
-# issue. You as an assignee, and an open pull request of yours that closes the
-# issue, are reasons too, with the login "you": another session of yours, on
-# this computer or on another one, can work on the issue.
+# issue. Your own login prints as "you": another session of yours, on this
+# computer or on another one, can work on the issue.
 #
 # Needs only bash and gh: every filter is gh's own --jq.
 

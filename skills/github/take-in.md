@@ -11,7 +11,7 @@ each reason why not, one per line:
 
 - `closed`, or a line that names someone else: say so and wait. These lines
   win over the lines below.
-- `PR #<n> by you`: the work is in review. Say so and stop.
+- `PR #<n> by you`: the work has a pull request already. Say so and stop.
 - Only an `assigned to you` line, `branch` lines, or both: another session of
   yours can work on the issue, on this computer or on another one. Show the
   person what the script printed, and ask one at a time, in this order:
@@ -84,9 +84,9 @@ branch at all.
 
 A linked branch in this repository, on an issue that nobody is assigned to,
 can be someone else's: the script warns, and does not assign the issue to you.
-Find out whose the branch is before you push to it, when the person did not say
-it after `take-in-check.sh`. Someone else's: say so and wait. Yours: run the command
-the warning gives, which assigns the issue to you.
+Find out whose the branch is before you push to it. When the person said it
+after `take-in-check.sh`, use that answer. Someone else's: say so and wait.
+Yours: run the command the warning gives, which assigns the issue to you.
 
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree
