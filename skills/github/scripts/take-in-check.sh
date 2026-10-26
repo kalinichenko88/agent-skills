@@ -5,8 +5,9 @@
 #   take-in-check.sh <n or URL>
 #
 # The reasons: an issue in another repository than this checkout's, a closed
-# issue, an assignee who is not you, and an open pull request that closes the
-# issue and that someone else wrote.
+# issue, an assignee, a linked branch, and an open pull request that closes the
+# issue. Your own count too, named "you": another session of yours, on this
+# computer or another one, can work on the issue.
 #
 # Needs only bash and gh: every filter is gh's own --jq.
 
@@ -42,17 +43,28 @@ esac
 reasons=$(gh api graphql -f owner="${repo%/*}" -f name="${repo#*/}" -F n="$n" -f query='
   query($owner: String!, $name: String!, $n: Int!) {
     viewer { login }
-    repository(owner: $owner, name: $name) { issue(number: $n) {
-      state
-      assignees(first: 10) { nodes { login } }
-      closedByPullRequestsReferences(first: 10) { nodes { number state author { login } } }
-    } }
-  }' --jq '.data.viewer.login as $me | .data.repository.issue
+    repository(owner: $owner, name: $name) {
+      defaultBranchRef { name }
+      issue(number: $n) {
+        state
+        assignees(first: 10) { nodes { login } }
+        linkedBranches(first: 10) { nodes { ref {
+          name
+          target { ... on Commit { committedDate } }
+          compare(headRef: "HEAD") { behindBy }
+        } } }
+        closedByPullRequestsReferences(first: 10) { nodes { number state author { login } } }
+      }
+    }
+  }' --jq '.data.viewer.login as $me | .data.repository.defaultBranchRef.name as $main
+    | def who: if . == $me then "you" else . // "ghost" end;
+    .data.repository.issue
     | (select(.state != "OPEN") | "closed"),
-      (.assignees.nodes[] | select(.login != $me) | "assigned to \(.login)"),
-      (.closedByPullRequestsReferences.nodes[]
-        | select(.state == "OPEN" and .author.login != $me)
-        | "PR #\(.number) by \(.author.login // "ghost") is open and closes it")')
+      (.assignees.nodes[] | "assigned to \(.login | who)"),
+      (.linkedBranches.nodes[].ref
+        | "branch \(.name), \(.compare.behindBy) commits ahead of \($main), last commit \(.target.committedDate)"),
+      (.closedByPullRequestsReferences.nodes[] | select(.state == "OPEN")
+        | "PR #\(.number) by \(.author.login | who) is open and closes it")')
 
 if [ -z "$reasons" ]; then
   echo "take #$n"

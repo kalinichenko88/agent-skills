@@ -8,8 +8,13 @@ message, or after a talk about which task is next, is the request to take it
 into work; a mention inside other work is not. Check it first: `bash
 <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints `take #91`, or
 each reason why not. Closed, assigned to someone else, or closed by an open
-pull request someone else wrote — say so and wait. An issue of another
-repository than this checkout's — say so and stop.
+pull request someone else wrote — say so and wait. Only yours — assigned to
+you, a linked branch, an open pull request of yours that closes it — means
+that another session can work on it, on this computer or on another one. Show
+the person what the script printed and ask: does the work run somewhere else,
+or does it continue here? Somewhere else: stop. Here: go on, on the branch or
+the pull request that the script named. An issue of another repository than
+this checkout's — say so and stop.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can

@@ -307,13 +307,20 @@ done
 
 # take-in-check.sh
 take() { bash "$scripts/take-in-check.sh" "$@" 2>&1 || echo "exit $?"; }
-answer . .data.repository.issue take-in-5.json
-check 'take-in-check.sh on a free issue' 'take #5' "$(take 5)"
+answer . .data.repository.issue take-in-20.json
+check 'take-in-check.sh on a free issue' 'take #20' "$(take 20)"
 answer '.state = "CLOSED" | .assignees.nodes = [{login: "someone"}, {login: "kalinichenko88"}]
   | .closedByPullRequestsReferences.nodes = [{number: 9, state: "OPEN", author: {login: "someone"}},
-      {number: 10, state: "OPEN", author: {login: "kalinichenko88"}}]' .data.repository.issue take-in-5.json
+      {number: 10, state: "OPEN", author: {login: "kalinichenko88"}}]' .data.repository.issue take-in-20.json
 check 'take-in-check.sh on an issue someone else has' \
-  "$(printf '#5: closed\n#5: assigned to someone\n#5: PR #9 by someone is open and closes it\nexit 1')" "$(take '#5')"
+  "$(printf '#20: closed\n#20: assigned to someone\n#20: assigned to you\n#20: PR #9 by someone is open and closes it\n#20: PR #10 by you is open and closes it\nexit 1')" \
+  "$(take '#20')"
+# As recorded, #114 is assigned to you and has a linked branch: another
+# session of yours can work on it.
+answer . .data.repository.issue take-in-114.json
+check 'take-in-check.sh on an issue that is yours already' \
+  "$(printf '#114: assigned to you\n#114: branch fix/114-take-in-own-work, 0 commits ahead of main, last commit 2026-10-26T17:05:57Z\nexit 1')" \
+  "$(take 114)"
 check 'take-in-check.sh on an issue of another repository' \
   "$(printf '#179 is in octo-org/octo-repo, and this checkout is kalinichenko88/agent-skills: stop\nexit 1')" \
   "$(take https://github.com/octo-org/octo-repo/issues/179)"
