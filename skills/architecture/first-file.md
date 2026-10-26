@@ -96,7 +96,8 @@ an invariant that the project can break is not an invariant.
 An invariant starts at a line `- **I-<n>.** <statement>`. The lines under it
 belong to it, up to the next line that starts with a character other than a
 space or a tab; a blank line does not end it. Lines inside a fenced code block
-are skipped.
+are skipped. A fence closes at a line of the same character, as long or
+longer, with nothing after it. A fence that does not close stops the script.
 
 ```
   Check: grep `<ERE>` in `<path>`... [except `<path>`...] [debt `<path>`...]
@@ -129,11 +130,15 @@ are skipped.
   error, so a typo cannot pass forever.
 - An invariant with no `Check:` line is review only. Any other text after
   `Check:` is a line that the script cannot read.
-- A `Check:` line and a `debt` line are one line each: do not wrap them. A
-  next line that holds only paths and the words `in`, `except` or `debt` is a
-  line that the script cannot read, and so is a `debt` line in an invariant
-  with no `Check:` line, and a `Check:` line under no `- **I-<n>.**` line, as
-  under a `*` bullet. The script stops there, and does not drop the line.
+- A `Check:` line and a `debt` line are one line each: do not wrap them. The
+  script stops, and does not drop the line, at:
+  - a line right after one of them that starts with a path, or with `in` or
+    `except` and a path;
+  - a `debt` line with a word that is not a path;
+  - a `debt` line in an invariant with no `Check:` line;
+  - a `Check:` or `debt` line under no `- **I-<n>.**` line, as under a `*`
+    bullet.
+
   Prose under an invariant is not read, also when it starts with one of these
-  words.
+  words: `debt` with no path in backticks after it is prose.
 - Empty code files count as code files of 0 lines.

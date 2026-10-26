@@ -84,7 +84,7 @@ records=$(printf '%s\n' "$text" | awk '
   function stop(msg) {
     print "invariants.sh: " msg > "/dev/stderr"
     failed = 1
-    exit
+    exit 2
   }
   function bad() { stop(id ": cannot read: " line) }
   # Splits s into tok[1..ntok]: a `quoted` item, or a bare word. Spaces and
@@ -136,32 +136,33 @@ records=$(printf '%s\n' "$text" | awk '
     id = ""
   }
   { sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line) }
-  # A fenced block, indented or not, of backticks or tildes, ends at a line
-  # that starts with the same fence.
-  fence != "" { if (index(line, fence) == 1) fence = ""; next }
+  # A fenced block, indented or not, of backticks or tildes, ends at a line of
+  # the same character, as long or longer, with nothing after it.
+  fence != "" { if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/) fence = ""; next }
   # A line that starts with neither a space nor a tab ends the invariant.
   /^[^ \t]/ { flush() }
-  line ~ /^(```|~~~)/ { fence = substr(line, 1, 3); next }
+  line ~ /^(```|~~~)/ { match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH); opened = NR; next }
   /^- \*\*I-[0-9]+\.\*\*/ {
     id = $0; sub(/^- \*\*/, "", id); sub(/\.\*\*.*/, "", id)
     kind = "review"; arg = ""; split("", list); seen = more = 0
     next
   }
+  # A list line starts with an `item`, or with the word in, except or debt and
+  # an `item`: a debt line, or the rest of a Check: line. Prose that starts
+  # with one of these words is not one.
+  { listed = line ~ /^((in|except|debt)[ \t,]*)?`/ }
   id == "" {
-    # A Check: line that no invariant holds would never run.
+    # A Check: or debt line that no invariant holds would never be read.
     if (line ~ /^Check:[ \t]*(grep|lines|files)([ \t]|$)/) stop("a Check: line outside an invariant: " line)
+    if (listed && line ~ /^debt/) stop("a debt line outside an invariant: " line)
     next
   }
   {
-    # A list line holds only `items`, the words in, except and debt, commas
-    # and a last ".": a debt line, or the rest of a Check: line. Prose that
-    # starts with one of these words is not one.
-    listed = line ~ /^((`[^`]*`|in|except|debt)[ \t,]*)+\.?$/
     if (line ~ /^Check:/) {
       if (seen) bad()
       seen = more = 1
       check()
-    } else if (listed && line ~ /^debt[ \t`]/) {
+    } else if (listed && line ~ /^debt/) {
       # A debt line adds to the debt list of the Check: line of its block.
       if (!seen) bad()
       tokenize(line)
@@ -172,7 +173,12 @@ records=$(printf '%s\n' "$text" | awk '
       bad()
     } else more = 0
   }
-  END { if (failed) exit 2; flush() }
+  END {
+    # A fence that does not close would hide each invariant below it.
+    if (!failed && fence != "") stop("a code fence that does not close, at line " opened)
+    if (failed) exit 2
+    flush()
+  }
 ') || exit 2
 
 # was: each file that the branch renamed, as new path<TAB>old path, so that

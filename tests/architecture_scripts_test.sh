@@ -145,6 +145,12 @@ check 'a Check: line that wraps at a path' '2 invariants.sh: I-1: cannot read: `
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`' '  except `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a Check: line that wraps at except' '2 invariants.sh: I-1: cannot read: except `src/a.ts`.' "$code $err"
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`,' '  `lib/` (the legacy part).' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a Check: line that wraps before words' '2 invariants.sh: I-1: cannot read: `lib/` (the legacy part).' "$code $err"
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '  debt `src/a.ts` until the split.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a debt line with words after its path' '2 invariants.sh: I-1: cannot read: debt `src/a.ts` until the split.' "$code $err"
 
 # Prose is not a check: a wrapped sentence that starts with "debt", and one
 # right after a Check: line that starts with "in".
@@ -166,11 +172,21 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` debt `sr
   '~~~' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'an indented and a tilde fence' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
-# A fence at the start of a line ends the invariant, as any such line does.
+# A fence at the start of a line ends the invariant, as any such line does, so
+# a debt line after it is outside the invariant.
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```text' '```' \
   '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'a fence at the start of a line' "1 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
+check 'a fence at the start of a line' '2 invariants.sh: a debt line outside an invariant: debt `src/a.ts`.' "$code $err"
+# A fence closes only at a line of its own character, as long or longer, with
+# nothing after it. One that never closes would hide each invariant below it.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` debt `src/a.ts`.' '````markdown' \
+  '- **I-2.** An example.' '  ```ts' '  Check: grep `x` in `nope/`.' '  ```' '````' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a fence that holds a shorter one' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
+printf '%s\n' '- **I-1.** An example.' '  ```' '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 2' "$code $err"
 
 # An except path that covers each code file of the check leaves it nothing to
 # read, as a typo does.

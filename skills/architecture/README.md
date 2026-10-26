@@ -27,11 +27,12 @@ checks, and an ADR for each decision that needs one.
 - **Your invariants, checked.** `docs/ARCHITECTURE.md` (or `ARCHITECTURE.md`
   at the root) holds numbered invariants. Each has a `Check:` line, or is
   checked in review only. A check is a pattern that must find nothing, a size
-  limit for a file, or a size limit for a folder. `scripts/invariants.sh` runs them and prints PASS or FAIL for
-  each. A file or folder already past its limit is known debt, listed in the
-  check, so the check passes now and the list shrinks over time. With
-  `--new-since <base>`, it marks the hits that a branch adds. It needs only
-  bash, git and awk.
+  limit for a file, or a size limit for a folder. `scripts/invariants.sh`
+  runs the checks and prints PASS or FAIL for each, and `review only` for an
+  invariant with no check. A file or folder already past its limit is known
+  debt, listed in the check, so the check passes now and the list shrinks
+  over time. With `--new-since <base>`, it marks the hits that a branch adds.
+  It needs only bash, git, awk and the debt skill beside it.
 - **Splits before growth.** A change into a file past its limit names the
   split first. A split that only moves code goes into the same pull request,
   as its own commit before the feature; one that needs decisions of its own

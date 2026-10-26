@@ -140,8 +140,8 @@ yes. Its parts:
 - the cross-cutting concerns;
 - an index of the accepted ADRs.
 
-Each invariant has one MUST statement, a `Check:` line or the words "review
-only", and the ADR that set it, when one did. A review finding cites `I-3`,
+Each invariant has one MUST statement, a `Check:` line or no `Check:` line
+for "review only", and the ADR that set it, when one did. A review finding cites `I-3`,
 and an ADR says "amends I-3". An ADR that amends `I-3` changes its statement
 and its `Check:` line in the same commit, so the check passes again. A FAIL is
 then always a defect: no reader looks for an ADR to excuse one. A `Check:`
@@ -487,8 +487,11 @@ is printed, as known debt: with its lines for `grep`, with its size for
 `lines` and `files`. A path of the `debt` list that no longer breaks it is
 printed as no longer debt, so that the list shrinks. The `except` paths are
 never printed. An invariant with no `Check:` line prints `I-4 review only`.
-The exit status is 0 when no check fails, 1 when one fails, and 2 for a wrong
-call or a `Check:` line that the script cannot read; then it names that line.
+The exit status is 0 when no check fails, 1 when one fails, and 2 when a
+check did not run: a wrong call, a line that the script cannot read or that no
+invariant holds, a code fence that does not close, a path of `in` with no code
+file outside its `except` paths, a pattern that git rejects, or no debt skill
+beside this one. Then a line on stderr names the cause.
 
 The script builds each `git grep` call itself, with `--` before the paths, and
 puts the pattern in its own argument after `-e`, so a pattern that starts with
@@ -536,9 +539,10 @@ still hears of it.
 The lens runs `invariants.sh --new-since <base> HEAD` first. Each `new` hit
 is the branch's. A FAIL with no `new` hit was on the base already: it is a
 finding outside the task, an issue through `kalinichenko:github`, or one
-already filed. That holds unless the branch changed the invariant: a new
-invariant, a lower limit, or a path taken off its `debt` list makes the FAIL
-the branch's. Then it runs `clones.sh` on a read-only checkout of the head, keeping
+already filed. That holds unless the branch added the invariant or changed
+its `Check:` or `debt` lines, as a lower limit, a wider pattern or `in` list,
+or a path taken off its `except` or `debt` list: then the FAIL is the
+branch's. Then it runs `clones.sh` on a read-only checkout of the head, keeping
 the clones that touch a file the branch changed. Its findings:
 
 - a second structure beside an existing one. A change that follows the

@@ -29,9 +29,9 @@ above `<dir>`.
 project already keeps them there. Never make a second place for the same
 document.
 
-**Safety.** No step runs code of the project: no package manager, no script
-of the project and no build in the project's tree, and no text of the
-architecture file as a shell command.
+**Safety.** No step runs code of the project. In the project's tree, no step
+runs a package manager, a script of the project or a build. No step runs text
+of the architecture file as a shell command.
 
 ## The start of a feature
 
@@ -217,8 +217,8 @@ wins in that project, and it names the convention that it replaces.
   file and a `files` check for a folder. The skill keeps no number of its
   own.
 - **The `debt` list.** The files and folders already past a limit are in the
-  check's `debt` list, so the check passes now. After the first architecture
-  file, a path joins the list only in a pull request that also files its debt
+  check's `debt` list, so the check passes now. Outside the five steps of
+  `first-file.md`, a path joins the list only in a pull request that also files its debt
   issue, by *When to split*. A path
   that drops below the limit leaves the list. A new number for the limit
   needs an ADR.
@@ -328,18 +328,20 @@ path of its `debt` list; then `no longer debt`, a path of the list with no
 hit, which leaves the list. With `--new-since`, `new` marks each hit that the
 base does not have: those are the branch's. A FAIL with no `new` hit was on
 the base already: it is a finding outside the task. That holds unless the
-branch changed the invariant: a new invariant, a lower limit, or a path taken
-off its `debt` list makes the FAIL the branch's.
+branch added the invariant or changed its `Check:` or `debt` lines, as a
+lower limit, a wider pattern or `in` list, or a path taken off its `except`
+or `debt` list: then the FAIL is the branch's.
 
 - **Exit 0:** no invariant fails.
 - **Exit 1:** one fails. A hit of the change is a defect: fix the code, or
   end it by the gate. On a branch, `--new-since <base>` tells its hits from
-  those of the base. An ADR never excuses a FAIL: an ADR that amends an
+  those of the base, unless the branch changed the invariant. An ADR never excuses a FAIL: an ADR that amends an
   invariant changes its `Check:` line in the same commit.
-- **Exit 2:** a check did not run. The line on stderr names the cause: a
-  wrong call, a line that the script cannot read, a `Check:` line outside an
-  invariant, a path with no code file outside its `except` paths, a pattern
-  that git rejects, or no debt skill beside this one. Correct the call, or
+- **Exit 2:** a check did not run. The lines on stderr name the cause: a
+  wrong call, a line that the script cannot read, a `Check:` or `debt` line
+  outside an invariant, a code fence that does not close, a path with no code
+  file outside its `except` paths, a pattern that git rejects, or no debt
+  skill beside this one. Correct the call, or
   the line in the architecture file.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
@@ -351,7 +353,7 @@ tell code from data.
 | Thought | Reality |
 | --- | --- |
 | "The request is clear; I will start with the code" | A new capability gets the block first, in a message before the first edit. It is four lines. |
-| "There is no architecture file, so the decision steps do not apply" | Only step 1 and the gate read the file. The other steps hold in every project. |
+| "There is no architecture file, so the decision steps do not apply" | Only step 1 and the gate need the file. The other steps hold in every project. |
 | "Offering an architecture file is out of the task's scope" | The offer is one question at the first decision of the session, and a no ends it. Ask it. |
 | "I found the API client; the search is done" | Search once for each kind of work the change does: the format, the store, the check of the input. |
 | "The file is on the `debt` list already, so a few more lines are fine" | The list records the debt; it is no leave to add to it. Name the split before the edit. Only a split that needs decisions of its own lets the change in as it is, with its debt issue. |
