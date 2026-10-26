@@ -135,7 +135,8 @@ first() {
 # feature, a constant file at the feature root. A `use-*` file inside a `use-*`
 # folder at the feature root counts as a hook at the root. Each of these
 # fails, though the skill allows it: the page's own hook when the page file is
-# not named `*-page.tsx`, a generic `use-*` hook in src/shared. No recorded run
+# not named `*-page.tsx` or imports it in another form than `./use-products`,
+# as `./use-products.js`, a generic `use-*` hook in src/shared. No recorded run
 # wrote any of these, so add a case when a run does.
 nested() {
   local ok=0 dir feature found
