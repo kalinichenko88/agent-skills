@@ -82,14 +82,19 @@ start there.
    - an invariant that the script prints as `review only` has no `Check:`
      line: name it in the report, as a rule that a grep cannot test.
 
-   When the script exits with 2, a check did not run: give its message in
-   the report.
+   When the script exits with 2, it stopped at the cause that it gives on
+   stderr, and each invariant that it did not print did not run. Give the
+   message, and name those invariants in the report as not checked.
 
    The architecture file can also name the one way to do a kind of work, as
-   the one HTTP client. A second way is a broken invariant when an invariant
-   covers it, or else a place of its own. Its fix needs a choice between the
-   two ways, so its issue says that the fix writes an ADR through
-   `kalinichenko:architecture`.
+   the one HTTP client. When the code keeps a second way beside it, as a
+   second HTTP client that several modules use, the two ways compete. Find
+   the second way with `git grep -n` over the scope, as for a rule above. It
+   is a broken invariant when an invariant covers it, or else a place of its
+   own. Its fix needs a choice between the two ways, so its issue says that
+   the fix writes an ADR through `kalinichenko:architecture`. A hit whose
+   fix is only to use the way that the file names is a broken rule of the
+   list above, and its issue asks for no ADR.
 
    Keep a hit only when the rule's text, its exceptions included, forbids it.
    A hit that the text leaves open is *borderline*: name it in the report,
@@ -125,10 +130,11 @@ start there.
    one place, which the fewest shared helpers that remove all its rows fix.
    Sort a clone place as the findings of step 3: a rule of step 2's files that
    requires the copies drops it, and one that forbids them makes it a broken
-   rule, counted once. Then check each place that is left against the three
-   conditions of *Shared code or a copy*, under *Decomposition* in
-   `<skills>/architecture/SKILL.md`. A place that fails one of them is a copy
-   kept on purpose: name it in the report, and file none. When `clones.sh`
+   rule, counted once. Then check each clone place that no rule drops or
+   forbids against the three conditions of *Shared code or a copy*, under
+   *Decomposition* in `<skills>/architecture/SKILL.md`. The number of copies
+   does not decide here. A place that fails one of the three is a copy kept
+   on purpose: name it in the report, and file none. When `clones.sh`
    exits with an error, as with neither `npx` nor `bunx` or with a shared
    `TMPDIR`, skip this step and give its message in the report. `jscpd` never
    goes into a `package.json`.
@@ -136,10 +142,12 @@ start there.
 ## Choose the places
 
 A place is one fix: a file to split, a broken rule, the clones that one
-shared helper removes, or a piece of over-engineering to remove. Rank the
-places by their file's score from `measure.sh`: a broken rule takes the
-importer's score, and a place over several files — clones, a dependency and
-its importers, a bundled finding — the highest of its files. A file outside
+shared helper removes, or a piece of over-engineering to remove. The hits
+of one `grep` rule, its `debt` hits included, are one place over several
+files. Rank the places by their file's score from `measure.sh`: a broken
+rule takes the importer's score, and a place over several files — the hits
+of one rule, clones, a dependency and its importers, a bundled finding — the
+highest of its files. A file outside
 the table gets its score from `measure.sh <file>`.
 
 A hotspot, a file or a folder from a `debt` hit of step 2 included, is a

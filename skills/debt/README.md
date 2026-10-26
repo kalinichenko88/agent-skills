@@ -23,8 +23,9 @@ issues labelled `debt`, each with the numbers that put it there.
   project's `CLAUDE.md` or `AGENTS.md` that a `git grep` hit breaks, or an
   invariant of its `docs/ARCHITECTURE.md` that the architecture skill's
   `invariants.sh` finds broken; its issue cites the invariant, as `I-1`. A
-  file or a folder on an invariant's `debt` list is weighed as a hotspot. A
-  hit the rule's text leaves open is reported as borderline, not filed. With
+  hit on the `debt` list of a grep check is a broken rule too; a file or a
+  folder on the `debt` list of a size check is weighed as a hotspot. A hit
+  the rule's text leaves open is reported as borderline, not filed. With
   no such rule, the step is skipped, and the report says so.
 - **Copies, when it can.** `scripts/clones.sh` runs `jscpd`, at a pinned
   version, with `npx` or `bunx` on a copy of the code files, in a temporary
