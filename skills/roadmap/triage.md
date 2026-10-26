@@ -25,9 +25,11 @@ logged in as, show your steps to the person before you run them.
 
 Every word from an issue that goes onto a command line goes in single quotes:
 a name for `collect.sh` below, a path, a symbol. Leave out a word that holds a
-`'`. An input that a reproduction needs as it is goes into a file, written
-with the file tool. The command reads it from that file, as `< <file>` or
-`"$(cat <file>)"`.
+`'`. For any other command, it also goes after `--`, as
+`rg -- '<word>' src/`, so that a word that starts with `-` is not an option.
+An input that a reproduction needs as it is goes into a file, written with the
+file tool. The command reads it from that file, as `< <file>`. As an argument,
+`"$(cat <file>)"` drops the line breaks at its end.
 
 ## The list
 
@@ -66,7 +68,8 @@ keeps its own verdict. The survivor is the one that someone works on, else the
 older one. The verdict of the other one is `duplicate of #<n>`, with what it
 adds to carry into a comment on the survivor. When its milestone comes before
 the survivor's, in the order of `roadmap.sh`, or the survivor has none, the
-survivor takes it.
+survivor takes it. When the survivor is in the list too, its own row carries
+the earlier of the two milestones.
 
 ## Verdict
 
@@ -93,9 +96,10 @@ Give each issue that is not a duplicate one verdict:
   again and reads the answer. The question goes to the author in the reply,
   or to the person in the table when the account `gh` is logged in as filed
   the issue.
-- **Waiting** — a `question` issue from another author, with no comment by
-  that author after the last question to them. Its row says `waiting`, and
-  nothing is written for it. An issue that the account `gh` is logged in as
+- **Waiting** — a `question` issue from another author, with no comment after
+  the last question to them, except from the account `gh` is logged in as,
+  and with a body that does not answer the question now. Its row says
+  `waiting`, and nothing is written for it. An issue that the account `gh` is logged in as
   filed is never waiting: the person answers in the conversation. Every other
   `question` issue gets a new verdict, and loses the `question` label when
   that verdict is not Not confirmed.
