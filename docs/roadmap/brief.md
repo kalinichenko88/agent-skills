@@ -67,8 +67,8 @@ Header: label "SCENARIO 4 OF 4", title "Triage new issues".
 Trigger box: "WHEN: you ask the agent to triage the new issues."
 1. "Which issues are new?" — THE AGENT takes three tickets, "#36", "#37" and "#38", out of a tray labelled "New"; the tickets have no tags; YOU watch. Caption: "Open issues with no label or no milestone. Nobody has checked their reports yet."
 2. "Duplicates close first" — THE AGENT clips ticket "#37" behind ticket "#36" and puts a grey stamp with no text on "#37". Caption: "#37 is the same report as #36. It closes, and what it adds is copied to #36."
-3. "A verdict for each" — THE AGENT looks at ticket "#36" through a large magnifying glass; beside it, ticket "#38" has a small speech bubble with "?"; YOU watch from the laptop. Caption: "The agent reproduces each report or finds it in the code. A false one closes; an unclear one gets a question."
-4. "Label and milestone" — YOU give a thumbs-up; THE AGENT puts ticket "#36", with a small tag "bug", into box "M1"; ticket "#38" waits beside the box. Caption: "Each issue gets a label, and its importance picks the milestone. One approval, then it all goes into GitHub."
+3. "A verdict for each" — THE AGENT looks at ticket "#36" through a large magnifying glass; beside it, ticket "#38" has a small speech bubble with "?"; YOU watch from the laptop. Caption: "The agent tries to reproduce each report or to find it in the code. A false one closes; an unclear one gets a question."
+4. "Label and milestone" — YOU give a thumbs-up; THE AGENT puts ticket "#36", with a small tag "bug", into box "M1"; ticket "#38" waits beside the box. Caption: "A confirmed issue goes into the milestone its importance asks for. One approval, then it all goes into GitHub."
 Result box: "YOU GET: every new issue checked, each open one labelled, and each confirmed one in a milestone."
 </image>
 
