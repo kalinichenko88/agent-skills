@@ -21,9 +21,9 @@ issue=${BASH_REMATCH[2]#\#}
 # number and these words stay whole up to 50 characters, so the name does not
 # stop in the middle of a phrase. When they are longer, it cuts the words at a
 # word end to 40 characters and drops the small words at the end of the cut.
-# Then it drops a "(" that has no ")" after it and, when the count of quotes
-# is odd, the last quote, each with the words after it. gh's --jq counts
-# characters, not bytes, so the result stays valid UTF-8.
+# Then it drops a "(" that has no ")" after it and, when the count of double
+# quotes is odd, the last double quote, each with the words after it. gh's
+# --jq counts characters, not bytes, so the result stays valid UTF-8.
 # ponytail: the small words are English; add a language's words when its
 # titles end on them.
 # shellcheck disable=SC2016 # the single-quoted $ are jq's

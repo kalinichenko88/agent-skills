@@ -74,9 +74,9 @@ check 'escape: the title' '#133 a "b" \ c d' "$(field sessionTitle)"
 # number, the first part has 48 characters in row 7, 50 in row 8 and 51 in
 # row 9, which then drops a "(" with no ")" after the cut; row 10 stops at
 # " — "; row 11 drops a "(" with no ")" after a comma, row 12 after the cut;
-# row 13 drops the last quote of an odd count. Then a short title keeps its
-# last small word; a Russian title counts in characters, not bytes; a word
-# longer than the limit is cut inside.
+# row 13 drops the last double quote of an odd count; row 14 keeps a "(" with
+# its ")". Then a short title keeps its last small word; a Russian title
+# counts in characters, not bytes; a word longer than the limit is cut inside.
 while IFS='|' read -r issue_title name; do
   jq --arg t "$issue_title" '.title = $t' "$fixtures/issue.json" >"$tmp/issue.json"
   out=$(run claude-prompt.json '#133') || fail "$issue_title: exit $?"
@@ -95,6 +95,7 @@ Post-1.0 non-goal: bulk tag rename (the other four were promoted)|#133 bulk tag 
 notes: bulk write API for imports (one lock cycle, one index transaction)|#133 bulk write API for imports
 query: richer where filters (in / not / ranges / missing) and multi-tag matching|#133 richer where filters
 review-loop: a review subagent gets "file it, do not ask first" from rules.md, and no "file nothing"|#133 a review subagent gets
+vault-io: folder enumeration (listFolders)|#133 folder enumeration (listFolders)
 Hooks fail when logged in|#133 Hooks fail when logged in
 Хук ставит в имя сессии весь заголовок issue, и имя получается длинным|#133 Хук ставит в имя сессии весь заголовок issue
 skills/architecture/scripts/invariants.sh fails on bash 3.2|#133 skills/architecture/scripts/invaria
