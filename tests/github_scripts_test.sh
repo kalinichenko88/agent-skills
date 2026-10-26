@@ -366,10 +366,14 @@ esac
 printf 'feat/5-linked\thttps://github.com/someone/agent-skills/tree/feat/5-linked\n' >"$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations 2>&1) &&
   fail 'worktree.sh goes on with a linked branch in another repository' "$out"
-case $out in *'#5 is linked to https://github.com/someone/agent-skills/tree/feat/5-linked, a branch in another repository: stop'*) ;;
-  *) fail 'worktree.sh names the linked branch in another repository' "$out" ;;
+check 'worktree.sh names the linked branch in another repository' \
+  "$(printf '#5 is linked only to branches in another repository:\nhttps://github.com/someone/agent-skills/tree/feat/5-linked')" "$out"
+# A linked branch in this repository still wins, after one in a fork.
+printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-new)
+case $out in *'using it'*'--name feat/5-scout-citations --checkout'*) ;;
+  *) fail 'worktree.sh skips a linked branch in another repository' "$out" ;;
 esac
-case $out in *'dry run:'*) fail 'worktree.sh writes for a linked branch in another repository' "$out" ;; esac
 
 # worktree.sh --here, for "a branch only": it assigns the issue and checks the
 # branch out in the checkout where it runs.

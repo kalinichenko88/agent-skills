@@ -43,9 +43,10 @@ branch" — and then they win. Each path assigns the issue to you, because an
 unassigned issue looks free to everyone else: "a branch only" runs
 `worktree.sh` with `--here`, which makes no worktree and works in the current
 checkout, and "stay on this branch" runs `gh issue edit 91 --add-assignee @me`
-and touches no branch. `worktree.sh` warns instead of assigning in one case,
-below; "stay on this branch" checks the same case first, with
-`gh issue develop --list 91` and the issue's assignees.
+and touches no branch. `worktree.sh` does not assign the issue in two cases,
+below: it warns in one and stops in the other. "Stay on this branch" checks
+the case of the warning first, with `gh issue develop --list 91` and the
+issue's assignees.
 
 The branch, and the worktree when one is made, carry one name that says what
 the work is: `<type>/<number>-<two to four words>`, the type from *Commits* in
@@ -63,14 +64,16 @@ already checked out is worked on where it is. A session already in a worktree,
 as one started with `claude --worktree` or `codex --worktree`, checks the
 branch out where it is, and so does `--here`.
 
+Only a linked branch in this repository counts: without `--branch-repo`,
+`gh` would make a new branch of the same name here. When every linked branch
+is in another repository, as a fork's, the script stops before it assigns or
+makes anything, and prints their URLs. Say so and wait for the person: a
+rerun with another name stops the same way.
+
 A linked branch on an issue that nobody is assigned to can be someone else's:
 the script warns, and does not assign the issue to you. Find out whose the
 branch is before you push to it. Someone else's: say so and wait. Yours: run
 the command the warning gives, which assigns the issue to you.
-
-A linked branch in another repository, as a fork's, stops the script before
-it assigns or makes anything: without `--branch-repo`, `gh` would make a new
-branch of that name in this repository. Say so and wait.
 
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree

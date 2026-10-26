@@ -13,8 +13,9 @@ its write commands and runs none.
 A script can stop with an error, from `gh` or from its own usage check. Then
 its step is not done: report the error and stop at that step. Do not do the
 step by hand with `gh`: that skips the checks the script makes. A refusal from
-`take-in-check.sh` or `add-finding.sh` is not an error; `take-in.md` and
-`filing.md` say what to do with it.
+`take-in-check.sh` or `add-finding.sh`, or the stop of `worktree.sh` at
+branches in another repository, is not an error; `take-in.md` and `filing.md`
+say what to do with it.
 
 ## Reading the tracker
 
