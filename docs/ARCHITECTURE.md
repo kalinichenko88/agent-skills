@@ -195,8 +195,8 @@ hold 10. A new number needs an ADR.
   to `hooks/hooks.json` is a major release: Codex users must trust the
   hooks again. Both hosts run every hook, but Codex fails a hook run whose
   output has a field that Codex does not know, as `sessionTitle`. Such a
-  hook finds Codex by `turn_id` in its input, which only Codex sends, and
-  prints nothing there.
+  hook prints only for a Claude Code input: one with `prompt_id`, which
+  Claude Code sends, and with no `turn_id`, which only Codex sends.
 - **Portability.** bash 3.2 on macOS, three kinds of awk, Git Bash on
   Windows, NixOS with no `/bin/bash`: every script starts with
   `#!/usr/bin/env bash`, and every file is LF (`.gitattributes`).
