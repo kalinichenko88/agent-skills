@@ -5,8 +5,9 @@
 #   add-finding.sh <n> <section-file> <title> [label]
 #
 # The section file starts with the line "## Also: <the problem>". The host must
-# be an open issue that nobody else works on (collect.sh status says taken: no)
-# and that holds fewer than two added findings. All of this is read again just
+# be an open issue that nobody works on, you included, because another session
+# of yours can work on it (collect.sh status says status: free), and that holds
+# fewer than two added findings. All of this is read again just
 # before the write. Otherwise it prints why and exits 1, and writes nothing.
 # Run it for one host at a time: it reads the body and writes it back whole.
 # When gh stops it with an error, the step is not done. A rerun with the same
@@ -44,10 +45,10 @@ problem=$(sed -n '1s/^## Also: //p' "$section")
 
 host=$(bash "$(dirname "$0")/collect.sh" status "$n")
 # A pull request gives the state: line only.
-{ read -r _ state; read -r _ status; read -r _ also; read -r _ taken; } <<<"$host" || true
+{ read -r _ state; read -r _ status; read -r _ also; } <<<"$host" || true
 
 [ "$state" = open ] || refuse "it is $state"
-[ "$taken" = no ] || refuse "someone works on it: $status"
+[ "$status" = free ] || refuse "it is busy: $status"
 
 tmp=${TMPDIR:-/tmp}
 body=$(mktemp "${tmp%/}/body.XXXXXX")

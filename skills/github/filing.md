@@ -55,8 +55,8 @@ than it closes. Per finding, the scout's groups decide:
   file, so its author sees the overlap.
 - **A host** — an open issue whose fix changes the same code, or that decides
   something about the same function. It takes the finding only if it is not
-  someone else's work (`tracker.md`) and holds fewer than two added findings,
-  its `also:`. One PR must still close every problem in it. Write the section
+  busy (`tracker.md`) and holds fewer than two added findings, its `also:`.
+  One PR must still close every problem in it. Write the section
   to a file outside the checkout. It starts `## Also: <the problem>`, then says
   where it is (`path:line`), how it shows up, and why it was out of scope here.
   Then:
@@ -95,7 +95,7 @@ than it closes. Per finding, the scout's groups decide:
     repository's own name for that label in `gh label list`. When there is
     neither, create `debt` first:
     `gh label create debt --description "Structural debt to refactor" --color 5319e7`.
-  - A host that someone works on, or that holds two added findings: write
+  - A busy host, or one that holds two added findings: write
     `Related to #12` in the new body, and leave a one-line comment on the host
     that names the new issue. Do not edit its body.
 
@@ -112,9 +112,8 @@ Name the relation in the body — `Related to #12`, `Blocks #12`, `Supersedes
 agent reads something true, and leave a one-line comment saying what moved and
 why. GitHub keeps the edit history, so nothing is lost by correcting the text
 in place. A duplicate is closed against the survivor, never left standing as a
-second opinion. When the other side is a host that someone works on, or that
-holds two added findings, it gets the one-line comment only: its body stays as
-it is.
+second opinion. When the other side is a busy host, or one that holds two
+added findings, it gets the one-line comment only: its body stays as it is.
 
 ## A defect in this plugin
 
