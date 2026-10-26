@@ -97,17 +97,17 @@ An invariant starts at a line `- **I-<n>.** <statement>`. The lines under it
 belong to it, up to the next line that starts with a character other than a
 space or a tab; a blank line does not end it. Lines inside a fenced code block
 are skipped. A fence closes at a line of the same character, as long or
-longer, with nothing after it, indented as far as the opening line. A fence
-at column 0 also closes at such a line indented 1 to 3 columns more. A tab
-moves the text to the next multiple of 4 columns.
+longer, with nothing but spaces or tabs after it, at the same column as the
+opening line. A fence at column 0 also closes at such a line indented 1 to 3
+columns more. A tab moves the text to the next multiple of 4 columns.
 
-A fence stops the script in three cases, because the lines that it hides
-could hold a check:
+A fence stops the script in three cases. The lines that it hides could hold
+a check.
 
 - It does not close.
-- It is indented, and such a line is indented 1 to 3 columns past it.
-  Markdown counts those columns from the margin of the list item, which the
-  script does not know.
+- It is indented, and a line that could close it is indented 1 to 3 columns
+  past its opening line. Markdown counts those columns from the margin of the
+  list item. The script does not know that margin.
 - A non-blank line before its closing line is indented less than its opening
   line, as at the end of the list item that holds it.
 
