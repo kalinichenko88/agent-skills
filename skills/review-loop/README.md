@@ -3,7 +3,8 @@
 A review that ends: rounds that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
-a security review last, and a summary of what was decided and fixed.
+a review of the tests for `high` and `xhigh` changes, a security review last,
+and a summary of what was decided and fixed.
 
 ## When it starts
 
@@ -42,8 +43,14 @@ each task stays as that skill sets it. In place of the final review of
   needed only one round. Its findings go through the same checks. Without the
   Codex CLI or its login, or when Codex fails, the step is skipped, and the
   summary says so.
-- **Later fixes are reviewed too.** The fixes from the last pass and the Codex
-  review are one commit. The fixes from the security review are one commit,
+- **A review of the tests.** For `high` and `xhigh` changes, one review
+  subagent reads the tests of the whole branch once, when the rounds end. It
+  finds a test missing where a defect can hide, a test that passes with its
+  code deleted, a test that the change left stale, a test that repeats
+  another, and brittle or heavy tests. It runs at the end because the later
+  rounds add tests too, and an older test then often repeats a newer one.
+- **Later fixes are reviewed too.** The fixes from the last pass, the Codex
+  review and the review of the tests are one commit. The fixes from the security review are one commit,
   and so are those from each set of your review comments, also after the pull
   request opens. Each of these commits has rounds of its own: at the level of
   the loop's round 1, or `xhigh` for a fix to security code.
