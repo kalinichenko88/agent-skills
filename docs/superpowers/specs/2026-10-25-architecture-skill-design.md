@@ -473,9 +473,10 @@ or a `debt` hit. So a branch that adds an invariant, widens it, or changes its
 `except` or `debt` list gets `new` on each hit that it adds that way, and an
 invariant that the base does not have marks each of its hits `new`. So does an
 invariant that the script does not read whole in the base's file, as one on
-or after a line that it cannot read, or one whose check cannot run at the
-base: a line on stderr says so, and the
-run goes on, since the branch can be the one that corrects that file. Before it compares, it follows the renames of files: a file
+or after a line that it cannot read, and one whose check cannot run at the
+base: a line on stderr says so, and the run goes on, since the branch can be
+the one that corrects that file. Before it compares, it follows the renames
+of files: a file
 that `git diff -M <base> <ref>` shows as renamed is compared with its old
 path. A folder is compared by its path
 only, because `git diff` names no folder renames. So when a branch only

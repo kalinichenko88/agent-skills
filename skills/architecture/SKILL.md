@@ -308,9 +308,10 @@ bash <dir>/scripts/invariants.sh --new-since <base> [ref]
 
 Run it from the project's checkout. With no ref it reads the working tree,
 with the untracked files that git does not ignore; with a ref, that commit.
-`<base>` is the base of the branch: `git merge-base origin/<default branch>
-HEAD`, or `git merge-base <default branch> HEAD` where there is no `origin`.
-With a ref, the ref takes the place of `HEAD`.
+`<base>` is the base of the branch:
+`git merge-base origin/<default branch> HEAD`, or
+`git merge-base <default branch> HEAD` where there is no `origin`. With a
+ref, the ref takes the place of `HEAD`.
 It runs each `Check:` line of the architecture file (syntax: `first-file.md`)
 and prints one line per invariant:
 
@@ -352,7 +353,7 @@ Four cases mark hits `new` that are not the branch's. Read the diff for them:
 - When the script cannot read the base's file past a line, each hit of an
   invariant that it did not read whole there is `new`: the one that holds
   that line, and each one after it. For a code fence that does not close,
-  the invariant that holds the fence is not whole either: the stderr line
+  the invariant that holds the fence is not whole either: a line on stderr
   gives the line of the fence. When the base's check of one
   invariant cannot run, each hit of that invariant is `new`.
 
@@ -371,8 +372,9 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   opening line, a path with no code file outside its `except` paths, a
   pattern that git rejects, two invariants with one number, no `checks.awk`
   beside the script, or no debt skill beside this one. Correct the
-  call, or the line in the architecture file. At the base, these causes give
-  no exit 2.
+  call, or the line in the architecture file. In the base's file, or in a
+  check that cannot run at the base, these causes give no exit 2: see the
+  cases above.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to
