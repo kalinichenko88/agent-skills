@@ -120,7 +120,8 @@ context. It checks that a checkout with `core.autocrlf=true`, the Git for
 Windows default, keeps every text file in LF, that the hook still gives the
 rules from a CRLF `rules.md`, that every script starts with
 `#!/usr/bin/env bash`, and that every `- ` line of `CHANGELOG.md` starts with
-its scope in parentheses. It also runs the github and roadmap skills' scripts against a fake `gh` that answers from payloads recorded
+its scope in parentheses. It also runs the github and roadmap skills' scripts
+against a fake `gh` that answers from payloads recorded
 in `tests/fixtures/github/` and `tests/fixtures/roadmap/`, all from public
 repositories, the debt skill's `measure.sh` on a repository the test builds,
 and its `clones.sh` against a fake `npx` that answers with a report recorded

@@ -56,7 +56,8 @@ grep -qx 'bash skills/architecture/scripts/invariants.sh' "$tmp/out" ||
   fail 'make check does not run invariants.sh' "$(cat "$tmp/out")"
 # make -n prints a recipe without its - prefix, so the line above passes a
 # recipe that ignores the exit code. The target must fail on a broken
-# invariant: here a file of the skill past a limit of 0 lines.
+# invariant: here a file of the skill past a limit of 0 lines. A script that
+# stops before its check fails too, so the output must hold the FAIL.
 inv=$tmp/inv
 mkdir -p "$inv/skills/architecture/scripts" "$inv/skills/debt/scripts" "$inv/docs"
 cp "$root/skills/architecture/scripts/invariants.sh" "$inv/skills/architecture/scripts/"
