@@ -122,7 +122,8 @@ check 'no file at a ref' '0 No architecture file at HEAD.' "$code $out"
 
 mkdir "$empty/docs"
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep fetch in src/' >"$empty/docs/ARCHITECTURE.md"
-run "$empty"
+# An AT of the person's environment does not reach the message.
+AT='leak: ' run "$empty"
 check 'a line it cannot read' '2 invariants.sh: I-1: cannot read: Check: grep fetch in src/' "$code $err"
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"

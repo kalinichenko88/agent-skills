@@ -549,7 +549,7 @@ still hears of it.
 
 The lens runs `invariants.sh --new-since <base> HEAD` first. Each `new` hit
 is the branch's, also when the branch changed the invariant, except in the
-three cases that SKILL.md lists. A FAIL whose failing hits have no `new` mark
+cases that SKILL.md lists. A FAIL whose failing hits have no `new` mark
 was on the base already: it is a finding outside the task, an issue
 through `kalinichenko:github`, or one already filed. Then it runs
 `clones.sh` on a read-only checkout of the head, keeping the clones that touch

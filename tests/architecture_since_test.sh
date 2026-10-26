@@ -144,7 +144,7 @@ check 'a base file it cannot read' "1 $(printf '%s\n' 'I-1 FAIL' \
   '  new src/feature/a.ts:2:fetch(u);' '  new src/feature/a.ts:3:fetch(u);' \
   'I-2 FAIL' '  src/feature/b.ts:1:fetch(v);' 'I-3 FAIL' '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
 for line in 'invariants.sh: at HEAD: I-3: cannot read: Check: grep const in src/' \
-  'invariants.sh: at HEAD: each hit of that invariant and of each one after it is new' \
+  'invariants.sh: at HEAD: each hit of an invariant that the script did not read whole there is new' \
   'invariants.sh: at HEAD: I-1: git grep failed' 'invariants.sh: at HEAD: each hit of I-1 is new'; do
   grep -qxF "$line" <<<"$err" || fail "no line on stderr: $line" "$err"
 done

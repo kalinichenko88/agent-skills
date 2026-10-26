@@ -308,6 +308,8 @@ bash <dir>/scripts/invariants.sh --new-since <base> [ref]
 
 Run it from the project's checkout. With no ref it reads the working tree,
 with the untracked files that git does not ignore; with a ref, that commit.
+`<base>` is the commit where the branch starts:
+`git merge-base origin/<default branch> HEAD`.
 It runs each `Check:` line of the architecture file (syntax: `first-file.md`)
 and prints one line per invariant:
 
@@ -335,17 +337,21 @@ by a change of the list or of the file's path. With `--new-since`, a FAIL
 whose failing hits have no `new` mark was on the base already: it is a
 finding outside the task.
 
-Three cases mark hits `new` that the branch did not add. Read the diff for
-them:
+Four cases mark hits `new` that are not the branch's. Read the diff for them:
 
+- A file that the branch moves is compared with its old path only when git
+  sees the rename: the move is committed or staged, and the file stays at
+  least half the same. A move that git does not see makes each hit of the
+  file `new`.
 - A `files` check compares a folder by its path. So a folder that the branch
   only renames shows its own hit as `new`: when the diff shows only the move,
-  the hit is not the branch's. The hits of the files in it follow the rename.
+  the hit is not the branch's.
 - With no architecture file at the base, each hit is `new`, as for a branch
   that adds the first one.
-- When the script cannot read the base's file past a line, each hit of the
-  invariant on that line, and of each one after it, is `new`. When the base's
-  check of one invariant cannot run, each hit of that invariant is `new`.
+- When the script cannot read the base's file past a line, each hit of an
+  invariant that it did not read whole there is `new`: as a rule, the one
+  where it stops and each one after it. When the base's check of one
+  invariant cannot run, each hit of that invariant is `new`.
 
 In the last two cases, lines on stderr after `at <base>:` say so.
 
@@ -362,7 +368,8 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   opening line, a path with no code file outside its `except` paths, a
   pattern that git rejects, two invariants with one number, no `checks.awk`
   beside the script, or no debt skill beside this one. Correct the
-  call, or the line in the architecture file.
+  call, or the line in the architecture file. These causes in the base's
+  file give no exit 2: see the cases above.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to

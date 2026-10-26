@@ -11,11 +11,11 @@
 # architecture file on the base, and puts the word new before each hit that the
 # base does not have with the same status, a hit that fails or a debt hit: a
 # grep line that the base has fewer times in the file, by its path before a
-# rename; a file with no such hit at the base, or a smaller one; a folder the
-# same, by its path. An invariant is compared with the one of the same id and
-# kind of check at the base; with none there, each of its hits is new. So it
-# is when the base's file stops before it or its check cannot run: stderr says
-# so, after "at <base>:".
+# rename that git sees; a file with no such hit at the base, or a smaller one;
+# a folder the same, by its path. An invariant is compared with the one of the
+# same id and kind of check at the base; with none there, each of its hits is
+# new. So it is when the script does not read that one whole in the base's
+# file, or its check cannot run there: stderr says so, after "at <base>:".
 # The syntax of a Check: line is in the skill's first-file.md. No text of the
 # file runs as a command: a pattern and each path go to git grep as their own
 # arguments, after -e and --, as literal pathspecs. Documents and other data
@@ -88,17 +88,17 @@ else
   echo 'No architecture file in the working tree.'
   exit 0
 fi
-records=$(printf '%s\n' "$text" | awk "$checks") || exit 2
+records=$(printf '%s\n' "$text" | AT='' awk "$checks") || exit 2
 # olds: the records of the base's own architecture file. A base file that
-# cannot be read gives the records above the line it stops at: the branch can
-# be the one that corrects that line.
+# cannot be read gives the records of the invariants that checks.awk read
+# whole before it stopped: the branch can be the one that corrects the file.
 olds=
-if [ -z "$base" ]; then
-  :
-elif ! text=$(file_at "$base"); then
-  echo "invariants.sh: at $since: no architecture file, so each hit is new" >&2
-elif ! olds=$(printf '%s\n' "$text" | AT="at $since: " awk "$checks"); then
-  echo "invariants.sh: at $since: each hit of that invariant and of each one after it is new" >&2
+if [ -n "$base" ]; then
+  if ! text=$(file_at "$base"); then
+    echo "invariants.sh: at $since: no architecture file, so each hit is new" >&2
+  elif ! olds=$(printf '%s\n' "$text" | AT="at $since: " awk "$checks"); then
+    echo "invariants.sh: at $since: each hit of an invariant that the script did not read whole there is new" >&2
+  fi
 fi
 
 # was: each file that the branch renamed, as new path<TAB>old path, so that
@@ -123,11 +123,13 @@ lib='
 '
 
 # ggrep <option>...: git grep with the options over the paths of the check,
-# with \036 for its NUL bytes. A status past 1 is an error, not "no match".
+# with \036 for its NUL bytes. A status past 1 is an error, not "no match":
+# its message starts with $at, which names the base in base_hits.
+at=
 ggrep() {
   local out code=0
   out=$(git -c core.quotePath=false --literal-pathspecs grep --no-color --no-column --null -I "$@" "${where[@]}" -- "${ins[@]}" | tr '\0' '\036') || code=$?
-  [ "$code" -le 1 ] || die "$id: git grep failed"
+  [ "$code" -le 1 ] || die "$at$id: git grep failed"
   printf '%s\n' "$out"
 }
 
@@ -169,7 +171,7 @@ size_hits() {
 # the base. The base may not have the paths of the check, and is not checked
 # for them.
 base_hits() {
-  local where=("$base") prefix=$base: arg=$barg except_=$bexcept ins id="at $since: $id"
+  local where=("$base") prefix=$base: arg=$barg except_=$bexcept ins at="at $since: "
   IFS=$'\037' read -r -a ins <<<"$bin"
   if [ "$kind" = grep ]; then grep_hits; else listing | size_hits; fi
 }
