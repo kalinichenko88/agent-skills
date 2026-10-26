@@ -16,10 +16,11 @@ time.
 
 ## What you get
 
-- **A task starts clean.** Its duplicates close before the work starts. The
-  work gets a worktree named for what it does, as `fix/91-what-it-does`. Every
-  open bug and debt issue in the same area is checked, so one PR can close
-  them with the task.
+- **A task starts clean.** When you name an issue, the agent first tells you
+  its title and, in two or three sentences, what it asks. Its duplicates close
+  before the work starts. The work gets a worktree named for what it does, as
+  `fix/91-what-it-does`. Every open bug and debt issue in the same area is
+  checked, so one PR can close them with the task.
 - **A finding goes to the tracker, not to the chat.** A fix in the task's
   module that needs no decision and is smaller than the task goes into the
   current PR. Anything else joins an open issue on the same code, up to two

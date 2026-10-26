@@ -21,6 +21,13 @@ each reason why not, one per line:
      else: stop. Here: go on with the steps below.
 - An issue of another repository than this checkout's: say so and stop.
 
+**The reply opens with what the task is.** Whatever the check prints, read the
+issue — `gh issue view 91 --json title,body`, or with its URL — and start the
+reply with its number, its title and two or three sentences of your own: what
+is wrong or what is wanted, and when the work is done. Write them in the
+person's language. A reason from the check comes after them. The same read
+gives the names for `collect.sh` below.
+
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can
 set up the worktree below: the worktree is not the work, so the duplicates can
