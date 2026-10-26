@@ -8,7 +8,7 @@ lint:
 	claude plugin validate .
 	jq empty .codex-plugin/plugin.json hooks/hooks.json
 	! grep -n '^- ' CHANGELOG.md | grep -v '^[0-9]*:- ([a-z][a-z, -]*) '
-	shellcheck hooks/*.sh tests/*.sh skills/github/scripts/*.sh skills/roadmap/scripts/*.sh skills/debt/scripts/*.sh skills/review-loop/scripts/*.sh tests/fixtures/debt/*.sh
+	shellcheck hooks/*.sh tests/*.sh skills/github/scripts/*.sh skills/roadmap/scripts/*.sh skills/debt/scripts/*.sh skills/review-loop/scripts/*.sh skills/architecture/scripts/*.sh tests/fixtures/debt/*.sh
 
 # A test passes only when it exits 0 and its last non-empty line on stdout is
 # its ok line: under bash 3.2 a script that set -u stops exits 0 when it has an
