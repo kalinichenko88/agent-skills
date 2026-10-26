@@ -15,7 +15,9 @@ run the checks. The model does the rest.
 
 Both hosts read the same skills and `rules.md`; each host has its own
 `plugin.json`. `hooks/rules.sh` injects `rules.md` at the
-start of each session and each subagent. A skill loads when its
+start of each session and each subagent. In Claude Code,
+`hooks/session-title.sh` names the session after an issue when the prompt
+is the issue alone. A skill loads when its
 `description` matches the moment. The plugin installs as a copy of the whole
 repository.
 
@@ -29,7 +31,8 @@ it: an invariant on it is review only.
 ## Codemap
 
 - `rules.md` — the base prompt. `hooks/rules.sh` and `hooks/hooks.json`
-  inject it.
+  inject it. `hooks/session-title.sh` names a Claude Code session after an
+  issue.
 - `skills/<name>/` — one skill: `SKILL.md`, `README.md`, its other `.md`
   files, and `scripts/`.
 - `tests/<name>_test.sh` — the tests that `make check` runs.
@@ -58,7 +61,7 @@ Each skill is a module, by the area of work it serves.
 
 | Module | Folder | Its test, fixtures and pictures |
 | --- | --- | --- |
-| rules | `rules.md`, `hooks/` | `tests/rules_test.sh` |
+| rules | `rules.md`, `hooks/` | `tests/rules_test.sh`, `tests/hooks_scripts_test.sh`, `tests/fixtures/hooks/` |
 | github | `skills/github/` | `tests/github_scripts_test.sh`, `tests/fixtures/github/`, `docs/github/` |
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
 | review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/fixtures/review_loop/` |
@@ -190,7 +193,10 @@ hold 10. A new number needs an ADR.
 - **Two hosts.** A step that one host cannot do names the other way: Codex
   has no subagent with a model, so it does each such step itself. A change
   to `hooks/hooks.json` is a major release: Codex users must trust the
-  hooks again.
+  hooks again. Both hosts run every hook, but Codex fails a hook run whose
+  output has a field that Codex does not know, as `sessionTitle`. Such a
+  hook prints only for a Claude Code input: one with `prompt_id`, which
+  Claude Code sends, and with no `turn_id`, which only Codex sends.
 - **Portability.** bash 3.2 on macOS, three kinds of awk, Git Bash on
   Windows, NixOS with no `/bin/bash`: every script starts with
   `#!/usr/bin/env bash`, and every file is LF (`.gitattributes`).
