@@ -188,9 +188,9 @@ printf '%s\n' '```' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' 
 run "$empty"
 check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 1' "$code $err"
 # A fence closes at its closing line, indented at least as far as its opening
-# line. A line indented less before that, as at the end of the list item that
-# holds the fence, stops the run: the lines that the fence hides could hold a
-# check.
+# line. A non-blank line indented less before that, as at the end of the list
+# item that holds the fence, stops the run: the lines that the fence hides
+# could hold a check.
 printf '%s\n' '- **I-1.** No fetch. Example:' '  ```ts' '  fetch(u)' '  Check: grep `fetch\(` in `src/`.' \
   '- **I-2.** Other.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
@@ -206,6 +206,12 @@ printf '%s\n' '- **I-1.** An example.' '  ```' '  x' '```' '- **I-2.** No fetch.
 run "$empty"
 check 'a closing line indented less than its fence' \
   '2 invariants.sh: a code fence at line 2 does not close before line 4' "$code $err"
+# As in Markdown, a closing line may be indented up to 3 columns past its
+# fence; one indented 4 or more is a line of code.
+printf '%s\n' '- **I-1.** An example.' '  ```' '      ```' '  Check: grep `fetch\(` in `src/`.' '    ```' \
+  '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a closing line indented past its fence' "1 $(printf '%s\n' 'I-1 review only' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
 # A run of backticks with another backtick later on the line is inline code,
 # not a fence.
 printf '%s\n' '```x``` is code.' '- **I-1.** An example.' '  ```' '  x' '  ```' '- **I-2.** No fetch.' \

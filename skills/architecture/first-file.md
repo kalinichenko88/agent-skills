@@ -97,10 +97,11 @@ An invariant starts at a line `- **I-<n>.** <statement>`. The lines under it
 belong to it, up to the next line that starts with a character other than a
 space or a tab; a blank line does not end it. Lines inside a fenced code block
 are skipped. A fence closes at a line of the same character, as long or
-longer, with nothing after it, indented at least as far as the opening line.
-A fence stops the script when it does not close, or when a line before its
-closing line is indented less than its opening line, as at the end of the
-list item that holds it: the lines that it hides could hold a check.
+longer, with nothing after it, indented as far as the opening line or up to
+3 more. A fence stops the script when it does not close, or when a non-blank
+line before its closing line is indented less than its opening line, as at
+the end of the list item that holds it: the lines that it hides could hold a
+check.
 
 ```
   Check: grep `<ERE>` in `<path>`... [except `<path>`...] [debt `<path>`...]

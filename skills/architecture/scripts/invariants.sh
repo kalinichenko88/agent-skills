@@ -135,16 +135,15 @@ records=$(printf '%s\n' "$text" | awk '
     if (id != "") printf "%s\036%s\036%s\036%s\036%s\036%s\n", id, kind, arg, list["in"], list["except"], list["debt"]
     id = ""
   }
-  { sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line) }
+  { sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line); ind = length($0) - length(line) }
   # A fenced block of backticks or tildes ends at a line of the same
-  # character, as long or longer, with nothing after it, indented at least as
-  # far as the opening line. A line indented less before that, as at the end
-  # of the list item that holds the fence, is an error: the lines that the
-  # fence hides could hold a check.
+  # character, as long or longer, with nothing after it, indented as far as
+  # the opening line or up to 3 more. A non-blank line indented less before
+  # that, as at the end of the list item that holds the fence, is an error:
+  # the lines that the fence hides could hold a check.
   fence != "" {
-    match($0, /^[ \t]*/)
-    if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/ && RLENGTH >= indent) fence = ""
-    else if (line != "" && RLENGTH < indent) stop("a code fence at line " opened " does not close before line " NR)
+    if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/ && ind >= indent && ind < indent + 4) fence = ""
+    else if (line != "" && ind < indent) stop("a code fence at line " opened " does not close before line " NR)
     next
   }
   # A line that starts with neither a space nor a tab ends the invariant.
@@ -152,7 +151,7 @@ records=$(printf '%s\n' "$text" | awk '
   # A run of backticks with another backtick later on the line is inline
   # code, not a fence.
   line ~ /^(```+[^`]*$|~~~)/ {
-    match($0, /^[ \t]*/); indent = RLENGTH; opened = NR
+    indent = ind; opened = NR
     match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH)
     next
   }
