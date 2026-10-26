@@ -113,8 +113,8 @@ defect.
 `kalinichenko:review-loop` replaces `superpowers:requesting-code-review` and
 `superpowers:receiving-code-review`. In
 `superpowers:subagent-driven-development`, the review after each task stays as
-that skill sets it. Invoke review-loop after the last task, in place of the
-final review.
+that skill sets it, without review-loop. Invoke review-loop after the last
+task, in place of the final review.
 
 ## The Boy Scout Rule (always)
 
