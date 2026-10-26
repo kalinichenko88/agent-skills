@@ -1,6 +1,6 @@
 ---
 name: debt
-description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file, duplicated code, or over-engineering — and filing or re-measuring debt issues for refactoring.
+description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file or the invariants of its docs/ARCHITECTURE.md, duplicated code, or over-engineering — and filing or re-measuring debt issues for refactoring.
 ---
 
 # Technical debt map
@@ -67,10 +67,34 @@ start there.
    allows, and check that this line is in the output.
    A rule that a grep cannot test, such as a size or a mirrored layout, gets
    the command that can (`wc -l`, a listing), or is left out and named in the
-   report. Keep a hit only when the rule's text, its exceptions included,
-   forbids it. A hit that the text leaves open is *borderline*: name it in the
-   report, and file none. The map carries no rules of its own: with no such
-   rule in the instruction files, skip this step and say so.
+   report.
+
+   The architecture file, `docs/ARCHITECTURE.md` or `ARCHITECTURE.md` at the
+   root, holds the project's rules too. Run
+   `bash <skills>/architecture/scripts/invariants.sh` from the root of
+   `<tree>`, and keep the hits under the scope:
+   - a hit under `I-<n> FAIL`, with no `debt` before it, is a broken rule,
+     and its issue cites `I-<n>`;
+   - a `debt` hit of a `grep` check is a broken rule too. A `debt` hit of a
+     `lines` or `files` check is a hotspot, which *Choose the places* makes a
+     place or puts into *next*. A path can be on a `debt` list with no
+     issue: a first architecture file puts it there without one;
+   - an invariant that the script prints as `review only` has no `Check:`
+     line: name it in the report, as a rule that a grep cannot test.
+
+   When the script exits with 2, a check did not run: give its message in
+   the report.
+
+   The architecture file can also name the one way to do a kind of work, as
+   the one HTTP client. A second way is a broken invariant when an invariant
+   covers it, or else a place of its own. Its fix needs a choice between the
+   two ways, so its issue says that the fix writes an ADR through
+   `kalinichenko:architecture`.
+
+   Keep a hit only when the rule's text, its exceptions included, forbids it.
+   A hit that the text leaves open is *borderline*: name it in the report,
+   and file none. The map carries no rules of its own: with no such rule in
+   the instruction files and no architecture file, skip this step and say so.
 3. **Over-engineering**, when the ponytail plugin's `ponytail-audit` skill is
    in your skill list; else skip this step and say so. It takes no path and
    loads as instructions, so in Claude Code send it to one subagent right
@@ -81,10 +105,10 @@ start there.
    package manager and no script of the project, in any directory." In Codex,
    run it yourself at that point, with the same limits. Then sort its
    findings, in this order, each part of a bundled finding on its own:
-   1. **Against the project's rules.** Drop a part that a rule of the
-      instruction files of step 2 contradicts or requires: ponytail counts a
-      file that exports one thing as bloat, and a project with one entity per
-      file keeps it. Quote the rule in the report.
+   1. **Against the project's rules.** Drop a part that a rule of the files
+      of step 2 contradicts or requires: ponytail counts a file that exports
+      one thing as bloat, and a project with one entity per file keeps it.
+      Quote the rule in the report.
    2. **Already a broken rule** of step 2: it counts once, there.
    3. **A place or a small cut.** A place is a fix that is a pull request of
       its own: a dependency the platform covers, an abstraction with one
@@ -101,9 +125,13 @@ start there.
    one place, which the fewest shared helpers that remove all its rows fix.
    Sort a clone place as the findings of step 3: a rule of step 2's files that
    requires the copies drops it, and one that forbids them makes it a broken
-   rule, counted once. When it exits with an error, as with neither `npx` nor
-   `bunx` or with a shared `TMPDIR`, skip this step and give its message in the
-   report. `jscpd` never goes into a `package.json`.
+   rule, counted once. Then check each place that is left against the three
+   conditions of *Shared code or a copy*, under *Decomposition* in
+   `<skills>/architecture/SKILL.md`. A place that fails one of them is a copy
+   kept on purpose: name it in the report, and file none. When `clones.sh`
+   exits with an error, as with neither `npx` nor `bunx` or with a shared
+   `TMPDIR`, skip this step and give its message in the report. `jscpd` never
+   goes into a `package.json`.
 
 ## Choose the places
 
@@ -114,9 +142,9 @@ importer's score, and a place over several files — clones, a dependency and
 its importers, a bundled finding — the highest of its files. A file outside
 the table gets its score from `measure.sh <file>`.
 
-A hotspot is a place only when its file holds more than one concern, the
-split can be named, and no rule of the instruction files keeps the file
-whole. For example, a rule that puts all of a module's rules in its service
+A hotspot, a file or a folder from a `debt` hit of step 2 included, is a
+place only when it holds more than one concern, the split can be named, and
+no rule of the files of step 2 keeps it whole. For example, a rule that puts all of a module's rules in its service
 keeps that service whole. A high score alone is not a place: a short file
 that changes often, a large file of one concern, or a file that a rule keeps
 whole goes into *next*, with the rule quoted.
@@ -162,7 +190,8 @@ at most 600 words, tables and code blocks not counted:
 1. `## Where`: the rows of `measure.sh` for the place's files, and the
    "Measured on" line of the scope's run. No line numbers: a hot file's lines
    move with the next pull request, and the SHA dates the evidence.
-2. `## What is broken`: the rule, quoted with its file and heading, or the
+2. `## What is broken`: the rule, quoted with its file and heading, or with
+   its `I-<n>` for an invariant, or the
    measurement that makes the place a hotspot. The evidence names each file
    and symbol, with the command and its count. A clone is named by its two
    files and its length in lines, from `clones.sh`, without its line ranges.
@@ -198,7 +227,8 @@ and linked so far.
 ## The report
 
 The issues filed, re-measured and named, with their numbers; *next*, with
-scores; the borderline hits; the small cuts, one line each with the score of
+scores; the borderline hits; the invariants with no `Check:` line; the
+copies kept on purpose; the small cuts, one line each with the score of
 the file it names, or of its highest file; the ponytail findings dropped, with
 the rule; the lines the kept findings would save, marked as your estimate,
 not ponytail's own `net:`; the steps skipped and
