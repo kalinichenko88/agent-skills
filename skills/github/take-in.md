@@ -7,7 +7,21 @@ An issue named on its own — `#91`, "take #91", its URL — as the session's fi
 message, or after a talk about which task is next, is the request to take it
 into work; a mention inside other work is not. Check it first: `bash
 <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints `take #91`, or
-each reason why not, one per line:
+each reason why not, one per line.
+
+**Then say what the task is.** When the check stops with an error, report it
+and stop (`tracker.md`): no summary is due. The error is any line other than
+`take #91` and the lines that start with `#91`. Otherwise read the issue:
+`gh issue view 91 --json title,body`, or with its URL. Before the next step,
+write its number, its title and two or three sentences of your own: what is
+wrong or what is wanted, and what must be true for the work to be done. For an
+issue with `## Also:` sections, name each added problem too. This is the first
+thing you say about the issue. Write your sentences in the person's language,
+and give the title as the issue has it. When this read fails, say so, and go
+on with what the check printed. The same read gives the files, symbols and
+words for `collect.sh` below.
+
+Then act on what the check printed:
 
 - `closed`, or a line that names someone else: say so and wait. These lines
   win over the lines below.
