@@ -1,6 +1,6 @@
 ---
 name: react-conventions
-description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, putting two requests in one component (loading its options and creating one), reading a value from useRef or writing usePrevious.
+description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, putting two requests in one component (loading its options and creating an option), reading a value from useRef or writing usePrevious.
 ---
 
 # React conventions
@@ -153,32 +153,39 @@ export function GroupSelect({ type, onChange }: GroupSelectProps) {
     // post, setCreation, add to the options, onChange
   }
 
-  return <select>…</select>;
+  return <div>…</div>;
 }
 ```
 
 ```tsx
 export function GroupSelect({ type, onChange }: GroupSelectProps) {
+  const [name, setName] = useState('');
   const { options, addOption } = useGroupOptions(type);
   const { creation, createGroup } = useCreateGroup(type, (group) => {
     addOption(group);
     onChange(group);
   });
 
-  return <select>…</select>;
+  function handleCreate() {
+    createGroup(name);
+  }
+
+  return <div>…</div>;
 }
 ```
 
 Count the jobs, not the lines. A short body with two requests has two jobs. A
 long form with one submit has one job, and its request can stay in the
 component. Each hook holds one union, as *A request's state is one union*
-says. With a data library, the hook holds the library's call, as `useQuery`,
-and the library holds the state. The hooks are the component's own files, and
+says. If the project already has a data library, each job's hook holds the
+library's call, as `useQuery`, and the library holds the state. Two library
+calls in one body are two jobs. The hooks are the component's own files, and
 *A part's own files live in its folder* places them:
 `group-select/use-group-options.ts` next to `group-select/group-select.tsx`,
-or the feature root for the page. A value that is not a request's state, as
-the text of an input, stays in the component, and the component gives it to
-the hook: `createGroup(name)`.
+and a page's hooks sit at the feature root. A value that is not a request's
+state, as the text of an input, does not go into a job's hook. The component
+holds it and gives it to the function that the hook returns:
+`createGroup(name)`.
 
 ## Render reads props, state and context — not refs
 
