@@ -185,8 +185,9 @@ body are two jobs, and so are two queries or two mutations. The hooks are the
 component's own files, and *A part's own files live in its folder* places
 them: `group-select/use-group-options.ts` next to
 `group-select/group-select.tsx`, and a page's hooks sit at the feature root.
-The text of an input stays in the component, as `name` in the example, and
-the component gives it to `createGroup(name)`.
+
+The text of an input is not kept in a job's hook: the component holds it, as
+`name` in the example, and gives it to `createGroup(name)`.
 
 ## Render reads props, state and context — not refs
 
