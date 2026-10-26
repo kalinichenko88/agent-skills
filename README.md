@@ -73,9 +73,10 @@ plugin hooks until you do, so without that the skills load but the rules do
 not. Editing `rules.md` does not need a new trust; changing `hooks/hooks.json`
 does.
 
-The hook is plain bash with no other dependency. The github and roadmap skills'
-scripts are bash too, and they also need `gh`. The debt skill's `measure.sh`
-needs only bash, git and awk; its `clones.sh` also needs `npx` or `bunx`,
+The hook is plain bash with no other dependency. The github and roadmap
+skills' scripts are bash too, and they also need `gh`, git and awk. The
+debt skill's `measure.sh` needs only bash, git and awk; its `clones.sh`
+also needs `npx` or `bunx`,
 and a `TMPDIR` that other users cannot write, or none: then it uses
 `~/.cache`. The architecture skill's `invariants.sh` needs only bash, git and
 awk. On native Windows, Claude Code runs
