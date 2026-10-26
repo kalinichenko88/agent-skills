@@ -11,15 +11,14 @@ each reason why not, one per line:
 
 - `closed`, or a line that names someone else: say so and wait. These lines
   win over the lines below.
-- `PR #<n> by you`: the work is in review. Say so and stop. GitHub moved the
-  branch's link to the pull request, so `worktree.sh` would make a new branch.
-- Only `assigned to you` and linked branches: another session of yours can
-  work on the issue, on this computer or on another one. Show the person what
-  the script printed and ask: does the work run somewhere else, or does it
-  continue here? Somewhere else: stop. Here: go on with the steps below. A
-  linked branch on an issue that nobody is assigned to can be someone else's:
-  GitHub does not say whose a branch is. Ask whose it is too. Someone else's:
-  say so and wait.
+- `PR #<n> by you`: the work is in review. Say so and stop.
+- Only an `assigned to you` line, `branch` lines, or both: another session of
+  yours can work on the issue, on this computer or on another one. Show the
+  person what the script printed, and ask in this order:
+  1. With no `assigned to you` line: whose is the branch? GitHub does not say
+     whose a branch is. Someone else's: say so and wait.
+  2. Does the work run somewhere else, or does it continue here? Somewhere
+     else: stop. Here: go on with the steps below.
 - An issue of another repository than this checkout's: say so and stop.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
@@ -85,8 +84,9 @@ branch at all.
 
 A linked branch in this repository, on an issue that nobody is assigned to,
 can be someone else's: the script warns, and does not assign the issue to you.
-Find out whose the branch is before you push to it. Someone else's: say so and
-wait. Yours: run the command the warning gives, which assigns the issue to you.
+Find out whose the branch is before you push to it, when the person did not say
+it at the check above. Someone else's: say so and wait. Yours: run the command
+the warning gives, which assigns the issue to you.
 
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree
