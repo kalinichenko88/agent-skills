@@ -65,8 +65,8 @@ than it closes. Per finding, the scout's groups decide:
   bash <dir>/scripts/add-finding.sh 12 "$section_file" "<a title that names every problem in it>" [label]
   ```
 
-  `[label]` is the finding's label from `gh label list`, if one fits and the
-  host does not have it. The script reads `status:` and `also:` again just
+  `[label]` is the finding's label, chosen as *No free host* below says, when
+  the host does not have it. The script reads `status:` and `also:` again just
   before it writes, so the findings you added in this run count too. It adds
   the section to the end of the body, sets the title, adds the label, and
   leaves a one-line comment, because a body edit notifies nobody. A busy host
@@ -87,7 +87,11 @@ than it closes. Per finding, the scout's groups decide:
     (`path:line`), how it shows up, and why it was out of scope here.
   - Label it from the labels the repository already has — `gh label list`
     first, then `--label` with the ones that fit. Never invent a new label; if
-    nothing fits, file it unlabelled.
+    nothing fits, file it unlabelled. The one exception is debt: a file or a
+    folder past a limit, a break of a layer rule, a copy to extract, or
+    over-engineering. It takes `debt`, or the repository's own name for it.
+    When there is neither, create it first:
+    `gh label create debt --description "Structural debt to refactor" --color 5319e7`.
   - A host that someone works on, or that holds two added findings: write
     `Related to #12` in the new body, and leave a one-line comment on the host
     that names the new issue. Do not edit its body.

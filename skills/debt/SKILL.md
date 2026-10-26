@@ -149,8 +149,8 @@ qualified.
 The label is `debt`, or the repository's own name for it in `gh label list`.
 When there is neither, create it once:
 `gh label create debt --description "Structural debt to refactor" --color 5319e7`.
-This is the one label the map may create; `filing.md`'s rule against new labels
-holds for everything else.
+`filing.md` creates it the same way for a debt finding that another skill
+files.
 
 ## The issue
 
