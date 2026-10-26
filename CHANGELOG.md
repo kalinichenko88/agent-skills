@@ -5,6 +5,31 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 0.10.0 - 2026-10-26
+
+### Added
+
+- (github) tell the person what the issue asks before take-in goes on (#138)
+- (react) give each of a component's two jobs a hook of its own (#126)
+- (architecture) add the architecture skill, with checked invariants in docs/ARCHITECTURE.md (#116)
+
+### Changed
+
+- (architecture) run invariants.sh in make check, so a broken invariant fails CI (#136)
+- (plugin) print every script's usage from its header, and name awk where a script calls it (#135)
+- (github) give the reason for the shellcheck disables in collect.sh and keep-open.sh (#130)
+- (plugin) add docs/ARCHITECTURE.md, with nine invariants, and point agents to it (#128)
+- (roadmap) draw the triage scenario picture, and number the scenarios out of four (#111)
+
+### Fixed
+
+- (github) create the debt label for a debt finding, so it never gets bug or none (#137)
+- (architecture) give the patterns that step 2 proposes a place in the parts of a first file (#132)
+- (architecture) never close a code fence in invariants.sh that Markdown keeps open (#129)
+- (github) stop take-in-check on an issue that is yours already (#124)
+- (rules) take a clear fix in the task's module, smaller than the task, into its PR (#113)
+- (rules) put review-loop over the superpowers review skills, and keep the per-task review (#118)
+
 ## 0.9.0 - 2026-10-26
 
 ### Added
