@@ -4,7 +4,6 @@ TESTS = $(patsubst tests/%_test.sh,%,$(wildcard tests/*_test.sh))
 .NOTPARALLEL:
 check: lint invariants test
 
-# The invariants of docs/ARCHITECTURE.md, on this repository's working tree.
 invariants:
 	bash skills/architecture/scripts/invariants.sh
 
