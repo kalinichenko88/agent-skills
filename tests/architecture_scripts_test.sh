@@ -187,10 +187,9 @@ check 'a fence that holds a shorter one' "0 $(printf '%s\n' 'I-1 PASS' '  debt s
 printf '%s\n' '```' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 1' "$code $err"
-# A fence closes at its closing line, indented as far as its opening line or
-# up to 3 more. A non-blank line indented less before that, as at the end of
-# the list item that holds the fence, stops the run: the lines that the fence
-# hides could hold a check.
+# A fence closes at its closing line. A non-blank line indented less before
+# that, as at the end of the list item that holds the fence, stops the run:
+# the lines that the fence hides could hold a check.
 printf '%s\n' '- **I-1.** No fetch. Example:' '  ```ts' '  fetch(u)' '  Check: grep `fetch\(` in `src/`.' \
   '- **I-2.** Other.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
@@ -206,7 +205,7 @@ printf '%s\n' '- **I-1.** An example.' '  ```' '  x' '```' '- **I-2.** No fetch.
 run "$empty"
 check 'a closing line indented less than its fence' \
   '2 invariants.sh: a code fence at line 2 does not close before line 4' "$code $err"
-# A closing line closes a fence in a list item only at the fence's own indent;
+# A closing line closes an indented fence only at the fence's own indent;
 # one indented 4 or more past it is a line of code. One indented 1 to 3 past
 # it stops the run: Markdown counts those 3 from the margin of the list item,
 # which the script does not know.
@@ -224,14 +223,15 @@ run "$empty"
 check 'a closing line past the margin of its list item' \
   '2 invariants.sh: a code fence at line 2 has a closing line indented past it, at line 4' "$code $err"
 # A tab moves to the next multiple of 4 columns, as in Markdown: two tabs are
-# 8 columns, a line of code in a fence at 2.
+# 8 columns, a line of code in a fence indented by 2.
 printf '%s\n' '- **I-1.** An example.' '  ```' $'\t\t```' '  Check: grep `x` in `nope/`.' '  ```' \
   '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a closing line indented by tabs' "1 $(printf '%s\n' 'I-1 review only' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
 # A fence at column 0 is in no list item, so its margin is 0, and a closing
-# line up to 3 past it closes it. The shape of 4 of 2,359 fences in a sample
-# of real documents: 300 files, of private projects, so the text is neutral.
+# line up to 3 past it closes it. 4 of 2,359 fences in a sample of 300 real
+# files have this shape. The files are from private projects, so the test
+# text is neutral.
 printf '%s\n' '```' 'x' '   ```' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence at column 0 that closes past it' "1 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
