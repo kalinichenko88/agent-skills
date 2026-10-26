@@ -67,10 +67,10 @@ checks the branch out where it is, and so does `--here`.
 A linked branch in another repository does not win: without `--branch-repo`,
 `gh` would make a new branch with the same name here. When every linked branch
 is in another repository, as a fork's, the script stops before it assigns or
-makes anything, and prints their URLs. Say so and wait for the person: a
-rerun with another name stops the same way. A branch in another repository
-can be someone else's: find out whose it is, as for the warning below. When it
-is not, and the person removes those links, a rerun goes on.
+makes anything, and prints their URLs. Give the person those URLs and wait:
+the person decides. A rerun with another name stops the same way. A rerun goes
+on only when the issue has a linked branch in this repository, or no linked
+branch at all.
 
 A linked branch on an issue that nobody is assigned to can be someone else's:
 the script warns, and does not assign the issue to you. Find out whose the
