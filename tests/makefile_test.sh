@@ -66,4 +66,5 @@ printf '%s\n' '- **I-1.** No code file has a line.' '  Check: lines 0 in `skills
 git -C "$inv" init -q
 make -s -C "$inv" -f "$root/Makefile" invariants >"$tmp/out" 2>&1 &&
   fail 'make invariants passes a broken invariant' "$(cat "$tmp/out")"
+grep -qx 'I-1 FAIL' "$tmp/out" || fail 'make invariants stops before its check' "$(cat "$tmp/out")"
 echo 'makefile_test: ok'
