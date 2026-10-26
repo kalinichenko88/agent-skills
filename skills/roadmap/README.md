@@ -61,7 +61,7 @@ run in parallel, and what is left to close a milestone.
 
 ### Triage new issues
 
-![Triage new issues: you get every new issue checked, labelled and in the milestone its importance asks for](../../docs/roadmap/04-triage.webp)
+![Triage new issues: you get every new issue checked, and each confirmed one labelled and in a milestone](../../docs/roadmap/04-triage.webp)
 
 ## How it works
 
