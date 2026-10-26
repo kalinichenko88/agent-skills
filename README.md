@@ -32,6 +32,11 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
   over-engineering, filed as at most three `debt` issues a run.
+- **[`kalinichenko:architecture`](skills/architecture/README.md)** — new code
+  that grows into the project's structure, not beside it: the problem before
+  the code, one way to do one kind of work, a split before a file grows past
+  its limit, and numbered invariants in `docs/ARCHITECTURE.md` that a script
+  checks.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
@@ -70,7 +75,8 @@ The hook is plain bash with no other dependency. The github and roadmap skills'
 scripts are bash too, and they also need `gh`. The debt skill's `measure.sh`
 needs only bash, git and awk; its `clones.sh` also needs `npx` or `bunx`,
 and a `TMPDIR` that other users cannot write, or none: then it uses
-`~/.cache`. On native Windows, Claude Code runs
+`~/.cache`. The architecture skill's `invariants.sh` needs only bash, git and
+awk. On native Windows, Claude Code runs
 them in Git Bash, so install [Git for Windows](https://git-scm.com/downloads/win):
 without it, Claude Code runs the hook in PowerShell, and the rules do not load.
 Codex on native Windows is not tested: run it in WSL. The debt skill's
@@ -119,7 +125,10 @@ when `bun` is installed. Without `node`, the test skips `clones.sh` and says
 so. One case runs `clones.sh` with no `TMPDIR`, so it makes and removes a
 directory in your `~/.cache`. The review-loop skill's `codex-review.sh` runs
 against a fake `codex` that answers with findings recorded from `codex exec`
-on this repository, in `tests/fixtures/review-loop/`.
+on this repository, in `tests/fixtures/review-loop/`. The architecture skill's
+`invariants.sh` runs on repositories the test builds: each kind of check, the
+`debt` lists, `--new-since` over renamed files, and the calls that must stop
+with exit 2.
 
 `make check` runs every `tests/<name>_test.sh`. A test passes only when it
 exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
