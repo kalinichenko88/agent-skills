@@ -340,9 +340,9 @@ reads the base's own architecture file.
 - **Exit 2:** a check did not run. The lines on stderr name the cause: a
   wrong call, no git repository, a line that the script cannot read, a
   `Check:` or `debt` line outside an invariant, a code fence that does not
-  close, a path with no code file outside its `except` paths, a pattern that
-  git rejects, or no debt skill beside this one. Correct the call, or the
-  line in the architecture file.
+  close or whose closing line is indented past it, a path with no code file
+  outside its `except` paths, a pattern that git rejects, or no debt skill
+  beside this one. Correct the call, or the line in the architecture file.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to

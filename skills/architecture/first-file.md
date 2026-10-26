@@ -97,11 +97,14 @@ An invariant starts at a line `- **I-<n>.** <statement>`. The lines under it
 belong to it, up to the next line that starts with a character other than a
 space or a tab; a blank line does not end it. Lines inside a fenced code block
 are skipped. A fence closes at a line of the same character, as long or
-longer, with nothing after it, indented as far as the opening line or up to
-3 more. A fence stops the script when it does not close, or when a non-blank
-line before its closing line is indented less than its opening line, as at
-the end of the list item that holds it: the lines that it hides could hold a
-check.
+longer, with nothing after it, indented as far as the opening line. A fence
+at the start of a line also closes at such a line indented up to 3 more. A
+tab counts to the next multiple of 4 columns. A fence stops the script when
+it does not close; when it is indented and such a line is indented 1 to 3
+columns past it, because Markdown counts from the margin of the list item;
+or when a non-blank line before its closing line is indented less than its
+opening line, as at the end of the list item that holds it. The lines that
+it hides could hold a check.
 
 ```
   Check: grep `<ERE>` in `<path>`... [except `<path>`...] [debt `<path>`...]
