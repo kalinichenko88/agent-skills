@@ -179,7 +179,8 @@ a `Check:` line, a lint rule, a test, or "review only").
 **`CLAUDE.md` and `AGENTS.md`** get a link and one line, written only after
 the person's yes: "Before a spec, a plan or the first edit of a new feature,
 read `docs/ARCHITECTURE.md`. At the start of a new feature, and for a
-decision, load `kalinichenko:architecture`."
+decision, load `kalinichenko:architecture`." The line names the file at the
+path where the project keeps it, as `ARCHITECTURE.md` at the root.
 Keep the Why and Vercel measured that such a line loads a skill where its
 description alone often does not.
 
@@ -253,10 +254,11 @@ spec. The steps:
    text of each invariant of the area and its `Check:` line: it keeps it, or
    it breaks it. The option is not in the tree yet, so `invariants.sh` cannot
    judge it; the script runs once the edit exists, before its commit, and
-   again in the review. A broken invariant ends in one of two ways: change the
-   design, or write an ADR that amends the invariant, its statement and its
-   `Check:` line, with its "simpler alternative rejected because". Never a
-   silent exception.
+   again in the review. A broken invariant ends in one of three ways: change
+   the design; write an ADR that amends the invariant, its statement and its
+   `Check:` line, with its "simpler alternative rejected because"; or, for a
+   limit of decomposition only, put the path into the `debt` list with its
+   debt issue, by *When to split*. Never a silent exception.
 7. Decide whether the decision needs an ADR (see *ADRs*). Most decisions do
    not.
 8. **A second reader** for a decision that needs an ADR. One subagent that
@@ -359,7 +361,9 @@ convention that it replaces.
 - **The limits are the project's**: invariants with a `lines` check for a
   file and a `files` check for a folder. The skill keeps no number of its own.
   It proposes, for each, the size that 90% of the project's code files, or
-  folders, stay under, rounded; the person confirms or changes it.
+  folders, stay under, rounded; the person confirms or changes it. So about a
+  tenth of them start on the `debt` list; a person who wants a shorter list
+  picks a larger limit.
 - **The `debt` list.** The files and folders already past a limit go into
   the check's `debt` list, so the check passes now. `invariants.sh` prints
   each of them with its size, as known debt. A path that drops below the limit
@@ -415,8 +419,8 @@ project that has none. It writes nothing without a yes. After a no, it does
 not offer again in that session, and it asks whether to add one line to the
 project's `CLAUDE.md`: "This project keeps no `docs/ARCHITECTURE.md`." With
 that line, later sessions do not offer it. A yes in the middle of a feature
-puts the new file into its own commit on the current branch, before the
-feature's commits.
+puts the new file into its own commit on the current branch, with no change
+of the feature in it. Commits that already exist stay as they are.
 
 1. One subagent (see *Models*) reads a few typical files of each area, as
    Agent OS's `/discover-standards` does, with `measure.sh` to find the areas
@@ -487,7 +491,9 @@ The exit status is 0 when no check fails, 1 when one fails, and 2 for a wrong
 call or a `Check:` line that the script cannot read; then it names that line.
 
 The script builds each `git grep` call itself, with `--` before the paths, and
-puts the pattern in its own argument. No text of `docs/ARCHITECTURE.md` runs as
+puts the pattern in its own argument after `-e`, so a pattern that starts with
+`-`, as `-webkit-`, is a pattern and not a flag. No text of
+`docs/ARCHITECTURE.md` runs as
 a shell command. A pattern that would break out of its argument fails as a
 pattern, not as a command.
 
@@ -515,7 +521,9 @@ misses. It gets the lens only when it does.
 Only in a project that has an architecture file or an ADR folder, as
 *The project's files* finds them. There, one review subagent reads the range
 of round 1 of `kalinichenko:review-loop` against them, once, beside round 1,
-for `high` and `xhigh` changes. Elsewhere it does not run, so a review in
+for `high` and `xhigh` changes, and for a change to documents only that
+touches the architecture file or an ADR, which review-loop gives no level;
+then it runs at `high`. Elsewhere it does not run, so a review in
 another repository costs nothing more; the reuse angle of `/code-review`
 covers part of the copies there. Instead, review-loop's summary says once per
 pull request, in one line and with no subagent, that
@@ -579,7 +587,9 @@ project's tree. Each tool has its own runner, and an absent runner gives a
 `skipped:` line:
 
 - codebase-memory-mcp and dependency-cruiser: `npx` or `bunx`, as `jscpd` in
-  `clones.sh`;
+  `clones.sh`. dependency-cruiser runs with `--no-config` and gets the
+  `tsconfig.json` of the copy with `--ts-config`, so the project's
+  `.dependency-cruiser.js`, which the copy holds as code, never loads;
 - ruff: `uvx ruff@<pin>`, when `uvx` is on `PATH`;
 - `go list`: the `go` on `PATH`, with no network and no other toolchain
   (`GOPROXY=off`, `GOTOOLCHAIN=local`). A module that is not in the cache, or
@@ -587,8 +597,10 @@ project's tree. Each tool has its own runner, and an absent runner gives a
   a download.
 
 Unlike `clones.sh`, the copy keeps the files that the tools read as data and
-that `data.ere` leaves out: `tsconfig.json`, `go.sum`, `pyproject.toml`
-(`go.mod` is code to `data.ere`, so the copy has it already). The trial gives
+that `data.ere` leaves out: each `tsconfig*.json`, because one can extend
+another, as `tsconfig.base.json` with the path aliases; `go.sum`;
+`pyproject.toml` (`go.mod` is code to `data.ere`, so the copy has it
+already). The trial gives
 both tools the same copy. Its uses: the codemap of a first
 `docs/ARCHITECTURE.md`, the edges and cycles that a branch adds, the cycles in
 the debt map, and the check "A does not import B".
@@ -630,6 +642,7 @@ to the ADR rules, or decide again the line in `CLAUDE.md` (#99 has the rules).
   as `github` keeps `take-in.md` and `filing.md`.
 - The exact syntax of a `Check:` line, within *invariants.sh* above: one line,
   read by the script without a shell, the pattern in backticks or another
-  quote that holds spaces.
+  quote that holds spaces. A long `debt` list goes on the indented lines
+  under it, one path per line.
 - The layout of the ADR template, within the fields above.
 - The README of the skill, and its line in the plugin README.
