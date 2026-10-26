@@ -35,7 +35,8 @@ without it.
   not three flags that can disagree. A data library that the project already
   has holds this state instead.
 - **A component with two jobs gives each one a hook.** A job is a request and
-  its state. The component calls the hooks, holds the input text, and renders.
-  Count the jobs, not the lines: a component with one job can keep it.
+  its state. The component calls the hooks and renders, and the input text
+  stays out of the job hooks. Count the jobs, not the lines: a component with
+  one job can keep it.
 - **Render reads props, state and context, not refs.** A ref change schedules
   no render. `usePrevious` keeps the previous value in state.
