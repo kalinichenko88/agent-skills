@@ -122,7 +122,8 @@ check 'no file at a ref' '0 No architecture file at HEAD.' "$code $out"
 
 mkdir "$empty/docs"
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep fetch in src/' >"$empty/docs/ARCHITECTURE.md"
-run "$empty"
+# An AT of the person's environment does not reach the message.
+AT='leak: ' run "$empty"
 check 'a line it cannot read' '2 invariants.sh: I-1: cannot read: Check: grep fetch in src/' "$code $err"
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
@@ -171,6 +172,9 @@ check 'a Check: line outside an invariant' \
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` except `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'an except path over the whole check' '2 invariants.sh: I-1: no code file under src/' "$code $err"
+printf '%s\n' '- **I-1.** No fetch.' '- **I-1.** No fetch again.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'two invariants with one number' '2 invariants.sh: I-1: a second invariant with this number, at line 2' "$code $err"
 
 # An empty code file is a code file: a files check counts it.
 : >"$empty/src/b.ts"
@@ -185,6 +189,14 @@ cp "$inv" "$tmp/alone/scripts/"
 code=0
 out=$(cd "$empty" && bash "$tmp/alone/scripts/invariants.sh" 2>"$tmp/err") || code=$?
 check 'no debt skill beside it' "2 invariants.sh: the debt skill's data.ere is not beside this skill" "$code $(cat "$tmp/err")"
+# Without checks.awk beside it, the script cannot read the architecture file:
+# a check that did not run, not a failed invariant.
+mkdir -p "$tmp/half/architecture/scripts" "$tmp/half/debt/scripts"
+cp "$inv" "$tmp/half/architecture/scripts/"
+cp "$root/skills/debt/scripts/data.ere" "$tmp/half/debt/scripts/"
+code=0
+out=$(cd "$empty" && bash "$tmp/half/architecture/scripts/invariants.sh" 2>"$tmp/err") || code=$?
+check 'no checks.awk beside it' '2 invariants.sh: checks.awk is not beside this script' "$code $(cat "$tmp/err")"
 
 # The lines and files checks, and debt lists: a file and a folder past their
 # limits, a file and a folder that are known debt, a debt path that no longer
@@ -217,56 +229,6 @@ check 'lines, files and debt' "1 $(printf '%s\n' 'I-1 FAIL' '  src/feature/big.t
   'I-2 FAIL' '  src/many 4' \
   'I-3 PASS' '  debt src/many 4' \
   'I-4 PASS' '  debt src/legacy/report.ts:12:fetch(x);')" "$code $out"
-
-# --new-since: a file renamed with no edit stays old, a hit that the branch
-# adds to an old file or in a new one is new, a known debt that grows is new
-# debt, and a file that moves into the checked folder is new. The base has no
-# architecture file.
-repo3=$tmp/repo3
-new_repo "$repo3"
-mkdir -p "$repo3/src/api" "$repo3/src/feature" "$repo3/src/legacy" "$repo3/src/many" "$repo3/tools"
-echo 'export const get = (u) => fetch(u);' >"$repo3/src/api/client.ts"
-printf '%s\n' 'const x = 1;' 'fetch(u);' >"$repo3/src/feature/a.ts"
-seq 11 >"$repo3/src/legacy/report.ts"
-echo 'fetch(x);' >>"$repo3/src/legacy/report.ts"
-seq 11 >"$repo3/src/legacy/grow.ts"
-for f in m1 m2 m3 m4; do echo 1 >"$repo3/src/many/$f.ts"; done
-seq 15 >"$repo3/tools/migrate.ts"
-commit "$repo3" 'add the base'
-base=$(git -C "$repo3" rev-parse HEAD)
-mkdir -p "$repo3/src/cli" "$repo3/docs"
-git -C "$repo3" mv src/legacy/report.ts src/legacy/summary.ts
-git -C "$repo3" mv tools/migrate.ts src/cli/migrate.ts
-seq 14 >"$repo3/src/legacy/grow.ts"
-echo 'fetch(u);' >>"$repo3/src/feature/a.ts"
-echo 'fetch(v);' >"$repo3/src/feature/b.ts"
-echo 1 >"$repo3/src/many/m5.ts"
-cat >"$repo3/docs/ARCHITECTURE.md" <<'EOF'
-- **I-1.** Only `src/api/client.ts` calls `fetch`.
-  Check: grep `fetch\(` in `src/` except `src/api/client.ts` debt `src/legacy/summary.ts`.
-- **I-2.** No code file in `src/` has more than 10 lines.
-  Check: lines 10 in `src/` debt `src/legacy/summary.ts`
-  debt `src/legacy/grow.ts`.
-- **I-3.** No folder in `src/` holds more than 3 code files of its own.
-  Check: files 3 in `src/` debt `src/many/`.
-EOF
-commit "$repo3" 'add the branch'
-want=$(printf '%s\n' 'I-1 FAIL' \
-  '  src/feature/a.ts:2:fetch(u);' \
-  '  new src/feature/a.ts:3:fetch(u);' \
-  '  new src/feature/b.ts:1:fetch(v);' \
-  '  debt src/legacy/summary.ts:12:fetch(x);' \
-  'I-2 FAIL' '  new src/cli/migrate.ts 15' \
-  '  new debt src/legacy/grow.ts 14' '  debt src/legacy/summary.ts 12' \
-  'I-3 PASS' '  new debt src/many 5')
-run "$repo3" --new-since "$base" HEAD
-check 'new since the base' "1 $want" "$code $out"
-run "$repo3" --new-since "$base"
-check 'new since the base, working tree' "1 $want" "$code $out"
-run "$repo3" --new-since "$base" "$base"
-check 'no file at the ref' "0 No architecture file at $base." "$code $out"
-run "$repo3" --new-since nosuchref
-check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 
 run "$repo" nosuchref
 check 'not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"

@@ -70,7 +70,10 @@ cannot tell: a file that restates the code costs each reader and helps none.
 - the patterns that the code keeps everywhere and that are not obvious, each
   with the kind of file that keeps it, as "each `.ts` file in `src/routes/`",
   not a list of the files, which each new one would make false;
-- the invariants, numbered `I-1`, `I-2` and on;
+- the invariants, numbered `I-1`, `I-2` and on. A number is never given to a
+  second invariant, and an invariant keeps its number: a finding and an ADR
+  cite it by that number, and `--new-since` of `invariants.sh` finds it at
+  the base by its number and its kind of check;
 - the limits of decomposition;
 - the cross-cutting concerns;
 - an index of the accepted ADRs.

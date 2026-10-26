@@ -60,7 +60,7 @@ grep -qx 'bash skills/architecture/scripts/invariants.sh' "$tmp/out" ||
 # stops before its check fails too, so the output must hold the FAIL.
 inv=$tmp/inv
 mkdir -p "$inv/skills/architecture/scripts" "$inv/skills/debt/scripts" "$inv/docs"
-cp "$root/skills/architecture/scripts/invariants.sh" "$inv/skills/architecture/scripts/"
+cp "$root/skills/architecture/scripts/"* "$inv/skills/architecture/scripts/"
 cp "$root/skills/debt/scripts/data.ere" "$inv/skills/debt/scripts/"
 # shellcheck disable=SC2016 # Markdown backticks, not shell
 printf '%s\n' '- **I-1.** No code file has a line.' '  Check: lines 0 in `skills/`.' >"$inv/docs/ARCHITECTURE.md"

@@ -64,8 +64,9 @@ When the ponytail plugin's `ponytail-review` skill is in your skill list,
 commit the work and run it once on the whole branch, before the first round.
 It lists what to delete, replace with the standard library or shorten, and
 changes nothing. Its findings go through *The findings*, and its cuts are one
-commit, so the first round reads the shorter code. Skip it for documents only,
-and for a move that a script or a test proves unchanged. When the skill is not
+commit, so the first round reads the shorter code. Its list does not end the
+turn: go on to the first round. Skip it for documents only, and for a move
+that a script or a test proves unchanged. When the skill is not
 installed, skip it and say so in the summary.
 
 ## The rounds

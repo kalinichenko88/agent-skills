@@ -7,14 +7,19 @@
 #
 # Without a ref, it reads the working tree, with the untracked files that git
 # does not ignore; with one, that commit. It runs from any directory of the
-# checkout. With --new-since, it runs the same checks on the base too, and puts
-# the word new before each hit that the base does not have: a grep line that
-# the base has fewer times in the file, by its path before a rename; a file
-# with no hit at the base, or a smaller one; a folder the same, by its path.
-# The syntax of a Check: line is in the skill's first-file.md. No
-# text of the file runs as a command: a pattern and each path go to git grep
-# as their own arguments, after -e and --, as literal pathspecs. Documents and
-# other data are not code and are left out, by the debt skill's data rule.
+# checkout. With --new-since, it also runs the checks of the base's own
+# architecture file on the base, and puts the word new before each hit that the
+# base does not have with the same status, a hit that fails or a debt hit: a
+# grep line that the base has fewer times in the file, by its path before a
+# rename that git sees; a file with no such hit at the base, or a smaller one;
+# a folder the same, by its path. An invariant is compared with the one of the
+# same id and kind of check at the base; with none there, each of its hits is
+# new. So it is when the script does not read that one whole in the base's
+# file, or its check cannot run there: stderr says so, after "at <base>:".
+# The syntax of a Check: line is in the skill's first-file.md. No text of the
+# file runs as a command: a pattern and each path go to git grep as their own
+# arguments, after -e and --, as literal pathspecs. Documents and other data
+# are not code and are left out, by the debt skill's data rule.
 #
 # Exit 0 when no invariant fails, 1 when one fails, and 2 for a wrong call or a
 # check that cannot run.
@@ -47,6 +52,10 @@ case $ref in -*) usage ;; esac
 data_file=$(dirname "$0")/../../debt/scripts/data.ere
 [ -r "$data_file" ] || die "the debt skill's data.ere is not beside this skill"
 data=$(<"$data_file")
+# checks.awk reads the architecture file into one record per invariant.
+checks_file=$(dirname "$0")/checks.awk
+[ -r "$checks_file" ] || die 'checks.awk is not beside this script'
+checks=$(<"$checks_file")
 top=$(git rev-parse --show-toplevel 2>/dev/null) || die 'not in a git repository'
 cd "$top"
 
@@ -63,9 +72,11 @@ if [ -n "$since" ]; then
   base=$(git rev-parse --verify -q "$since^{commit}") || die "not a commit: $since"
 fi
 
+# file_at <sha>: the architecture file of the commit; it fails when there is none.
+file_at() { git show "$1:docs/ARCHITECTURE.md" 2>/dev/null || git show "$1:ARCHITECTURE.md" 2>/dev/null; }
+
 if [ -n "$sha" ]; then
-  text=$(git show "$sha:docs/ARCHITECTURE.md" 2>/dev/null) ||
-    text=$(git show "$sha:ARCHITECTURE.md" 2>/dev/null) || {
+  text=$(file_at "$sha") || {
     echo "No architecture file at $ref."
     exit 0
   }
@@ -77,134 +88,18 @@ else
   echo 'No architecture file in the working tree.'
   exit 0
 fi
-
-# One record per invariant, its fields separated by \036 and the items of a
-# list by \037: id, kind (grep, lines, files or review), arg, in, except, debt.
-records=$(printf '%s\n' "$text" | awk '
-  function stop(msg) {
-    print "invariants.sh: " msg > "/dev/stderr"
-    failed = 1
-    exit 2
-  }
-  function bad() { stop(id ": cannot read: " line) }
-  # Splits s into tok[1..ntok]: a `quoted` item, or a bare word. Spaces and
-  # commas separate them; a last bare "." ends the line.
-  function tokenize(s,   i, rest) {
-    ntok = 0
-    while (s != "") {
-      if (match(s, /^[ \t,]+/)) { s = substr(s, RLENGTH + 1); continue }
-      if (substr(s, 1, 1) == "`") {
-        rest = substr(s, 2)
-        i = index(rest, "`")
-        if (i == 0) bad()
-        tok[++ntok] = substr(rest, 1, i - 1); quoted[ntok] = 1
-        s = substr(rest, i + 1)
-        continue
-      }
-      match(s, /^[^ \t,`]+/)
-      tok[++ntok] = substr(s, 1, RLENGTH); quoted[ntok] = 0
-      s = substr(s, RLENGTH + 1)
-    }
-    if (ntok && !quoted[ntok] && tok[ntok] == ".") ntok--
-  }
-  # Adds the quoted items from tok[t] on to list[name]; returns the next t.
-  function items(t, name,   n) {
-    n = 0
-    for (; t <= ntok && quoted[t]; t++) {
-      if (tok[t] == "") bad()
-      list[name] = list[name] (list[name] != "" ? "\037" : "") tok[t]
-      n++
-    }
-    if (!n) bad()
-    return t
-  }
-  function check(   t) {
-    tokenize(substr(line, 7))
-    if (ntok < 4 || quoted[1]) bad()
-    kind = tok[1]; arg = tok[2]
-    if (kind == "grep") { if (!quoted[2] || arg == "") bad() }
-    else if (kind == "lines" || kind == "files") { if (quoted[2] || arg !~ /^[0-9]+$/) bad() }
-    else bad()
-    if (quoted[3] || tok[3] != "in") bad()
-    t = items(4, "in")
-    if (t <= ntok && !quoted[t] && tok[t] == "except") t = items(t + 1, "except")
-    if (t <= ntok && !quoted[t] && tok[t] == "debt") t = items(t + 1, "debt")
-    if (t <= ntok) bad()
-  }
-  function flush() {
-    if (id != "") printf "%s\036%s\036%s\036%s\036%s\036%s\n", id, kind, arg, list["in"], list["except"], list["debt"]
-    id = ""
-  }
-  # ind: the column where the text starts. A tab moves to the next multiple
-  # of 4, as in Markdown.
-  {
-    sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line)
-    ind = 0
-    for (c = 1; c <= length($0) - length(line); c++) ind = substr($0, c, 1) == "\t" ? ind + 4 - ind % 4 : ind + 1
-  }
-  # A fenced block of backticks or tildes ends at a line of the same
-  # character, as long or longer, with nothing but spaces or tabs after it,
-  # indented up to 3 past the margin of the list item that holds the fence.
-  # The script does not know that margin. A fence at column 0 is in no list
-  # item, so its margin is 0. For an indented fence, a closing line at its
-  # indent closes it, one 1 to 3 past it is an error, and one 4 or more past
-  # it is a line of code. A non-blank line indented less, as at the end of
-  # that list item, is an error too: the lines that the fence hides could hold
-  # a check.
-  fence != "" {
-    if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/ && ind >= indent && ind < indent + 4) {
-      if (ind > indent && indent > 0) stop("a code fence at line " opened " has a closing line indented past it, at line " NR)
-      fence = ""
-    } else if (line != "" && ind < indent) stop("a code fence at line " opened " does not close before line " NR)
-    next
-  }
-  # A line that starts with neither a space nor a tab ends the invariant.
-  /^[^ \t]/ { flush() }
-  # A run of backticks with another backtick later on the line is inline
-  # code, not a fence.
-  line ~ /^(```+[^`]*$|~~~)/ {
-    indent = ind; opened = NR
-    match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH)
-    next
-  }
-  /^- \*\*I-[0-9]+\.\*\*/ {
-    id = $0; sub(/^- \*\*/, "", id); sub(/\.\*\*.*/, "", id)
-    kind = "review"; arg = ""; split("", list); seen = more = 0
-    next
-  }
-  # A list line starts with an `item`, or with the word in, except or debt and
-  # an `item`: a debt line, or the rest of a Check: line. Prose that starts
-  # with one of these words is not one.
-  { listed = line ~ /^((in|except|debt)[ \t,]*)?`/ }
-  id == "" {
-    # A Check: or debt line that no invariant holds would never be read.
-    if (line ~ /^Check:[ \t]*(grep|lines|files)([ \t]|$)/) stop("a Check: line outside an invariant: " line)
-    if (listed && line ~ /^debt/) stop("a debt line outside an invariant: " line)
-    next
-  }
-  {
-    if (line ~ /^Check:/) {
-      if (seen) bad()
-      seen = more = 1
-      check()
-    } else if (listed && line ~ /^debt/) {
-      # A debt line adds to the debt list of the Check: line of its block.
-      if (!seen) bad()
-      tokenize(line)
-      if (items(2, "debt") <= ntok) bad()
-      more = 1
-    } else if (more && listed) {
-      # A Check: or debt line is one line: one that wraps would lose its rest.
-      bad()
-    } else more = 0
-  }
-  END {
-    # A fence that does not close would hide each invariant below it.
-    if (!failed && fence != "") stop("a code fence that does not close, at line " opened)
-    if (failed) exit 2
-    flush()
-  }
-') || exit 2
+records=$(printf '%s\n' "$text" | AT='' awk "$checks") || exit 2
+# olds: the records of the base's own architecture file. A base file that
+# cannot be read gives the records of the invariants that checks.awk read
+# whole before it stopped: the branch can be the one that corrects the file.
+olds=
+if [ -n "$base" ]; then
+  if ! text=$(file_at "$base"); then
+    echo "invariants.sh: at $since: no architecture file, so each hit is new" >&2
+  elif ! olds=$(printf '%s\n' "$text" | AT="at $since: " awk "$checks"); then
+    echo "invariants.sh: at $since: each hit of an invariant that the script did not read whole there is new" >&2
+  fi
+fi
 
 # was: each file that the branch renamed, as new path<TAB>old path, so that
 # its hits match those of its old path at the base.
@@ -228,11 +123,13 @@ lib='
 '
 
 # ggrep <option>...: git grep with the options over the paths of the check,
-# with \036 for its NUL bytes. A status past 1 is an error, not "no match".
+# with \036 for its NUL bytes. A status past 1 is an error, not "no match":
+# its message starts with $at, which names the base in base_hits.
+at=
 ggrep() {
   local out code=0
   out=$(git -c core.quotePath=false --literal-pathspecs grep --no-color --no-column --null -I "$@" "${where[@]}" -- "${ins[@]}" | tr '\0' '\036') || code=$?
-  [ "$code" -le 1 ] || die "$id: git grep failed"
+  [ "$code" -le 1 ] || die "$at$id: git grep failed"
   printf '%s\n' "$out"
 }
 
@@ -270,10 +167,12 @@ size_hits() {
     END { for (d in count) if (count[d] > ENVIRON["N"] + 0) printf "%s\t%s\n", d, count[d] }'
 }
 
-# base_hits: the hits of the same check at the base. The base may not have the
-# paths of the check, and is not checked for them.
+# base_hits: the hits of the base's check, $barg in $bin except $bexcept, at
+# the base. The base may not have the paths of the check, and is not checked
+# for them.
 base_hits() {
-  local where=("$base") prefix=$base:
+  local where=("$base") prefix=$base: arg=$barg except_=$bexcept ins at="at $since: "
+  IFS=$'\037' read -r -a ins <<<"$bin"
   if [ "$kind" = grep ]; then grep_hits; else listing | size_hits; fi
 }
 
@@ -282,24 +181,30 @@ base_hits() {
 # base, a line \035, then the sorted hits. It exits 1 when it fails, that is
 # when a hit is not under a debt entry.
 report() {
-  ID=$id KIND=$kind DEBT=$debt_ SINCE=$base awk -F'\t' "$lib"'
+  ID=$id KIND=$kind DEBT=$debt_ BDEBT=$bdebt SINCE=$base awk -F'\t' "$lib"'
     BEGIN { nd = split(ENVIRON["DEBT"], entry, "\037"); grep = ENVIRON["KIND"] == "grep" }
     $0 == "\035" { part++; next }
     !NF { next }
     { t = $0; sub(/^[^\t]*\t[^\t]*\t/, "", t) }
     part == 0 { was[$1] = $2; next }
-    part == 1 { if (grep) seen[$1 "\t" t]++; else size[$1] = $2 + 0; next }
+    # A hit at the base is keyed by its status there, debt or fail, and its path.
+    part == 1 {
+      p = (under_any($1, ENVIRON["BDEBT"]) ? "debt" : "fail") "\t" $1
+      if (grep) seen[p "\t" t]++; else size[p] = $2 + 0
+      next
+    }
     {
       h = grep ? $1 ":" $2 ":" t : $1 " " $2
-      # p: the path of the hit at the base. A folder keeps its path.
+      known = 0
+      for (i = 1; i <= nd; i++) if (under($1, entry[i])) known = held[i] = 1
+      # p: the key of the hit at the base. A folder keeps its path.
       p = $1
       if (ENVIRON["KIND"] != "files" && ($1 in was)) p = was[$1]
+      p = (known ? "debt" : "fail") "\t" p
       if (ENVIRON["SINCE"] == "") fresh = 0
       else if (grep) fresh = seen[p "\t" t]-- <= 0
       else fresh = !(p in size) || size[p] < $2 + 0
       mark = fresh ? "new " : ""
-      known = 0
-      for (i = 1; i <= nd; i++) if (under($1, entry[i])) known = held[i] = 1
       if (known) debt[++k] = mark "debt " h; else hit[++n] = mark h
     }
     END {
@@ -341,8 +246,18 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   else
     hits=$(printf '%s\n' "$files" | size_hits)
   fi
+  # The same invariant at the base: its id, with a check of the same kind.
   old=
-  [ -z "$base" ] || old=$(base_hits) || exit 2
+  bdebt=
+  rec=
+  [ -z "$olds" ] || rec=$(ID=$id KIND=$kind awk -F'\036' '$1 == ENVIRON["ID"] && $2 == ENVIRON["KIND"]' <<<"$olds")
+  if [ -n "$rec" ]; then
+    IFS=$'\036' read -r _ _ barg bin bexcept bdebt <<<"$rec"
+    old=$(base_hits) || {
+      old=
+      echo "invariants.sh: at $since: each hit of $id is new" >&2
+    }
+  fi
   {
     printf '%s\n' "$was" $'\035' "$old" $'\035'
     printf '%s\n' "$hits" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2n

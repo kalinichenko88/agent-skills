@@ -66,7 +66,7 @@ Each skill is a module, by the area of work it serves.
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
 | review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/fixtures/review_loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/fixtures/debt/` |
-| architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_fences_test.sh` |
+| architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_since_test.sh`, `tests/architecture_fences_test.sh` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
 | release, infographic | `.claude/skills/<name>/` | none |
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |
@@ -183,7 +183,7 @@ has 330 lines; 8 folders hold code files of their own, and the largest two
 hold 10. A new number needs an ADR.
 
 - **I-8.** A code file MUST have at most 330 lines.
-  Check: lines 330 in `.` debt `skills/architecture/scripts/invariants.sh` `tests/github_scripts_test.sh` `tests/roadmap_scripts_test.sh`.
+  Check: lines 330 in `.` debt `tests/github_scripts_test.sh` `tests/roadmap_scripts_test.sh`.
 - **I-9.** A folder MUST hold at most 10 code files of its own. `tests/` is
   out of the check: its test scripts stay at its top, because the Makefile
   finds a test only as `tests/<name>_test.sh`.

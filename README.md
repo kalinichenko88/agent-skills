@@ -135,9 +135,9 @@ against a fake `codex` that answers with findings recorded from `codex exec`
 on this repository, in `tests/fixtures/review_loop/`. The session-title
 hook runs on prompts recorded from Claude Code and Codex, in
 `tests/fixtures/hooks/`, against a fake `gh`. The architecture skill's
-`invariants.sh` runs on repositories the test builds: each kind of check, the
-`debt` lists, `--new-since` over renamed files, and the calls that must stop
-with exit 2.
+`invariants.sh` runs on repositories the tests build: each kind of check, the
+`debt` lists, `--new-since` over renamed files, changed checks and a base
+file that it cannot read, and the calls that must stop with exit 2.
 
 `make check` runs every `tests/<name>_test.sh`. A test passes only when it
 exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
