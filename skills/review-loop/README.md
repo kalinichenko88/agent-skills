@@ -3,7 +3,8 @@
 A review that ends: rounds that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
-a security review last, and a summary of what was decided and fixed.
+a review of the tests for `high` and `xhigh` changes, a security review last,
+and a summary of what was decided and fixed.
 
 ## When it starts
 
@@ -42,11 +43,21 @@ each task stays as that skill sets it. In place of the final review of
   needed only one round. Its findings go through the same checks. Without the
   Codex CLI or its login, or when Codex fails, the step is skipped, and the
   summary says so.
-- **Later fixes are reviewed too.** The fixes from the last pass and the Codex
-  review are one commit. The fixes from the security review are one commit,
-  and so are those from each set of your review comments, also after the pull
-  request opens. Each of these commits has rounds of its own: at the level of
-  the loop's round 1, or `xhigh` for a fix to security code.
+- **A review of the tests.** For `high` and `xhigh` changes, one review
+  subagent, or `/review` in Codex, reads the tests of the whole branch once:
+  beside the last pass, or after round 1 when the loop needed only one round.
+  It finds a test missing where a defect can hide, a test that passes with
+  its code deleted, a test that the change left stale, a test that repeats
+  another, and brittle or heavy tests. It runs at the end because the fixes of
+  later rounds add tests too, and an older test then often repeats a newer
+  one. When the agent asks you after a round with a defect and you say to
+  stop, or no one can answer, the last pass and this review are both skipped.
+- **Later fixes are reviewed too.** The fixes from the last pass, the Codex
+  review and the review of the tests are one commit. The fixes from the
+  security review are one commit, and so are those from each set of your
+  review comments, also after the pull request opens. Each of these commits
+  has rounds of its own: at the level of the loop's round 1, or `xhigh` for a
+  fix to security code.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.
