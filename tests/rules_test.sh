@@ -94,12 +94,12 @@ done
 # `debt` label in the repository, "never invent a new label" left it `bug` or
 # unlabelled (#133). filing.md creates the label, and rules.md says so too.
 # shellcheck disable=SC2016 # Markdown backticks, not shell
-tr -s '[:space:]' ' ' <"$root/skills/github/filing.md" | grep -qF 'create it first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`' || {
+tr -s '[:space:]' ' ' <"$root/skills/github/filing.md" | grep -qF 'create `debt` first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`' || {
   echo "FAIL: filing.md: a debt finding in a repository with no debt label gets another label or none"
   exit 1
 }
 # shellcheck disable=SC2016 # Markdown backticks, not shell
-tr -s '[:space:]' ' ' <"$root/rules.md" | grep -qF 'existing labels only (a missing `debt` is created)' || {
+tr -s '[:space:]' ' ' <"$root/rules.md" | grep -qF 'existing labels only (`debt` is created for a debt finding when no debt label exists)' || {
   echo "FAIL: rules.md: existing labels only, with no word on the debt label"
   exit 1
 }

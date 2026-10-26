@@ -166,10 +166,10 @@ chat. Do not derail the task to fix it; do not ask first. If the Boy Scout Rule
 above takes it, it goes into the current PR instead, listed in the description
 as not part of the task. The skill draws that
 line and carries the how: a search of the tracker first, adding to an open
-issue on the same code before opening a new one, existing labels only (a missing
-`debt` is created), and every number listed in the final report. Where there is
-no GitHub remote or `gh auth status` fails, name the finding in the final report
-instead.
+issue on the same code before opening a new one, existing labels only (`debt` is
+created for a debt finding when no debt label exists), and every number listed
+in the final report. Where there is no GitHub remote or `gh auth status` fails,
+name the finding in the final report instead.
 
 **A defect in this plugin goes to its tracker, after the person says yes.**
 These rules, the hooks, a `kalinichenko:` skill and its scripts are the plugin.

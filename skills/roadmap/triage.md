@@ -121,7 +121,8 @@ shows as busy.
 ## Label and milestone
 
 - **The label** — an issue with no label gets one from `gh label list`, by
-  the labels rule of `<github>/filing.md`: never a new one. An issue with a
+  the labels rule of `<github>/filing.md`: never a new one, except `debt`
+  for a debt issue, as that rule says. An issue with a
   label keeps it, unless the verdict shows it is wrong: then the table gives
   the label to remove. A label that closes the issue, as `duplicate`,
   `invalid` or `wontfix`, goes with a close.
