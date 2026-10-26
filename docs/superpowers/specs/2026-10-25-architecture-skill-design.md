@@ -522,8 +522,8 @@ Only in a project that has an architecture file or an ADR folder, as
 *The project's files* finds them. There, one review subagent reads the range
 of round 1 of `kalinichenko:review-loop` against them, once, beside round 1,
 for `high` and `xhigh` changes, and for any change that touches the
-architecture file or an ADR, as a `low` fix that adds a dependency and its
-ADR, or a change to documents only, which review-loop gives no level. Its
+architecture file or an ADR, as a `medium` change that adds a dependency and
+its ADR, or a change to documents only, which review-loop gives no level. Its
 effort is the review's level, and `high` when that level is lower or there
 is none. Elsewhere it does not run, so a review in
 another repository costs nothing more; the reuse angle of `/code-review`
@@ -589,9 +589,11 @@ project's tree. Each tool has its own runner, and an absent runner gives a
 `skipped:` line:
 
 - codebase-memory-mcp: `npx` or `bunx`, as `jscpd` in `clones.sh`;
-- dependency-cruiser: the same, with a pinned `typescript` beside it, as
+- dependency-cruiser: `npx` only, with a pinned `typescript` beside it, as
   `npx -p typescript@<pin> -p dependency-cruiser@<pin> depcruise`: without
-  it, dependency-cruiser reads no `.ts` file. It runs with `--no-config`, so
+  it, dependency-cruiser reads no `.ts` file. `bunx` keeps only the last
+  `-p`, so with no `npx` the tool gives a `skipped:` line. It runs with
+  `--no-config`, so
   the project's `.dependency-cruiser.js`, which the copy holds as code, never
   loads. When the copy has a `tsconfig.json`, it gets `--ts-config` for the
   path aliases. When it fails on that file, as on an `extends` of a package
