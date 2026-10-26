@@ -118,16 +118,17 @@ campground rule as Robert C. Martin put it in *Clean Code*: every check-in
 leaves the module a little better than the check-out found it, and a codebase
 that only ever receives that kind of care does not rot.
 
-It covers the files the change edits and the files next to them in the same
+It covers the files the task edits and the files next to them in the same
 module: the module as the project's instruction file or a conventions skill
-draws it, or else the directory of an edited file. A finding there, from a
-stale comment or a broken link to a bug in the next function, goes into this
-change when it passes three tests. It is settled: there is one way to fix it,
+draws it, or else the directory of a file the task edits. A finding there, from
+a stale comment or a broken link to a bug in the next function, goes into this
+change when it meets three conditions. It is clear: there is one way to fix it,
 and nothing outside the module relies on what it changes. It is smaller than
 the task's own diff, and all such fixes together are smaller too. Dropping it
-leaves the task whole. A bug brings its test. List each one in the PR
-description as not part of the task. A finding that fails one of the tests is
-an issue. Cleaner than you found it is not the same as rebuilt.
+leaves the task whole. A bug brings its test, which counts neither for the
+module nor for the size. List each one in the PR description as not part of
+the task. A finding that fails one condition is an issue. Cleaner than you
+found it is not the same as rebuilt.
 
 ## Code conventions (always)
 

@@ -129,8 +129,8 @@ The issue in hand stays the task throughout. A hit that is someone else's work
    - **The change removes it** — the task's own diff takes out its cause, with
      no code added for it but a bug's test. It closes with the PR.
    - **Rides along** — it passes the four tests in step 4, with *Same module*
-     widened to the same area: its fix changes a file of the screen, window or
-     command the task changes.
+     widened to the same area: its fix changes a file in the same module, or a
+     file of the screen, window or command the task changes.
    - **Stays open** — none of these. If the change moves the code it cites,
      *Finishing* in `SKILL.md` corrects its text.
 4. **Check every other hit.** It rides along only if it passes all four,

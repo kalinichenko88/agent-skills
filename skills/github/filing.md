@@ -4,25 +4,29 @@ The global prompt says when a finding becomes an issue; this file says how.
 Read `tracker.md`, next to this file, before the search below: it runs the
 scripts and reads the tracker. `<dir>` is this skill's base directory.
 
-**In the task's module and settled: it goes into this PR instead** — the Boy
-Scout Rule. Check each test against the diff you would write:
+**In the task's module and clear: it goes into this PR instead** — the Boy
+Scout Rule. Check each condition against the diff you would write:
 
 - **Same module** — it changes a file the task changes, or a file next to them
   in the same module. The module is the one that the project's instruction
   file or a conventions skill draws, as a feature or a package; with neither,
   the directory of a file the task changes.
-- **Settled** — there is only one way to fix it, and nothing outside the module
+- **Clear** — there is only one way to fix it, and nothing outside the module
   relies on what it changes.
-- **Smaller** — its share of the diff is smaller than the task's own diff.
+- **Smaller** — its share of the diff is smaller than the task's own diff will
+  be.
 - **Separable** — dropping it leaves the task whole.
 
-A bug brings its own test, as the global prompt says. Give each one its own
-commit, and list it in the PR description under **Also fixed**, one line per
-item. All of them together, with the issues that ride along (`take-in.md`),
-stay smaller than the task's own diff: past that, drop the largest, one at a
-time, and file it as below. Fails any test — a file in another module, a
-design choice, a change to business logic, a change that code outside the
-module relies on — and it is an issue, however small it looks.
+A bug brings its own test, as the global prompt says. The test counts neither
+for the module nor for the size. List each fix in the PR description under
+**Also fixed**, one line per item. Before the PR opens, total them: while all
+of them together are not smaller than the task's own diff, take out the
+largest, one at a time, and file it as below. The issues that ride along have
+their own total, in `take-in.md`. Fails any condition — a file in another
+module, a bug that shows outside the module too, a design choice, a question
+on business logic (what the product should do, not a bug in what it does now),
+a change that code outside the module relies on — and it is an issue, however
+small it looks.
 
 **Search by identifier, not by your title.** A search for the symbol finds
 every issue that names it; the prose you were about to write finds only issues

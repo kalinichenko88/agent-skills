@@ -62,9 +62,10 @@ tr '\n' ' ' <"$root/rules.md" | grep -qE 'read-only subagent[^.]* review[^.]* fi
 # A fix outside the task goes into its PR or into an issue by one scope: the
 # task's module. Each place that draws that line names the module, and none
 # keeps the three tests without it (#103).
-for f in rules.md skills/github/filing.md skills/github/take-in.md; do
-  tr '\n' ' ' <"$root/$f" | grep -q 'same module' || {
-    echo "FAIL: $f: a fix goes into the task's PR with no 'same module' scope"
+for f in rules.md skills/github/filing.md skills/github/take-in.md \
+  skills/github/SKILL.md skills/github/README.md; do
+  tr -s '[:space:]' ' ' <"$root/$f" | grep -qE "(same|task's) module" || {
+    echo "FAIL: $f: a fix goes into the task's PR with no module scope"
     exit 1
   }
 done
