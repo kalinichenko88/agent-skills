@@ -23,14 +23,14 @@
 # jscpd is pinned to the version that wrote tests/fixtures/debt/jscpd-report.json:
 # a new one runs here only on purpose, with the report recorded again.
 #
-# Needs bash and git, and npx or bunx.
+# Needs bash and git, and npx with node or bunx with bun.
 
 set -euo pipefail
 unset CDPATH
 jscpd=jscpd@5.4.2
 
 [ $# -ge 1 ] && [ $# -le 2 ] || {
-  echo 'usage: clones.sh <tree> [path]' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 data=$(<"$(dirname "$0")/data.ere")

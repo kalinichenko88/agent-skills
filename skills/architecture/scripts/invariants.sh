@@ -24,7 +24,7 @@
 set -euo pipefail
 
 usage() {
-  echo 'usage: invariants.sh [--new-since <base>] [ref]' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 die() {
