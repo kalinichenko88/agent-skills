@@ -140,8 +140,7 @@ The issue in hand stays the task throughout. A hit that is someone else's work
      draws the module. The same topic in another module is another PR.
    - **Settled** — its body already says what to do; nothing in it waits on a
      decision.
-   - **Smaller** — its share of the diff is smaller than that fix. No test
-     counts, as in `filing.md`.
+   - **Smaller** — its share of the diff is smaller than that fix.
    - **Separable** — dropping it leaves the task whole, so a reviewer can ask
      for it to be split out and lose nothing but a line in the description.
 5. **Total the ones that passed.** While the total is not smaller than that

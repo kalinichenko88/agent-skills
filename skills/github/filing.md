@@ -10,24 +10,24 @@ Scout Rule. Check each condition against the diff you would write:
 - **Same module** — it changes a file the task changes, or a file next to them
   in the same module. The module is the one that the project's instruction
   file or a conventions skill draws, as a feature or a package; with neither,
-  the directory of a file the task changes.
+  the directory of a file the task changes. A bug's test can live where the
+  project keeps its tests.
 - **Clear** — there is only one way to fix it, and nothing outside the module
   relies on what it changes.
 - **Smaller** — its share of the diff is smaller than the task's own diff will
   be.
 - **Separable** — dropping it leaves the task whole.
 
-A bug brings its own test, as the global prompt says. No test counts for the
-module or for the size: not the task's, not a fix's. List each fix in the PR
+A bug brings its own test, as the global prompt says. List each fix in the PR
 description under **Also fixed**, one line per item. Total them each time one
 joins: when the new one makes all of them together not smaller than the task's
 own diff will be, the new one is an issue, filed as below. The issues that ride
 along have their own total, in `take-in.md`. Fails any condition — a file in
 another module, a bug that shows outside the module too, a design choice, a
-question on business logic (what the product should do; a bug is code that
-does not do what its docs, its tests, its name or an issue say), a change that
-code outside the module relies on — and it is an issue, however small it
-looks.
+question on business logic (what the product should do, where its docs, tests
+and names do not say it; code that crashes, loses data, is unsafe or does not
+do what they say is a bug), a change that code outside the module relies on —
+and it is an issue, however small it looks.
 
 **Search by identifier, not by your title.** A search for the symbol finds
 every issue that names it; the prose you were about to write finds only issues
