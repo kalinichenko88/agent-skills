@@ -12,8 +12,6 @@ re='"prompt":"(#[0-9]+|https://github\.com/[^/"]+/[^/"]+/issues/[0-9]+)"'
 issue=${BASH_REMATCH[1]#\#}
 
 title=$(gh issue view "$issue" --json number,title --jq '"#\(.number) \(.title)"' 2>/dev/null) || exit 0
-[ -n "$title" ] || exit 0
 title=${title//\\/\\\\}
 title=${title//\"/\\\"}
-title=${title//$'\t'/ }
 printf '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","sessionTitle":"%s"}}\n' "$title"
