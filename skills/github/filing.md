@@ -80,11 +80,10 @@ than it closes. Per finding, the scout's groups decide:
   the command or remove it. A debt finding keeps its debt label: when the
   repository has none, create `debt` as *No free host* says. Then run the
   command again, with the same section file. The rerun finishes the step.
-  When the body holds the section already, the rerun
-  does not check for a full host and does not change the body or the title.
-  It adds the label, if the command names one, and leaves the one-line
-  comment. Run it for one host at a time, never two at once: it reads the body
-  and writes it back whole.
+  When the body holds the section already, the rerun does not check for a full
+  host and does not change the body or the title. It adds the label, if the
+  command names one, and leaves the one-line comment. Run it for one host at a
+  time, never two at once: it reads the body and writes it back whole.
 - **No free host** — file a new issue:
   - One issue per finding. Title states the problem, body says where it is
     (`path:line`), how it shows up, and why it was out of scope here.

@@ -102,7 +102,8 @@ done
 # architecture and review-loop file a debt issue through filing.md. With no
 # `debt` label in the repository, "never invent a new label" left it `bug` or
 # unlabelled (#133). Each place that gives the labels rule, for a new issue or
-# for a host, names the exception. A script's header loses its # marks first.
+# for a host, names the exception. Each line loses one leading #, so a phrase
+# can span a script's comment lines.
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
     echo "FAIL: $f: a debt finding with no debt label gets another label or none: no \"$phrase\""

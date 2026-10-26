@@ -123,8 +123,8 @@ shows as busy.
 - **The label** — an issue with no label gets one by the labels rule of
   `<github>/filing.md`: never a new one, except `debt` for a debt issue, as
   that rule says. An issue with a label keeps it, unless the verdict shows it
-  is wrong: then the table gives the label to remove. A label that closes the issue, as `duplicate`,
-  `invalid` or `wontfix`, goes with a close.
+  is wrong: then the table gives the label to remove. A label that closes the
+  issue, as `duplicate`, `invalid` or `wontfix`, goes with a close.
 - **The milestone is the importance.** It goes into a current milestone when
   it breaks what a current milestone delivers, or touches security or data.
   Otherwise it goes into the first milestone whose goal it serves, or into
