@@ -47,8 +47,9 @@ None.
 
 ## Confirmation
 
-`tests/rules_test.sh` checks that each script holds the line, and that its
-header has a call line with the script's own name.
+`tests/rules_test.sh` checks that each script holds the line and a call line
+with its own name. Like the `sed`, it reads the whole file, not only the
+header.
 `tests/github_scripts_test.sh`, `tests/roadmap_scripts_test.sh` and
 `tests/architecture_scripts_test.sh` run the usage of `collect.sh`,
 `plan.sh` and `invariants.sh`.
