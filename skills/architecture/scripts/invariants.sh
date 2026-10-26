@@ -147,9 +147,10 @@ records=$(printf '%s\n' "$text" | awk '
   # indented up to 3 past the margin of the list item that holds the fence.
   # The script does not know that margin. A fence at column 0 is in no list
   # item, so its margin is 0. For an indented fence, a closing line at its
-  # indent closes it, and one 1 to 3 past it is an error. A non-blank line
-  # indented less, as at the end of that list item, is an error too: the lines
-  # that the fence hides could hold a check.
+  # indent closes it, one 1 to 3 past it is an error, and one 4 or more past
+  # it is a line of code. A non-blank line indented less, as at the end of
+  # that list item, is an error too: the lines that the fence hides could hold
+  # a check.
   fence != "" {
     if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/ && ind >= indent && ind < indent + 4) {
       if (ind > indent && indent > 0) stop("a code fence at line " opened " has a closing line indented past it, at line " NR)

@@ -179,7 +179,8 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```te
 run "$empty"
 check 'a fence at the start of a line' '2 invariants.sh: a debt line outside an invariant: debt `src/a.ts`.' "$code $err"
 # A fence closes only at a line of its own character, as long or longer, with
-# nothing after it. One that never closes would hide each invariant below it.
+# nothing but spaces or tabs after it. One that never closes would hide each
+# invariant below it.
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` debt `src/a.ts`.' '````markdown' \
   '- **I-2.** An example.' '  ```ts' '  Check: grep `x` in `nope/`.' '  ```' '````' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
@@ -187,9 +188,9 @@ check 'a fence that holds a shorter one' "0 $(printf '%s\n' 'I-1 PASS' '  debt s
 printf '%s\n' '```' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 1' "$code $err"
-# A fence closes at its closing line. A non-blank line indented less before
-# that, as at the end of the list item that holds the fence, stops the run:
-# the lines that the fence hides could hold a check.
+# A non-blank line indented less than a fence, before its closing line, as at
+# the end of the list item that holds the fence, stops the run: the lines that
+# the fence hides could hold a check.
 printf '%s\n' '- **I-1.** No fetch. Example:' '  ```ts' '  fetch(u)' '  Check: grep `fetch\(` in `src/`.' \
   '- **I-2.** Other.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
