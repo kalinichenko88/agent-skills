@@ -464,9 +464,14 @@ line that says so and exits 0.
 
 `invariants.sh --new-since <base> [ref]` gives the same report and marks
 `new` each hit that the base does not have, under a FAIL and under the known
-debt of a PASS. It reads the checks at the ref and runs them on both trees, so
-the base needs no architecture file, and a check that the branch amends is the
-same at both. Before it compares, it follows the renames of files: a file
+debt of a PASS. It runs the checks of the ref on the ref, and those of the
+base's own architecture file on the base: the invariant with the same id and
+the same kind of check, with its own `Check:` line and `debt` list. A hit is
+`new` when the base does not have it with the same status, a hit that fails
+or a `debt` hit. So a branch that adds an invariant, widens it, or changes its
+`except` or `debt` list gets `new` on each hit that it adds that way, and an
+invariant that the base does not have marks each of its hits `new`. Before it
+compares, it follows the renames of files: a file
 that `git diff -M <base> <ref>` shows as renamed is compared with its old
 path. A folder is compared by its path
 only, because `git diff` names no folder renames. So when a branch only
@@ -475,10 +480,11 @@ debt shows as `new`; the lens reads the diff and sees the move.
 A hit of `grep` is matched by its path and the text of its line, not by its
 line number, which moves. Identical hits are counted: when the ref has more
 hits with one path and one text than the base, the extra ones are new. A hit
-of `lines` or `files` is new when the run on the base has no hit at its old
-path (for a folder, its path), or a smaller one there. So a file that the
-branch moves into the paths of a check, or out of its `except` paths, brings
-a `new` hit.
+of `lines` or `files` is new when the run on the base has no hit with the same
+status at its old path (for a folder, its path), or a smaller one there. So a
+file that the branch moves into the paths of a check, out of its `except`
+paths, or into or out from under a path of its `debt` list, brings a `new`
+hit.
 
 The output is one line per invariant, `I-1 PASS` or `I-2 FAIL`, and under each
 FAIL what it found: the `git grep` lines, or the files and folders and their
@@ -538,13 +544,9 @@ pull request, in one line and with no subagent, that
 still hears of it.
 
 The lens runs `invariants.sh --new-since <base> HEAD` first. Each `new` hit
-is the branch's. When the branch left the invariant as it was and moved no
-file into or out from under a path of its `debt` list, a FAIL with no `new`
-hit was on the base already: it is a finding outside the task, an issue
-through `kalinichenko:github`, or one already filed. Otherwise `new` does not
-tell all of the branch's hits: the lens compares the head's output with that
-of `invariants.sh <base>`, which reads the base's own architecture file. Then
-it runs
+is the branch's, also when the branch changed the invariant. A FAIL with no
+`new` hit was on the base already: it is a finding outside the task, an issue
+through `kalinichenko:github`, or one already filed. Then it runs
 `clones.sh` on a read-only checkout of the head, keeping the clones that touch
 a file the branch changed. Its findings:
 

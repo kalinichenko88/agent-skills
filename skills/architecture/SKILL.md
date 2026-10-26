@@ -324,13 +324,13 @@ I-4 review only
 
 Under each invariant: the hits that break it; then `debt`, the hits under a
 path of its `debt` list; then `no longer debt`, a path of the list with no
-hit, which leaves the list. With `--new-since`, `new` marks each hit that the
-base does not have: those are the branch's. When the branch left the
-invariant as it was and moved no file into or out from under a path of its
-`debt` list, a FAIL with no `new` hit was on the base already: it is a
-finding outside the task. Otherwise `new` does not tell all of the branch's
-hits: compare the head's output with that of `invariants.sh <base>`, which
-reads the base's own architecture file.
+hit, which leaves the list. With `--new-since`, the script also runs each
+invariant at the base, by the base's own architecture file, and `new` marks
+each hit that the base does not have with the same status, as a hit that
+fails or as a `debt` hit: those are the branch's. So a hit is `new` also when
+the branch adds or widens the invariant, or moves the hit into or out from
+under a path of its `debt` list. A FAIL with no `new` hit was on the base
+already: it is a finding outside the task.
 
 - **Exit 0:** no invariant fails.
 - **Exit 1:** one fails. A hit of the change is a defect: fix the code, or

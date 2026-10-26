@@ -7,11 +7,13 @@
 #
 # Without a ref, it reads the working tree, with the untracked files that git
 # does not ignore; with one, that commit. It runs from any directory of the
-# checkout. With --new-since, it runs the same checks on the base too, and puts
-# the word new before each hit that the base does not have: a grep line that
-# the base has fewer times in the file, by its path before a rename; a file
-# with no hit at the base, or a smaller one; a folder the same, by its path.
-# The syntax of a Check: line is in the skill's first-file.md. No
+# checkout. With --new-since, it also runs the checks of the base's own
+# architecture file on the base, and puts the word new before each hit that the
+# base does not have with the same status, a hit that fails or a debt hit: a
+# grep line that the base has fewer times in the file, by its path before a
+# rename; a file with no such hit at the base, or a smaller one; a folder the
+# same, by its path. An invariant is compared with the one of the same id and
+# kind of check at the base; with none there, each of its hits is new. The syntax of a Check: line is in the skill's first-file.md. No
 # text of the file runs as a command: a pattern and each path go to git grep
 # as their own arguments, after -e and --, as literal pathspecs. Documents and
 # other data are not code and are left out, by the debt skill's data rule.
@@ -65,9 +67,11 @@ if [ -n "$since" ]; then
   base=$(git rev-parse --verify -q "$since^{commit}") || die "not a commit: $since"
 fi
 
+# file_at <sha>: the architecture file of the commit; it fails when there is none.
+file_at() { git show "$1:docs/ARCHITECTURE.md" 2>/dev/null || git show "$1:ARCHITECTURE.md" 2>/dev/null; }
+
 if [ -n "$sha" ]; then
-  text=$(git show "$sha:docs/ARCHITECTURE.md" 2>/dev/null) ||
-    text=$(git show "$sha:ARCHITECTURE.md" 2>/dev/null) || {
+  text=$(file_at "$sha") || {
     echo "No architecture file at $ref."
     exit 0
   }
@@ -80,6 +84,11 @@ else
   exit 0
 fi
 records=$(printf '%s\n' "$text" | awk "$checks") || exit 2
+# olds: the records of the base's own architecture file, or none.
+olds=
+if [ -n "$base" ] && text=$(file_at "$base"); then
+  olds=$(printf '%s\n' "$text" | awk "$checks") || die "that line is in the architecture file at $since"
+fi
 
 # was: each file that the branch renamed, as new path<TAB>old path, so that
 # its hits match those of its old path at the base.
@@ -145,10 +154,12 @@ size_hits() {
     END { for (d in count) if (count[d] > ENVIRON["N"] + 0) printf "%s\t%s\n", d, count[d] }'
 }
 
-# base_hits: the hits of the same check at the base. The base may not have the
-# paths of the check, and is not checked for them.
+# base_hits: the hits of the base's check, $barg in $bin except $bexcept, at
+# the base. The base may not have the paths of the check, and is not checked
+# for them.
 base_hits() {
-  local where=("$base") prefix=$base:
+  local where=("$base") prefix=$base: arg=$barg except_=$bexcept ins
+  IFS=$'\037' read -r -a ins <<<"$bin"
   if [ "$kind" = grep ]; then grep_hits; else listing | size_hits; fi
 }
 
@@ -157,24 +168,30 @@ base_hits() {
 # base, a line \035, then the sorted hits. It exits 1 when it fails, that is
 # when a hit is not under a debt entry.
 report() {
-  ID=$id KIND=$kind DEBT=$debt_ SINCE=$base awk -F'\t' "$lib"'
+  ID=$id KIND=$kind DEBT=$debt_ BDEBT=$bdebt SINCE=$base awk -F'\t' "$lib"'
     BEGIN { nd = split(ENVIRON["DEBT"], entry, "\037"); grep = ENVIRON["KIND"] == "grep" }
     $0 == "\035" { part++; next }
     !NF { next }
     { t = $0; sub(/^[^\t]*\t[^\t]*\t/, "", t) }
     part == 0 { was[$1] = $2; next }
-    part == 1 { if (grep) seen[$1 "\t" t]++; else size[$1] = $2 + 0; next }
+    # A hit at the base is keyed by its status there, debt or fail, and its path.
+    part == 1 {
+      p = (under_any($1, ENVIRON["BDEBT"]) ? "debt" : "fail") "\t" $1
+      if (grep) seen[p "\t" t]++; else size[p] = $2 + 0
+      next
+    }
     {
       h = grep ? $1 ":" $2 ":" t : $1 " " $2
-      # p: the path of the hit at the base. A folder keeps its path.
+      known = 0
+      for (i = 1; i <= nd; i++) if (under($1, entry[i])) known = held[i] = 1
+      # p: the key of the hit at the base. A folder keeps its path.
       p = $1
       if (ENVIRON["KIND"] != "files" && ($1 in was)) p = was[$1]
+      p = (known ? "debt" : "fail") "\t" p
       if (ENVIRON["SINCE"] == "") fresh = 0
       else if (grep) fresh = seen[p "\t" t]-- <= 0
       else fresh = !(p in size) || size[p] < $2 + 0
       mark = fresh ? "new " : ""
-      known = 0
-      for (i = 1; i <= nd; i++) if (under($1, entry[i])) known = held[i] = 1
       if (known) debt[++k] = mark "debt " h; else hit[++n] = mark h
     }
     END {
@@ -216,8 +233,14 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   else
     hits=$(printf '%s\n' "$files" | size_hits)
   fi
+  # The same invariant at the base: its id, with a check of the same kind.
   old=
-  [ -z "$base" ] || old=$(base_hits) || exit 2
+  bdebt=
+  rec=$(ID=$id KIND=$kind awk -F'\036' '$1 == ENVIRON["ID"] && $2 == ENVIRON["KIND"]' <<<"$olds")
+  if [ -n "$rec" ]; then
+    IFS=$'\036' read -r _ _ barg bin bexcept bdebt <<<"$rec"
+    old=$(base_hits) || exit 2
+  fi
   {
     printf '%s\n' "$was" $'\035' "$old" $'\035'
     printf '%s\n' "$hits" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2n
