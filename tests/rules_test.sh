@@ -51,4 +51,43 @@ for event in SessionStart SubagentStart; do
     exit 1
   }
 done
+# A review subagent gets these rules too, as the loop above proves, and
+# *Out-of-scope findings* tells it to file an issue without asking. One
+# sentence must tell every read-only subagent, a review one included, to file
+# nothing.
+tr '\n' ' ' <"$root/rules.md" | grep -qE 'read-only subagent[^.]* review[^.]* files nothing' || {
+  echo "FAIL: SubagentStart: no sentence tells a read-only review subagent to file nothing"
+  exit 1
+}
+# superpowers' review skills start at the same moments as review-loop and give
+# other steps, and subagent-driven-development's per-task reviewer is a review
+# subagent too. The rules must say which skill wins, keep review-loop out of the
+# per-task review, and invoke review-loop after the last task: the review there
+# is not the first review of the change, so the trigger in rules.md does not
+# fire.
+# shellcheck disable=SC2016 # Markdown backticks, not shell
+tr '\n' ' ' <"$root/rules.md" | grep -qE 'review-loop` replaces `superpowers:requesting-code-review` and `superpowers:receiving-code-review`' || {
+  echo "FAIL: no sentence says that review-loop replaces the superpowers review skills"
+  exit 1
+}
+# shellcheck disable=SC2016 # Markdown backticks, not shell
+tr '\n' ' ' <"$root/rules.md" | grep -qE '\. In `superpowers:subagent-driven-development`, the review after each task stays as that skill sets it, without `kalinichenko:review-loop`\. Invoke review-loop after the last task, in place of the final review\.' || {
+  echo "FAIL: no sentence keeps the per-task review of subagent-driven development and invokes review-loop after the last task"
+  exit 1
+}
+# A fix outside the task goes into its PR or into an issue by one scope: the
+# task's module. Each place that draws that line names the module, and none
+# keeps the three tests without it (#103).
+for f in rules.md skills/github/filing.md skills/github/take-in.md \
+  skills/github/SKILL.md skills/github/README.md; do
+  text=$(tr -s '[:space:]' ' ' <"$root/$f")
+  grep -qE "(same|task's) module" <<<"$text" || {
+    echo "FAIL: $f: a fix goes into the task's PR with no module scope"
+    exit 1
+  }
+  if grep -qi 'small, safe' <<<"$text"; then
+    echo "FAIL: $f: a fix goes into the PR by size and safety alone, with no module"
+    exit 1
+  fi
+done
 echo 'rules_test: ok'

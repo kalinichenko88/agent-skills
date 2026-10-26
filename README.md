@@ -7,7 +7,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   calling work done, ship every bug fix with its test, use the platform before
   a dependency, keep code and commits in English, write prose in Simplified
   Technical English, move docs with the change, verify review findings before
-  acting on them and load the review loop before the first review of a change,
+  acting on them and load the review loop in place of superpowers' review
+  skills before the first review of a change,
   load the TypeScript conventions before the first write to a TypeScript file
   and the React conventions before the first write to a React component or
   hook. Outside this repository, report a defect in this plugin to its

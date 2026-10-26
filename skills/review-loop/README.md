@@ -12,6 +12,11 @@ a security review last, and a summary of what was decided and fixed.
 - A person's review comments arrive.
 - You choose a review level, or decide whether another round is needed.
 
+With superpowers installed, it replaces `requesting-code-review` and
+`receiving-code-review`. In `subagent-driven-development`, the review after
+each task stays as that skill sets it. In place of the final review of
+`subagent-driven-development`, this skill starts after the last task.
+
 ## What you get
 
 - **Less code first.** When the
@@ -49,10 +54,11 @@ a security review last, and a summary of what was decided and fixed.
   branch. Its fixes get rounds of their own, as the later fixes above.
 - **A summary.** First a run of the repository's check on the final branch.
   Then the rounds, the decisions with their reasons, what was fixed, what was
-  declined and why, and the issues filed. The pull request description
-  carries the summary under `## Review`. In a public repository, an example
-  from a private source in that section or in a reply to a review comment
-  keeps no names, numbers, titles, paths or code.
+  declined and why, and the issues filed. Last, the docs the branch changed,
+  or why it changed none. The pull request description carries the summary
+  under `## Review`. In a public repository, an example from a private source
+  in that section or in a reply to a review comment keeps no names, numbers,
+  titles, paths or code.
 - **Then the pull request.** For an issue taken into work, or when you ask
   for a pull request, the agent opens it after the summary and asks whether
   to merge, in the same turn. This needs a passing check and a branch other

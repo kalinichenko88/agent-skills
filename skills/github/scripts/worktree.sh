@@ -5,14 +5,16 @@
 #
 #   worktree.sh <n> <branch> [--here]
 #
-# An issue with a linked branch and no assignee gets a warning instead: the
-# branch can be someone else's.
+# An issue with a linked branch in this repository and no assignee gets a
+# warning instead: the branch can be someone else's.
 #
-# A branch already linked to the issue wins over a <branch> that is not
-# linked: the first one that gh lists. A branch already checked out somewhere
-# is worked on there. A session already in a worktree, as one started with
-# claude --worktree or codex --worktree, checks the branch out where it is;
-# --here does the same in any checkout, for "a branch only".
+# A branch linked to the issue in this repository wins over a <branch> that is
+# not linked there: the first such branch that gh lists. When every linked
+# branch is in another repository, as a fork's, the script stops before it
+# writes. A branch already checked out somewhere is worked on there. A session
+# already in a worktree, as one started with claude --worktree or codex
+# --worktree, checks the branch out where it is; --here does the same in any
+# checkout, for "a branch only".
 #
 # DRY_RUN=1 prints the commands that would write, and runs none.
 
@@ -26,7 +28,21 @@ n=$1 branch=$2 here=${3:-}
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
-linked=$(gh issue develop --list "$n" | cut -f1)
+# Without --branch-repo, gh makes a new branch of a linked branch's name in
+# this repository, so only this repository's linked branches count. When every
+# linked branch is in another repository, the script stops and the person
+# decides.
+list=$(gh issue develop --list "$n")
+linked=''
+if [ -n "$list" ]; then
+  repo=$(gh api 'repos/{owner}/{repo}' --jq .full_name)
+  linked=$(awk -F'\t' -v r="/$repo/tree/" '{ s = r $1 } substr($2, length($2) - length(s) + 1) == s { print $1 }' <<<"$list")
+  if [ -z "$linked" ]; then
+    echo "#$n is linked only to branches in another repository:" >&2
+    cut -f2 <<<"$list" >&2
+    exit 1
+  fi
+fi
 
 # Assigned to you, the issue's linked branch counts as yours (collect.sh).
 # GitHub does not say whose a branch is: one that is linked while nobody is

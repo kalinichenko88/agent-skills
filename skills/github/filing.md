@@ -4,13 +4,32 @@ The global prompt says when a finding becomes an issue; this file says how.
 Read `tracker.md`, next to this file, before the search below: it runs the
 scripts and reads the tracker. `<dir>` is this skill's base directory.
 
-**Small, safe and needs no decision: it goes into this PR instead** — the Boy
-Scout Rule. Check all three against the diff you would write: it stays within a
-few lines, it changes nothing another caller or user relies on, and there is
-only one way to do it. Fix it in its own commit if it touches a file the task
-does not, and list it in the PR description under **Also fixed**, one line per
-item. Fails any of the three — a design choice, a behaviour change, a fix that
-needs its own test — and it is an issue, however small it looks.
+**In the task's module and clear: it goes into this PR instead** — the Boy
+Scout Rule. Check each condition against the diff you would write:
+
+- **Same module** — it changes a file the task changes, or a file next to them
+  in the same module. The module is the one that the project's instruction
+  file or a conventions skill draws, as a feature or a package; with neither,
+  the directory of a file the task changes. For a test, that is the directory
+  of the code it tests; a test helper gives no directory. A test belongs only
+  to the module of the code it tests, wherever it lives; a test of several
+  modules, or a helper that tests of several modules share, belongs to none.
+- **Clear** — there is only one way to fix it, and nothing outside the module
+  relies on what it changes.
+- **Smaller** — its share of the diff is smaller than the task's own diff will
+  be.
+- **Separable** — dropping it leaves the task whole.
+
+A bug brings its own test, as the global prompt says. List each fix in the PR
+description under **Also fixed**, one line per item. Total them each time one
+joins: when the new one makes all of them together not smaller than the task's
+own diff will be, the new one is an issue, filed as below. The issues that ride
+along have their own total, in `take-in.md`. Fails any condition — a file in
+another module, a bug that shows outside the module too, a design choice, a
+question on business logic (what the product should do where its docs, tests
+and names do not say it; a bug is code that crashes or does not do what they
+say), a change that code outside the module relies on — and it is an issue,
+however small it looks.
 
 **Search by identifier, not by your title.** A search for the symbol finds
 every issue that names it; the prose you were about to write finds only issues

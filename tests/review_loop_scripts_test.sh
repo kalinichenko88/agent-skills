@@ -63,6 +63,7 @@ out=$(review "$base")
 check 'prints the findings that codex wrote, and nothing of its session' "$(cat "$fixtures/codex-findings.json")" "$out"
 check 'codex runs in the read-only sandbox' read-only "$(grep -A1 -xF -- -s "$tmp/args" | sed -n 2p)"
 grep -qxF -- '--ephemeral' "$tmp/args" || fail 'codex keeps no session files' "$(cat "$tmp/args")"
+grep -qF 'file nothing' "$tmp/args" || fail 'the prompt tells codex, which loads rules.md too, to file nothing' "$(cat "$tmp/args")"
 grep -qF "git diff $base...$head" "$tmp/args" ||
   fail 'the prompt names the range of the whole branch, from the merge base to the SHA of HEAD' "$(cat "$tmp/args")"
 rm -f "$tmp/args"

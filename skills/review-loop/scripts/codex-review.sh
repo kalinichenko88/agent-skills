@@ -95,8 +95,8 @@ EOF
 # The prompt that found three defects no /code-review round had reported, on
 # three finished branches of this plugin (#59). Its second sentence came after
 # that measurement: it keeps a person's Codex rules, as this plugin's rules.md,
-# from starting a review loop inside this one review.
-prompt="You review a change in this git repository: \`git diff $base...$head\`. You are one reviewer inside a review that another agent runs: start no review loop and no review skill. Read the diff, and read the code around it as you need. Find defects: code that gives a wrong result, crashes, loses or corrupts data, opens a security hole, races, or breaks a contract that other code depends on. Look hardest at trust boundaries, partial failure and retries, concurrency and ordering, and empty, missing and timeout cases. Do not report style, names or cleanup. Report a finding only when you can name the input or the state that makes it fail, from the code. Do not change files. For each finding give the file, the line, a one-sentence summary and the failure scenario. Return no findings when the change has none."
+# from starting a review loop inside this one review, or filing an issue.
+prompt="You review a change in this git repository: \`git diff $base...$head\`. You are one reviewer inside a review that another agent runs: start no review loop and no review skill, and file nothing. Read the diff, and read the code around it as you need. Find defects: code that gives a wrong result, crashes, loses or corrupts data, opens a security hole, races, or breaks a contract that other code depends on. Look hardest at trust boundaries, partial failure and retries, concurrency and ordering, and empty, missing and timeout cases. Do not report style, names or cleanup. Report a finding only when you can name the input or the state that makes it fail, from the code. Do not change files. For each finding give the file, the line, a one-sentence summary and the failure scenario. Return no findings when the change has none."
 
 if ! codex exec -s read-only --ephemeral --output-schema "$tmp/schema.json" \
   -o "$tmp/findings.json" "$prompt" </dev/null >"$tmp/log" 2>&1 ||

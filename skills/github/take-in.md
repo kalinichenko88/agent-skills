@@ -43,9 +43,10 @@ branch" — and then they win. Each path assigns the issue to you, because an
 unassigned issue looks free to everyone else: "a branch only" runs
 `worktree.sh` with `--here`, which makes no worktree and works in the current
 checkout, and "stay on this branch" runs `gh issue edit 91 --add-assignee @me`
-and touches no branch. `worktree.sh` warns instead of assigning in one case,
-below; "stay on this branch" checks the same case first, with
-`gh issue develop --list 91` and the issue's assignees.
+and touches no branch. `worktree.sh` does not assign the issue in two cases,
+below: it warns in one and stops in the other. "Stay on this branch" checks
+the case of the warning first, with `gh issue develop --list 91` and the
+issue's assignees. In that check, a branch linked in any repository counts.
 
 The branch, and the worktree when one is made, carry one name that says what
 the work is: `<type>/<number>-<two to four words>`, the type from *Commits* in
@@ -58,15 +59,23 @@ bash <dir>/scripts/worktree.sh 91 fix/91-electron-binary-in-lanes
 
 It assigns the issue to you, branches from the remote's default branch, links
 the branch to the issue, and prints the path to work in as its last line. A
-branch already linked to the issue wins over the name you gave. A branch
-already checked out is worked on where it is. A session already in a worktree,
-as one started with `claude --worktree` or `codex --worktree`, checks the
-branch out where it is, and so does `--here`.
+branch linked to the issue in this repository wins over the name you gave. A
+branch already checked out is worked on where it is. A session already in a
+worktree, as one started with `claude --worktree` or `codex --worktree`,
+checks the branch out where it is, and so does `--here`.
 
-A linked branch on an issue that nobody is assigned to can be someone else's:
-the script warns, and does not assign the issue to you. Find out whose the
-branch is before you push to it. Someone else's: say so and wait. Yours: run
-the command the warning gives, which assigns the issue to you.
+A linked branch in another repository does not win: without `--branch-repo`,
+`gh` would make a new branch with the same name here. When every linked branch
+is in another repository, as a fork's, the script stops before it assigns or
+makes anything, and prints their URLs. Give the person those URLs and wait:
+the person decides. A rerun with another name stops the same way. A rerun goes
+on only when the issue has a linked branch in this repository, or no linked
+branch at all.
+
+A linked branch in this repository, on an issue that nobody is assigned to,
+can be someone else's: the script warns, and does not assign the issue to you.
+Find out whose the branch is before you push to it. Someone else's: say so and
+wait. Yours: run the command the warning gives, which assigns the issue to you.
 
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree
@@ -119,15 +128,17 @@ The issue in hand stays the task throughout. A hit that is someone else's work
      that says what the code now does.
    - **The change removes it** — the task's own diff takes out its cause, with
      no code added for it but a bug's test. It closes with the PR.
-   - **Rides along** — it passes the four tests in step 4, with *Same file*
-     widened to the same area: its fix changes a file of the screen, window or
-     command the task changes.
+   - **Rides along** — it passes the four tests in step 4, with *Same module*
+     widened to the same area: its fix changes a file in the same module, or a
+     file of the screen, window or command the task changes, or a test of that
+     screen, window or command.
    - **Stays open** — none of these. If the change moves the code it cites,
      *Finishing* in `SKILL.md` corrects its text.
 4. **Check every other hit.** It rides along only if it passes all four,
    measured against the fix for the issue in hand alone:
-   - **Same file** — it changes a file the task already changes, in any
-     function. The same topic in another file is another PR.
+   - **Same module** — it changes a file the task already changes, in any
+     function, or a file next to them in the same module, as `filing.md`
+     draws the module. The same topic in another module is another PR.
    - **Settled** — its body already says what to do; nothing in it waits on a
      decision.
    - **Smaller** — its share of the diff is smaller than that fix.
