@@ -16,7 +16,7 @@ each reason why not, one per line:
   yours can work on the issue, on this computer or on another one. Show the
   person what the script printed, and ask in this order:
   1. With no `assigned to you` line: whose is the branch? GitHub does not say
-     whose a branch is. Someone else's: say so and wait.
+     whose a branch is. Someone else's: say so and wait, and do not ask 2.
   2. Does the work run somewhere else, or does it continue here? Somewhere
      else: stop. Here: go on with the steps below.
 - An issue of another repository than this checkout's: say so and stop.
@@ -85,7 +85,7 @@ branch at all.
 A linked branch in this repository, on an issue that nobody is assigned to,
 can be someone else's: the script warns, and does not assign the issue to you.
 Find out whose the branch is before you push to it, when the person did not say
-it at the check above. Someone else's: say so and wait. Yours: run the command
+it after `take-in-check.sh`. Someone else's: say so and wait. Yours: run the command
 the warning gives, which assigns the issue to you.
 
 Then move into the worktree, when the script made one or found the branch in
