@@ -92,9 +92,10 @@ Where the split does not fit:
 
 - The rules of the product are prose in `SKILL.md`, and the model runs
   them. No code holds them, and no check sees them.
-- The roles are sections of a script, not folders. A script can take part
-  of a role from a sibling in its folder, as roadmap's scripts take some
-  reads from `read.sh` and the graph logic from the `.awk` files.
+- Inside a script, the roles are parts of the file, not folders. A script
+  can take part of a role from a sibling in its folder, as `roadmap.sh`,
+  `next.sh` and `plan.sh` take some reads from `read.sh` and the graph
+  logic from the `.awk` files.
 
 ## Patterns
 
