@@ -17,18 +17,23 @@ issue=${BASH_REMATCH[2]#\#}
 
 # An issue title is a sentence, as "github: filing.md forbids a new label, so
 # a debt issue ...". The session title drops a prefix of one or two words
-# before ": " and keeps the words before the next ",", ";" or ": ". When the
-# number and these words are longer than 40 characters, it cuts the words at a
-# word end to fit and drops the small words at the end of the cut. gh's --jq
-# counts characters, not bytes, so the result stays valid UTF-8.
+# before ": " and keeps the words before the next ",", ";", ": " or " — ". The
+# number and these words stay whole up to 50 characters, so the name does not
+# stop in the middle of a phrase. When they are longer, it cuts the words at a
+# word end to 40 characters and drops the small words at the end of the cut.
+# Then it drops a "(" that has no ")" after it and, when the count of double
+# quotes is odd, the last double quote, each with the words after it. gh's
+# --jq counts characters, not bytes, so the result stays valid UTF-8.
 # ponytail: the small words are English; add a language's words when its
 # titles end on them.
 # shellcheck disable=SC2016 # the single-quoted $ are jq's
 short='"#\(.number) " as $n | (40 - ($n | length)) as $max
-  | $n + (.title | sub("^[^ :]+( [^ :]+)?: +"; "") | sub("(,|;|: ).*"; "")
-  | if length > $max then .[:$max + 1] | sub(" +[^ ]*$"; "") | .[:$max]
+  | (50 - ($n | length)) as $whole
+  | $n + (.title | sub("^[^ :]+( [^ :]+)?: +"; "") | sub("(,|;|: | — ).*"; "")
+  | if length > $whole then .[:$max + 1] | sub(" +[^ ]*$"; "") | .[:$max]
       | sub("( (a|an|and|at|by|for|from|in|of|on|or|the|to|with))+$"; "")
-    else . end)'
+    else . end | sub(" *\\([^)]*$"; "")
+  | if ([match("\""; "g")] | length) % 2 == 1 then sub(" *\"[^\"]*$"; "") else . end)'
 title=$(gh issue view "$issue" --json number,title --jq "$short" 2>/dev/null) || exit 0
 title=${title//[[:cntrl:]]/ }
 title=${title//\\/\\\\}
