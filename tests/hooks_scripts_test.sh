@@ -50,11 +50,16 @@ check 'URL: the title' "$recorded" "$(title sessionTitle)"
 check 'URL: gh reads the issue' "issue view $url" "$(calls | cut -d' ' -f1-3)"
 
 # Claude Code sent "  #91  " as it was typed. The prompts below are JSON text:
-# \n is a pasted newline.
-for prompt in '  #133  ' "$url"'\n' 'http://ghe.example.com/o/r/issues/133'; do
+# \n is a pasted newline. Each line is the prompt|the issue gh gets.
+while IFS='|' read -r prompt issue; do
   out=$(run claude-prompt.json "$prompt") || fail "$prompt: exit $?"
   check "$prompt: the title" "$recorded" "$(title sessionTitle)"
-done
+  check "$prompt: gh reads the issue" "issue view $issue" "$(calls | cut -d' ' -f1-3)"
+done <<EOF
+  #133  |133
+$url\n|$url
+#133\t|133
+EOF
 
 # A quote, a backslash or a tab in the title must leave the JSON valid.
 jq '.title = "a \"b\" \\ c\td"' "$fixtures/issue.json" >"$tmp/issue.json"
@@ -62,8 +67,10 @@ out=$(run claude-prompt.json '#133') || fail "escape: exit $?"
 check 'escape: the title' '#133 a "b" \ c d' "$(title sessionTitle)"
 cp "$fixtures/issue.json" "$tmp/issue.json"
 
-# None of these is an issue on its own: no title, and no gh call.
-for prompt in 'Look at #133' '#133 and #134' "$url#issuecomment-1"; do
+# None of these is an issue on its own: no title, and no gh call. gh would
+# send a token to the host of the last one.
+for prompt in 'Look at #133' '#133 and #134' "$url#issuecomment-1" \
+  https://example.com/o/r/issues/133; do
   out=$(run claude-prompt.json "$prompt") || fail "$prompt: exit $?"
   check "$prompt: no title" '' "$out"
   check "$prompt: no gh call" '' "$(calls)"
@@ -71,10 +78,14 @@ done
 out=$(run codex-prompt.json '#133') || fail "Codex: exit $?"
 check 'Codex: no title, as Codex fails the run on a field it does not know' '' "$out"
 check 'Codex: no gh call' '' "$(calls)"
-# A host that sends neither prompt_id nor turn_id is not known to be Claude Code.
-sed 's/"turn_id":"[^"]*",//' "$fixtures/codex-prompt.json" >"$tmp/other.json"
-out=$(fixtures=$tmp run other.json '#133') || fail "other host: exit $?"
-check 'other host: no title' '' "$out"
+# A host is Claude Code only with prompt_id and no turn_id.
+sed 's/"turn_id":"[^"]*",//' "$fixtures/codex-prompt.json" >"$tmp/no-ids.json"
+sed 's/"prompt_id"/"turn_id":"x","prompt_id"/' "$fixtures/claude-prompt.json" >"$tmp/both-ids.json"
+for payload in no-ids.json both-ids.json; do
+  out=$(fixtures=$tmp run "$payload" '#133') || fail "$payload: exit $?"
+  check "$payload: no title" '' "$out"
+  check "$payload: no gh call" '' "$(calls)"
+done
 out=$(FAKE_FAIL=1 run claude-prompt.json '#133') || fail "gh fails: exit $?"
 check 'gh fails: no title' '' "$out"
 

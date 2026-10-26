@@ -8,8 +8,9 @@
 
 input=$(cat)
 [[ $input == *'"prompt_id":'* && $input != *'"turn_id":'* ]] || exit 0
-# Claude Code does not trim the prompt. The URL forms are take-in-check.sh's.
-re='"prompt":"( |\\[nr])*(#[0-9]+|https?://[^/"]+/[^/"]+/[^/"]+/issues/[0-9]+)( |\\[nr])*"'
+# Claude Code does not trim the prompt. Only github.com: gh sends a token to
+# the host of a URL, as GH_ENTERPRISE_TOKEN to any host but github.com.
+re='"prompt":"( |\\[nrt])*(#[0-9]+|https://github\.com/[^/"]+/[^/"]+/issues/[0-9]+)( |\\[nrt])*"'
 [[ $input =~ $re ]] || exit 0
 issue=${BASH_REMATCH[2]#\#}
 
