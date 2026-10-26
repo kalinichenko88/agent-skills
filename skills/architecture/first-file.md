@@ -68,8 +68,8 @@ cannot tell: a file that restates the code costs each reader and helps none.
   code states and each new export would make false;
 - the layers: which folders and classes play each role;
 - the patterns that the code keeps everywhere and that are not obvious, each
-  with the kind of file that keeps it, as "each file in `src/routes/`", not a
-  list of the files, which each new one would make false;
+  with the kind of file that keeps it, as "each `.ts` file in `src/routes/`",
+  not a list of the files, which each new one would make false;
 - the invariants, numbered `I-1`, `I-2` and on;
 - the limits of decomposition;
 - the cross-cutting concerns;
