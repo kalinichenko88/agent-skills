@@ -67,8 +67,8 @@ trigger, the header of each script in `scripts/`, and each file or section
 that another module names. One skill uses another by its name,
 `kalinichenko:<name>`, by a path to one of its files, as
 `<skills>/github/tracker.md`, or by a script's header. So before a rename of
-a file or a section, grep the whole repository for its name, and for a
-section also for its anchor, as `#the-ponytail-step`.
+a file or a section, grep the whole repository for the words of its name,
+and for a section also for its anchor, as `#the-ponytail-step`.
 
 **Direction in text.** `rules.md` names github, roadmap, review-loop and
 the two conventions. architecture names debt, github, roadmap and
