@@ -43,7 +43,7 @@ if [ -z "$ids" ]; then
   echo "PR #$pr does not close #$n: nothing to do"
   exit 0
 fi
-# shellcheck disable=SC2016
+# shellcheck disable=SC2016 # GraphQL, not shell
 run gh api graphql --silent -f pr="${ids% *}" -f issue="${ids#* }" \
   -f query='mutation($pr: ID!, $issue: ID!) { removeCloseIssueReferences(input: {issueId: $issue, pullRequestIds: [$pr]}) { clientMutationId } }'
 [ "${DRY_RUN:-}" = 1 ] || echo "PR #$pr no longer closes #$n"
