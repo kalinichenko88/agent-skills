@@ -14,7 +14,7 @@ have one correct result: read the tracker, write the plan, measure the code,
 run the checks. The model does the rest.
 
 Both hosts read the same skills and `rules.md`; each host has its own
-manifest. `hooks/rules.sh` injects `rules.md` at the
+`plugin.json`. `hooks/rules.sh` injects `rules.md` at the
 start of each session and each subagent. A skill loads when its
 `description` matches the moment. The plugin installs as a copy of the whole
 repository.
@@ -33,8 +33,8 @@ it: an invariant on it is review only.
 - `skills/<name>/` — one skill: `SKILL.md`, `README.md`, its other `.md`
   files, and `scripts/`.
 - `tests/<name>_test.sh` — the tests that `make check` runs.
-  `tests/<name>_eval.sh` — the evals; they call the model when a person
-  runs them.
+  `tests/<name>_eval.sh` — the evals. They call the model, except in the
+  modes that I-7 names.
   `tests/fixtures/<area>/` — recorded payloads and trees.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
@@ -63,20 +63,18 @@ Each skill is a module, by the area of work it serves.
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |
 
 **Public API.** A skill's API is its `SKILL.md`, whose `description` is the
-trigger, the header of each script in `scripts/`, and each `.md` file or
-section that another module names. One skill uses another by its name,
+trigger, the header of each script in `scripts/`, and each file or section
+that another module names. One skill uses another by its name,
 `kalinichenko:<name>`, by a path to one of its files, as
 `<skills>/github/tracker.md`, or by a script's header. So before a rename of
-a file or a section, grep the other skills and `rules.md` for it. In code,
-two links exist: `invariants.sh` reads the debt skill's `data.ere` (I-5),
-and `tests/rules_test.sh` greps sentences of github's `.md` files.
+a file or a section, grep the whole repository for its name.
 
 **Direction in text.** `rules.md` names github, roadmap, review-loop and
 the two conventions. architecture names debt, github, roadmap and
 react-conventions. debt names github, roadmap and review-loop. roadmap
 names github. react-conventions names typescript-conventions. github and
 review-loop name each other, and github, review-loop and the two
-conventions name the global prompt back. These cycles are in text only.
+conventions name the global prompt back. No cycle closes in code.
 
 **Where a module's files are.** A module's test and fixtures are outside its
 folder, in `tests/`: the Makefile finds a test by `tests/<name>_test.sh`. So
@@ -94,10 +92,8 @@ In a skill with scripts:
 
 Where the split does not fit:
 
-- Most rules of the product are prose in `SKILL.md`, and the model runs
-  them. A script holds only a rule with one correct result, as the refusals
-  of `plan.sh`. No `Check:` line sees the prose; `tests/rules_test.sh`
-  greps some of its sentences.
+- Most rules of the product are prose in `SKILL.md` and the `.md` files
+  beside it, and the model runs them. No `Check:` line sees the prose.
 - Inside a script, the roles are parts of the file, not folders. A script
   can take part of a role from a sibling in its folder, as `roadmap.sh`,
   `next.sh` and `plan.sh` take some reads from `read.sh` and the graph
