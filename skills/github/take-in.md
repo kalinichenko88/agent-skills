@@ -128,15 +128,16 @@ The issue in hand stays the task throughout. A hit that is someone else's work
      that says what the code now does.
    - **The change removes it** — the task's own diff takes out its cause, with
      no code added for it but a bug's test. It closes with the PR.
-   - **Rides along** — it passes the four tests in step 4, with *Same file*
+   - **Rides along** — it passes the four tests in step 4, with *Same module*
      widened to the same area: its fix changes a file of the screen, window or
      command the task changes.
    - **Stays open** — none of these. If the change moves the code it cites,
      *Finishing* in `SKILL.md` corrects its text.
 4. **Check every other hit.** It rides along only if it passes all four,
    measured against the fix for the issue in hand alone:
-   - **Same file** — it changes a file the task already changes, in any
-     function. The same topic in another file is another PR.
+   - **Same module** — it changes a file the task already changes, in any
+     function, or a file next to them in the same module, as `filing.md`
+     draws the module. The same topic in another module is another PR.
    - **Settled** — its body already says what to do; nothing in it waits on a
      decision.
    - **Smaller** — its share of the diff is smaller than that fix.

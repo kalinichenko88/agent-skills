@@ -59,4 +59,18 @@ tr '\n' ' ' <"$root/rules.md" | grep -qE 'read-only subagent[^.]* review[^.]* fi
   echo "FAIL: SubagentStart: no sentence tells a read-only review subagent to file nothing"
   exit 1
 }
+# A fix outside the task goes into its PR or into an issue by one scope: the
+# task's module. Each place that draws that line names the module, and none
+# keeps the three tests without it (#103).
+for f in rules.md skills/github/filing.md skills/github/take-in.md; do
+  tr '\n' ' ' <"$root/$f" | grep -q 'same module' || {
+    echo "FAIL: $f: a fix goes into the task's PR with no 'same module' scope"
+    exit 1
+  }
+done
+if grep -n -i 'small, safe' "$root/rules.md" "$root/skills/github/filing.md" \
+  "$root/skills/github/SKILL.md" "$root/skills/github/README.md"; then
+  echo "FAIL: the lines above take a fix into the PR by size and safety alone, with no module"
+  exit 1
+fi
 echo 'rules_test: ok'

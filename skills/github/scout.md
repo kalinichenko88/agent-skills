@@ -88,8 +88,8 @@ For **take-in**:
   screen, window or command. The file their fix changes does not matter. A report
   that gives only what someone saw counts. Put `bug` or `debt` first on the
   entry's `why:` line.
-- **Neighbours** — other open issues whose fix changes the same files, or that
-  decide something about the same function.
+- **Neighbours** — other open issues whose fix changes the same files or other
+  files in their directories, or that decide something about the same function.
 - **Linked, open work and history** — every item of `== Its timeline` that no
   group above holds, open pull requests from the search lists that change the
   same code, and closed issues or merged pull requests from the search lists
