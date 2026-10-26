@@ -7,7 +7,20 @@ An issue named on its own — `#91`, "take #91", its URL — as the session's fi
 message, or after a talk about which task is next, is the request to take it
 into work; a mention inside other work is not. Check it first: `bash
 <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints `take #91`, or
-each reason why not, one per line:
+each reason why not, one per line.
+
+**Then say what the task is.** When the check stops with an error
+(`tracker.md`), skip this step: the error is a line from `gh`, or one that
+starts with `usage:` or `take-in-check.sh:`. Otherwise read the issue: `gh
+issue view 91 --json title,body`, or with its URL. Before the next step, write its number, its title and two or
+three sentences of your own: what is wrong or what is wanted, and what must be
+true for the work to be done. For an issue with `## Also:` sections, name each
+added problem too. This is the first thing you say about the issue. Write your
+sentences in the person's language, and give the title as the issue has it.
+When this read fails, say so, and go on with what the check printed. The same
+read gives the files, symbols and words for `collect.sh` below.
+
+Then act on what the check printed:
 
 - `closed`, or a line that names someone else: say so and wait. These lines
   win over the lines below.
@@ -20,15 +33,6 @@ each reason why not, one per line:
   2. Does the work run somewhere else, or does it continue here? Somewhere
      else: stop. Here: go on with the steps below.
 - An issue of another repository than this checkout's: say so and stop.
-
-**Then say what the task is.** Unless the check stops with an error
-(`tracker.md`), read the issue: `gh issue view 91 --json title,body`, or with
-its URL. Before the next step, write its number, its title and two or three
-sentences of your own: what is wrong or what is wanted, and what must be true
-for the work to be done. This is the first thing you say about the issue.
-Write your sentences in the person's language, and give the title as the issue
-has it. What the check printed comes after them. The same read gives the files,
-symbols and words for `collect.sh` below.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can
