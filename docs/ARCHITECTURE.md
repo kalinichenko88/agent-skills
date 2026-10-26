@@ -35,7 +35,13 @@ it: an invariant on it is review only.
 - `tests/<name>_test.sh` — the tests that `make check` runs.
   `tests/<name>_eval.sh` — the evals. They call the model, except in the
   runs that I-7 describes.
-  `tests/fixtures/<area>/` — recorded payloads and trees.
+  `tests/fixtures/<area>/` — recorded payloads and trees, for the tests
+  that read them: `tests/<area>_<kind>_test.sh`, where `<kind>` is the
+  last word before `_test.sh`, for example `scripts`, `checks` or
+  `fences`, and `tests/<area>_eval.sh`. So
+  `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`.
+  A folder takes the underscores of the test's name, never the hyphen of
+  a skill's name. An area whose tests read no recorded data has no folder.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
 - `.claude/skills/` — `release` and `infographic`: skills of this
@@ -55,7 +61,7 @@ Each skill is a module, by the area of work it serves.
 | rules | `rules.md`, `hooks/` | `tests/rules_test.sh` |
 | github | `skills/github/` | `tests/github_scripts_test.sh`, `tests/fixtures/github/`, `docs/github/` |
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
-| review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/fixtures/review-loop/` |
+| review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/fixtures/review_loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/fixtures/debt/` |
 | architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_fences_test.sh` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
