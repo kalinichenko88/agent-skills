@@ -73,10 +73,9 @@ check 'escape: the title' '#133 a "b" \ c d' "$(field sessionTitle)"
 # of #64. Rows 7 to 13 are titles of this tracker and vaultmd: with the
 # number, the first part has 48 characters in row 7, 50 in row 8 and 51 in
 # row 9; row 10 stops at " — "; rows 11 and 12 drop a "(" with no ")", after
-# a comma and after the cut; row 13 drops a quote with no pair. Rows 14 and
-# 15, written for the test, keep a "(" and a quote with no space before them.
-# Then a short title keeps its last small word; a Russian title counts in
-# characters, not bytes; a word longer than the limit is cut inside.
+# a comma and after the cut; row 13 drops a quote with no pair. Then a short
+# title keeps its last small word; a Russian title counts in characters, not
+# bytes; a word longer than the limit is cut inside.
 while IFS='|' read -r issue_title name; do
   jq --arg t "$issue_title" '.title = $t' "$fixtures/issue.json" >"$tmp/issue.json"
   out=$(run claude-prompt.json '#133') || fail "$issue_title: exit $?"
@@ -95,8 +94,6 @@ Post-1.0 non-goal: bulk tag rename (the other four were promoted)|#133 bulk tag 
 notes: bulk write API for imports (one lock cycle, one index transaction)|#133 bulk write API for imports
 query: richer where filters (in / not / ranges / missing) and multi-tag matching|#133 richer where filters
 review-loop: a review subagent gets "file it, do not ask first" from rules.md, and no "file nothing"|#133 a review subagent gets
-(WIP, do not merge)|#133 (WIP
-Support 12" displays in the settings page|#133 Support 12" displays in the settings page
 Hooks fail when logged in|#133 Hooks fail when logged in
 Хук ставит в имя сессии весь заголовок issue, и имя получается длинным|#133 Хук ставит в имя сессии весь заголовок issue
 skills/architecture/scripts/invariants.sh fails on bash 3.2|#133 skills/architecture/scripts/invaria
