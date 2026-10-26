@@ -136,12 +136,13 @@ and the render branches on `status`. If the project already has a data library
 A job is a request and its state: loading the options, creating an item,
 sending a form. When one component body holds two jobs or more, each with its
 own state and its own async call, each job moves into a custom hook. The
-component keeps the rest: it calls the hooks, connects them, holds the state
-that no request owns, and renders.
+component keeps the rest: it calls the hooks, connects them, holds the text
+of its inputs, and renders.
 
 ```tsx
 // no: two requests and their state in one body
 export function GroupSelect({ type, onChange }: GroupSelectProps) {
+  const [name, setName] = useState('');
   const [options, setOptions] = useState<OptionsState>({ status: 'loading' });
   const [creation, setCreation] = useState<CreationState>({ status: 'idle' });
 
@@ -149,7 +150,7 @@ export function GroupSelect({ type, onChange }: GroupSelectProps) {
     // fetch the options, setOptions at each step
   }, [type]);
 
-  async function handleCreate(name: string) {
+  async function handleCreate() {
     // post, setCreation, add to the options, onChange
   }
 
@@ -176,16 +177,16 @@ export function GroupSelect({ type, onChange }: GroupSelectProps) {
 
 Count the jobs, not the lines. A short body with two requests has two jobs. A
 long form with one submit has one job, and its request can stay in the
-component. Each hook holds one union, as *A request's state is one union*
-says. If the project already has a data library, each job's hook holds the
-library's call, as `useQuery`, and the library holds the state. Two library
-calls in one body are two jobs. The hooks are the component's own files, and
-*A part's own files live in its folder* places them:
-`group-select/use-group-options.ts` next to `group-select/group-select.tsx`,
-and a page's hooks sit at the feature root. A value that is not a request's
-state, as the text of an input, does not go into a job's hook. The component
-holds it and gives it to the function that the hook returns:
-`createGroup(name)`.
+component. Each job's hook holds one union, as *A request's state is one
+union* says. If the project already has a data library, each job's hook holds
+the library's call, as `useQuery` or `useMutation`, and the library holds the
+state. Two queries or mutations in one body are two jobs. The hooks are the
+component's own files, and *A part's own files live in its folder* places
+them: `group-select/use-group-options.ts` next to
+`group-select/group-select.tsx`, and a page's hooks sit at the feature root. A
+value that is not a request's state, as the text of an input, is not kept in a
+job's hook. The component holds it and gives it to the function that the hook
+returns: `createGroup(name)`.
 
 ## Render reads props, state and context — not refs
 

@@ -168,9 +168,9 @@ feature root or in `shared`, and the runs with a zod schema outside
 hook that holds two requests or more: a comments section loads and sends
 comments, and the other two tasks have one request each. With
 `--check <logs folder>` it runs only these checks, on the logs that an earlier
-run printed. `tests/skill_load_checks_test.sh` runs them so in `make check`, on `tests/fixtures/skill_load`: two recorded runs and a
-case that fails each check. A change to a check updates the output that the
-test expects.
+run printed. `tests/skill_load_checks_test.sh` runs them so in `make check`,
+on `tests/fixtures/skill_load`: two recorded runs and a case that fails each
+check. A change to a check updates the output that the test expects.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
 It checks that no count of rounds goes past three, and that a security review
 follows the last pass. Its fixture has a local `origin`, and its task says

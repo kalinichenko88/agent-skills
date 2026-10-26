@@ -204,15 +204,20 @@ schemas() {
 # ponytail: it finds a component or a hook by `export function` or `export
 # default function`, then a capital letter or `use` and a capital letter, at a
 # line's start. Its body ends at the first line that is `}`, with a `;` or a
-# `//` comment or neither, so `}: Props) {` and `} {` of a signature over
-# several lines do not end it. It counts the lines in that body with `await` or
-# `.then(`, except a line with `.json()` and no `fetch(`: `await fetch(…)` and
-# then `await response.json()` is one request. An arrow function, one that is
-# not exported, or two requests on one line pass unseen, and a `.then(` chain
-# over several lines counts one call per `.then(` line: every recorded run
-# wrote `export function` and one request per line. No recorded run put two
-# requests in one hook, so no fixture fails through a hook: add one when a run
-# does.
+# `//` comment or neither. The line `}: Props) {` or `} {` of a signature over
+# several lines does not end it. It counts the lines in that body with `await`
+# or `.then(`, except a line with `.json()` and no `fetch(`: `await fetch(…)`
+# and then `await response.json()` is one request, and so are `fetch(…)`,
+# `.then((r) => r.json())` and `.then(set)` on three lines. Each of these
+# passes unseen: an arrow function, one that is not exported, two requests on
+# one line, a request with no `await` or `.then(`, as `useQuery`, or a client
+# that reads the body on the request line, as `ky.get(…).json()`. Each of these
+# fails though it holds one request: a body read other than `.json()`, as
+# `.text()`, a braced `.then(` chain with one `.then(` line per step, and a
+# hook with two awaits that are not requests. Every recorded run wrote
+# `export function`, `fetch` and `.json()`, one request per line. No recorded
+# run put two requests in one hook, so no fixture fails through a hook: add one
+# when a run does.
 hooks() {
   local ok=0 dir found
   for dir; do
@@ -220,7 +225,7 @@ hooks() {
     found=$(find "$dir/src" \( -name '*.ts' -o -name '*.tsx' \) -exec awk '
       FNR == 1 { open = 0 }
       /^export (default )?function ([A-Z]|use[A-Z])/ { start = FILENAME ": " $0; calls = 0; open = 1; next }
-      open && /(^|[^[:alnum:]_])await[[:space:]]|\.then\(/ && !(/\.json\(\)/ && !/(^|[^[:alnum:]_.])fetch\(/) { calls++ }
+      open && /(^|[^[:alnum:]_])await[[:space:]]|\.then\(/ && !(/\.json\(\)/ && !/(^|[^[:alnum:]_])fetch\(/) { calls++ }
       open && /^};?[[:space:]]*(\/\/.*)?$/ { if (calls > 1) print start; open = 0 }' {} +)
     if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
   done

@@ -15,7 +15,8 @@ without it.
 - You add a hook, a helper or a constant that one sub-component uses.
 - You register a reducer, a route or a provider.
 - A component holds a request's loading, error and data.
-- One component holds two requests, as loading its options and creating one.
+- One component holds two requests, as loading its options and creating an
+  option.
 - You read a value from `useRef`, or write `usePrevious`.
 
 ## The rules
