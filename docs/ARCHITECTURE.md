@@ -41,7 +41,7 @@ it: an invariant on it is review only.
   `fences`, and `tests/<area>_eval.sh`. So
   `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`.
   A folder takes the underscores of the test's name, never the hyphen of
-  a skill's name. A test that reads no recorded data has no folder.
+  a skill's name. An area whose tests read no recorded data has no folder.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
 - `.claude/skills/` — `release` and `infographic`: skills of this
