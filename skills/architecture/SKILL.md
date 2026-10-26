@@ -341,10 +341,9 @@ finding outside the task.
 
 Five cases mark hits `new` that are not the branch's. Read the diff for them:
 
-- A `grep` line that a file already has is counted, not matched. When the
-  branch adds a copy of it, `new` marks the last copy in the file, which can
-  be the base's.
-
+- `grep` hits with the same path and text are counted. When the branch adds
+  copies of a hit, `new` marks that many of the last copies in the file,
+  which can be the base's.
 - A file that the branch moves is compared with its old path only when git
   sees the rename: the move is committed or staged, and the file stays at
   least half the same. A move that git does not see makes each hit of the
@@ -356,12 +355,13 @@ Five cases mark hits `new` that are not the branch's. Read the diff for them:
   that adds the first one.
 - When the script cannot read the base's file past a line, each hit of an
   invariant that it did not read whole there is `new`: the one that holds
-  that line, and each one after it. For a code fence that does not close,
-  the invariant that holds the fence is not whole either: a line on stderr
-  gives the line of the fence. A `Check:` or `debt` line at the start of a
-  line is in no invariant: the invariant above it is compared without that
-  line. When the base's check of one
-  invariant cannot run, each hit of that invariant is `new`.
+  that line, and each one after it. For an indented code fence that does not
+  close, the invariant that holds the fence is not whole either: a line on
+  stderr gives the line of the fence. A `Check:` or `debt` line with no space
+  or tab before it is in no invariant, and the script stops there: the
+  invariant above it is compared with only the lines before that line. When
+  the base's check of one invariant cannot run, each hit of that invariant is
+  `new`.
 
 In the last two cases, lines on stderr after `at <base>:` say so.
 

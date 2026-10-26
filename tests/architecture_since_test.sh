@@ -149,11 +149,12 @@ for line in 'invariants.sh: at HEAD: I-3: cannot read: Check: grep const in src/
   grep -qxF "$line" <<<"$err" || fail "no line on stderr: $line" "$err"
 done
 
-# A base file whose I-2 holds a code fence that does not close: I-1 is
-# compared, and I-2, which holds the fence, is not whole, as I-3 after it.
+# A base file whose I-2 holds, after its Check: line, a code fence that does
+# not close: I-1 is compared, and I-2, which holds the fence, is not whole,
+# as I-3 after it.
 cp "$repo3/docs/ARCHITECTURE.md" "$tmp/head"
 printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' \
-  '- **I-2.** b' '  ```text' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
+  '- **I-2.** b' '  Check: grep `fetch\(v\)` in `src/feature/`.' '  ```text' \
   '- **I-3.** c' '  Check: grep `const` in `src/feature/`.' >"$repo3/docs/ARCHITECTURE.md"
 commit "$repo3" 'open a fence'
 cp "$tmp/head" "$repo3/docs/ARCHITECTURE.md"
@@ -161,6 +162,17 @@ run "$repo3" --new-since HEAD
 check 'a base fence that does not close' "1 $(printf '%s\n' 'I-1 FAIL' \
   '  src/feature/a.ts:2:fetch(u);' '  src/feature/a.ts:3:fetch(u);' 'I-2 FAIL' \
   '  new src/feature/b.ts:1:fetch(v);' 'I-3 FAIL' '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
+grep -qxF 'invariants.sh: at HEAD: a code fence at line 5 does not close before line 6' <<<"$err" ||
+  fail 'no line on stderr for the fence' "$err"
+
+# A debt line with no indent in the base's file ends I-1 there: the base's
+# I-1 has no debt list, so the hits under it are new debt.
+printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' 'debt `src/feature/a.ts`.' >"$repo3/docs/ARCHITECTURE.md"
+commit "$repo3" 'unindent a debt line'
+printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' '  debt `src/feature/a.ts`.' >"$repo3/docs/ARCHITECTURE.md"
+run "$repo3" --new-since HEAD
+check 'a base debt line with no indent' "0 $(printf '%s\n' 'I-1 PASS' \
+  '  new debt src/feature/a.ts:2:fetch(u);' '  new debt src/feature/a.ts:3:fetch(u);')" "$code $out"
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 
