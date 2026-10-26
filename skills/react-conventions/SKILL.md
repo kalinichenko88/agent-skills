@@ -1,6 +1,6 @@
 ---
 name: react-conventions
-description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, reading a value from useRef or writing usePrevious.
+description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, giving one component two requests, as loading options and creating one, reading a value from useRef or writing usePrevious.
 ---
 
 # React conventions
@@ -130,6 +130,46 @@ transition then resets the other two by hand, and one missed reset shows an
 error over fresh results. With one union, each transition is one `setSearch`,
 and the render branches on `status`. If the project already has a data library
 (TanStack Query, RTK Query), it holds this state instead.
+
+## A component with two jobs gives each one a hook
+
+A job is a request and its state: loading the options, creating an item,
+sending a form. When one component body holds two jobs, each with its own
+state and its own async call, each job moves into a custom hook. The component
+keeps only the composition: it calls the hooks, connects them, and renders.
+
+```tsx
+// no: two requests and their state in one body
+export function GroupSelect({ type, onChange }: GroupSelectProps) {
+  const [options, setOptions] = useState<OptionsState>({ status: 'loading' });
+  const [creation, setCreation] = useState<CreationState>({ status: 'idle' });
+
+  useEffect(() => { /* fetch the options, setOptions at each step */ }, [type]);
+
+  async function handleCreate(name: string) { /* post, setCreation, add to the options */ }
+
+  return <select>…</select>;
+}
+```
+
+```tsx
+export function GroupSelect({ type, onChange }: GroupSelectProps) {
+  const { options, addOption } = useGroupOptions(type);
+  const { creation, createGroup } = useCreateGroup(type, (group) => {
+    addOption(group);
+    onChange(group);
+  });
+
+  return <select>…</select>;
+}
+```
+
+Count the jobs, not the lines. A short body with two requests has two jobs. A
+long form with one submit has one, and it can stay. Each hook holds one union,
+as the section above says, and the hooks are the component's own files:
+`group-select/use-group-options.ts` next to `group-select/group-select.tsx`. A
+value that only the render uses, as the text of an input, stays in the
+component.
 
 ## Render reads props, state and context — not refs
 
