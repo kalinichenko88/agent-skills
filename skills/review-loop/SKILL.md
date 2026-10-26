@@ -10,8 +10,8 @@ skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
-whole branch once too. At `high` and `xhigh`, one review subagent reads the
-tests of the whole branch once. A security review comes last. The agent
+whole branch once too. At `high` and `xhigh`, one review reads the tests of
+the whole branch once. A security review comes last. The agent
 fixes and decides by itself, except for a change to business logic, and
 writes a summary. When the task is an issue taken into work, or the person
 asked for a pull request, the push and the pull request follow in the same
@@ -106,7 +106,7 @@ At `xhigh` in Claude Code, Codex reads the whole branch once per review. Start
 it in the background when the last pass starts. When the loop had one round,
 start it when that round confirms no defect and its nits are committed. When
 step 4 skips the last pass, skip this step too. Change no file while Codex
-runs: its fixes and those of the last pass are one commit.
+runs.
 
 ```bash
 bash <dir>/scripts/codex-review.sh <base>
@@ -133,30 +133,32 @@ seconds each.
 
 ### A review of the tests
 
-When the level of the code is `high` or `xhigh`, one review subagent reads the
-tests of the whole branch once per review. Start it when the last pass
-starts. When the loop had one round, start it when that round confirms no
-defect and its nits are committed. When step 4 skips the last pass, skip this
-step too. Change no file while it runs: its fixes, those of the last pass and
-those of the Codex review are one commit. Give it this prompt, where `<base>`
-is the base of step 1:
+When the change is `high` or `xhigh` by the table in *The level*, by its code
+alone when the text of a skill comes with code, one review reads the tests of
+the whole branch once per review. A change to documents only has none. Start
+it when the last pass starts. When the loop had one round, start it when that
+round confirms no defect and its nits are committed. When step 4 skips the
+last pass, skip this step too. Change no file while it runs. `<dir>` is this
+skill's base directory, `<base>` is the base of step 1, and `<head>` is the
+SHA of `HEAD`. Its findings go through *The findings*. In Claude Code, one
+review subagent gets this prompt:
 
 ```
 Read <dir>/tests-lens.md and do what it says.
-Range: <base>..HEAD, in <the working tree of the branch>.
+Range: <base>..<head>.
+Tree: <the working tree of the branch>.
 ```
 
-In Codex: `/review` with the custom instructions "Read
-`<dir>/tests-lens.md` and do what it says, for this branch against
-origin/<default branch>." Its findings go through *The findings*.
+In Codex: `/review` with the same three lines as its custom instructions.
 
 Why: on nine merged pull requests of three projects, each with a finished
 `/code-review` loop, this review found 11 defects in tests that the loop had
-not reported, in seven of the nine. Six were redundant or heavy tests. Five
-came after round 1: a later round added a test or changed the code, and an
-older test stayed, redundant or stale. So the review reads the branch at the
-end of the loop, not beside round 1. A review of the change against its issue
-found nothing new on the same nine.
+not reported, in seven of the nine. Of the 11, six were redundant or heavy
+tests. Five came from a fix after round 1: that fix added a test or changed
+the code, and an older test stayed, redundant or stale. So the review reads
+the branch at the end of the loop, not beside round 1. A second lens, on the
+change against its issue, found nothing new on the same nine, so the skill
+has none.
 
 ### Fixes from other places
 
@@ -164,7 +166,8 @@ Each of these starts a new count of rounds: the last pass, the Codex review,
 the review of the tests, the security review, and each set of a person's
 review comments, before or after the pull request opens. When more than one
 of the last pass, the Codex review and the review of the tests find defects,
-their fixes are one commit. For each of them:
+their fixes are one commit. A count of rounds here does not start the Codex
+review or the review of the tests again. For each of them:
 
 - Its fixes are one commit, and that commit goes through steps 2 to 4.
 - Its rounds run at the level that the loop's round 1 used. In a new session,
@@ -205,10 +208,9 @@ rounds, run `/security-review` once, on the final branch. It reads the branch
 against origin's default branch and takes no target, so it never runs inside
 the loop. Its findings go through *The findings*, and its fixes through
 *Fixes from other places*. In Codex: `/review` with the custom instructions
-"Find security defects on this
-branch against origin/<default branch>: injection, authentication,
-authorization, secrets and data exposure." Where there is no `origin` remote,
-say so in the summary.
+"Find security defects on this branch against origin/<default branch>:
+injection, authentication, authorization, secrets and data exposure." Where
+there is no `origin` remote, say so in the summary.
 
 The report of `/security-review` does not end the turn, even when its prompt
 says the final reply is the report alone. After the findings of

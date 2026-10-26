@@ -28,8 +28,9 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
   that ends: rounds that read only the last fixes, one last pass over the
   whole branch when the loop needed more than one round, Codex as a second
-  reviewer for `xhigh` changes in Claude Code, a security review, and a
-  summary of what was decided and fixed.
+  reviewer for `xhigh` changes in Claude Code, a review of the tests for
+  `high` and `xhigh` changes, a security review, and a summary of what was
+  decided and fixed.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
   over-engineering, filed as at most three `debt` issues a run.
@@ -179,10 +180,11 @@ run printed. `tests/skill_load_checks_test.sh` runs them so in `make check`,
 on `tests/fixtures/skill_load`: two recorded runs and a case that fails each
 check. A change to a check updates the output that the test expects.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
-It checks that no count of rounds goes past three, and that a security review
-follows the last pass. Its fixture has a local `origin`, and its task says
-that no one can answer questions. Run it after a change to
-`skills/review-loop` or to its section in `rules.md`. Both call the model, so
+It checks that no count of rounds goes past three, that the review of the
+tests runs once next to the last pass, and that a security review follows the
+last pass. Its fixture has a local `origin`, and its task says that no one
+can answer questions. Run it after a change to `skills/review-loop` or to its
+section in `rules.md`. Both call the model, so
 their runs are not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
