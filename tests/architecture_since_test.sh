@@ -148,6 +148,19 @@ for line in 'invariants.sh: at HEAD: I-3: cannot read: Check: grep const in src/
   'invariants.sh: at HEAD: I-1: git grep failed' 'invariants.sh: at HEAD: each hit of I-1 is new'; do
   grep -qxF "$line" <<<"$err" || fail "no line on stderr: $line" "$err"
 done
+
+# A base file whose I-2 holds a code fence that does not close: I-1 is
+# compared, and I-2, which holds the fence, is not whole, as I-3 after it.
+cp "$repo3/docs/ARCHITECTURE.md" "$tmp/head"
+printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' \
+  '- **I-2.** b' '  ```text' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
+  '- **I-3.** c' '  Check: grep `const` in `src/feature/`.' >"$repo3/docs/ARCHITECTURE.md"
+commit "$repo3" 'open a fence'
+cp "$tmp/head" "$repo3/docs/ARCHITECTURE.md"
+run "$repo3" --new-since HEAD
+check 'a base fence that does not close' "1 $(printf '%s\n' 'I-1 FAIL' \
+  '  src/feature/a.ts:2:fetch(u);' '  src/feature/a.ts:3:fetch(u);' 'I-2 FAIL' \
+  '  new src/feature/b.ts:1:fetch(v);' 'I-3 FAIL' '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 

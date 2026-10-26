@@ -339,7 +339,11 @@ by a change of the list or of the file's path. With `--new-since`, a FAIL
 whose failing hits have no `new` mark was on the base already: it is a
 finding outside the task.
 
-Four cases mark hits `new` that are not the branch's. Read the diff for them:
+Five cases mark hits `new` that are not the branch's. Read the diff for them:
+
+- A `grep` line that a file already has is counted, not matched. When the
+  branch adds a copy of it, `new` marks the last copy in the file, which can
+  be the base's.
 
 - A file that the branch moves is compared with its old path only when git
   sees the rename: the move is committed or staged, and the file stays at
@@ -354,7 +358,9 @@ Four cases mark hits `new` that are not the branch's. Read the diff for them:
   invariant that it did not read whole there is `new`: the one that holds
   that line, and each one after it. For a code fence that does not close,
   the invariant that holds the fence is not whole either: a line on stderr
-  gives the line of the fence. When the base's check of one
+  gives the line of the fence. A `Check:` or `debt` line at the start of a
+  line is in no invariant: the invariant above it is compared without that
+  line. When the base's check of one
   invariant cannot run, each hit of that invariant is `new`.
 
 In the last two cases, lines on stderr after `at <base>:` say so.
@@ -362,7 +368,7 @@ In the last two cases, lines on stderr after `at <base>:` say so.
 - **Exit 0:** no invariant fails.
 - **Exit 1:** one fails. A hit of the change is a defect: fix the code, or
   end it by the gate. On a branch, run the script with `--new-since <base>`:
-  the paragraphs above tell which FAIL is the branch's. An ADR never excuses
+  the paragraphs above tell which hits are the branch's. An ADR never excuses
   a FAIL: an ADR that amends an invariant changes its `Check:` line in the
   same commit.
 - **Exit 2:** a check did not run. The lines on stderr name the cause: a
@@ -371,10 +377,10 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   close, an indented code fence with a closing line 1 to 3 columns past its
   opening line, a path with no code file outside its `except` paths, a
   pattern that git rejects, two invariants with one number, no `checks.awk`
-  beside the script, or no debt skill beside this one. Correct the
-  call, or the line in the architecture file. In the base's file, or in a
-  check that cannot run at the base, these causes give no exit 2: see the
-  cases above.
+  beside the script, or no debt skill beside this one. Correct the call,
+  the line in the architecture file, or the install. In the base's file, or
+  in a check that cannot run at the base, these causes give no exit 2: see
+  the cases above.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to
