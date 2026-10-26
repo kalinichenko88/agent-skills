@@ -150,7 +150,7 @@ entries() {
         | .duplicateOf.number' $nums; } | sort -un)
     nums=$(for num in $nums; do has "$num" || echo "$num"; done)
   fi
-  # shellcheck disable=SC2086
+  # shellcheck disable=SC2086 # one number per word
   set -- $nums
   each "$fields" "$defs"'.data.viewer.login as $me | [.data.repository[]] | sort_by(.number)[] | entry($me)' "$@"
   echo "== end: $# entries"
