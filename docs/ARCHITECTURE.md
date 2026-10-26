@@ -35,12 +35,13 @@ it: an invariant on it is review only.
 - `tests/<name>_test.sh` — the tests that `make check` runs.
   `tests/<name>_eval.sh` — the evals. They call the model, except in the
   runs that I-7 describes.
-  `tests/fixtures/<area>/` — recorded payloads and trees, for
-  `tests/<area>_<kind>_test.sh` and `tests/<area>_eval.sh`, where
-  `<kind>` is one word, as `scripts` or `checks`. So
-  `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`:
-  the underscore of the test's name, not the hyphen of the skill
-  `review-loop`.
+  `tests/fixtures/<area>/` — recorded payloads and trees, for the tests
+  that read them: `tests/<area>_<kind>_test.sh`, where `<kind>` is the
+  last word before `_test.sh`, for example `scripts`, `checks` or
+  `fences`, and `tests/<area>_eval.sh`. So
+  `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`.
+  A folder takes the underscores of the test's name, never the hyphen of
+  a skill's name. A test that reads no recorded data has no folder.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
 - `.claude/skills/` — `release` and `infographic`: skills of this
