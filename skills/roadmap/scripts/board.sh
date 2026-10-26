@@ -12,13 +12,13 @@
 #
 # Needs the project scope on the gh token: gh auth refresh -s project.
 # DRY_RUN=1 prints the commands that would write, and runs none.
-# Needs only bash and gh: every filter is gh's own --jq.
+# Needs only bash, gh and awk: every filter of gh's JSON is gh's own --jq.
 
 # shellcheck disable=SC2016 # the single-quoted $ are jq's and GraphQL's
 set -euo pipefail
 
 [ $# -eq 0 ] || {
-  echo 'usage: board.sh' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }

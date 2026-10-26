@@ -29,13 +29,13 @@
 # not yours. GitHub does not say whose a linked branch is: it counts as yours
 # when the issue is assigned to you alone, as worktree.sh leaves it.
 #
-# Needs only bash and gh: every filter is gh's own --jq.
+# Needs only bash, gh and awk: every filter of gh's JSON is gh's own --jq.
 
 # shellcheck disable=SC2016 # the single-quoted $ are jq's and GraphQL's
 set -euo pipefail
 
 usage() {
-  sed -n 's/^#   collect.sh/usage: collect.sh/p' "$0" >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 

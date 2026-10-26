@@ -14,7 +14,7 @@
 set -euo pipefail
 
 [ $# -eq 1 ] || {
-  echo 'usage: take-in-check.sh <n or URL>' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 repo=$(gh api 'repos/{owner}/{repo}' --jq .full_name)

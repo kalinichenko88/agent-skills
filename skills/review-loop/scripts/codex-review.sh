@@ -18,7 +18,7 @@
 set -euo pipefail
 
 [ $# -eq 1 ] || {
-  echo 'usage: codex-review.sh <base>' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 git rev-parse --git-dir >/dev/null || {

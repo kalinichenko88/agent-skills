@@ -6,9 +6,10 @@
 
 The steps with one correct result are scripts in `scripts/`, next to this
 file. Run each one as `bash <dir>/scripts/<name>.sh`, where `<dir>` is this
-skill's base directory: a plugin packager can drop the executable bit. They
-need only `bash` and `gh`. A script that writes takes `DRY_RUN=1`: it prints
-its write commands and runs none.
+skill's base directory: a plugin packager can drop the executable bit. Together
+they need `bash`, `gh`, `git` and `awk`, and the header of each script names
+what it needs. A script that writes takes `DRY_RUN=1`: it prints its write
+commands and runs none.
 
 A script can stop with an error, from `gh` or from its own usage check. Then
 its step is not done: report the error and stop at that step. Do not do the

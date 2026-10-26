@@ -23,7 +23,7 @@
 set -euo pipefail
 
 [ $# -eq 3 ] || [ $# -eq 4 ] || {
-  echo 'usage: add-finding.sh <n> <section-file> <title> [label]' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 n=${1#\#} section=$2 title=$3 label=${4:-}

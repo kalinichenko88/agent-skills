@@ -31,6 +31,15 @@ for script in $(git -C "$root" ls-files '*.sh'); do
     exit 1
   }
 done
+# Each script prints its usage from the call lines of its header (ADR 0001).
+# shellcheck disable=SC2016 # the line as the scripts hold it
+usage='sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2'
+for script in $(git -C "$root" ls-files 'skills/*/scripts/*.sh'); do
+  if ! grep -qF "$usage" "$root/$script" || ! grep -q "^#   ${script##*/}" "$root/$script"; then
+    echo "FAIL: $script: usage must print the '#   ${script##*/}' lines of its header"
+    exit 1
+  fi
+done
 
 for event in SessionStart SubagentStart; do
   output=$("$root/hooks/rules.sh" "$event")

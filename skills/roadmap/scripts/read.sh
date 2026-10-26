@@ -36,7 +36,7 @@
 set -euo pipefail
 
 usage() {
-  echo 'usage: read.sh issues [bug-label] | milestones | counts | milestone <name> | prs' >&2
+  sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
 }
 [ $# -ge 1 ] || usage
