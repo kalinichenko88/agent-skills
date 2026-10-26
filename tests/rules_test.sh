@@ -61,15 +61,16 @@ tr '\n' ' ' <"$root/rules.md" | grep -qE 'read-only subagent[^.]* review[^.]* fi
 }
 # superpowers' review skills start at the same moments as review-loop and give
 # other steps, and its per-task reviewer is a review subagent too. The rules
-# must say which skill wins, and keep the per-task review out of the loop.
+# must say which skill wins, keep the per-task review out of the loop, and
+# invoke the loop after the last task: that review is no longer the first one.
 # shellcheck disable=SC2016 # Markdown backticks, not shell
 tr '\n' ' ' <"$root/rules.md" | grep -qE 'review-loop` replaces `superpowers:requesting-code-review` and `superpowers:receiving-code-review`' || {
   echo "FAIL: no sentence says that review-loop replaces the superpowers review skills"
   exit 1
 }
 # shellcheck disable=SC2016 # Markdown backticks, not shell
-tr '\n' ' ' <"$root/rules.md" | grep -qE 'each task of `superpowers:subagent-driven-development` stays' || {
-  echo "FAIL: no sentence keeps the per-task review of subagent-driven development"
+tr '\n' ' ' <"$root/rules.md" | grep -qE 'subagent-driven-development`, the review after each task stays[^.]*\. Invoke review-loop after the last task' || {
+  echo "FAIL: no sentence keeps the per-task review of subagent-driven development and invokes review-loop after the last task"
   exit 1
 }
 echo 'rules_test: ok'

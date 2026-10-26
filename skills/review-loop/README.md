@@ -13,8 +13,9 @@ a security review last, and a summary of what was decided and fixed.
 - You choose a review level, or decide whether another round is needed.
 
 With superpowers installed, it replaces `requesting-code-review` and
-`receiving-code-review`. The review after each task of
-`subagent-driven-development` stays: the loop starts after the last task.
+`receiving-code-review`. In `subagent-driven-development`, the review after
+each task stays as that skill sets it. In place of its final review, this
+skill runs once, after the last task.
 
 ## What you get
 
