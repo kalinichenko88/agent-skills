@@ -67,6 +67,8 @@ cannot tell: a file that restates the code costs each reader and helps none.
   rule for its public API, as "its `index.ts`", not the API itself, which the
   code states and each new export would make false;
 - the layers: which folders and classes play each role;
+- the patterns that the code keeps everywhere and that are not obvious, each
+  with the files it holds for;
 - the invariants, numbered `I-1`, `I-2` and on;
 - the limits of decomposition;
 - the cross-cutting concerns;
