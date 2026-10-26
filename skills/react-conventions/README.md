@@ -37,6 +37,6 @@ without it.
 - **A component with two jobs gives each one a hook.** A job is a request and
   its state. The component calls the hooks, connects them and renders. The
   text of an input is not kept in a job's hook. Count the jobs, not the lines:
-  a component with one job can keep it.
+  a component with one job can keep its request.
 - **Render reads props, state and context, not refs.** A ref change schedules
   no render. `usePrevious` keeps the previous value in state.
