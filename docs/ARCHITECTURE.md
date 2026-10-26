@@ -2,8 +2,8 @@
 
 This file holds what the code cannot tell: the modules, the layers, the
 patterns of the scripts and the tests, and the invariants that
-`skills/architecture/scripts/invariants.sh` checks. The principles are in
-`kalinichenko:architecture`. The ADRs go in `docs/adr/`.
+`skills/architecture/scripts/invariants.sh` checks in `make check`. The
+principles are in `kalinichenko:architecture`. The ADRs go in `docs/adr/`.
 
 ## Bird's-eye view
 
@@ -44,7 +44,7 @@ it: an invariant on it is review only.
   works in this repository. No host loads them from the installed plugin:
   its users get `rules.md`.
 - `.claude-plugin/`, `.codex-plugin/` — the manifests. `Makefile` — `check:
-  lint test`. `.github/workflows/check.yml` — CI.
+  lint invariants test`. `.github/workflows/check.yml` — CI.
 
 ## Modules
 
