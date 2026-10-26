@@ -93,6 +93,10 @@ line ~ /^(```+[^`]*$|~~~)/ {
 }
 /^- \*\*I-[0-9]+\.\*\*/ {
   id = $0; sub(/^- \*\*/, "", id); sub(/\.\*\*.*/, "", id)
+  # A finding cites an invariant by its number, and --new-since finds the
+  # invariant at the base by it.
+  if (id in ids) stop(id ": a second invariant with this number, at line " NR)
+  ids[id] = 1
   kind = "review"; arg = ""; split("", list); seen = more = 0
   next
 }

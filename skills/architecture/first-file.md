@@ -70,7 +70,7 @@ cannot tell: a file that restates the code costs each reader and helps none.
 - the patterns that the code keeps everywhere and that are not obvious, each
   with the kind of file that keeps it, as "each `.ts` file in `src/routes/`",
   not a list of the files, which each new one would make false;
-- the invariants, numbered `I-1`, `I-2` and on;
+- the invariants, numbered `I-1`, `I-2` and on, each number once;
 - the limits of decomposition;
 - the cross-cutting concerns;
 - an index of the accepted ADRs.

@@ -13,11 +13,12 @@
 # grep line that the base has fewer times in the file, by its path before a
 # rename; a file with no such hit at the base, or a smaller one; a folder the
 # same, by its path. An invariant is compared with the one of the same id and
-# kind of check at the base; with none there, each of its hits is new. The
-# syntax of a Check: line is in the skill's first-file.md. No
-# text of the file runs as a command: a pattern and each path go to git grep
-# as their own arguments, after -e and --, as literal pathspecs. Documents and
-# other data are not code and are left out, by the debt skill's data rule.
+# kind of check at the base; with none there, each of its hits is new, as when
+# the base's file cannot be read or its check cannot run, which stderr says.
+# The syntax of a Check: line is in the skill's first-file.md. No text of the
+# file runs as a command: a pattern and each path go to git grep as their own
+# arguments, after -e and --, as literal pathspecs. Documents and other data
+# are not code and are left out, by the debt skill's data rule.
 #
 # Exit 0 when no invariant fails, 1 when one fails, and 2 for a wrong call or a
 # check that cannot run.
@@ -51,7 +52,9 @@ data_file=$(dirname "$0")/../../debt/scripts/data.ere
 [ -r "$data_file" ] || die "the debt skill's data.ere is not beside this skill"
 data=$(<"$data_file")
 # checks.awk reads the architecture file into one record per invariant.
-checks=$(<"$(dirname "$0")/checks.awk")
+checks_file=$(dirname "$0")/checks.awk
+[ -r "$checks_file" ] || die 'checks.awk is not beside this script'
+checks=$(<"$checks_file")
 top=$(git rev-parse --show-toplevel 2>/dev/null) || die 'not in a git repository'
 cd "$top"
 
@@ -85,10 +88,14 @@ else
   exit 0
 fi
 records=$(printf '%s\n' "$text" | awk "$checks") || exit 2
-# olds: the records of the base's own architecture file, or none.
+# olds: the records of the base's own architecture file, or none. A base file
+# that cannot be read gives none: the branch can be the one that corrects it.
 olds=
 if [ -n "$base" ] && text=$(file_at "$base"); then
-  olds=$(printf '%s\n' "$text" | awk "$checks") || die "that line is in the architecture file at $since"
+  olds=$(printf '%s\n' "$text" | awk "$checks") || {
+    olds=
+    echo "invariants.sh: the architecture file at $since cannot be read, so each hit is new" >&2
+  }
 fi
 
 # was: each file that the branch renamed, as new path<TAB>old path, so that
@@ -237,10 +244,14 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   # The same invariant at the base: its id, with a check of the same kind.
   old=
   bdebt=
-  rec=$(ID=$id KIND=$kind awk -F'\036' '$1 == ENVIRON["ID"] && $2 == ENVIRON["KIND"]' <<<"$olds")
+  rec=
+  [ -z "$olds" ] || rec=$(ID=$id KIND=$kind awk -F'\036' '$1 == ENVIRON["ID"] && $2 == ENVIRON["KIND"]' <<<"$olds")
   if [ -n "$rec" ]; then
     IFS=$'\036' read -r _ _ barg bin bexcept bdebt <<<"$rec"
-    old=$(base_hits) || exit 2
+    old=$(base_hits) || {
+      old=
+      echo "invariants.sh: $id: its check at $since cannot run, so each hit is new" >&2
+    }
   fi
   {
     printf '%s\n' "$was" $'\035' "$old" $'\035'

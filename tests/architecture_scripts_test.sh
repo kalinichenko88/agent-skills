@@ -171,6 +171,9 @@ check 'a Check: line outside an invariant' \
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` except `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'an except path over the whole check' '2 invariants.sh: I-1: no code file under src/' "$code $err"
+printf '%s\n' '- **I-1.** No fetch.' '- **I-1.** No fetch again.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'two invariants with one number' '2 invariants.sh: I-1: a second invariant with this number, at line 2' "$code $err"
 
 # An empty code file is a code file: a files check counts it.
 : >"$empty/src/b.ts"
@@ -303,6 +306,18 @@ check 'changed rules' "1 $(printf '%s\n' 'I-1 FAIL' \
   '  debt src/legacy/summary.ts 12' 'I-3 PASS' '  debt src/many 5' \
   'I-4 FAIL' '  new src/api/client.ts:1:export const get = (u) => fetch(u);' \
   '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
+
+# A base file that the script cannot read past its I-1: no record of it
+# counts, so each hit is new, and stderr says why.
+printf '%s\n' '- **I-1.** No fetch(v).' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
+  '- **I-2.** No fetch.' '  Check: grep fetch in src/' >"$repo3/docs/ARCHITECTURE.md"
+commit "$repo3" 'break the rules'
+printf '%s\n' '- **I-1.** No fetch(v).' '  Check: grep `fetch\(v\)` in `src/feature/`.' >"$repo3/docs/ARCHITECTURE.md"
+run "$repo3" --new-since HEAD
+check 'a base file it cannot read' "1 $(printf '%s\n' 'I-1 FAIL' '  new src/feature/b.ts:1:fetch(v);')
+invariants.sh: I-2: cannot read: Check: grep fetch in src/
+invariants.sh: the architecture file at HEAD cannot be read, so each hit is new" "$code $out
+$err"
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 
