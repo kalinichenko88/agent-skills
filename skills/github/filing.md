@@ -17,16 +17,17 @@ Scout Rule. Check each condition against the diff you would write:
   be.
 - **Separable** — dropping it leaves the task whole.
 
-A bug brings its own test, as the global prompt says. The test counts neither
-for the module nor for the size. List each fix in the PR description under
-**Also fixed**, one line per item. Before the PR opens, total them: while all
-of them together are not smaller than the task's own diff, take out the
-largest, one at a time, and file it as below. The issues that ride along have
-their own total, in `take-in.md`. Fails any condition — a file in another
-module, a bug that shows outside the module too, a design choice, a question
-on business logic (what the product should do, not a bug in what it does now),
-a change that code outside the module relies on — and it is an issue, however
-small it looks.
+A bug brings its own test, as the global prompt says. No test counts for the
+module or for the size: not the task's, not a fix's. List each fix in the PR
+description under **Also fixed**, one line per item. Total them each time one
+joins: when the new one makes all of them together not smaller than the task's
+own diff will be, the new one is an issue, filed as below. The issues that ride
+along have their own total, in `take-in.md`. Fails any condition — a file in
+another module, a bug that shows outside the module too, a design choice, a
+question on business logic (what the product should do; a bug is code that
+does not do what its docs, its tests, its name or an issue say), a change that
+code outside the module relies on — and it is an issue, however small it
+looks.
 
 **Search by identifier, not by your title.** A search for the symbol finds
 every issue that names it; the prose you were about to write finds only issues
