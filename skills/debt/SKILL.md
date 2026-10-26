@@ -87,14 +87,15 @@ start there.
    message, and name those invariants in the report as not checked.
 
    The architecture file can also name the one way to do a kind of work, as
-   the one HTTP client. When the code keeps a second way beside it, as a
-   second HTTP client that several modules use, the two ways compete. Find
-   the second way with `git grep -n` over the scope, as for a rule above. It
-   is a broken invariant when an invariant covers it, or else a place of its
-   own. Its fix needs a choice between the two ways, so its issue says that
-   the fix writes an ADR through `kalinichenko:architecture`. A hit whose
-   fix is only to use the way that the file names is a broken rule of the
-   list above, and its issue asks for no ADR.
+   the one HTTP client. A second way competes with it when it is code of its
+   own that other modules import, as a second client, a wrapper or a
+   dependency: then the fix must choose which way stays. Find it with
+   `git grep -n` over the scope, as for a rule above. It is a place of its
+   own, or it joins the place of the invariant that covers it. The issue of
+   that place says that the fix writes an ADR through
+   `kalinichenko:architecture`, and that the other hits move to the way that
+   the ADR keeps. A direct call where the named way already serves, as one
+   module that calls `fetch`, is no second way: its issue asks for no ADR.
 
    Keep a hit only when the rule's text, its exceptions included, forbids it.
    A hit that the text leaves open is *borderline*: name it in the report,
@@ -144,16 +145,18 @@ start there.
 A place is one fix: a file to split, a broken rule, the clones that one
 shared helper removes, or a piece of over-engineering to remove. The hits
 of one `grep` rule, its `debt` hits included, are one place over several
-files. Rank the places by their file's score from `measure.sh`: a broken
-rule takes the importer's score, and a place over several files — the hits
-of one rule, clones, a dependency and its importers, a bundled finding — the
-highest of its files. A file outside
-the table gets its score from `measure.sh <file>`.
+files. Each path of a `lines` or `files` check is a place of its own, with
+its own score. Rank the places by their file's score from `measure.sh`: a
+broken rule takes the importer's score, and a place over several files —
+the hits of one rule, clones, a dependency and its importers, a bundled
+finding — the highest of its files. A file outside the table gets its score
+from `measure.sh <file>`.
 
-A hotspot, a file or a folder from a `debt` hit of step 2 included, is a
-place only when it holds more than one concern, the split can be named, and
-no rule of the files of step 2 keeps it whole. For example, a rule that puts all of a module's rules in its service
-keeps that service whole. A high score alone is not a place: a short file
+A hotspot, a file or a folder from a `debt` hit of a `lines` or `files`
+check included, is a place only when it holds more than one concern, the
+split can be named, and no rule of the files of step 2 keeps it whole. For
+example, a rule that puts all of a module's rules in its service keeps that
+service whole. A high score alone is not a place: a short file
 that changes often, a large file of one concern, or a file that a rule keeps
 whole goes into *next*, with the rule quoted.
 
@@ -236,7 +239,8 @@ and linked so far.
 
 The issues filed, re-measured and named, with their numbers; *next*, with
 scores; the borderline hits; the invariants with no `Check:` line; the
-copies kept on purpose; the small cuts, one line each with the score of
+invariants that an exit 2 of `invariants.sh` left unchecked, with its
+message; the copies kept on purpose; the small cuts, one line each with the score of
 the file it names, or of its highest file; the ponytail findings dropped, with
 the rule; the lines the kept findings would save, marked as your estimate,
 not ponytail's own `net:`; the steps skipped and
