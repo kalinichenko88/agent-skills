@@ -125,10 +125,10 @@ a stale comment or a broken link to a bug in the next function, goes into this
 change when it meets three conditions. It is clear: there is one way to fix it,
 and nothing outside the module relies on what it changes. It is smaller than
 the task's own diff, and all such fixes together are smaller too. Dropping it
-leaves the task whole. A bug brings its test, which can live where the project
-keeps its tests. List each one in the PR description as not part of the task.
-A finding that fails one condition is an issue. Cleaner than you found it is
-not the same as rebuilt.
+leaves the task whole. A bug brings its test. A test belongs to the module of
+the code it tests, wherever it lives. List each one in the PR description as
+not part of the task. A finding that fails one condition is an issue. Cleaner
+than you found it is not the same as rebuilt.
 
 ## Code conventions (always)
 

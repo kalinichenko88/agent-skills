@@ -10,8 +10,8 @@ Scout Rule. Check each condition against the diff you would write:
 - **Same module** — it changes a file the task changes, or a file next to them
   in the same module. The module is the one that the project's instruction
   file or a conventions skill draws, as a feature or a package; with neither,
-  the directory of a file the task changes. A bug's test can live where the
-  project keeps its tests.
+  the directory of a file the task changes. A test belongs to the module of
+  the code it tests, wherever it lives.
 - **Clear** — there is only one way to fix it, and nothing outside the module
   relies on what it changes.
 - **Smaller** — its share of the diff is smaller than the task's own diff will
@@ -24,9 +24,9 @@ joins: when the new one makes all of them together not smaller than the task's
 own diff will be, the new one is an issue, filed as below. The issues that ride
 along have their own total, in `take-in.md`. Fails any condition — a file in
 another module, a bug that shows outside the module too, a design choice, a
-question on business logic (what the product should do, where its docs, tests
-and names do not say it; code that crashes, loses data, is unsafe or does not
-do what they say is a bug), a change that code outside the module relies on —
+question on business logic (what the product should do where its docs, tests
+and names do not say it; a bug is code that crashes, has a security hole, or
+does not do what they say), a change that code outside the module relies on —
 and it is an issue, however small it looks.
 
 **Search by identifier, not by your title.** A search for the symbol finds
