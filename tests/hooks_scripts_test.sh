@@ -67,23 +67,34 @@ jq '.title = "a \"b\" \\ c\td"' "$fixtures/issue.json" >"$tmp/issue.json"
 out=$(run claude-prompt.json '#133') || fail "escape: exit $?"
 check 'escape: the title' '#133 a "b" \ c d' "$(field sessionTitle)"
 
-# The name is at most 40 characters, cut at a word end. The first five are
-# titles of this tracker, the sixth a short form of #64; a short title keeps
-# its last small word; a Russian title counts in characters, not bytes; a word
-# longer than the limit is cut inside. Each line is the title|the name.
+# The name keeps the first part of the title whole when it has at most 50
+# characters; a longer part is cut at a word end to 40. The first five and the
+# next three are titles of this tracker and vaultmd, the sixth a short form of
+# #64; the eighth has 50 characters and the ninth 51; the next three, of
+# vaultmd, stop at " — " and drop a "(" with no ")"; the next drops a quote
+# with no pair; a short title keeps its last small word; a Russian title
+# counts in characters, not bytes; a word longer than the limit is cut inside.
+# Each line is the title|the name.
 while IFS='|' read -r issue_title name; do
   jq --arg t "$issue_title" '.title = $t' "$fixtures/issue.json" >"$tmp/issue.json"
   out=$(run claude-prompt.json '#133') || fail "$issue_title: exit $?"
   check "$issue_title: the title" "$name" "$(field sessionTitle)"
 done <<'EOF'
-architecture: first-file.md asks for patterns in step 2, but its parts of the file have no place for them|#133 first-file.md asks for patterns
+architecture: first-file.md asks for patterns in step 2, but its parts of the file have no place for them|#133 first-file.md asks for patterns in step 2
 architecture: I-8 fails on main: tests/architecture_scripts_test.sh has 353 lines, past the limit of 330|#133 I-8 fails on main
 roadmap: no step triages a new issue: no check of its report, no label, no importance, no milestone|#133 no step triages a new issue
 react-conventions has no rule for a component that holds several jobs: loading, creating and form state in one body|#133 react-conventions has no rule
 skill scripts: an unbound variable exits 0 through the EXIT trap, and collect.sh keeps its half-written file|#133 an unbound variable exits 0 through
 review-loop: the agent stops; nothing says to open the pull request|#133 the agent stops
+fs-atomic: the tmp is never synced before it is placed, and a failed write leaves it behind|#133 the tmp is never synced before it is placed
+review-loop: in Claude Code every review runs on one model; add Codex as a second reviewer for xhigh changes|#133 in Claude Code every review runs on one model
+Post-1.0 non-goal: bulk tag rename (the other four were promoted)|#133 bulk tag rename
+1.0: full revision of the public API — signatures and contracts|#133 full revision of the public API
+notes: bulk write API for imports (one lock cycle, one index transaction)|#133 bulk write API for imports
+query: richer where filters (in / not / ranges / missing) and multi-tag matching|#133 richer where filters
+review-loop: a review subagent gets "file it, do not ask first" from rules.md, and no "file nothing"|#133 a review subagent gets
 Hooks fail when logged in|#133 Hooks fail when logged in
-Хук ставит в имя сессии весь заголовок issue, и имя получается длинным|#133 Хук ставит в имя сессии весь
+Хук ставит в имя сессии весь заголовок issue, и имя получается длинным|#133 Хук ставит в имя сессии весь заголовок issue
 skills/architecture/scripts/invariants.sh fails on bash 3.2|#133 skills/architecture/scripts/invaria
 EOF
 cp "$fixtures/issue.json" "$tmp/issue.json"
