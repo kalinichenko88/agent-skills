@@ -7,14 +7,20 @@ An issue named on its own — `#91`, "take #91", its URL — as the session's fi
 message, or after a talk about which task is next, is the request to take it
 into work; a mention inside other work is not. Check it first: `bash
 <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints `take #91`, or
-each reason why not. Closed, assigned to someone else, or closed by an open
-pull request someone else wrote — say so and wait. Only yours — assigned to
-you, a linked branch, an open pull request of yours that closes it — means
-that another session can work on it, on this computer or on another one. Show
-the person what the script printed and ask: does the work run somewhere else,
-or does it continue here? Somewhere else: stop. Here: go on, on the branch or
-the pull request that the script named. An issue of another repository than
-this checkout's — say so and stop.
+each reason why not, one per line:
+
+- `closed`, or a line that names someone else: say so and wait. These lines
+  win over the lines below.
+- Only `assigned to you`, `PR #<n> by you` and linked branches: another session
+  of yours can work on the issue, on this computer or on another one. A linked
+  branch can also be someone else's: GitHub does not say whose a branch is.
+  Show the person what the script printed and ask: does the work run somewhere
+  else, or does it continue here? Somewhere else, or someone else's: stop.
+  Here: go on with the steps below. With a pull request of yours, check out its
+  branch with `gh pr checkout <n> --worktree .claude/worktrees/<its branch>`
+  in place of `worktree.sh`: GitHub moved the branch's link to the pull
+  request, so `worktree.sh` would make a new branch.
+- An issue of another repository than this checkout's: say so and stop.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can
@@ -82,8 +88,8 @@ can be someone else's: the script warns, and does not assign the issue to you.
 Find out whose the branch is before you push to it. Someone else's: say so and
 wait. Yours: run the command the warning gives, which assigns the issue to you.
 
-Then move into the worktree, when the script made one or found the branch in
-one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree
+Then move into the worktree, when the script or `gh pr checkout` made one, or
+the script found the branch in one. Claude Code: `EnterWorktree` with its path. Codex cannot move a running session: every command takes the worktree
 as `workdir`, and every file path, read or patched, is written under it.
 
 Then read what points at it: the scout's **Linked, open work and history**
