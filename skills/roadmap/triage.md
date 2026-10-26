@@ -122,8 +122,8 @@ shows as busy.
 
 - **The label** — an issue with no label gets one by the labels rule of
   `<github>/filing.md`: never a new one, except `debt` for a debt issue, as
-  that rule says. An issue with a label keeps it, unless the verdict shows it is wrong: then the table gives
-  the label to remove. A label that closes the issue, as `duplicate`,
+  that rule says. An issue with a label keeps it, unless the verdict shows it
+  is wrong: then the table gives the label to remove. A label that closes the issue, as `duplicate`,
   `invalid` or `wontfix`, goes with a close.
 - **The milestone is the importance.** It goes into a current milestone when
   it breaks what a current milestone delivers, or touches security or data.
@@ -143,8 +143,8 @@ from the conversation or from a private source goes in.
 
 After the approval, write each row:
 
-- a `debt` label that the repository does not have yet, first, with the
-  `gh label create` command of `<github>/filing.md`;
+- first, when a row's label is `debt` and the repository has no debt label,
+  create `debt` with the `gh label create` command of `<github>/filing.md`;
 - the label with `gh issue edit <n> --add-label '<label>'`, and a wrong one,
   or the `question` label of an issue whose new verdict is not Not confirmed,
   with `--remove-label '<label>'`;
