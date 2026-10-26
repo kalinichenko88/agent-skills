@@ -149,7 +149,8 @@ shared helper removes, or a piece of over-engineering to remove. The hits
 of one `grep` rule, its `debt` hits included, are one place over several
 files. Each path of a `lines` or `files` check is weighed as a place of its
 own: a file with its own score, and a folder with the highest score of its
-files. Rank the places by their file's score from `measure.sh`: a
+own files, not those of its subfolders, as the check counts them. Rank the
+places by their file's score from `measure.sh`: a
 broken rule takes the importer's score, and a place over several files —
 the hits of one rule, clones, a dependency and its importers, a bundled
 finding — the highest of its files. A file outside the table gets its score
