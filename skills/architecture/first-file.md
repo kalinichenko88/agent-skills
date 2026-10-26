@@ -72,8 +72,8 @@ cannot tell: a file that restates the code costs each reader and helps none.
 - the cross-cutting concerns;
 - an index of the accepted ADRs.
 
-Each invariant has one MUST statement, a `Check:` line or no `Check:` line
-for "review only", and the ADR that set it, when one did. An invariant goes in only when
+Each invariant has one MUST statement, a `Check:` line unless it is review
+only, and the ADR that set it, when one did. An invariant goes in only when
 the code keeps it now, or when a decision sets it: a wish fails each check,
 and then agents learn to ignore the checks. There is no NON-NEGOTIABLE mark:
 an invariant that the project can break is not an invariant.
@@ -97,7 +97,9 @@ An invariant starts at a line `- **I-<n>.** <statement>`. The lines under it
 belong to it, up to the next line that starts with a character other than a
 space or a tab; a blank line does not end it. Lines inside a fenced code block
 are skipped. A fence closes at a line of the same character, as long or
-longer, with nothing after it. A fence that does not close stops the script.
+longer, with nothing after it. As in Markdown, an indented fence also closes
+where its invariant ends. A fence at the start of a line that does not close
+stops the script.
 
 ```
   Check: grep `<ERE>` in `<path>`... [except `<path>`...] [debt `<path>`...]
@@ -132,13 +134,15 @@ longer, with nothing after it. A fence that does not close stops the script.
   `Check:` is a line that the script cannot read.
 - A `Check:` line and a `debt` line are one line each: do not wrap them. The
   script stops, and does not drop the line, at:
-  - a line right after one of them that starts with a path, or with `in` or
-    `except` and a path;
+  - a line right after one of them that starts with an item in backticks, or
+    with `in` or `except` and an item in backticks;
   - a `debt` line with a word that is not a path;
-  - a `debt` line in an invariant with no `Check:` line;
+  - a `debt` line before the `Check:` line of its invariant, or in an
+    invariant with no `Check:` line;
   - a `Check:` or `debt` line under no `- **I-<n>.**` line, as under a `*`
     bullet.
 
-  Prose under an invariant is not read, also when it starts with one of these
-  words: `debt` with no path in backticks after it is prose.
+  Other prose under an invariant is not read. A line is a `debt` line only
+  when a path in backticks comes right after `debt`, with only spaces or
+  commas between them: `debt:` or `debt of` starts prose.
 - Empty code files count as code files of 0 lines.

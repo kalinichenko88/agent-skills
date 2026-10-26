@@ -129,9 +129,9 @@ run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
 
 # A debt line belongs to the Check: line of its invariant wherever it stands
-# in the block. A line that the script would drop changes what a check means,
-# so it stops the run: a debt line with no Check: line, and a Check: line that
-# a person or a formatter wrapped.
+# in the block after it. A line that the script would drop changes what a
+# check means, so it stops the run: a debt line with no Check: line, and a
+# Check: line that a person or a formatter wrapped.
 printf '%s\n' '- **I-1.** No code file in `src/` has a line.' '  Check: lines 0 in `src/`.' \
   '  ADR: 0001.' '' '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
@@ -184,9 +184,15 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` debt `sr
   '- **I-2.** An example.' '  ```ts' '  Check: grep `x` in `nope/`.' '  ```' '````' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence that holds a shorter one' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
-printf '%s\n' '- **I-1.** An example.' '  ```' '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+printf '%s\n' '```' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 2' "$code $err"
+check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 1' "$code $err"
+# As in Markdown, a fence inside an invariant ends with it, closed or not, and
+# three backticks with a backtick after them are inline code, not a fence.
+printf '%s\n' '```x``` is code.' '- **I-1.** An example.' '  ```' '  x' '- **I-2.** No fetch.' \
+  '  Check: grep `fetch\(` in `src/`.' '  ```' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a fence that its invariant ends' "1 $(printf '%s\n' 'I-1 review only' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
 
 # An except path that covers each code file of the check leaves it nothing to
 # read, as a typo does.

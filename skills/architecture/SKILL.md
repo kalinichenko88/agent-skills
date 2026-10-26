@@ -218,10 +218,9 @@ wins in that project, and it names the convention that it replaces.
   own.
 - **The `debt` list.** The files and folders already past a limit are in the
   check's `debt` list, so the check passes now. Outside the five steps of
-  `first-file.md`, a path joins the list only in a pull request that also files its debt
-  issue, by *When to split*. A path
-  that drops below the limit leaves the list. A new number for the limit
-  needs an ADR.
+  `first-file.md`, a path joins the list only in a pull request that also
+  files its debt issue, by *When to split*. A path that drops below the limit
+  leaves the list. A new number for the limit needs an ADR.
 - **At the decision**, when the change goes into a file or a module past its
   limit, or into a file that does more than one job, name the split before
   the edit: the new files, what goes into each, and by which role.
@@ -326,23 +325,24 @@ I-4 review only
 Under each invariant: the hits that break it; then `debt`, the hits under a
 path of its `debt` list; then `no longer debt`, a path of the list with no
 hit, which leaves the list. With `--new-since`, `new` marks each hit that the
-base does not have: those are the branch's. A FAIL with no `new` hit was on
-the base already: it is a finding outside the task. That holds unless the
-branch added the invariant or changed its `Check:` or `debt` lines, as a
-lower limit, a wider pattern or `in` list, or a path taken off its `except`
-or `debt` list: then the FAIL is the branch's.
+base does not have: those are the branch's. When the branch left the
+invariant and the files of its `debt` list as they were, a FAIL with no `new`
+hit was on the base already: it is a finding outside the task. When the
+branch added or changed the invariant, or renamed a file of its `debt` list,
+run the script at the base too: a FAIL that the base does not have is the
+branch's.
 
 - **Exit 0:** no invariant fails.
 - **Exit 1:** one fails. A hit of the change is a defect: fix the code, or
-  end it by the gate. On a branch, `--new-since <base>` tells its hits from
-  those of the base, unless the branch changed the invariant. An ADR never excuses a FAIL: an ADR that amends an
-  invariant changes its `Check:` line in the same commit.
+  end it by the gate. On a branch, the paragraph above tells which FAIL is
+  the branch's. An ADR never excuses a FAIL: an ADR that amends an invariant
+  changes its `Check:` line in the same commit.
 - **Exit 2:** a check did not run. The lines on stderr name the cause: a
-  wrong call, a line that the script cannot read, a `Check:` or `debt` line
-  outside an invariant, a code fence that does not close, a path with no code
-  file outside its `except` paths, a pattern that git rejects, or no debt
-  skill beside this one. Correct the call, or
-  the line in the architecture file.
+  wrong call, no git repository, a line that the script cannot read, a
+  `Check:` or `debt` line outside an invariant, a code fence at the start of
+  a line that does not close, a path with no code file outside its `except`
+  paths, a pattern that git rejects, or no debt skill beside this one.
+  Correct the call, or the line in the architecture file.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to

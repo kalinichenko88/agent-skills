@@ -19,7 +19,7 @@
 # Exit 0 when no invariant fails, 1 when one fails, and 2 for a wrong call or a
 # check that cannot run.
 #
-# Needs only bash, git and awk.
+# Needs only bash, git and awk, and the debt skill's data.ere beside this skill.
 
 set -euo pipefail
 
@@ -137,11 +137,21 @@ records=$(printf '%s\n' "$text" | awk '
   }
   { sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line) }
   # A fenced block, indented or not, of backticks or tildes, ends at a line of
-  # the same character, as long or longer, with nothing after it.
-  fence != "" { if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/) fence = ""; next }
+  # the same character, as long or longer, with nothing after it. As in
+  # Markdown, an indented one also ends with its invariant, at a line that
+  # starts with neither a space nor a tab.
+  fence != "" {
+    if (indented && /^[^ \t]/) fence = ""
+    else { if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/) fence = ""; next }
+  }
   # A line that starts with neither a space nor a tab ends the invariant.
   /^[^ \t]/ { flush() }
-  line ~ /^(```|~~~)/ { match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH); opened = NR; next }
+  # Three backticks with a backtick after them are inline code, not a fence.
+  line ~ /^(```+[^`]*$|~~~)/ {
+    match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH)
+    indented = /^[ \t]/; opened = NR
+    next
+  }
   /^- \*\*I-[0-9]+\.\*\*/ {
     id = $0; sub(/^- \*\*/, "", id); sub(/\.\*\*.*/, "", id)
     kind = "review"; arg = ""; split("", list); seen = more = 0
@@ -174,8 +184,9 @@ records=$(printf '%s\n' "$text" | awk '
     } else more = 0
   }
   END {
-    # A fence that does not close would hide each invariant below it.
-    if (!failed && fence != "") stop("a code fence that does not close, at line " opened)
+    # A fence at the start of a line that does not close would hide each
+    # invariant below it.
+    if (!failed && fence != "" && !indented) stop("a code fence that does not close, at line " opened)
     if (failed) exit 2
     flush()
   }
