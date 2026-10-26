@@ -102,7 +102,7 @@ installed, skip it and say so in the summary.
 
 ### A second model for `xhigh` changes
 
-At `xhigh` in Claude Code, Codex reads the whole branch once per review. Start
+At `xhigh` in Claude Code, Codex reads the whole branch once. Start
 it in the background when the last pass starts. When the loop had one round,
 start it when that round confirms no defect and its nits are committed. When
 step 4 skips the last pass, skip this step too. Change no file while Codex
@@ -133,13 +133,14 @@ seconds each.
 
 ### A review of the tests
 
-Take the level from the table in *The level*. When the text of a skill or a
-prompt comes with code, take the level of the code alone. At `high` or
-`xhigh`, one review subagent, or `/review` in Codex, reads the tests of the
-whole branch once. A change to documents only gets no review of the tests.
-Start it when the last pass starts. When the loop had one round, start it
-when that round confirms no defect and its nits are committed. When step 4
-skips the last pass, skip this step too. Change no file while it runs.
+This step depends on the level of the change in the table of *The level*.
+When the text of a skill or a prompt comes with code, use the level of the
+code alone. At `high` or `xhigh`, one review subagent, or `/review` in Codex,
+reads the tests of the whole branch once. A change to documents only gets no
+review of the tests. Start it when the last pass starts. When the loop had
+one round, start it when that round confirms no defect and its nits are
+committed. When step 4 skips the last pass, skip this step too. Change no
+file while it runs.
 `<dir>` is this skill's base directory, `<base>` is the base of step 1, and
 `<head>` is the SHA of `HEAD`. Its findings go through *The findings*. The
 subagent gets this prompt:
@@ -155,11 +156,11 @@ In Codex: `/review` with the same three lines as its custom instructions.
 Why: on nine merged pull requests of three projects, each with a finished
 `/code-review` loop, this review found 11 defects in tests that the loop had
 not reported, in seven of the nine. Of the 11, six were redundant or heavy
-tests. Five of the 11, of any kind, came from a fix after round 1: that fix
-added a test or changed the code, and an older test stayed, redundant or
-stale. So the review reads the branch at the end of the loop, not beside
-round 1. A second review, of the change against its issue, found nothing new
-on the same nine, so the skill has none.
+tests. Of the same 11, five came from a fix after round 1: that fix added a
+test or changed the code, and an older test stayed, redundant or stale. So
+the review reads the branch at the end of the loop, not beside round 1.
+Another review, of the change against its issue, found nothing new on the
+same nine, so the skill does not run it.
 
 ### Fixes from other places
 

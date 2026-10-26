@@ -50,8 +50,8 @@ each task stays as that skill sets it. In place of the final review of
   its code deleted, a test that the change left stale, a test that repeats
   another, and brittle or heavy tests. It runs at the end because the fixes of
   later rounds add tests too, and an older test then often repeats a newer
-  one. When the third round still finds a defect and the loop stops there,
-  the last pass and this review are both skipped.
+  one. When the agent asks you after a round with a defect and you say to
+  stop, or no one can answer, the last pass and this review are both skipped.
 - **Later fixes are reviewed too.** The fixes from the last pass, the Codex
   review and the review of the tests are one commit. The fixes from the
   security review are one commit, and so are those from each set of your

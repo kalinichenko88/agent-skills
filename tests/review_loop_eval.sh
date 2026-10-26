@@ -6,8 +6,8 @@
 # is the review of the tests, S the security review. It exits 1 when a run has
 # fewer than two rounds, read the whole branch more than once after round 1,
 # ran more than three rounds in one count, sent the review of the tests other
-# than once next to its last read of the whole branch, or none after a last
-# pass, ran no security review after its last read of the whole branch, did
+# than once next to the last pass, or sent one with no last pass, ran no
+# security review after its last read of the whole branch, did
 # not invoke the skill, or ended on a report that names no docs or no review
 # of the tests. It calls the model, so it costs tokens and is not part of
 # `make check`: run it by hand after a change to skills/review-loop or to its
@@ -135,7 +135,7 @@ for log in "$logs"/run-*.jsonl; do
   # The skill wants the review of the tests named there too, at level high.
   result=$(jq -rR 'fromjson? | select(.type == "result") | .result' "$log")
   docs=$(grep -ciE 'docs( impact)?:' <<<"$result" || true)
-  named=$(grep -ciE '(^|[^a-z])tests? review|review of the tests|tests-lens' <<<"$result" || true)
+  named=$(grep -ciE '(^|[^a-z])tests?[ -]review|review of the tests|tests-lens' <<<"$result" || true)
   echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $long counts past three rounds, $tests reviews of the tests ($paired next to the last whole-branch read), $security security review calls after the last whole-branch read, review-loop invoked $skill times, $docs docs lines and $named lines on the review of the tests in the last report"
   cut -c1-300 <<<"${prompts:-no review subagent ran}"
   [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && [ "$tests" -eq "$whole" ] && [ "$paired" -eq "$tests" ] && [ "$security" -ge 1 ] && [ "$skill" -ge 1 ] && [ "$docs" -ge 1 ] && [ "$named" -ge 1 ] || failed=1

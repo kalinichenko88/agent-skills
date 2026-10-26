@@ -14,12 +14,12 @@ run no test.
 
 Report:
 
-- **Missing.** A defect that no test catches: a change to the code that the
-  range changes, which keeps every test green and gives a wrong result. Name
-  the change and the input that shows it, and say where the test goes. "This
-  function has no test" is not a finding. A bug fix with no test that fails
-  without the fix is one. Report each defect once, not one finding per
-  function.
+- **Missing.** A defect that no test catches: an edit to the code that the
+  range changes, after which every test still passes but the code gives a
+  wrong result. Name the edit and the input that shows it, and say where the
+  test goes. "This function has no test" is not a finding. A bug fix with no
+  test that fails without the fix is one. Report each defect once, not one
+  finding per function.
 - **Hollow.** A test that still passes when the code it covers is deleted or
   inverted: it asserts a value it gave itself, or a stub it set up, or a
   condition skips its assertion. A disabled case or an ignored failure that
@@ -39,10 +39,10 @@ Report:
   a network or a large fixture for one assertion, where another test does the
   same check in a smaller way.
 
-Give the evidence for each finding. For Missing, the change and the input
-that shows it. For Redundant, the two tests and the one that stays. For the
-other kinds, the line that makes the test pass, go stale, break on a change
-that keeps the behaviour, or build more than it checks. A finding with no
+Give the evidence for each finding. For Missing, the edit and the input that
+shows it. For Redundant, the two tests and the one that stays. For the other
+kinds, the line that makes the test pass, go stale, fail while the behaviour
+it checks is still right, or build more than it checks. A finding with no
 evidence is not a finding.
 
 Return one line per finding, `<kind> | path:line | the claim | the evidence`,
