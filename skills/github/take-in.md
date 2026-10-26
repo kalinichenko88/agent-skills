@@ -46,7 +46,7 @@ checkout, and "stay on this branch" runs `gh issue edit 91 --add-assignee @me`
 and touches no branch. `worktree.sh` does not assign the issue in two cases,
 below: it warns in one and stops in the other. "Stay on this branch" checks
 the case of the warning first, with `gh issue develop --list 91` and the
-issue's assignees.
+issue's assignees. In that check, a branch linked in any repository counts.
 
 The branch, and the worktree when one is made, carry one name that says what
 the work is: `<type>/<number>-<two to four words>`, the type from *Commits* in
@@ -59,16 +59,17 @@ bash <dir>/scripts/worktree.sh 91 fix/91-electron-binary-in-lanes
 
 It assigns the issue to you, branches from the remote's default branch, links
 the branch to the issue, and prints the path to work in as its last line. A
-branch already linked to the issue wins over the name you gave. A branch
-already checked out is worked on where it is. A session already in a worktree,
+branch linked to the issue in this repository wins over the name you gave. A
+branch already checked out is worked on where it is. A session already in a worktree,
 as one started with `claude --worktree` or `codex --worktree`, checks the
 branch out where it is, and so does `--here`.
 
-Only a linked branch in this repository counts: without `--branch-repo`,
-`gh` would make a new branch of the same name here. When every linked branch
+A linked branch in another repository does not win: without `--branch-repo`,
+`gh` would make a new branch with the same name here. When every linked branch
 is in another repository, as a fork's, the script stops before it assigns or
 makes anything, and prints their URLs. Say so and wait for the person: a
-rerun with another name stops the same way.
+rerun with another name stops the same way. When the person removes those
+links in the issue's *Development* panel, a rerun goes on.
 
 A linked branch on an issue that nobody is assigned to can be someone else's:
 the script warns, and does not assign the issue to you. Find out whose the

@@ -8,8 +8,8 @@
 # An issue with a linked branch in this repository and no assignee gets a
 # warning instead: the branch can be someone else's.
 #
-# A branch already linked to the issue wins over a <branch> that is not
-# linked: the first one in this repository that gh lists. When every linked
+# A branch linked to the issue in this repository wins over a <branch> that is
+# not linked there: the first such branch that gh lists. When every linked
 # branch is in another repository, as a fork's, the script stops before it
 # writes. A branch already checked out somewhere is worked on there. A session
 # already in a worktree, as one started with claude --worktree or codex
@@ -29,8 +29,8 @@ n=$1 branch=$2 here=${3:-}
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
 # Without --branch-repo, gh makes a new branch of a linked branch's name in
-# this repository, so only this repository's linked branches count. The person
-# decides how to check out a fork's branch.
+# this repository, so only this repository's linked branches count. When every
+# linked branch is a fork's, the script stops and the person decides.
 list=$(gh issue develop --list "$n")
 linked=''
 if [ -n "$list" ]; then

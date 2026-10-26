@@ -360,17 +360,19 @@ case $out in *'--name feat/5-scout-citations --checkout'*) ;;
   *) fail 'worktree.sh checks out the linked branch it was given' "$out" ;;
 esac
 
-# A linked branch in another repository, as a fork's: gh would make a new
-# branch of that name in this one. worktree.sh stops before its first write.
+# An issue linked only to a branch in another repository, as a fork's: gh
+# would make a new branch of that name in this one. worktree.sh stops before
+# its first write.
 # The line is gh issue develop --list as recorded, with another owner.
 printf 'feat/5-linked\thttps://github.com/someone/agent-skills/tree/feat/5-linked\n' >"$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations 2>&1) &&
   fail 'worktree.sh goes on with a linked branch in another repository' "$out"
 check 'worktree.sh names the linked branch in another repository' \
   "$(printf '#5 is linked only to branches in another repository:\nhttps://github.com/someone/agent-skills/tree/feat/5-linked')" "$out"
-# A linked branch in this repository still wins, after one in a fork.
+# A linked branch in this repository still wins, after one in a fork, and
+# over the fork branch's own name.
 printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"
-out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-new)
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-linked)
 case $out in *'using it'*'--name feat/5-scout-citations --checkout'*) ;;
   *) fail 'worktree.sh skips a linked branch in another repository' "$out" ;;
 esac
