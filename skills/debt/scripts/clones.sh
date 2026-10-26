@@ -23,7 +23,7 @@
 # jscpd is pinned to the version that wrote tests/fixtures/debt/jscpd-report.json:
 # a new one runs here only on purpose, with the report recorded again.
 #
-# Needs bash and git, and npx or bunx.
+# Needs bash and git, and npx with node or bunx with bun.
 
 set -euo pipefail
 unset CDPATH

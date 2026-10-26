@@ -47,6 +47,8 @@ None.
 
 ## Confirmation
 
-Review only. `tests/github_scripts_test.sh`,
-`tests/roadmap_scripts_test.sh` and `tests/architecture_scripts_test.sh`
-check the usage of `collect.sh`, `plan.sh` and `invariants.sh`.
+`tests/rules_test.sh` checks that each script holds the line, and that its
+header has a call line with the script's own name.
+`tests/github_scripts_test.sh`, `tests/roadmap_scripts_test.sh` and
+`tests/architecture_scripts_test.sh` run the usage of `collect.sh`,
+`plan.sh` and `invariants.sh`.

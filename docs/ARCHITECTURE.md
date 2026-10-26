@@ -109,9 +109,9 @@ Pattern 4 holds for the `.md` files of each skill.
 1. The header is the contract: what the script does, its
    `#   name.sh <args>` lines, `DRY_RUN` when it writes to GitHub, and a
    `Needs` line. The `Needs` line names bash and each other program that
-   the script calls, except the POSIX tools as `sed`, `sort` and `tr`. awk
-   is a POSIX tool, but the line names it: the awk programs are code, and
-   I-4 checks them. `usage` prints the `#   name.sh` lines of the header
+   the script calls, except the base tools of macOS and Linux, as `sed`,
+   `sort`, `tr` and `mktemp`. awk is a base tool too, but the line names
+   it: the awk programs are code, and I-4 checks them. `usage` prints the `#   name.sh` lines of the header
    with one line, the same in each script (ADR 0001):
    `sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2`. It reads the
    script through `$0`, so it runs before the script changes its directory.
