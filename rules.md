@@ -104,12 +104,16 @@ ones now say something false.
 
 Before the first review of a change — `/code-review` or `/security-review` in
 Claude Code, `/review` in Codex, a review subagent — and when a person's review
-comments arrive, invoke the `kalinichenko:review-loop` skill. It sets the
-level, what each round reads and when the rounds stop, the security review,
-which findings to fix or decide without asking, and the summary at the end. A
-read-only review subagent does not load it. An agent that acts on a
-finding, with the skill or without it, first verifies it against the real
-code: a confident wrong fix is worse than the defect.
+comments arrive, invoke the `kalinichenko:review-loop` skill. It sets every
+step, from the level to the pull request. A read-only review subagent does not
+load it. An agent that acts on a finding, with the skill or without it, first
+verifies it against the real code: a confident wrong fix is worse than the
+defect.
+
+`kalinichenko:review-loop` replaces `superpowers:requesting-code-review` and
+`superpowers:receiving-code-review`. The review after each task of
+`superpowers:subagent-driven-development` stays as that skill sets it: the loop
+starts after the last task, in place of that skill's final review.
 
 ## The Boy Scout Rule (always)
 
