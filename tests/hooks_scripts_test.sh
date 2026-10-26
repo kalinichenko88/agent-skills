@@ -72,10 +72,11 @@ check 'escape: the title' '#133 a "b" \ c d' "$(field sessionTitle)"
 # title|the name. Rows 1 to 5 are titles of this tracker, row 6 a short form
 # of #64. Rows 7 to 13 are titles of this tracker and vaultmd: with the
 # number, the first part has 48 characters in row 7, 50 in row 8 and 51 in
-# row 9; row 10 stops at " — "; rows 11 and 12 drop a "(" with no ")", after
-# a comma and after the cut; row 13 drops a quote with no pair. Then a short
-# title keeps its last small word; a Russian title counts in characters, not
-# bytes; a word longer than the limit is cut inside.
+# row 9, which then drops a "(" with no ")" after the cut; row 10 stops at
+# " — "; row 11 drops a "(" with no ")" after a comma, row 12 after the cut;
+# row 13 drops the last quote of an odd count. Then a short title keeps its
+# last small word; a Russian title counts in characters, not bytes; a word
+# longer than the limit is cut inside.
 while IFS='|' read -r issue_title name; do
   jq --arg t "$issue_title" '.title = $t' "$fixtures/issue.json" >"$tmp/issue.json"
   out=$(run claude-prompt.json '#133') || fail "$issue_title: exit $?"
