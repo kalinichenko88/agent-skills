@@ -17,10 +17,10 @@ issue=${BASH_REMATCH[2]#\#}
 
 # An issue title is a sentence, as "github: filing.md forbids a new label, so
 # a debt issue ...". The session title drops a prefix of one or two words
-# before ": ", keeps the words before the next ",", ";" or ": ", and, when they
-# are longer, cuts them at a word end to 40 characters with the number and
-# drops the small words at the end of the cut. gh's --jq counts characters,
-# not bytes, so the result stays valid UTF-8.
+# before ": " and keeps the words before the next ",", ";" or ": ". When the
+# number and these words are longer than 40 characters, it cuts the words at a
+# word end to fit and drops the small words at the end of the cut. gh's --jq
+# counts characters, not bytes, so the result stays valid UTF-8.
 # ponytail: the small words are English; add a language's words when its
 # titles end on them.
 # shellcheck disable=SC2016 # the single-quoted $ are jq's
