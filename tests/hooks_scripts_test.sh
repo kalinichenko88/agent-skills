@@ -70,7 +70,7 @@ check 'escape: the title' '#133 a "b" \ c d' "$(field sessionTitle)"
 # The name keeps the number and the first part of the title whole up to 50
 # characters, and cuts a longer part at a word end to 40. Each line is the
 # title|the name. Rows 1 to 5 are titles of this tracker, row 6 a short form
-# of #64. Rows 7 to 13 are titles of this tracker and vaultmd: with the
+# of #64. Rows 7 to 14 are titles of this tracker and vaultmd: with the
 # number, the first part has 48 characters in row 7, 50 in row 8 and 51 in
 # row 9, which then drops a "(" with no ")" after the cut; row 10 stops at
 # " — "; row 11 drops a "(" with no ")" after a comma, row 12 after the cut;
