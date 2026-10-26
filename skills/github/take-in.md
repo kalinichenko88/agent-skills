@@ -14,7 +14,7 @@ each reason why not, one per line:
 - `PR #<n> by you`: the work is in review. Say so and stop.
 - Only an `assigned to you` line, `branch` lines, or both: another session of
   yours can work on the issue, on this computer or on another one. Show the
-  person what the script printed, and ask in this order:
+  person what the script printed, and ask one at a time, in this order:
   1. With no `assigned to you` line: whose is the branch? GitHub does not say
      whose a branch is. Someone else's: say so and wait, and do not ask 2.
   2. Does the work run somewhere else, or does it continue here? Somewhere
