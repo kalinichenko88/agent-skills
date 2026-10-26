@@ -1,8 +1,11 @@
 TESTS = $(patsubst tests/%_test.sh,%,$(wildcard tests/*_test.sh))
 
-.PHONY: check lint test
+.PHONY: check lint invariants test
 .NOTPARALLEL:
-check: lint test
+check: lint invariants test
+
+invariants:
+	bash skills/architecture/scripts/invariants.sh
 
 lint:
 	claude plugin validate .

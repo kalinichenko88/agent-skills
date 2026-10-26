@@ -2,7 +2,8 @@
 # Runs the Makefile's test target on test scripts it writes, each with the
 # harness of the real ones: set -eu, an EXIT trap and check. Under bash 3.2 a
 # script that set -u stops exits 0 when it has an EXIT trap, so make test must
-# fail a script that does not print its ok line.
+# fail a script that does not print its ok line. Then checks that make check
+# runs invariants.sh, and that its target fails on a broken invariant.
 
 set -eu
 
@@ -47,4 +48,24 @@ run early && fail 'make test passes a test that exits 0 before its ok line' "$(c
 run late && fail 'make test passes a test that exits 3 after its ok line' "$(cat "$tmp/out")"
 run after && fail 'make test passes a test whose ok line is not its last' "$(cat "$tmp/out")"
 run 'unbound pass' && fail 'make test passes when an earlier test stops' "$(cat "$tmp/out")"
+
+# make check runs invariants.sh on this repository: without it, #129 broke I-8
+# of docs/ARCHITECTURE.md and CI passed (#134).
+make -n -s -C "$root" check >"$tmp/out" 2>&1 || fail 'make -n check fails' "$(cat "$tmp/out")"
+grep -qx 'bash skills/architecture/scripts/invariants.sh' "$tmp/out" ||
+  fail 'make check does not run invariants.sh' "$(cat "$tmp/out")"
+# make -n prints a recipe without its - prefix, so the line above passes a
+# recipe that ignores the exit code. The target must fail on a broken
+# invariant: here a file of the skill past a limit of 0 lines. A script that
+# stops before its check fails too, so the output must hold the FAIL.
+inv=$tmp/inv
+mkdir -p "$inv/skills/architecture/scripts" "$inv/skills/debt/scripts" "$inv/docs"
+cp "$root/skills/architecture/scripts/invariants.sh" "$inv/skills/architecture/scripts/"
+cp "$root/skills/debt/scripts/data.ere" "$inv/skills/debt/scripts/"
+# shellcheck disable=SC2016 # Markdown backticks, not shell
+printf '%s\n' '- **I-1.** No code file has a line.' '  Check: lines 0 in `skills/`.' >"$inv/docs/ARCHITECTURE.md"
+git -C "$inv" init -q
+make -s -C "$inv" -f "$root/Makefile" invariants >"$tmp/out" 2>&1 &&
+  fail 'make invariants passes a broken invariant' "$(cat "$tmp/out")"
+grep -qx 'I-1 FAIL' "$tmp/out" || fail 'make invariants stops before its check' "$(cat "$tmp/out")"
 echo 'makefile_test: ok'

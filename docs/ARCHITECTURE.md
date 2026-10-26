@@ -2,8 +2,8 @@
 
 This file holds what the code cannot tell: the modules, the layers, the
 patterns of the scripts and the tests, and the invariants that
-`skills/architecture/scripts/invariants.sh` checks. The principles are in
-`kalinichenko:architecture`. The ADRs go in `docs/adr/`.
+`skills/architecture/scripts/invariants.sh` checks in `make check`. The
+principles are in `kalinichenko:architecture`. The ADRs go in `docs/adr/`.
 
 ## Bird's-eye view
 
@@ -44,7 +44,7 @@ it: an invariant on it is review only.
   works in this repository. No host loads them from the installed plugin:
   its users get `rules.md`.
 - `.claude-plugin/`, `.codex-plugin/` — the manifests. `Makefile` — `check:
-  lint test`. `.github/workflows/check.yml` — CI.
+  lint invariants test`. `.github/workflows/check.yml` — CI.
 
 ## Modules
 
@@ -57,7 +57,7 @@ Each skill is a module, by the area of work it serves.
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
 | review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/fixtures/review-loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/fixtures/debt/` |
-| architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh` |
+| architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_fences_test.sh` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
 | release, infographic | `.claude/skills/<name>/` | none |
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |
