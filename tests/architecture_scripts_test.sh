@@ -187,12 +187,25 @@ check 'a fence that holds a shorter one' "0 $(printf '%s\n' 'I-1 PASS' '  debt s
 printf '%s\n' '```' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 1' "$code $err"
-# As in Markdown, a fence inside an invariant ends with it, closed or not, and
-# three backticks with a backtick after them are inline code, not a fence.
-printf '%s\n' '```x``` is code.' '- **I-1.** An example.' '  ```' '  x' '- **I-2.** No fetch.' \
-  '  Check: grep `fetch\(` in `src/`.' '  ```' >"$empty/docs/ARCHITECTURE.md"
+# A fence inside an invariant closes inside it, or the lines it hides could
+# hold a check.
+printf '%s\n' '- **I-1.** No fetch. Example:' '  ```ts' '  fetch(u)' '  Check: grep `fetch\(` in `src/`.' \
+  '- **I-2.** Other.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'a fence that its invariant ends' "1 $(printf '%s\n' 'I-1 review only' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
+check 'a fence that its invariant does not close' '2 invariants.sh: a code fence that does not close, at line 2' "$code $err"
+# A closing line closes a fence at any indent. A fence outside an invariant
+# may hold lines at the start of a line. A run of backticks with another
+# backtick later on the line is inline code, not a fence.
+printf '%s\n' '```x``` is code.' '- **I-1.** An example.' '  ```' '  x' '```' '- **I-2.** No fetch.' \
+  '  Check: grep `fetch\(` in `src/`.' '# Examples' '  ```md' '- **I-9.** An example.' \
+  '  Check: grep `x` in `nope/`.' '  ```' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'fences closed at any indent' "1 $(printf '%s\n' 'I-1 review only' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
+# A closing line at the start of a line ends the invariant too.
+printf '%s\n' '- **I-1.** An example.' '  ```' '  x' '```' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a closing fence that ends its invariant' \
+  '2 invariants.sh: a Check: line outside an invariant: Check: grep `fetch\(` in `src/`.' "$code $err"
 
 # An except path that covers each code file of the check leaves it nothing to
 # read, as a typo does.

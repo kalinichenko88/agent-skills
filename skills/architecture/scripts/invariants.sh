@@ -136,20 +136,24 @@ records=$(printf '%s\n' "$text" | awk '
     id = ""
   }
   { sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line) }
-  # A fenced block, indented or not, of backticks or tildes, ends at a line of
-  # the same character, as long or longer, with nothing after it. As in
-  # Markdown, an indented one also ends with its invariant, at a line that
-  # starts with neither a space nor a tab.
+  # A fenced block of backticks or tildes ends at a line of the same
+  # character, as long or longer, with nothing after it, at any indent. One
+  # that an invariant opens ends before the invariant does: the lines that a
+  # fence hides could hold a check.
   fence != "" {
-    if (indented && /^[^ \t]/) fence = ""
-    else { if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/) fence = ""; next }
+    if (index(line, fence) == 1 && line ~ /^(`+|~+)[ \t]*$/) {
+      fence = ""
+      if (/^[^ \t]/) flush()
+    } else if (inside && /^[^ \t]/) stop("a code fence that does not close, at line " opened)
+    next
   }
   # A line that starts with neither a space nor a tab ends the invariant.
   /^[^ \t]/ { flush() }
-  # Three backticks with a backtick after them are inline code, not a fence.
+  # A run of backticks with another backtick later on the line is inline
+  # code, not a fence.
   line ~ /^(```+[^`]*$|~~~)/ {
     match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH)
-    indented = /^[ \t]/; opened = NR
+    inside = id != ""; opened = NR
     next
   }
   /^- \*\*I-[0-9]+\.\*\*/ {
@@ -184,9 +188,8 @@ records=$(printf '%s\n' "$text" | awk '
     } else more = 0
   }
   END {
-    # A fence at the start of a line that does not close would hide each
-    # invariant below it.
-    if (!failed && fence != "" && !indented) stop("a code fence that does not close, at line " opened)
+    # A fence that does not close would hide each invariant below it.
+    if (!failed && fence != "") stop("a code fence that does not close, at line " opened)
     if (failed) exit 2
     flush()
   }

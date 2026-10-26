@@ -97,9 +97,9 @@ An invariant starts at a line `- **I-<n>.** <statement>`. The lines under it
 belong to it, up to the next line that starts with a character other than a
 space or a tab; a blank line does not end it. Lines inside a fenced code block
 are skipped. A fence closes at a line of the same character, as long or
-longer, with nothing after it. As in Markdown, an indented fence also closes
-where its invariant ends. A fence at the start of a line that does not close
-stops the script.
+longer, with nothing after it, at any indent. A fence that does not close
+stops the script, and so does a fence in an invariant that does not close
+before the invariant ends: the lines that it hides could hold a check.
 
 ```
   Check: grep `<ERE>` in `<path>`... [except `<path>`...] [debt `<path>`...]

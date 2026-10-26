@@ -490,8 +490,8 @@ never printed. An invariant with no `Check:` line prints `I-4 review only`.
 The exit status is 0 when no check fails, 1 when one fails, and 2 when a
 check did not run: a wrong call, no git repository, a line that the script
 cannot read, a `Check:` or `debt` line that no invariant holds, a code fence
-at the start of a line that does not close, a path of `in` with no code file
-outside its `except` paths, a pattern that git rejects, or no debt skill
+that does not close, a path of `in` with no code file outside its `except`
+paths, a pattern that git rejects, or no debt skill
 beside this one. Then the lines on stderr name the cause.
 
 The script builds each `git grep` call itself, with `--` before the paths, and
@@ -538,14 +538,16 @@ pull request, in one line and with no subagent, that
 still hears of it.
 
 The lens runs `invariants.sh --new-since <base> HEAD` first. Each `new` hit
-is the branch's. When the branch left the invariant and the files of its
-`debt` list as they were, a FAIL with no `new` hit was on the base already: it
-is a finding outside the task, an issue through `kalinichenko:github`, or one
-already filed. When the branch added or changed the invariant, or renamed a
-file of its `debt` list, the lens runs the script at the base too: a FAIL that
-the base does not have is the branch's. Then it runs `clones.sh` on a
-read-only checkout of the head, keeping the clones that touch a file the
-branch changed. Its findings:
+is the branch's. When the branch left the invariant as it was and moved no
+file out from under a path of its `debt` list, a FAIL with no `new` hit was on
+the base already: it is a finding outside the task, an issue through
+`kalinichenko:github`, or one already filed. When the branch added or changed
+the invariant, or moved a file out from under a path of its `debt` list, `new`
+does not tell the branch's hits. Then the lens
+runs `invariants.sh <base>` too, which reads the base's own architecture
+file: a hit that its output does not have is the branch's. Then it runs
+`clones.sh` on a read-only checkout of the head, keeping the clones that touch
+a file the branch changed. Its findings:
 
 - a second structure beside an existing one. A change that follows the
   project's own way, by *Consistency first*, is not one, even when that way
