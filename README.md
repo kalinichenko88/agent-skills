@@ -68,12 +68,14 @@ codex plugin marketplace add kalinichenko88/agent-skills
 codex plugin add kalinichenko@kalinichenko
 ```
 
-Then run `codex`, open `/hooks` and trust the plugin's two hooks. Codex skips
+Then run `codex`, open `/hooks` and trust the plugin's three hooks. Codex skips
 plugin hooks until you do, so without that the skills load but the rules do
 not. Editing `rules.md` does not need a new trust; changing `hooks/hooks.json`
 does.
 
-The hook is plain bash with no other dependency. The github and roadmap
+The hooks are plain bash. The two that inject the rules have no other
+dependency. The third names a Claude Code session after an issue: it calls
+`gh`, and in Codex it does nothing. The github and roadmap
 skills' scripts are bash too, and they also need `gh`, git and awk. The
 debt skill's `measure.sh` needs only bash, git and awk; its `clones.sh`
 also needs `npx` or `bunx`,
@@ -130,7 +132,9 @@ when `bun` is installed. Without `node`, the test skips `clones.sh` and says
 so. One case runs `clones.sh` with no `TMPDIR`, so it makes and removes a
 directory in your `~/.cache`. The review-loop skill's `codex-review.sh` runs
 against a fake `codex` that answers with findings recorded from `codex exec`
-on this repository, in `tests/fixtures/review_loop/`. The architecture skill's
+on this repository, in `tests/fixtures/review_loop/`. The session-title
+hook runs on prompts recorded from Claude Code and Codex, in
+`tests/fixtures/hooks/`, against a fake `gh`. The architecture skill's
 `invariants.sh` runs on repositories the test builds: each kind of check, the
 `debt` lists, `--new-since` over renamed files, and the calls that must stop
 with exit 2.
