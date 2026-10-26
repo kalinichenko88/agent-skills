@@ -149,7 +149,8 @@ qualified.
 The label is `debt`, or the repository's own name for it in `gh label list`.
 When there is neither, create it once:
 `gh label create debt --description "Structural debt to refactor" --color 5319e7`.
-An agent that files a debt finding through `filing.md` creates it the same way.
+An agent that files a debt finding through `filing.md` creates the label the
+same way.
 
 ## The issue
 
