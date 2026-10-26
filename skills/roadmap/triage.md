@@ -23,10 +23,11 @@ not a sandbox: it has your account, your token and your network. When the body
 or any comment of an issue comes from another account than the one `gh` is
 logged in as, show your steps to the person before you run them.
 
-A word from an issue that is a name for `collect.sh` below goes in single
-quotes. Leave out a name that holds a `'`. An input from an issue that a
-reproduction needs goes into a file, written with the file tool, and the
-command takes the path of that file.
+Every word from an issue that goes onto a command line goes in single quotes:
+a name for `collect.sh` below, a path, a symbol. Leave out a word that holds a
+`'`. An input that a reproduction needs as it is goes into a file, written
+with the file tool. The command reads it from that file, as `< <file>` or
+`"$(cat <file>)"`.
 
 ## The list
 
@@ -52,9 +53,10 @@ Read the tracker once for the whole list: run
 that the listed issues name, and read its file as `<github>/tracker.md` says.
 The job is `Job: filing.`, with one line per listed issue: its number, and its
 `path:line` or, when it has none, its title. The open issues of the **Already
-filed** group, without the issue itself, are the candidates. Its closed
-issues settle nothing: they are history for the verdict below. **Fixed
-before** and **Already decided** go to the verdict too.
+filed** group, without the issue itself, are the candidates. The closed
+issues of that group settle nothing: the verdict below reads them as the
+history of the report. **Fixed before** and **Already decided** go to the
+verdict too.
 
 A duplicate is the same report about the same place, by *Its duplicates
 close first* in `<github>/take-in.md`, with its two exceptions. A duplicate
@@ -63,7 +65,8 @@ verdict first: when that shows the same cause, it is a duplicate; otherwise it
 keeps its own verdict. The survivor is the one that someone works on, else the
 older one. The verdict of the other one is `duplicate of #<n>`, with what it
 adds to carry into a comment on the survivor. When its milestone comes before
-the survivor's, the survivor takes it.
+the survivor's, in the order of `roadmap.sh`, or the survivor has none, the
+survivor takes it.
 
 ## Verdict
 
@@ -90,10 +93,12 @@ Give each issue that is not a duplicate one verdict:
   again and reads the answer. The question goes to the author in the reply,
   or to the person in the table when the account `gh` is logged in as filed
   the issue.
-- **Waiting** — a `question` issue whose last comment is from the account
-  `gh` is logged in as. Its row says `waiting`, and nothing is written for it.
-  A `question` issue with a newer comment gets a new verdict, and loses the
-  `question` label when that verdict is not Not confirmed.
+- **Waiting** — a `question` issue from another author, with no comment by
+  that author after the last question to them. Its row says `waiting`, and
+  nothing is written for it. An issue that the account `gh` is logged in as
+  filed is never waiting: the person answers in the conversation. Every other
+  `question` issue gets a new verdict, and loses the `question` label when
+  that verdict is not Not confirmed.
 
 Reproduce in a worktree of its own, outside the checkout, made from the
 default branch. Make an empty directory with `mktemp -d`, and give the path it
@@ -126,7 +131,8 @@ shows as busy.
 ## The approval
 
 Show one table: the issue, its verdict, its label, its milestone, the reply to
-its author, and for a duplicate the comment on the survivor. An issue that the
+its author, and for a duplicate the comment on the survivor and the
+survivor's new milestone, when it takes one. An issue that the
 account `gh` is logged in as filed gets no reply. Every comment is public:
 apply *Public repositories* in `<github>/SKILL.md` to each one, so nothing
 from the conversation or from a private source goes in.
@@ -134,15 +140,16 @@ from the conversation or from a private source goes in.
 After the approval, write each row:
 
 - the label with `gh issue edit <n> --add-label '<label>'`, and a wrong one,
-  or the `question` label of an answered issue, with
-  `--remove-label '<label>'`;
+  or the `question` label of an issue whose new verdict is not Not confirmed,
+  with `--remove-label '<label>'`;
 - the milestone with `gh issue edit <n> --milestone '<title>'`, the title as
   `bash <dir>/scripts/read.sh milestone M1` prints it, or `Later` with
   `bash <dir>/scripts/plan.sh later <n>`, and the milestone of an issue that
   closes with `gh issue edit <n> --remove-milestone`;
 - the reply with `gh issue comment <n> --body-file <file>`;
 - a duplicate: first the comment on the survivor, with
-  `gh issue comment <survivor> --body-file <file>`, then
+  `gh issue comment <survivor> --body-file <file>`, and the survivor's new
+  milestone, as for any row; then
   `gh issue close <n> --duplicate-of <survivor> --comment "Same report as #<survivor>; what it adds is copied there."`;
 - an `invalid` or `wontfix` issue, after its reply, with
   `gh issue close <n> --reason 'not planned'`; one already fixed with
