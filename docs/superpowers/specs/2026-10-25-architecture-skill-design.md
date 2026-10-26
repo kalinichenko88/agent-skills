@@ -510,7 +510,7 @@ Decided with the person.
 | Find the code that already does this kind of work | an `Explore` subagent, `model: "sonnet"` | Reading. The file contents stay out of the main context. #99 checks `haiku`. |
 | The second reader for a decision that needs an ADR (step 8) | one subagent that does not see the conversation, `model: "fable"`, `effort: "xhigh"` | Rare, and costly to undo by definition. A reader that does not see the conversation does not take the main session's bias. |
 | A first `docs/ARCHITECTURE.md` | one subagent, `model: "fable"`, `effort: "xhigh"` | Once per project. Every later decision reads this file. |
-| The review lens (#97) | one subagent that does not see the conversation, `model: "opus"`, effort of the review's level | It runs at each `high` and `xhigh` review; `fable` costs 2.5 times as much. |
+| The review lens (#97) | one subagent that does not see the conversation, `model: "opus"`, effort of the review's level, at least `high` | It runs at each `high` and `xhigh` review, and at each review that touches the architecture file or an ADR; `fable` costs 2.5 times as much. |
 
 Codex reads the whole branch at `xhigh` already, with a prompt for defects
 only. #99 checks whether Codex with the lens prompt finds what the Claude lens
@@ -521,9 +521,11 @@ misses. It gets the lens only when it does.
 Only in a project that has an architecture file or an ADR folder, as
 *The project's files* finds them. There, one review subagent reads the range
 of round 1 of `kalinichenko:review-loop` against them, once, beside round 1,
-for `high` and `xhigh` changes, and for a change to documents only that
-touches the architecture file or an ADR, which review-loop gives no level;
-then it runs at `high`. Elsewhere it does not run, so a review in
+for `high` and `xhigh` changes, and for any change that touches the
+architecture file or an ADR, as a `low` fix that adds a dependency and its
+ADR, or a change to documents only, which review-loop gives no level. Its
+effort is the review's level, and `high` when that level is lower or there
+is none. Elsewhere it does not run, so a review in
 another repository costs nothing more; the reuse angle of `/code-review`
 covers part of the copies there. Instead, review-loop's summary says once per
 pull request, in one line and with no subagent, that
@@ -586,10 +588,18 @@ code files, with no package manager and no script of the project in the
 project's tree. Each tool has its own runner, and an absent runner gives a
 `skipped:` line:
 
-- codebase-memory-mcp and dependency-cruiser: `npx` or `bunx`, as `jscpd` in
-  `clones.sh`. dependency-cruiser runs with `--no-config` and gets the
-  `tsconfig.json` of the copy with `--ts-config`, so the project's
-  `.dependency-cruiser.js`, which the copy holds as code, never loads;
+- codebase-memory-mcp: `npx` or `bunx`, as `jscpd` in `clones.sh`;
+- dependency-cruiser: the same, with a pinned `typescript` beside it, as
+  `npx -p typescript@<pin> -p dependency-cruiser@<pin> depcruise`: without
+  it, dependency-cruiser reads no `.ts` file. It runs with `--no-config`, so
+  the project's `.dependency-cruiser.js`, which the copy holds as code, never
+  loads. When the copy has a `tsconfig.json`, it gets `--ts-config` for the
+  path aliases. When it fails on that file, as on an `extends` of a package
+  (`@tsconfig/node20`) or of a generated file (`.svelte-kit/tsconfig.json`)
+  that the copy does not hold, it runs again without it and prints a line
+  that the edges through path aliases are missing. Which `tsconfig*.json`
+  holds the aliases, as `tsconfig.app.json` behind a `tsconfig.json` with
+  only `references`, the trial settles;
 - ruff: `uvx ruff@<pin>`, when `uvx` is on `PATH`;
 - `go list`: the `go` on `PATH`, with no network and no other toolchain
   (`GOPROXY=off`, `GOTOOLCHAIN=local`). A module that is not in the cache, or
@@ -600,8 +610,8 @@ Unlike `clones.sh`, the copy keeps the files that the tools read as data and
 that `data.ere` leaves out: each `tsconfig*.json`, because one can extend
 another, as `tsconfig.base.json` with the path aliases; `go.sum`;
 `pyproject.toml` (`go.mod` is code to `data.ere`, so the copy has it
-already). The trial gives
-both tools the same copy. Its uses: the codemap of a first
+already). The trial gives both tools the same copy. Its uses: the codemap of
+a first
 `docs/ARCHITECTURE.md`, the edges and cycles that a branch adds, the cycles in
 the debt map, and the check "A does not import B".
 
@@ -642,7 +652,8 @@ to the ADR rules, or decide again the line in `CLAUDE.md` (#99 has the rules).
   as `github` keeps `take-in.md` and `filing.md`.
 - The exact syntax of a `Check:` line, within *invariants.sh* above: one line,
   read by the script without a shell, the pattern in backticks or another
-  quote that holds spaces. A long `debt` list goes on the indented lines
-  under it, one path per line.
+  quote that holds spaces. A long `debt` list goes on indented lines right
+  under it, each `debt` and one path, so that no such line looks like the
+  `ADR:` line.
 - The layout of the ADR template, within the fields above.
 - The README of the skill, and its line in the plugin README.
