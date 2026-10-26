@@ -13,7 +13,8 @@
 # grep line that the base has fewer times in the file, by its path before a
 # rename; a file with no such hit at the base, or a smaller one; a folder the
 # same, by its path. An invariant is compared with the one of the same id and
-# kind of check at the base; with none there, each of its hits is new. The syntax of a Check: line is in the skill's first-file.md. No
+# kind of check at the base; with none there, each of its hits is new. The
+# syntax of a Check: line is in the skill's first-file.md. No
 # text of the file runs as a command: a pattern and each path go to git grep
 # as their own arguments, after -e and --, as literal pathspecs. Documents and
 # other data are not code and are left out, by the debt skill's data rule.
