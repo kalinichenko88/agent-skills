@@ -3,11 +3,15 @@
 # or ARCHITECTURE.md at the root, and prints one line per invariant: PASS,
 # FAIL or review only, with what each check found under it.
 #
-#   invariants.sh [ref]
+#   invariants.sh [--new-since <base>] [ref]
 #
 # Without a ref, it reads the working tree, with the untracked files that git
 # does not ignore; with one, that commit. It runs from any directory of the
-# checkout. The syntax of a Check: line is in the skill's first-file.md. No
+# checkout. With --new-since, it runs the same checks on the base too, and puts
+# the word new before each hit that the base does not have: a grep line that
+# the base has fewer times in the file, by its path before a rename; a file
+# with no hit at the base, or a smaller one; a folder the same, by its path.
+# The syntax of a Check: line is in the skill's first-file.md. No
 # text of the file runs as a command: a pattern and each path go to git grep
 # as their own arguments, after -e and --, as literal pathspecs. Documents and
 # other data are not code and are left out, by the debt skill's data rule.
@@ -29,8 +33,15 @@ die() {
   exit 2
 }
 
+since=
+if [ "${1:-}" = --new-since ]; then
+  [ $# -ge 2 ] && [ -n "$2" ] || usage
+  since=$2
+  shift 2
+fi
 [ $# -le 1 ] || usage
 ref=${1:-}
+case $since in -*) usage ;; esac
 case $ref in -*) usage ;; esac
 # The data rule of measure.sh and clones.sh. It goes to awk through ENVIRON,
 # because awk -v turns \. into any character.
@@ -46,6 +57,10 @@ if [ -n "$ref" ]; then
 fi
 # git grep names a file of a commit as <sha>:<path>.
 prefix=${sha:+$sha:}
+base=
+if [ -n "$since" ]; then
+  base=$(git rev-parse --verify -q "$since^{commit}") || die "not a commit: $since"
+fi
 
 if [ -n "$sha" ]; then
   text=$(git show "$sha:docs/ARCHITECTURE.md" 2>/dev/null) ||
@@ -144,6 +159,16 @@ records=$(printf '%s\n' "$text" | awk '
   END { if (failed) exit 2; flush() }
 ') || exit 2
 
+# was: each file that the branch renamed, as new path<TAB>old path, so that
+# its hits match those of its old path at the base.
+was=
+if [ -n "$base" ]; then
+  was=$(git -c core.quotePath=false diff --no-color --no-ext-diff -z -M --name-status "$base" ${sha:+"$sha"} | tr '\0' '\n' | awk '
+    /^R/ { getline old; getline new; print new "\t" old; next }
+    /^C/ { getline; getline; next }
+    { getline }') || die 'git diff failed'
+fi
+
 # For the awk programs below: under(p, e) is true when the path p is the entry
 # e or inside it, and under_any(p, list) gives the index of the first entry of
 # a \037 list that holds p, or 0.
@@ -181,34 +206,54 @@ grep_hits() {
     }'
 }
 
-# size_hits: the files past the limit of a lines check, as path<TAB>lines, or
-# the folders past that of a files check, as folder<TAB>files, with no except
-# path. A folder counts its own code files, not those of its subfolders.
+# size_hits: from the listing on stdin, the files past the limit of a lines
+# check, as path<TAB>lines, or the folders past that of a files check, as
+# folder<TAB>files, with no except path. A folder counts its own code files,
+# not those of its subfolders.
 size_hits() {
-  printf '%s\n' "$files" | KIND=$kind N=$arg EXCEPT=$except_ awk -F'\t' "$lib"'
+  KIND=$kind N=$arg EXCEPT=$except_ awk -F'\t' "$lib"'
     !NF || under_any($1, ENVIRON["EXCEPT"]) { next }
     ENVIRON["KIND"] == "lines" { if ($2 + 0 > ENVIRON["N"] + 0) printf "%s\t%s\n", $1, $2; next }
     { d = $1; if (!sub(/\/[^\/]*$/, "", d)) d = "."; count[d]++ }
     END { for (d in count) if (count[d] > ENVIRON["N"] + 0) printf "%s\t%s\n", d, count[d] }'
 }
 
-# report: prints the block of one invariant from its hits on stdin: the hits,
-# the known debt, and the debt entries with no hit. It exits 1 when it fails,
-# that is when a hit is not under a debt entry.
+# base_hits: the hits of the same check at the base. The base may not have the
+# paths of the check, and is not checked for them.
+base_hits() {
+  local where=("$base") prefix=$base:
+  if [ "$kind" = grep ]; then grep_hits; else listing | size_hits; fi
+}
+
+# report: prints the block of one invariant: the hits, the known debt, and the
+# debt entries with no hit. Its input is $was, a line \035, the hits at the
+# base, a line \035, then the sorted hits. It exits 1 when it fails, that is
+# when a hit is not under a debt entry.
 report() {
-  LC_ALL=C sort -t $'\t' -k1,1 -k2,2n | ID=$id KIND=$kind DEBT=$debt_ awk -F'\t' "$lib"'
-    BEGIN { nd = split(ENVIRON["DEBT"], entry, "\037") }
-    NF {
-      t = $0; sub(/^[^\t]*\t[^\t]*\t/, "", t)
-      h = ENVIRON["KIND"] == "grep" ? $1 ":" $2 ":" t : $1 " " $2
+  ID=$id KIND=$kind DEBT=$debt_ SINCE=$base awk -F'\t' "$lib"'
+    BEGIN { nd = split(ENVIRON["DEBT"], entry, "\037"); grep = ENVIRON["KIND"] == "grep" }
+    $0 == "\035" { part++; next }
+    !NF { next }
+    { t = $0; sub(/^[^\t]*\t[^\t]*\t/, "", t) }
+    part == 0 { was[$1] = $2; next }
+    part == 1 { if (grep) seen[$1 "\t" t]++; else size[$1] = $2 + 0; next }
+    {
+      h = grep ? $1 ":" $2 ":" t : $1 " " $2
+      # p: the path of the hit at the base. A folder keeps its path.
+      p = $1
+      if (ENVIRON["KIND"] != "files" && ($1 in was)) p = was[$1]
+      if (ENVIRON["SINCE"] == "") fresh = 0
+      else if (grep) fresh = seen[p "\t" t]-- <= 0
+      else fresh = !(p in size) || size[p] < $2 + 0
+      mark = fresh ? "new " : ""
       known = 0
       for (i = 1; i <= nd; i++) if (under($1, entry[i])) known = held[i] = 1
-      if (known) debt[++k] = h; else hit[++n] = h
+      if (known) debt[++k] = mark "debt " h; else hit[++n] = mark h
     }
     END {
       print ENVIRON["ID"] " " (n ? "FAIL" : "PASS")
       for (i = 1; i <= n; i++) print "  " hit[i]
-      for (i = 1; i <= k; i++) print "  debt " debt[i]
+      for (i = 1; i <= k; i++) print "  " debt[i]
       for (i = 1; i <= nd; i++) if (!held[i]) { e = entry[i]; sub(/\/+$/, "", e); print "  no longer debt " e }
       exit n ? 1 : 0
     }'
@@ -241,8 +286,13 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   if [ "$kind" = grep ]; then
     hits=$(grep_hits) || exit 2
   else
-    hits=$(size_hits)
+    hits=$(printf '%s\n' "$files" | size_hits)
   fi
-  printf '%s\n' "$hits" | report || status=1
+  old=
+  [ -z "$base" ] || old=$(base_hits) || exit 2
+  {
+    printf '%s\n' "$was" $'\035' "$old" $'\035'
+    printf '%s\n' "$hits" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2n
+  } | report || status=1
 done <<<"$records"
 exit "$status"

@@ -158,6 +158,56 @@ check 'lines, files and debt' "1 $(printf '%s\n' 'I-1 FAIL' '  src/feature/big.t
   'I-3 PASS' '  debt src/many 4' \
   'I-4 PASS' '  debt src/legacy/report.ts:12:fetch(x);')" "$code $out"
 
+# --new-since: a file renamed with no edit stays old, a hit that the branch
+# adds to an old file or in a new one is new, a known debt that grows is new
+# debt, and a file that moves into the checked folder is new. The base has no
+# architecture file.
+repo3=$tmp/repo3
+new_repo "$repo3"
+mkdir -p "$repo3/src/api" "$repo3/src/feature" "$repo3/src/legacy" "$repo3/src/many" "$repo3/tools"
+echo 'export const get = (u) => fetch(u);' >"$repo3/src/api/client.ts"
+printf '%s\n' 'const x = 1;' 'fetch(u);' >"$repo3/src/feature/a.ts"
+seq 11 >"$repo3/src/legacy/report.ts"
+echo 'fetch(x);' >>"$repo3/src/legacy/report.ts"
+seq 11 >"$repo3/src/legacy/grow.ts"
+for f in m1 m2 m3 m4; do echo 1 >"$repo3/src/many/$f.ts"; done
+seq 15 >"$repo3/tools/migrate.ts"
+commit "$repo3" 'add the base'
+base=$(git -C "$repo3" rev-parse HEAD)
+mkdir -p "$repo3/src/cli" "$repo3/docs"
+git -C "$repo3" mv src/legacy/report.ts src/legacy/summary.ts
+git -C "$repo3" mv tools/migrate.ts src/cli/migrate.ts
+seq 14 >"$repo3/src/legacy/grow.ts"
+echo 'fetch(u);' >>"$repo3/src/feature/a.ts"
+echo 'fetch(v);' >"$repo3/src/feature/b.ts"
+echo 1 >"$repo3/src/many/m5.ts"
+cat >"$repo3/docs/ARCHITECTURE.md" <<'EOF'
+- **I-1.** Only `src/api/client.ts` calls `fetch`.
+  Check: grep `fetch\(` in `src/` except `src/api/client.ts` debt `src/legacy/summary.ts`.
+- **I-2.** No code file in `src/` has more than 10 lines.
+  Check: lines 10 in `src/` debt `src/legacy/summary.ts`
+  debt `src/legacy/grow.ts`.
+- **I-3.** No folder in `src/` holds more than 3 code files of its own.
+  Check: files 3 in `src/` debt `src/many/`.
+EOF
+commit "$repo3" 'add the branch'
+want=$(printf '%s\n' 'I-1 FAIL' \
+  '  src/feature/a.ts:2:fetch(u);' \
+  '  new src/feature/a.ts:3:fetch(u);' \
+  '  new src/feature/b.ts:1:fetch(v);' \
+  '  debt src/legacy/summary.ts:12:fetch(x);' \
+  'I-2 FAIL' '  new src/cli/migrate.ts 15' \
+  '  new debt src/legacy/grow.ts 14' '  debt src/legacy/summary.ts 12' \
+  'I-3 PASS' '  new debt src/many 5')
+run "$repo3" --new-since "$base" HEAD
+check 'new since the base' "1 $want" "$code $out"
+run "$repo3" --new-since "$base"
+check 'new since the base, working tree' "1 $want" "$code $out"
+run "$repo3" --new-since "$base" "$base"
+check 'no file at the ref' "0 No architecture file at $base." "$code $out"
+run "$repo3" --new-since nosuchref
+check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
+
 run "$repo" nosuchref
 check 'not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 run "$repo" a b
