@@ -21,13 +21,14 @@ each reason why not, one per line:
      else: stop. Here: go on with the steps below.
 - An issue of another repository than this checkout's: say so and stop.
 
-**Say what the task is first.** Unless the check stops with an error
+**Then say what the task is.** Unless the check stops with an error
 (`tracker.md`), read the issue: `gh issue view 91 --json title,body`, or with
-its URL. Before the next step, write its number and its title. Then write two
-or three sentences of your own: what is wrong or what is wanted, and what must
-be true for the work to be done. This is the first thing you say about the
-issue, in the person's language. What the check printed comes after it. The
-same read gives the files, symbols and words for `collect.sh` below.
+its URL. Before the next step, write its number, its title and two or three
+sentences of your own: what is wrong or what is wanted, and what must be true
+for the work to be done. This is the first thing you say about the issue.
+Write your sentences in the person's language, and give the title as the issue
+has it. What the check printed comes after them. The same read gives the files,
+symbols and words for `collect.sh` below.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can
