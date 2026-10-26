@@ -126,6 +126,24 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$em
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
 
+# A debt line belongs to the Check: line of its invariant wherever it stands
+# in the block. A line that the script would drop changes what a check means,
+# so it stops the run: a debt line with no Check: line, and a Check: line that
+# a person or a formatter wrapped.
+printf '%s\n' '- **I-1.** No code file in `src/` has a line.' '  Check: lines 0 in `src/`.' \
+  '  ADR: 0001.' '' '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a debt line after the ADR line' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts 1')" "$code $out"
+printf '%s\n' '- **I-1.** No fetch.' '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a debt line with no Check: line' '2 invariants.sh: I-1: cannot read: debt `src/a.ts`.' "$code $err"
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`' '  `lib/` except `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a Check: line that wraps at a path' '2 invariants.sh: I-1: cannot read: `lib/` except `src/a.ts`.' "$code $err"
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`' '  except `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a Check: line that wraps at except' '2 invariants.sh: I-1: cannot read: except `src/a.ts`.' "$code $err"
+
 # The lines and files checks, and debt lists: a file and a folder past their
 # limits, a file and a folder that are known debt, a debt path that no longer
 # breaks its check, a document past the limit that is not code, and a

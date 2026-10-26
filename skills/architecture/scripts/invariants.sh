@@ -150,10 +150,15 @@ records=$(printf '%s\n' "$text" | awk '
       if (seen) bad()
       seen = more = 1
       check()
-    } else if (more && line ~ /^debt([ \t`]|$)/) {
-      # A debt line right after the Check: line adds to its debt list.
+    } else if (line ~ /^debt([ \t`]|$)/) {
+      # A debt line adds to the debt list of the Check: line of its block.
+      if (!seen) bad()
       tokenize(line)
       if (items(2, "debt") <= ntok) bad()
+      more = 1
+    } else if (more && line ~ /^(`|(in|except)([ \t`]|$))/) {
+      # A Check: or debt line is one line: one that wraps would lose its rest.
+      bad()
     } else more = 0
   }
   END { if (failed) exit 2; flush() }

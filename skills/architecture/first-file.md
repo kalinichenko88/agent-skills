@@ -93,9 +93,10 @@ an invariant that the project can break is not an invariant.
 
 ## The `Check:` line
 
-An invariant starts at a line `- **I-<n>.** <statement>`. The indented lines
-under it, up to the next line that does not start with a space, belong to it.
-Lines inside a fenced code block are skipped.
+An invariant starts at a line `- **I-<n>.** <statement>`. The lines under it
+belong to it, up to the next line that starts with a character other than a
+space or a tab; a blank line does not end it. Lines inside a fenced code block
+are skipped.
 
 ```
   Check: grep `<ERE>` in `<path>`... [except `<path>`...] [debt `<path>`...]
@@ -113,8 +114,9 @@ Lines inside a fenced code block are skipped.
 - Each pattern and path is in backticks, so it can hold spaces but not a
   backtick. Items are separated by spaces, and a comma may follow an item. A
   `.` may end the line.
-- A line `debt` and paths, indented and right after the `Check:` line, adds
-  to its `debt` list. A long list goes on such lines, one path each.
+- A line `debt` and paths, indented, anywhere in the invariant after its
+  `Check:` line, adds to its `debt` list. A long list goes on such lines, one
+  path each.
 - A path is literal, from the root of the repository: a file or a folder,
   with or without a trailing `/`. A path P is under an entry E when P is E,
   or P starts with E and `/`.
@@ -127,3 +129,7 @@ Lines inside a fenced code block are skipped.
   pass forever.
 - An invariant with no `Check:` line is review only. Any other text after
   `Check:` is a line that the script cannot read.
+- A `Check:` line and a `debt` line are one line each: do not wrap them. A
+  next line that starts with a backtick, `in` or `except` is a line that the
+  script cannot read, and so is a `debt` line in an invariant with no
+  `Check:` line. The script stops there, and does not drop the line.
