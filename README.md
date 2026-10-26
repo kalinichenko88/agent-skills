@@ -44,8 +44,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   — house TypeScript style.
 - **[`kalinichenko:react-conventions`](skills/react-conventions/README.md)** —
   layer and feature boundaries in a React app, where a sub-component's own
-  files go, request state as one union, one hook per job, and no
-  `ref.current` in render.
+  files go, request state as one union, a hook for each of a component's two
+  jobs, and no `ref.current` in render.
 
 Each skill's README says when it starts and what you get. The github and
 roadmap READMEs show each scenario as a picture.
@@ -164,9 +164,10 @@ instead of its primary export, and the runs that put the order, its line, the
 customer or the discount outside `models/` or two of them in one file. In a
 React feature, it counts the runs that put a sub-component's own hook at the
 feature root or in `shared`, and the runs with a zod schema outside
-`schemas/`. In a comments section that loads and sends comments, it counts the
-runs with a component body that holds both requests. With `--check <logs folder>` it runs only these checks, on the
-logs that an earlier run printed. `tests/skill_load_checks_test.sh` runs them
+`schemas/`. In the three React tasks, it counts the runs with a component or a
+hook that holds two requests: a comments section loads and sends comments,
+and the other two tasks have one request each. With `--check <logs folder>`
+it runs only these checks, on the logs that an earlier run printed. `tests/skill_load_checks_test.sh` runs them
 so in `make check`, on `tests/fixtures/skill_load`: two recorded runs and a
 case that fails each check. A change to a check updates the output that the
 test expects.

@@ -1,8 +1,9 @@
 # kalinichenko:react-conventions
 
 Layer and feature boundaries in a React app, where a sub-component's own files
-go, request state as one union, one hook per job, and no `ref.current` in
-render. Each rule is one that agents broke in a test without it.
+go, request state as one union, a hook for each of a component's two jobs, and
+no `ref.current` in render. Each rule is one that agents broke in a test
+without it.
 
 ## When it starts
 
@@ -33,7 +34,7 @@ render. Each rule is one that agents broke in a test without it.
   not three flags that can disagree. A data library that the project already
   has holds this state instead.
 - **A component with two jobs gives each one a hook.** A job is a request and
-  its state. The component keeps only the composition. Count the jobs, not the
-  lines.
+  its state. The component calls the hooks and renders. Count the jobs, not the
+  lines: a component with one job can keep it.
 - **Render reads props, state and context, not refs.** A ref change schedules
   no render. `usePrevious` keeps the previous value in state.

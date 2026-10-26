@@ -6,8 +6,9 @@
 # the order runs that put the order, its line, the customer or the discount
 # outside models/, or two of them in one file. It counts the feature runs that
 # put a sub-component's own hook at the feature root or in `shared`, and the
-# feature runs with a zod schema outside schemas/. It counts the comments runs
-# with a component body that holds two async calls. Its runs call the model, so
+# feature runs with a zod schema outside schemas/. It counts the React runs
+# with a component or a hook that holds two async calls. Its runs call the
+# model, so
 # they cost tokens and are not part of `make check`: run it by hand after a
 # change to rules.md or to a skill's description. It runs with this machine's
 # other plugins and settings, the setup the rules must work in.
@@ -63,6 +64,8 @@ count() {
   local skill=$1 loaded=0 log calls
   shift
   for log; do
+    # The logs of an older eval have no log of a later task.
+    [ -f "$log" ] || { echo "no log: $log" && continue; }
     calls=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id != null)
       | .message.content[] | select(.type == "tool_use")
       | if .name == "Skill" then .input.skill
@@ -136,14 +139,14 @@ first() {
 # not named `*-page.tsx`, a generic `use-*` hook in src/shared. No recorded run
 # wrote any of these, so add a case when a run does.
 nested() {
-  local ok=0 dir root found
+  local ok=0 dir feature found
   for dir; do
-    root=$dir/src/features/products
-    [ -d "$root" ] || { echo "no feature written: $dir" && continue; }
-    found=$(find "$dir/src" -type f -name 'use-*' \( -path "$root/use-*" -o -path "$dir/src/shared/*" \) |
+    feature=$dir/src/features/products
+    [ -d "$feature" ] || { echo "no feature written: $dir" && continue; }
+    found=$(find "$dir/src" -type f -name 'use-*' \( -path "$feature/use-*" -o -path "$dir/src/shared/*" \) |
       while IFS= read -r file; do
         hook=$(basename "${file%.*}")
-        if [ "$file" = "$root/$(basename "$file")" ] && grep -qsE "from ['\"]\./${hook}['\"]" "$root"/*-page.tsx; then
+        if [ "$file" = "$feature/$(basename "$file")" ] && grep -qsE "from ['\"]\./${hook}['\"]" "$feature"/*-page.tsx; then
           continue
         fi
         echo "$file"
@@ -192,29 +195,31 @@ schemas() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
-# hooks <dir>...: the comments runs whose every component body holds at most
+# hooks <dir>...: the React runs whose every component and hook holds at most
 # one async call, as react-conventions asks: two requests and their state go
-# to a hook each. It prints the first line of each component that holds more.
-# The recorded runs without the rule loaded the comments in an effect and sent
-# a new one in a handler, both in the component body.
-# ponytail: it finds a component by `export function` or `export default
-# function` and a capital letter at a line's start, and its body ends at the
-# first `}` at a line's start. It counts the lines in that body with `await` or
-# `.then(`. An arrow component, a component that is not exported, or two calls
-# on one line pass unseen: every recorded run wrote `export function` and one
-# call per line.
+# to a hook each. It prints the first line of each one that holds more. The
+# recorded comments runs without the rule loaded the comments in an effect and
+# sent a new one in a handler, both in the component body. The search panel
+# and the products page have one request each, and keep it.
+# ponytail: it finds a component or a hook by `export function` or `export
+# default function`, then a capital letter or `use` and a capital letter, at a
+# line's start. Its body ends at the first line that is only `}`. It counts the
+# lines in that body with `await` or `.then(`, except the lines with `.json()`:
+# `await fetch(…)` and then `await response.json()` is one request. An arrow
+# function, one that is not exported, or two requests on one line pass unseen:
+# every recorded run wrote `export function` and one request per line.
 hooks() {
   local ok=0 dir found
   for dir; do
-    [ -n "$(find "$dir/src" -name '*.tsx')" ] || { echo "no component written: $dir/src" && continue; }
-    found=$(find "$dir/src" -name '*.tsx' -exec awk '
+    [ -n "$(find "$dir/src" \( -name '*.ts' -o -name '*.tsx' \))" ] || { echo "no TypeScript file written: $dir/src" && continue; }
+    found=$(find "$dir/src" \( -name '*.ts' -o -name '*.tsx' \) -exec awk '
       FNR == 1 { open = 0 }
-      /^export (default )?function [A-Z]/ { start = FILENAME ": " $0; calls = 0; open = 1; next }
-      open && /(^|[^[:alnum:]_])await[[:space:]]|\.then\(/ { calls++ }
-      open && /^}/ { if (calls > 1) print start; open = 0 }' {} +)
+      /^export (default )?function ([A-Z]|use[A-Z])/ { start = FILENAME ": " $0; calls = 0; open = 1; next }
+      open && !/\.json\(\)/ && /(^|[^[:alnum:]_])await[[:space:]]|\.then\(/ { calls++ }
+      open && /^}[[:space:]]*$/ { if (calls > 1) print start; open = 0 }' {} +)
     if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
   done
-  echo "one job: $ok of $# comments runs hold at most one async call in each component body"
+  echo "one job: $ok of $# React runs hold at most one async call in each component and hook"
   [ "$ok" -eq "$#" ] || failed=1
 }
 
@@ -251,6 +256,6 @@ first "$logs"/order-*[0-9]
 models "$logs"/order-*[0-9]
 nested "$logs"/feature-*[0-9]
 schemas "$logs"/feature-*[0-9]
-hooks "$logs"/comments-*[0-9]
+hooks "$logs"/react-*[0-9] "$logs"/feature-*[0-9] "$logs"/comments-*[0-9]
 echo "logs: $logs"
 exit "$failed"

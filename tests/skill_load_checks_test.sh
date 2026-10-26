@@ -3,11 +3,12 @@
 # tests/fixtures/skill_load: the subagents' tool calls and the files they
 # wrote, in the layout an eval run leaves. ts-1, react-1, feature-1, the log of
 # order-2 and the tree of order-1 are one recorded run, trimmed to what the
-# checks read. comments-1, its log and its component, is a later run with the
-# rule on one hook per job. The other runs change them into a case that a check
-# must fail or must pass. order-3, feature-2 to feature-5, comments-2 and
-# comments-3 have no log: count reads only the logs, and the other checks read
-# only the trees.
+# checks read. comments-1, its log and its tree, is a later run with the rule
+# on one hook per job. The other runs change them into a case that a check must
+# fail or must pass. order-3, feature-2 to feature-5 and comments-2 have no log:
+# count reads only the logs, and the other checks read only the trees. In
+# react-1 and react-2, `await fetch(…)` and `await response.json()` are one
+# request that hooks must pass.
 #   ts-2       the Skill call after the first Write; `.filter((item) => item…`
 #   react-2    no react-conventions; `{results.map((result) => (`
 #   order-1    every file written through Bash, as `cat > <file> <<'EOF'`
@@ -24,8 +25,6 @@
 #              feature root, which products-page.tsx imports
 #   comments-2 a run without the rule: the comments load in an effect and a
 #              new one is sent in a handler, both in the component body
-#   comments-3 what hooks must pass: a component of a group select run with
-#              the rule, with one `await` in its handler and its state in hooks
 # A change to a check that moves a verdict changes the output and fails here.
 # Last, it gives the eval an argument too many, as `--check <folder> extra` and
 # `3 --check <folder>`, with a stub claude: the eval must refuse before it
@@ -57,7 +56,7 @@ no schemas/ folder: tests/fixtures/skill_load/feature-2
 tests/fixtures/skill_load/feature-3/src/features/products/products-api.ts
 schemas: 3 of 5 feature runs declare their zod schemas only in schemas/
 tests/fixtures/skill_load/comments-2/src/comments-section.tsx: export function CommentsSection({ postId }: { postId: string }) {
-one job: 2 of 3 comments runs hold at most one async call in each component body
+one job: 8 of 9 React runs hold at most one async call in each component and hook
 logs: tests/fixtures/skill_load
 EOF
 }
@@ -76,11 +75,25 @@ out=$(tests/skill_load_eval.sh --check tests/fixtures/skill_load/ 2>&1) || code=
   exit 1
 }
 
+stub=$(mktemp -d)
+old=$(mktemp -d)
+trap 'rm -rf "$stub" "$old"' EXIT
+
+# The logs of an older eval have no log of a later task, as comments: the
+# checks must still run, and name the log that is not there.
+cp -R tests/fixtures/skill_load/. "$old"
+rm -r "$old"/comments-*
+code=0
+out=$(tests/skill_load_eval.sh --check "$old" 2>&1) || code=$?
+case $out in *"no log: $old/comments-*.jsonl"*"logs: $old") ;; *) code="$code, no 'no log:' line" ;; esac
+[ "$code" = 1 ] || {
+  printf 'FAIL: --check on logs with no comments run exited %s, not 1\n%s\n' "$code" "$out"
+  exit 1
+}
+
 # refused <argument>...: the eval must exit 2 with its usage and start no run.
 # The claude on PATH is a stub that records each call, so a broken guard costs
 # no tokens, and the logs of such a run go into the stub's folder.
-stub=$(mktemp -d)
-trap 'rm -rf "$stub"' EXIT
 cat >"$stub/claude" <<'EOF'
 #!/usr/bin/env bash
 touch "$(dirname "$0")/called"

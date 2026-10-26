@@ -1,6 +1,6 @@
 ---
 name: react-conventions
-description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, giving one component two requests, as loading options and creating one, reading a value from useRef or writing usePrevious.
+description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, putting two requests in one component (loading its options and creating one), reading a value from useRef or writing usePrevious.
 ---
 
 # React conventions
@@ -134,9 +134,10 @@ and the render branches on `status`. If the project already has a data library
 ## A component with two jobs gives each one a hook
 
 A job is a request and its state: loading the options, creating an item,
-sending a form. When one component body holds two jobs, each with its own
-state and its own async call, each job moves into a custom hook. The component
-keeps only the composition: it calls the hooks, connects them, and renders.
+sending a form. When one component body holds two jobs or more, each with its
+own state and its own async call, each job moves into a custom hook. The
+component keeps the rest: it calls the hooks, connects them, holds the state
+that no request owns, and renders.
 
 ```tsx
 // no: two requests and their state in one body
@@ -144,9 +145,13 @@ export function GroupSelect({ type, onChange }: GroupSelectProps) {
   const [options, setOptions] = useState<OptionsState>({ status: 'loading' });
   const [creation, setCreation] = useState<CreationState>({ status: 'idle' });
 
-  useEffect(() => { /* fetch the options, setOptions at each step */ }, [type]);
+  useEffect(() => {
+    // fetch the options, setOptions at each step
+  }, [type]);
 
-  async function handleCreate(name: string) { /* post, setCreation, add to the options */ }
+  async function handleCreate(name: string) {
+    // post, setCreation, add to the options, onChange
+  }
 
   return <select>…</select>;
 }
@@ -165,11 +170,15 @@ export function GroupSelect({ type, onChange }: GroupSelectProps) {
 ```
 
 Count the jobs, not the lines. A short body with two requests has two jobs. A
-long form with one submit has one, and it can stay. Each hook holds one union,
-as the section above says, and the hooks are the component's own files:
-`group-select/use-group-options.ts` next to `group-select/group-select.tsx`. A
-value that only the render uses, as the text of an input, stays in the
-component.
+long form with one submit has one job, and its request can stay in the
+component. Each hook holds one union, as *A request's state is one union*
+says. With a data library, the hook holds the library's call, as `useQuery`,
+and the library holds the state. The hooks are the component's own files, and
+*A part's own files live in its folder* places them:
+`group-select/use-group-options.ts` next to `group-select/group-select.tsx`,
+or the feature root for the page. A value that is not a request's state, as
+the text of an input, stays in the component, and the component gives it to
+the hook: `createGroup(name)`.
 
 ## Render reads props, state and context — not refs
 
