@@ -183,7 +183,7 @@ has 330 lines; 8 folders hold code files of their own, and the largest two
 hold 10. A new number needs an ADR.
 
 - **I-8.** A code file MUST have at most 330 lines.
-  Check: lines 330 in `.` debt `skills/architecture/scripts/invariants.sh` `tests/github_scripts_test.sh` `tests/roadmap_scripts_test.sh`.
+  Check: lines 330 in `.` debt `tests/github_scripts_test.sh` `tests/roadmap_scripts_test.sh`.
 - **I-9.** A folder MUST hold at most 10 code files of its own. `tests/` is
   out of the check: its test scripts stay at its top, because the Makefile
   finds a test only as `tests/<name>_test.sh`.
