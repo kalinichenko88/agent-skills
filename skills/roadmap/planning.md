@@ -39,7 +39,8 @@ until the person approves the whole plan. One approval covers the whole list.
      ```
 
    - Each issue through the `kalinichenko:github` skill's `filing.md`: a search
-     first, existing labels only. Put it into its milestone with
+     first, existing labels only, except `debt` for a debt issue, as
+     `filing.md` says. Put it into its milestone with
      `gh issue edit <n> --milestone '<title>'`, the title as
      `bash <dir>/scripts/read.sh milestone M1` prints it.
    - Each link with `plan.sh block <issue> <blocker>`, and each sub-issue with

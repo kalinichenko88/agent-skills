@@ -101,15 +101,20 @@ for f in rules.md skills/github/filing.md skills/github/take-in.md \
 done
 # architecture and review-loop file a debt issue through filing.md. With no
 # `debt` label in the repository, "never invent a new label" left it `bug` or
-# unlabelled (#133). filing.md creates the label, and rules.md says so too.
-# shellcheck disable=SC2016 # Markdown backticks, not shell
-tr -s '[:space:]' ' ' <"$root/skills/github/filing.md" | grep -qF 'create `debt` first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`' || {
-  echo "FAIL: filing.md: a debt finding in a repository with no debt label gets another label or none"
-  exit 1
-}
-# shellcheck disable=SC2016 # Markdown backticks, not shell
-tr -s '[:space:]' ' ' <"$root/rules.md" | grep -qF 'existing labels only (`debt` is created for a debt finding when no debt label exists)' || {
-  echo "FAIL: rules.md: existing labels only, with no word on the debt label"
-  exit 1
-}
+# unlabelled (#133). Each place that gives the labels rule, for a new issue or
+# for a host, names the exception.
+while IFS='|' read -r f phrase; do
+  tr -s '[:space:]' ' ' <"$root/$f" | grep -qF "$phrase" || {
+    echo "FAIL: $f: a debt finding with no debt label gets another label or none: no \"$phrase\""
+    exit 1
+  }
+done <<'EOF'
+rules.md|existing labels only (`debt` is created for a debt finding when no debt label exists)
+skills/github/filing.md|The one exception is debt: a file or a folder to split,
+skills/github/filing.md|create `debt` first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`
+skills/github/filing.md|For a debt finding, when the repository has no debt label, create `debt` first.
+skills/github/scripts/add-finding.sh|A debt finding keeps its debt label
+skills/roadmap/triage.md|except `debt` for a debt issue
+skills/roadmap/planning.md|except `debt` for a debt issue
+EOF
 echo 'rules_test: ok'

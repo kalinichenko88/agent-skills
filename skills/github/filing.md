@@ -65,10 +65,11 @@ than it closes. Per finding, the scout's groups decide:
   bash <dir>/scripts/add-finding.sh 12 "$section_file" "<a title that names every problem in it>" [label]
   ```
 
-  `[label]` is the finding's label when the host does not have it: choose it,
-  and for a debt finding create `debt` first, as *No free host* below says.
-  The script reads `status:` and `also:` again just
-  before it writes, so the findings you added in this run count too. It adds
+  `[label]` is the finding's label when the host does not have it, chosen as
+  *No free host* below says. For a debt finding, when the repository has no
+  debt label, create `debt` first. The script reads `status:` and `also:`
+  again just before it writes, so the findings you added in this run count
+  too. It adds
   the section to the end of the body, sets the title, adds the label, and
   leaves a one-line comment, because a body edit notifies nobody. A busy host
   or a full one it refuses, and writes nothing. When `gh` stops it with an
@@ -77,8 +78,9 @@ than it closes. Per finding, the scout's groups decide:
   section file too. Keep the section file, and do not change it. A rerun waits
   until the person asks for it and the cause of the error is gone. If the
   error says that the label is not found, correct the label in the command or
-  remove it. A debt finding keeps `debt`: create it as *No free host* says.
-  Then run the command again, with the same section file. The rerun
+  remove it. A debt finding keeps its debt label: when the repository has
+  none, create `debt` as *No free host* says. Then run the command again,
+  with the same section file. The rerun
   finishes the step. When the body holds the section already, the rerun
   does not check for a full host and does not change the body or the title.
   It adds the label, if the command names one, and leaves the one-line

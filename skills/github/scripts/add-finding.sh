@@ -12,7 +12,8 @@
 # When gh stops it with an error, the step is not done. A rerun with the same
 # section file, unchanged, finishes it after the cause of the error is gone.
 # If the error says that the label is not found, correct the label or remove
-# it before the rerun. When the body holds the section already, the rerun does
+# it before the rerun. A debt finding keeps its debt label: create it first,
+# as filing.md says. When the body holds the section already, the rerun does
 # not check for a full host and does not change the body or the title. It adds
 # the label, if the command names one, and leaves the one-line comment.
 #
