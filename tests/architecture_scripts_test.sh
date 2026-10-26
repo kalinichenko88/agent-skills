@@ -12,10 +12,12 @@
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-# A person's color.ui=always must not reach what the script reads from git; it
-# goes after any configuration the environment already gives git.
+# A person's color.ui=always or grep.column=true must not reach what the
+# script reads from git; they go after any configuration the environment
+# already gives git.
 n=${GIT_CONFIG_COUNT:-0}
-export "GIT_CONFIG_KEY_$n=color.ui" "GIT_CONFIG_VALUE_$n=always" GIT_CONFIG_COUNT=$((n + 1))
+export "GIT_CONFIG_KEY_$n=color.ui" "GIT_CONFIG_VALUE_$n=always" \
+  "GIT_CONFIG_KEY_$((n + 1))=grep.column" "GIT_CONFIG_VALUE_$((n + 1))=true" GIT_CONFIG_COUNT=$((n + 2))
 inv=$root/skills/architecture/scripts/invariants.sh
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -143,6 +145,52 @@ check 'a Check: line that wraps at a path' '2 invariants.sh: I-1: cannot read: `
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`' '  except `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a Check: line that wraps at except' '2 invariants.sh: I-1: cannot read: except `src/a.ts`.' "$code $err"
+
+# Prose is not a check: a wrapped sentence that starts with "debt", and one
+# right after a Check: line that starts with "in".
+printf '%s\n' '- **I-1.** No fetch, and the' '  debt is described in prose.' \
+  '  Check: grep `fetch\(` in `src/` debt `src/a.ts`.' '  in the meantime the client wraps it.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'prose that starts with debt or in' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
+
+# A Check: line with no invariant above it would never run: a * bullet, or the
+# period outside the bold.
+printf '%s\n' '* **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a Check: line outside an invariant' \
+  '2 invariants.sh: a Check: line outside an invariant: Check: grep `fetch\(` in `src/`.' "$code $err"
+
+# A fenced example is skipped when its fence is indented, or made of tildes.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` debt `src/a.ts`.' '  ```ts' \
+  '  Check: grep `x` in `nope/`.' '  ```' '~~~markdown' '- **I-2.** An example.' '  Check: grep `x` in `nope/`.' \
+  '~~~' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'an indented and a tilde fence' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
+# A fence at the start of a line ends the invariant, as any such line does.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```text' '```' \
+  '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a fence at the start of a line' "1 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
+
+# An except path that covers each code file of the check leaves it nothing to
+# read, as a typo does.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` except `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'an except path over the whole check' '2 invariants.sh: I-1: no code file under src/' "$code $err"
+
+# An empty code file is a code file: a files check counts it.
+: >"$empty/src/b.ts"
+printf '%s\n' '- **I-1.** One code file in `src/`.' '  Check: files 1 in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'an empty code file' "1 $(printf '%s\n' 'I-1 FAIL' '  src 2')" "$code $out"
+rm "$empty/src/b.ts"
+
+# Without the debt skill beside it, the script cannot tell code from data.
+mkdir -p "$tmp/alone/scripts"
+cp "$inv" "$tmp/alone/scripts/"
+code=0
+out=$(cd "$empty" && bash "$tmp/alone/scripts/invariants.sh" 2>"$tmp/err") || code=$?
+check 'no debt skill beside it' "2 invariants.sh: the debt skill's data.ere is not beside this skill" "$code $(cat "$tmp/err")"
 
 # The lines and files checks, and debt lists: a file and a folder past their
 # limits, a file and a folder that are known debt, a debt path that no longer

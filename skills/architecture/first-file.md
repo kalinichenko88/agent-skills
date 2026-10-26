@@ -72,8 +72,8 @@ cannot tell: a file that restates the code costs each reader and helps none.
 - the cross-cutting concerns;
 - an index of the accepted ADRs.
 
-Each invariant has one MUST statement, a `Check:` line or none for "review
-only", and the ADR that set it, when one did. An invariant goes in only when
+Each invariant has one MUST statement, a `Check:` line or no `Check:` line
+for "review only", and the ADR that set it, when one did. An invariant goes in only when
 the code keeps it now, or when a decision sets it: a wish fails each check,
 and then agents learn to ignore the checks. There is no NON-NEGOTIABLE mark:
 an invariant that the project can break is not an invariant.
@@ -120,16 +120,20 @@ are skipped.
 - A path is literal, from the root of the repository: a file or a folder,
   with or without a trailing `/`. A path P is under an entry E when P is E,
   or P starts with E and `/`.
-- `except` paths leave the check before it runs, by design: their files are
-  not read, and they are never printed. `debt` paths are known debt: a hit
-  under one is printed, and does not fail the check.
+- `except` paths are out of the check, by design: a hit under one is never
+  printed. `debt` paths are known debt: a hit under one is printed, and does
+  not fail the check.
 - Documents, lockfiles, fixtures and other data are not code: the debt
   skill's `data.ere` leaves them out of every check.
-- A path of `in` with no code file under it is an error, so a typo cannot
-  pass forever.
+- A path of `in` with no code file under it outside the `except` paths is an
+  error, so a typo cannot pass forever.
 - An invariant with no `Check:` line is review only. Any other text after
   `Check:` is a line that the script cannot read.
 - A `Check:` line and a `debt` line are one line each: do not wrap them. A
-  next line that starts with a backtick, `in` or `except` is a line that the
-  script cannot read, and so is a `debt` line in an invariant with no
-  `Check:` line. The script stops there, and does not drop the line.
+  next line that holds only paths and the words `in`, `except` or `debt` is a
+  line that the script cannot read, and so is a `debt` line in an invariant
+  with no `Check:` line, and a `Check:` line under no `- **I-<n>.**` line, as
+  under a `*` bullet. The script stops there, and does not drop the line.
+  Prose under an invariant is not read, also when it starts with one of these
+  words.
+- Empty code files count as code files of 0 lines.

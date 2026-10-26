@@ -534,9 +534,11 @@ pull request, in one line and with no subagent, that
 still hears of it.
 
 The lens runs `invariants.sh --new-since <base> HEAD` first. Each `new` hit
-is the branch's. A FAIL with no `new` hit is not the branch's: it is a finding
-outside the task, an issue through `kalinichenko:github`, or one already
-filed. Then it runs `clones.sh` on a read-only checkout of the head, keeping
+is the branch's. A FAIL with no `new` hit was on the base already: it is a
+finding outside the task, an issue through `kalinichenko:github`, or one
+already filed. That holds unless the branch changed the invariant: a new
+invariant, a lower limit, or a path taken off its `debt` list makes the FAIL
+the branch's. Then it runs `clones.sh` on a read-only checkout of the head, keeping
 the clones that touch a file the branch changed. Its findings:
 
 - a second structure beside an existing one. A change that follows the

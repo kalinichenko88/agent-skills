@@ -44,7 +44,9 @@ case $since in -*) usage ;; esac
 case $ref in -*) usage ;; esac
 # The data rule of measure.sh and clones.sh. It goes to awk through ENVIRON,
 # because awk -v turns \. into any character.
-data=$(<"$(dirname "$0")/../../debt/scripts/data.ere")
+data_file=$(dirname "$0")/../../debt/scripts/data.ere
+[ -r "$data_file" ] || die "the debt skill's data.ere is not beside this skill"
+data=$(<"$data_file")
 top=$(git rev-parse --show-toplevel 2>/dev/null) || die 'not in a git repository'
 cd "$top"
 
@@ -79,11 +81,12 @@ fi
 # One record per invariant, its fields separated by \036 and the items of a
 # list by \037: id, kind (grep, lines, files or review), arg, in, except, debt.
 records=$(printf '%s\n' "$text" | awk '
-  function bad() {
-    printf "invariants.sh: %s: cannot read: %s\n", id, line > "/dev/stderr"
+  function stop(msg) {
+    print "invariants.sh: " msg > "/dev/stderr"
     failed = 1
     exit
   }
+  function bad() { stop(id ": cannot read: " line) }
   # Splits s into tok[1..ntok]: a `quoted` item, or a bare word. Spaces and
   # commas separate them; a last bare "." ends the line.
   function tokenize(s,   i, rest) {
@@ -132,30 +135,39 @@ records=$(printf '%s\n' "$text" | awk '
     if (id != "") printf "%s\036%s\036%s\036%s\036%s\036%s\n", id, kind, arg, list["in"], list["except"], list["debt"]
     id = ""
   }
-  { sub(/\r$/, "") }
-  /^```/ { fence = !fence; next }
-  fence { next }
+  { sub(/\r$/, ""); line = $0; sub(/^[ \t]+/, "", line) }
+  # A fenced block, indented or not, of backticks or tildes, ends at a line
+  # that starts with the same fence.
+  fence != "" { if (index(line, fence) == 1) fence = ""; next }
+  # A line that starts with neither a space nor a tab ends the invariant.
+  /^[^ \t]/ { flush() }
+  line ~ /^(```|~~~)/ { fence = substr(line, 1, 3); next }
   /^- \*\*I-[0-9]+\.\*\*/ {
-    flush()
     id = $0; sub(/^- \*\*/, "", id); sub(/\.\*\*.*/, "", id)
     kind = "review"; arg = ""; split("", list); seen = more = 0
     next
   }
-  /^[^ \t]/ { flush(); next }
-  id == "" { next }
+  id == "" {
+    # A Check: line that no invariant holds would never run.
+    if (line ~ /^Check:[ \t]*(grep|lines|files)([ \t]|$)/) stop("a Check: line outside an invariant: " line)
+    next
+  }
   {
-    line = $0; sub(/^[ \t]+/, "", line)
+    # A list line holds only `items`, the words in, except and debt, commas
+    # and a last ".": a debt line, or the rest of a Check: line. Prose that
+    # starts with one of these words is not one.
+    listed = line ~ /^((`[^`]*`|in|except|debt)[ \t,]*)+\.?$/
     if (line ~ /^Check:/) {
       if (seen) bad()
       seen = more = 1
       check()
-    } else if (line ~ /^debt([ \t`]|$)/) {
+    } else if (listed && line ~ /^debt[ \t`]/) {
       # A debt line adds to the debt list of the Check: line of its block.
       if (!seen) bad()
       tokenize(line)
       if (items(2, "debt") <= ntok) bad()
       more = 1
-    } else if (more && line ~ /^(`|(in|except)([ \t`]|$))/) {
+    } else if (more && listed) {
       # A Check: or debt line is one line: one that wraps would lose its rest.
       bad()
     } else more = 0
@@ -188,16 +200,19 @@ lib='
 # with \036 for its NUL bytes. A status past 1 is an error, not "no match".
 ggrep() {
   local out code=0
-  out=$(git -c core.quotePath=false --literal-pathspecs grep --no-color --null -I "$@" "${where[@]}" -- "${ins[@]}" | tr '\0' '\036') || code=$?
+  out=$(git -c core.quotePath=false --literal-pathspecs grep --no-color --no-column --null -I "$@" "${where[@]}" -- "${ins[@]}" | tr '\0' '\036') || code=$?
   [ "$code" -le 1 ] || die "$id: git grep failed"
   printf '%s\n' "$out"
 }
 
 # listing: the code files under the paths of the check, one a line as
-# path<TAB>lines.
+# path<TAB>lines. git grep -c leaves out an empty file, and -L gives them: all
+# on one line, each path followed by \036.
 listing() {
-  ggrep -c -e '' | DATA=$data PREFIX=$prefix awk -F'\036' '
-    NF { f = substr($1, length(ENVIRON["PREFIX"]) + 1); if (f !~ ENVIRON["DATA"]) printf "%s\t%s\n", f, $2 }'
+  { ggrep -c -e '' && ggrep -L -e ''; } | DATA=$data PREFIX=$prefix awk -F'\036' '
+    function add(f, n) { f = substr(f, length(ENVIRON["PREFIX"]) + 1); if (f !~ ENVIRON["DATA"]) printf "%s\t%s\n", f, n }
+    NF && $NF != "" { add($1, $2); next }
+    { for (i = 1; i < NF; i++) add($i, 0) }'
 }
 
 # grep_hits: the lines that the pattern finds, as path<TAB>line<TAB>text,
@@ -274,11 +289,12 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   fi
   IFS=$'\037' read -r -a ins <<<"$in_"
 
-  # A path with no code file is a typo or an empty folder: a check that reads
-  # nothing would pass forever.
+  # A path with no code file outside the except paths is a typo, an empty
+  # folder or an except path too wide: a check that reads nothing would pass
+  # forever.
   files=$(listing) || exit 2
-  missing=$(printf '%s\n' "$files" | IN=$in_ awk -F'\t' "$lib"'
-    NF { code[$1] = 1 }
+  missing=$(printf '%s\n' "$files" | IN=$in_ EXCEPT=$except_ awk -F'\t' "$lib"'
+    NF && !under_any($1, ENVIRON["EXCEPT"]) { code[$1] = 1 }
     END {
       n = split(ENVIRON["IN"], a, "\037")
       for (i = 1; i <= n; i++) {

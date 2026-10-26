@@ -30,8 +30,8 @@ project already keeps them there. Never make a second place for the same
 document.
 
 **Safety.** No step runs code of the project: no package manager, no script
-of the project, no build, and no text of the architecture file as a shell
-command.
+of the project and no build in the project's tree, and no text of the
+architecture file as a shell command.
 
 ## The start of a feature
 
@@ -78,8 +78,9 @@ With `superpowers:brainstorming` in the session, its order holds: its first
 message is the opt-out line and one question, and it reads the code only
 after the person says yes to its offer to look. So the block comes first in
 the message that reports what that look found, and again at the start of the
-spec. With no such look, it comes only where the paragraph above puts it.
-Never before its first question.
+spec. With no such look, it comes only at the start of the spec, or in the
+conversation before the first edit when there is no spec. Never before its
+first question.
 
 ## The moment of a decision
 
@@ -92,7 +93,7 @@ no spec:
 - a change to a file or a module that is past its limit.
 
 The steps hold in every project. With no architecture file, step 1 is the
-offer and the gate has no invariant to check; steps 2 to 5 are the same.
+offer and the gate has no invariant to check; the other steps are the same.
 
 1. Read the architecture file and the ADRs that it links for the area. Run
    `invariants.sh`. With no architecture file, offer to write one
@@ -216,8 +217,9 @@ wins in that project, and it names the convention that it replaces.
   file and a `files` check for a folder. The skill keeps no number of its
   own.
 - **The `debt` list.** The files and folders already past a limit are in the
-  check's `debt` list, so the check passes now. A path joins the list only in
-  a pull request that also files its debt issue, by *When to split*. A path
+  check's `debt` list, so the check passes now. After the first architecture
+  file, a path joins the list only in a pull request that also files its debt
+  issue, by *When to split*. A path
   that drops below the limit leaves the list. A new number for the limit
   needs an ADR.
 - **At the decision**, when the change goes into a file or a module past its
@@ -295,8 +297,8 @@ only".
 ```
 
 At least two options, one line each, and both good and bad consequences: one
-decision a file, no policy in disguise, no option with no cost. Add the ADR
-to the index of the architecture file in the same commit.
+decision a file, no policy in disguise, no option with no cost. Add an
+accepted ADR to the index of the architecture file in the same commit.
 
 ## `invariants.sh`
 
@@ -312,8 +314,8 @@ and prints one line per invariant:
 
 ```
 I-1 FAIL
-  src/feature/list.ts:2:const r = fetch('/list');
   new src/feature/b.ts:1:fetch(v);
+  src/feature/list.ts:2:const r = fetch('/list');
   debt src/legacy/summary.ts:12:fetch(x);
 I-2 PASS
   new debt src/legacy/grow.ts 14
@@ -324,16 +326,21 @@ I-4 review only
 Under each invariant: the hits that break it; then `debt`, the hits under a
 path of its `debt` list; then `no longer debt`, a path of the list with no
 hit, which leaves the list. With `--new-since`, `new` marks each hit that the
-base does not have: those are the branch's. A FAIL with no `new` hit is not
-the branch's: it is a finding outside the task.
+base does not have: those are the branch's. A FAIL with no `new` hit was on
+the base already: it is a finding outside the task. That holds unless the
+branch changed the invariant: a new invariant, a lower limit, or a path taken
+off its `debt` list makes the FAIL the branch's.
 
 - **Exit 0:** no invariant fails.
-- **Exit 1:** one fails. A hit under a FAIL is a defect: fix the code, or end
-  it by the gate. An ADR never excuses a FAIL: an ADR that amends an
+- **Exit 1:** one fails. A hit of the change is a defect: fix the code, or
+  end it by the gate. On a branch, `--new-since <base>` tells its hits from
+  those of the base. An ADR never excuses a FAIL: an ADR that amends an
   invariant changes its `Check:` line in the same commit.
-- **Exit 2:** a wrong call, a `Check:` line that the script cannot read, or a
-  path with no code file, as a typo. The line on stderr names it. Correct the
-  line in the architecture file.
+- **Exit 2:** a check did not run. The line on stderr names the cause: a
+  wrong call, a line that the script cannot read, a `Check:` line outside an
+  invariant, a path with no code file outside its `except` paths, a pattern
+  that git rejects, or no debt skill beside this one. Correct the call, or
+  the line in the architecture file.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to
@@ -344,10 +351,10 @@ tell code from data.
 | Thought | Reality |
 | --- | --- |
 | "The request is clear; I will start with the code" | A new capability gets the block first, in a message before the first edit. It is four lines. |
-| "There is no architecture file, so the decision steps do not apply" | Only step 1 and the gate read the file. Steps 2 to 5 hold in every project. |
+| "There is no architecture file, so the decision steps do not apply" | Only step 1 and the gate read the file. The other steps hold in every project. |
 | "Offering an architecture file is out of the task's scope" | The offer is one question at the first decision of the session, and a no ends it. Ask it. |
 | "I found the API client; the search is done" | Search once for each kind of work the change does: the format, the store, the check of the input. |
-| "The file is on the `debt` list already, so a few more lines are fine" | The list records the debt; it does not allow it to grow. Name the split before the edit. |
+| "The file is on the `debt` list already, so a few more lines are fine" | The list records the debt; it is no leave to add to it. Name the split before the edit. Only a split that needs decisions of its own lets the change in as it is, with its debt issue. |
 | "Moving that part out is a separate task" | A split that only moves code is its own commit before the feature, in this pull request. Only a split that needs decisions of its own waits, as a debt issue filed in this pull request. |
 | "I will extract the shared helper later" | Check the three conditions now. When all three hold, extract it in this change; when one fails, the copy stays. |
 

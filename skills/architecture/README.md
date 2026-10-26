@@ -25,9 +25,9 @@ checks, and an ADR for each decision that needs one.
   reason why the existing one cannot take the change. At most three options,
   each with its cost, and no abstraction for a future need.
 - **Your invariants, checked.** `docs/ARCHITECTURE.md` (or `ARCHITECTURE.md`
-  at the root) holds numbered invariants, each with a `Check:` line:
-  a pattern that must find nothing, a size limit for a file, or a size limit
-  for a folder. `scripts/invariants.sh` runs them and prints PASS or FAIL for
+  at the root) holds numbered invariants. Each has a `Check:` line, or is
+  checked in review only. A check is a pattern that must find nothing, a size
+  limit for a file, or a size limit for a folder. `scripts/invariants.sh` runs them and prints PASS or FAIL for
   each. A file or folder already past its limit is known debt, listed in the
   check, so the check passes now and the list shrinks over time. With
   `--new-since <base>`, it marks the hits that a branch adds. It needs only
@@ -49,6 +49,6 @@ checks, and an ADR for each decision that needs one.
   nothing without your yes. After a no, one line in `CLAUDE.md` stops the
   offer.
 - **No code of yours runs.** No step runs a package manager, a script of the
-  project or a build. The text of `docs/ARCHITECTURE.md` never runs as a
+  project or a build in your project's tree. The text of `docs/ARCHITECTURE.md` never runs as a
   command: `invariants.sh` passes each pattern and path to `git grep` as an
   argument of its own.
