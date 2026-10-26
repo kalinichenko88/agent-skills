@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Names a Claude Code session after the issue that it takes in: when the prompt
-# is only an issue, as #91 or its URL, the title becomes "#91 <issue title>".
+# is only an issue, as #91 or its github.com URL, the title becomes
+# "#91 <issue title>".
 # Codex marks a hook run as failed when its output has a field that Codex does
 # not know, as sessionTitle. So the hook prints only for a Claude Code input:
 # prompt_id, which Claude Code sends, and no turn_id, which only Codex sends.

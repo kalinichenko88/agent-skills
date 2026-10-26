@@ -68,9 +68,9 @@ check 'escape: the title' '#133 a "b" \ c d' "$(title sessionTitle)"
 cp "$fixtures/issue.json" "$tmp/issue.json"
 
 # None of these is an issue on its own: no title, and no gh call. gh would
-# send a token to the host of the last one.
+# send a token to the host of the last two.
 for prompt in 'Look at #133' '#133 and #134' "$url#issuecomment-1" \
-  https://example.com/o/r/issues/133; do
+  https://example.com/o/r/issues/133 https://github.com.example.com/o/r/issues/133; do
   out=$(run claude-prompt.json "$prompt") || fail "$prompt: exit $?"
   check "$prompt: no title" '' "$out"
   check "$prompt: no gh call" '' "$(calls)"
