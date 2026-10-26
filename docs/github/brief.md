@@ -32,7 +32,7 @@ Bottom line, small: "Also: commit messages and GitHub Actions versions follow th
 Canvas: portrait, the largest portrait size the tool offers (at least 1024x1536).
 Header: label "SCENARIO 1 OF 3", title "Start a task".
 Trigger box: "WHEN: you write \"#91\" or paste the issue link." (keep the double quotation marks around #91)
-1. "Is it free?" — THE AGENT examines ticket "#91" with a green check. Caption: "Open, not assigned to someone else, no one else's PR. If taken, the agent tells you and waits."
+1. "Is it free?" — THE AGENT examines ticket "#91" with a green check. Caption: "Open, and nobody works on it: not someone else, not another session of yours. If taken, the agent tells you and waits."
 2. "Close the duplicates" — THE AGENT moves notes from two similar blank tickets into ticket "#91"; one blank ticket goes into a small bin. Caption: "The same report in other words is closed. What it adds moves into #91."
 3. "Own branch, own folder" — THE AGENT sets up a separate folder and a branch sign "fix/91-short-name"; the developer's main desk stays tidy. Caption: "The issue is assigned to you. The work gets its own branch and worktree."
 4. "What else is on this code?" — THE AGENT shows two blank extra tickets next to ticket "#91". Caption: "It reads the linked issues and PRs, and finds open bugs this PR can close too."
