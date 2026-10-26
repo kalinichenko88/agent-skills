@@ -354,8 +354,10 @@ Five cases mark hits `new` that are not the branch's. Read the diff for them:
 - With no architecture file at the base, each hit is `new`, as for a branch
   that adds the first one.
 - When the script cannot read the base's file past a line, each hit of an
-  invariant that it did not read whole there is `new`. When the base's check
-  of one invariant cannot run, each hit of that invariant is `new`.
+  invariant that it did not read whole there is `new`. A `Check:` or `debt`
+  line with no indent ends the invariant above it: that invariant is
+  compared with only the lines before it. When the base's check of one
+  invariant cannot run, each hit of that invariant is `new`.
 
 In the last two cases, lines on stderr after `at <base>:` say so.
 
