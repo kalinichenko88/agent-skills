@@ -135,9 +135,9 @@ and the render branches on `status`. If the project already has a data library
 
 A job is a request and its state: loading the options, creating an item,
 sending a form. When one component body holds two jobs or more, each with its
-own state and its own async call, each job moves into a custom hook. The
-component calls the hooks, connects them to each other and to its callback
-props, as `onChange`, and renders.
+own state and its own async call, each job moves into a custom hook of its
+own. The component calls the hooks, connects them to each other and to its
+callback props, as `onChange`, and renders.
 
 ```tsx
 // no: two requests and their state in one body

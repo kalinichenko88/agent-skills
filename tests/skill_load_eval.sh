@@ -8,10 +8,9 @@
 # put a sub-component's own hook at the feature root or in `shared`, and the
 # feature runs with a zod schema outside schemas/. It counts the React runs
 # with a component or a hook that holds two async calls. Its runs call the
-# model, so
-# they cost tokens and are not part of `make check`: run it by hand after a
-# change to rules.md or to a skill's description. It runs with this machine's
-# other plugins and settings, the setup the rules must work in.
+# model, so they cost tokens and are not part of `make check`: run it by hand
+# after a change to rules.md or to a skill's description. It runs with this
+# machine's other plugins and settings, the setup the rules must work in.
 #
 # With --check, it runs only the checks, on the logs folder of an earlier run.
 # `make check` runs them so on tests/fixtures/skill_load, through
@@ -146,7 +145,7 @@ nested() {
     found=$(find "$dir/src" -type f -name 'use-*' \( -path "$feature/use-*" -o -path "$dir/src/shared/*" \) |
       while IFS= read -r file; do
         hook=$(basename "${file%.*}")
-        if [ "$file" = "$feature/$(basename "$file")" ] && grep -qsE "from ['\"]\./${hook}['\"]" "$feature"/*-page.tsx; then
+        if [ "$file" = "$feature/$(basename "$file")" ] && grep -qsE "from ['\"]\./${hook}(\.[jt]sx?)?['\"]" "$feature"/*-page.tsx; then
           continue
         fi
         echo "$file"
@@ -216,7 +215,8 @@ schemas() {
 # request: a body read other than `.json()`, as `.text()`, a hook with two
 # awaits that are not requests, and a `.then(` chain with two counted lines:
 # in a braced body read, `.then((r) => {` counts and `return r.json();` on the
-# next line does not, so `.then(set)` after them makes two.
+# next line does not, so `.then(set)` after them makes two, and so does
+# `fetch(…).then((r) => r.json())` with `.then(set)` on the next line.
 # Every recorded run wrote `export function`, `fetch` and `.json()`, one
 # request per line. No recorded run put two requests in one hook, so no fixture
 # fails through a hook: add one when a run does.
