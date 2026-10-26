@@ -64,14 +64,14 @@ tr '\n' ' ' <"$root/rules.md" | grep -qE 'read-only subagent[^.]* review[^.]* fi
 # keeps the three tests without it (#103).
 for f in rules.md skills/github/filing.md skills/github/take-in.md \
   skills/github/SKILL.md skills/github/README.md; do
-  tr -s '[:space:]' ' ' <"$root/$f" | grep -qE "(same|task's) module" || {
+  text=$(tr -s '[:space:]' ' ' <"$root/$f")
+  grep -qE "(same|task's) module" <<<"$text" || {
     echo "FAIL: $f: a fix goes into the task's PR with no module scope"
     exit 1
   }
+  if grep -qi 'small, safe' <<<"$text"; then
+    echo "FAIL: $f: a fix goes into the PR by size and safety alone, with no module"
+    exit 1
+  fi
 done
-if grep -n -i 'small, safe' "$root/rules.md" "$root/skills/github/filing.md" \
-  "$root/skills/github/SKILL.md" "$root/skills/github/README.md"; then
-  echo "FAIL: the lines above take a fix into the PR by size and safety alone, with no module"
-  exit 1
-fi
 echo 'rules_test: ok'
