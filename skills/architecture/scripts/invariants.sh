@@ -63,7 +63,7 @@ else
 fi
 
 # One record per invariant, its fields separated by \036 and the items of a
-# list by \037: id, kind (grep or review), arg, in, except.
+# list by \037: id, kind (grep, lines, files or review), arg, in, except, debt.
 records=$(printf '%s\n' "$text" | awk '
   function bad() {
     printf "invariants.sh: %s: cannot read: %s\n", id, line > "/dev/stderr"
@@ -95,22 +95,27 @@ records=$(printf '%s\n' "$text" | awk '
     n = 0
     for (; t <= ntok && quoted[t]; t++) {
       if (tok[t] == "") bad()
-      list[name] = list[name] (n++ ? "\037" : "") tok[t]
+      list[name] = list[name] (list[name] != "" ? "\037" : "") tok[t]
+      n++
     }
     if (!n) bad()
     return t
   }
   function check(   t) {
     tokenize(substr(line, 7))
-    if (ntok < 4 || quoted[1] || tok[1] != "grep" || !quoted[2] || tok[2] == "") bad()
+    if (ntok < 4 || quoted[1]) bad()
     kind = tok[1]; arg = tok[2]
+    if (kind == "grep") { if (!quoted[2] || arg == "") bad() }
+    else if (kind == "lines" || kind == "files") { if (quoted[2] || arg !~ /^[0-9]+$/) bad() }
+    else bad()
     if (quoted[3] || tok[3] != "in") bad()
     t = items(4, "in")
     if (t <= ntok && !quoted[t] && tok[t] == "except") t = items(t + 1, "except")
+    if (t <= ntok && !quoted[t] && tok[t] == "debt") t = items(t + 1, "debt")
     if (t <= ntok) bad()
   }
   function flush() {
-    if (id != "") printf "%s\036%s\036%s\036%s\036%s\n", id, kind, arg, list["in"], list["except"]
+    if (id != "") printf "%s\036%s\036%s\036%s\036%s\036%s\n", id, kind, arg, list["in"], list["except"], list["debt"]
     id = ""
   }
   { sub(/\r$/, "") }
@@ -119,7 +124,7 @@ records=$(printf '%s\n' "$text" | awk '
   /^- \*\*I-[0-9]+\.\*\*/ {
     flush()
     id = $0; sub(/^- \*\*/, "", id); sub(/\.\*\*.*/, "", id)
-    kind = "review"; arg = ""; split("", list); seen = 0
+    kind = "review"; arg = ""; split("", list); seen = more = 0
     next
   }
   /^[^ \t]/ { flush(); next }
@@ -128,9 +133,13 @@ records=$(printf '%s\n' "$text" | awk '
     line = $0; sub(/^[ \t]+/, "", line)
     if (line ~ /^Check:/) {
       if (seen) bad()
-      seen = 1
+      seen = more = 1
       check()
-    }
+    } else if (more && line ~ /^debt([ \t`]|$)/) {
+      # A debt line right after the Check: line adds to its debt list.
+      tokenize(line)
+      if (items(2, "debt") <= ntok) bad()
+    } else more = 0
   }
   END { if (failed) exit 2; flush() }
 ') || exit 2
@@ -172,23 +181,41 @@ grep_hits() {
     }'
 }
 
-# report: prints the block of one invariant from its hits on stdin, and exits
-# 1 when it fails.
+# size_hits: the files past the limit of a lines check, as path<TAB>lines, or
+# the folders past that of a files check, as folder<TAB>files, with no except
+# path. A folder counts its own code files, not those of its subfolders.
+size_hits() {
+  printf '%s\n' "$files" | KIND=$kind N=$arg EXCEPT=$except_ awk -F'\t' "$lib"'
+    !NF || under_any($1, ENVIRON["EXCEPT"]) { next }
+    ENVIRON["KIND"] == "lines" { if ($2 + 0 > ENVIRON["N"] + 0) printf "%s\t%s\n", $1, $2; next }
+    { d = $1; if (!sub(/\/[^\/]*$/, "", d)) d = "."; count[d]++ }
+    END { for (d in count) if (count[d] > ENVIRON["N"] + 0) printf "%s\t%s\n", d, count[d] }'
+}
+
+# report: prints the block of one invariant from its hits on stdin: the hits,
+# the known debt, and the debt entries with no hit. It exits 1 when it fails,
+# that is when a hit is not under a debt entry.
 report() {
-  LC_ALL=C sort -t $'\t' -k1,1 -k2,2n | ID=$id KIND=$kind awk -F'\t' '
+  LC_ALL=C sort -t $'\t' -k1,1 -k2,2n | ID=$id KIND=$kind DEBT=$debt_ awk -F'\t' "$lib"'
+    BEGIN { nd = split(ENVIRON["DEBT"], entry, "\037") }
     NF {
       t = $0; sub(/^[^\t]*\t[^\t]*\t/, "", t)
-      hit[++n] = ENVIRON["KIND"] == "grep" ? $1 ":" $2 ":" t : $1 " " $2
+      h = ENVIRON["KIND"] == "grep" ? $1 ":" $2 ":" t : $1 " " $2
+      known = 0
+      for (i = 1; i <= nd; i++) if (under($1, entry[i])) known = held[i] = 1
+      if (known) debt[++k] = h; else hit[++n] = h
     }
     END {
       print ENVIRON["ID"] " " (n ? "FAIL" : "PASS")
       for (i = 1; i <= n; i++) print "  " hit[i]
+      for (i = 1; i <= k; i++) print "  debt " debt[i]
+      for (i = 1; i <= nd; i++) if (!held[i]) { e = entry[i]; sub(/\/+$/, "", e); print "  no longer debt " e }
       exit n ? 1 : 0
     }'
 }
 
 status=0
-while IFS=$'\036' read -r id kind arg in_ except_; do
+while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   [ -n "$id" ] || continue
   if [ "$kind" = review ]; then
     echo "$id review only"
@@ -211,7 +238,11 @@ while IFS=$'\036' read -r id kind arg in_ except_; do
     }')
   [ -z "$missing" ] || die "$id: no code file under $missing"
 
-  hits=$(grep_hits) || exit 2
+  if [ "$kind" = grep ]; then
+    hits=$(grep_hits) || exit 2
+  else
+    hits=$(size_hits)
+  fi
   printf '%s\n' "$hits" | report || status=1
 done <<<"$records"
 exit "$status"

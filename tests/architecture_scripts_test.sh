@@ -5,7 +5,8 @@
 # dash; a pattern that looks like a shell command; an invariant with no Check:
 # line, and one in a fenced example. Then the same file with CRLF line ends, at
 # the root, from a subdirectory, with an untracked file and at a ref, and the
-# calls that must stop with exit 2.
+# calls that must stop with exit 2. A second repository holds the lines and
+# files checks and the debt lists.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -124,6 +125,38 @@ check 'a line it cannot read' '2 invariants.sh: I-1: cannot read: Check: grep fe
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
+
+# The lines and files checks, and debt lists: a file and a folder past their
+# limits, a file and a folder that are known debt, a debt path that no longer
+# breaks its check, a document past the limit that is not code, and a
+# subfolder whose files do not count for the folder above it.
+repo2=$tmp/repo2
+new_repo "$repo2"
+mkdir -p "$repo2/src/feature" "$repo2/src/legacy" "$repo2/src/many/sub" "$repo2/docs"
+seq 11 >"$repo2/src/feature/big.ts"
+seq 3 >"$repo2/src/feature/small.ts"
+seq 11 >"$repo2/src/legacy/report.ts"
+echo 'fetch(x);' >>"$repo2/src/legacy/report.ts"
+seq 50 >"$repo2/src/notes.md"
+for f in m1 m2 m3 m4 sub/s1 sub/s2; do echo 1 >"$repo2/src/many/$f.ts"; done
+cat >"$repo2/docs/ARCHITECTURE.md" <<'EOF'
+- **I-1.** No code file in `src/` has more than 10 lines.
+  Check: lines 10 in `src/` debt `src/legacy/report.ts`
+  debt `src/legacy/old.ts`.
+- **I-2.** No folder in `src/` holds more than 3 code files of its own.
+  Check: files 3 in `src/`.
+- **I-3.** The same, with the folder as debt.
+  Check: files 3 in `src/many/` debt `src/many/`.
+- **I-4.** No `fetch` outside the API client.
+  Check: grep `fetch\(` in `src/` debt `src/legacy/report.ts`.
+EOF
+commit "$repo2" 'add the tree'
+run "$repo2"
+check 'lines, files and debt' "1 $(printf '%s\n' 'I-1 FAIL' '  src/feature/big.ts 11' \
+  '  debt src/legacy/report.ts 12' '  no longer debt src/legacy/old.ts' \
+  'I-2 FAIL' '  src/many 4' \
+  'I-3 PASS' '  debt src/many 4' \
+  'I-4 PASS' '  debt src/legacy/report.ts:12:fetch(x);')" "$code $out"
 
 run "$repo" nosuchref
 check 'not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
