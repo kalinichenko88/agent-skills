@@ -5,6 +5,18 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 0.9.0 - 2026-10-26
+
+### Added
+
+- (roadmap) triage new issues: a verdict, a label and a milestone for each, after one approval (#110)
+
+### Fixed
+
+- (github) count only this repository's linked branches in worktree.sh, and stop at a fork's (#109)
+- (review-loop) add a Docs item to the summary, as rules.md asks before the work is done (#107)
+- (rules) tell every read-only subagent, a review one included, to file nothing (#106)
+
 ## 0.8.0 - 2026-10-25
 
 ### Added
