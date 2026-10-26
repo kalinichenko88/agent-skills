@@ -327,21 +327,34 @@ path of its `debt` list; then `no longer debt`, a path of the list with no
 hit, which leaves the list. With `--new-since`, the script also runs each
 invariant at the base, by the base's own architecture file: the invariant
 with the same number and the same kind of check. `new` marks each hit that
-the base does not have with the same status, fails or debt, or has with a
-smaller size: those are the branch's. So a hit is `new` also when the branch
-adds or widens the invariant, changes its `except` or `debt` list, or moves a
-file into or out from under a path of that list. A FAIL whose failing hits
-have no `new` mark was on the base already: it is a finding outside the task.
-A folder is compared by its path, so a folder that the branch only renames
-shows its hits as `new`: the diff shows the move. When the base's file cannot
-be read, each hit is `new`; when the base's check of one invariant cannot
-run, each hit of that invariant is. A line on stderr says so.
+the base does not have with the same status, as a hit that fails or as a debt
+hit, or has with a smaller size: those are the branch's. So a hit is `new`
+also when the branch adds or widens the invariant, moves the hit out of its
+`except` paths, or moves it into or out from under a path of its `debt` list,
+by a change of the list or of the file's path. With `--new-since`, a FAIL
+whose failing hits have no `new` mark was on the base already: it is a
+finding outside the task.
+
+Three cases mark hits `new` that the branch did not add. Read the diff for
+them:
+
+- A `files` check compares a folder by its path. So a folder that the branch
+  only renames shows its own hit as `new`: when the diff shows only the move,
+  the hit is not the branch's. The hits of the files in it follow the rename.
+- With no architecture file at the base, each hit is `new`, as for a branch
+  that adds the first one.
+- When the script cannot read the base's file past a line, each hit of the
+  invariant on that line, and of each one after it, is `new`. When the base's
+  check of one invariant cannot run, each hit of that invariant is `new`.
+
+In the last two cases, lines on stderr after `at <base>:` say so.
 
 - **Exit 0:** no invariant fails.
 - **Exit 1:** one fails. A hit of the change is a defect: fix the code, or
-  end it by the gate. On a branch, the paragraph above tells which FAIL is
-  the branch's. An ADR never excuses a FAIL: an ADR that amends an invariant
-  changes its `Check:` line in the same commit.
+  end it by the gate. On a branch, run the script with `--new-since <base>`:
+  the paragraphs above tell which FAIL is the branch's. An ADR never excuses
+  a FAIL: an ADR that amends an invariant changes its `Check:` line in the
+  same commit.
 - **Exit 2:** a check did not run. The lines on stderr name the cause: a
   wrong call, no git repository, a line that the script cannot read, a
   `Check:` or `debt` line outside an invariant, a code fence that does not

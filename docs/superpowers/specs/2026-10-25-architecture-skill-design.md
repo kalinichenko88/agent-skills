@@ -135,7 +135,8 @@ yes. Its parts:
   code states and each new export would make false (see *Modules and
   layers*);
 - the layers: which folders and classes play each role;
-- the invariants, numbered `I-1`, `I-2` and on;
+- the invariants, numbered `I-1`, `I-2` and on, each number once; an
+  invariant keeps its number;
 - the limits of decomposition (see *Decomposition*);
 - the cross-cutting concerns;
 - an index of the accepted ADRs.
@@ -470,10 +471,10 @@ the same kind of check, with its own `Check:` line and `debt` list. A hit is
 `new` when the base does not have it with the same status, a hit that fails
 or a `debt` hit. So a branch that adds an invariant, widens it, or changes its
 `except` or `debt` list gets `new` on each hit that it adds that way, and an
-invariant that the base does not have marks each of its hits `new`. So does a
-base file that cannot be read, or a base check that cannot run: a line on
-stderr says so, and the run goes on, since the branch can be the one that
-corrects that file. Before it compares, it follows the renames of files: a file
+invariant that the base does not have marks each of its hits `new`. So does an
+invariant on or after a line of the base's file that the script cannot read,
+or one whose check cannot run at the base: a line on stderr says so, and the
+run goes on, since the branch can be the one that corrects that file. Before it compares, it follows the renames of files: a file
 that `git diff -M <base> <ref>` shows as renamed is compared with its old
 path. A folder is compared by its path
 only, because `git diff` names no folder renames. So when a branch only
@@ -499,8 +500,9 @@ The exit status is 0 when no check fails, 1 when one fails, and 2 when a
 check did not run: a wrong call, no git repository, a line that the script
 cannot read, a `Check:` or `debt` line that no invariant holds, a code fence
 that does not close, a path of `in` with no code file outside its `except`
-paths, a pattern that git rejects, or no debt skill
-beside this one. Then the lines on stderr name the cause.
+paths, a pattern that git rejects, two invariants with one number, no
+`checks.awk` beside the script, or no debt skill beside this one. Then the
+lines on stderr name the cause.
 
 The script builds each `git grep` call itself, with `--` before the paths, and
 puts the pattern in its own argument after `-e`, so a pattern that starts with
@@ -546,8 +548,9 @@ pull request, in one line and with no subagent, that
 still hears of it.
 
 The lens runs `invariants.sh --new-since <base> HEAD` first. Each `new` hit
-is the branch's, also when the branch changed the invariant. A FAIL with no
-`new` hit was on the base already: it is a finding outside the task, an issue
+is the branch's, also when the branch changed the invariant, except in the
+three cases that SKILL.md lists. A FAIL whose failing hits have no `new` mark
+was on the base already: it is a finding outside the task, an issue
 through `kalinichenko:github`, or one already filed. Then it runs
 `clones.sh` on a read-only checkout of the head, keeping the clones that touch
 a file the branch changed. Its findings:

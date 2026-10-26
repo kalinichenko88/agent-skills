@@ -1,12 +1,13 @@
 # Reads an architecture file and prints one record per invariant, its fields
 # separated by \036 and the items of a list by \037: id, kind (grep, lines,
 # files or review), arg, in, except, debt. On a line that it cannot read, it
-# prints the cause on stderr and exits 2.
+# prints the cause on stderr, after the text of AT when it is set, and exits 2.
+# Each record that it printed before is whole.
 #
-#   awk -f checks.awk
+#   AT=<where> awk -f checks.awk
 
 function stop(msg) {
-  print "invariants.sh: " msg > "/dev/stderr"
+  print "invariants.sh: " ENVIRON["AT"] msg > "/dev/stderr"
   failed = 1
   exit 2
 }

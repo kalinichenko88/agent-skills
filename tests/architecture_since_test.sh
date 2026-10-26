@@ -58,7 +58,7 @@ seq 11 >"$repo3/src/legacy/grow.ts"
 for f in m1 m2 m3 m4; do echo 1 >"$repo3/src/many/$f.ts"; done
 seq 15 >"$repo3/tools/migrate.ts"
 commit "$repo3" 'add the code'
-root=$(git -C "$repo3" rev-parse HEAD)
+first=$(git -C "$repo3" rev-parse HEAD)
 cat >"$tmp/rules" <<'EOF'
 - **I-1.** Only `src/api/client.ts` calls `fetch`.
   Check: grep `fetch\(` in `src/` except `src/api/client.ts` debt `src/legacy/report.ts`.
@@ -71,11 +71,12 @@ EOF
 cp "$tmp/rules" "$repo3/docs/ARCHITECTURE.md"
 commit "$repo3" 'add the rules'
 base=$(git -C "$repo3" rev-parse HEAD)
-run "$repo3" --new-since "$root" "$base"
+run "$repo3" --new-since "$first" "$base"
 check 'no file at the base' "1 $(printf '%s\n' 'I-1 FAIL' '  new src/feature/a.ts:2:fetch(u);' \
   '  new debt src/legacy/report.ts:12:fetch(x);' \
   'I-2 PASS' '  new debt src/legacy/grow.ts 11' '  new debt src/legacy/report.ts 12' \
   'I-3 PASS' '  new debt src/many 4')" "$code $out"
+check 'no file at the base, on stderr' "invariants.sh: at $first: no architecture file, so each hit is new" "$err"
 mkdir -p "$repo3/src/cli"
 git -C "$repo3" mv src/legacy/report.ts src/legacy/summary.ts
 git -C "$repo3" mv tools/migrate.ts src/cli/migrate.ts
@@ -97,8 +98,8 @@ run "$repo3" --new-since "$base" HEAD
 check 'new since the base' "1 $want" "$code $out"
 run "$repo3" --new-since "$base"
 check 'new since the base, working tree' "1 $want" "$code $out"
-run "$repo3" --new-since "$root" "$root"
-check 'no file at the ref' "0 No architecture file at $root." "$code $out"
+run "$repo3" --new-since "$first" "$first"
+check 'no file at the ref' "0 No architecture file at $first." "$code $out"
 
 # A branch that changes its rules: I-1 loses its except path, I-2 takes a
 # folder as debt, and I-4 is new. A hit is new when the base does not have it
@@ -128,17 +129,25 @@ check 'changed rules' "1 $(printf '%s\n' 'I-1 FAIL' \
   'I-4 FAIL' '  new src/api/client.ts:1:export const get = (u) => fetch(u);' \
   '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
 
-# A base file that the script cannot read past its I-1: no record of it
-# counts, so each hit is new, and stderr says why.
-printf '%s\n' '- **I-1.** No fetch(v).' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
-  '- **I-2.** No fetch.' '  Check: grep fetch in src/' >"$repo3/docs/ARCHITECTURE.md"
+# A base file whose I-1 has a pattern that git rejects and whose I-3 the
+# script cannot read: I-2 is compared as before, each hit of I-1 and I-3 is
+# new, and stderr says why, at the base.
+printf '%s\n' '- **I-1.** a' '  Check: grep `fetch(u` in `src/feature/`.' \
+  '- **I-2.** b' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
+  '- **I-3.** c' '  Check: grep const in src/' >"$repo3/docs/ARCHITECTURE.md"
 commit "$repo3" 'break the rules'
-printf '%s\n' '- **I-1.** No fetch(v).' '  Check: grep `fetch\(v\)` in `src/feature/`.' >"$repo3/docs/ARCHITECTURE.md"
+printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' \
+  '- **I-2.** b' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
+  '- **I-3.** c' '  Check: grep `const` in `src/feature/`.' >"$repo3/docs/ARCHITECTURE.md"
 run "$repo3" --new-since HEAD
-check 'a base file it cannot read' "1 $(printf '%s\n' 'I-1 FAIL' '  new src/feature/b.ts:1:fetch(v);')
-invariants.sh: I-2: cannot read: Check: grep fetch in src/
-invariants.sh: the architecture file at HEAD cannot be read, so each hit is new" "$code $out
-$err"
+check 'a base file it cannot read' "1 $(printf '%s\n' 'I-1 FAIL' \
+  '  new src/feature/a.ts:2:fetch(u);' '  new src/feature/a.ts:3:fetch(u);' \
+  'I-2 FAIL' '  src/feature/b.ts:1:fetch(v);' 'I-3 FAIL' '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
+for line in 'invariants.sh: at HEAD: I-3: cannot read: Check: grep const in src/' \
+  'invariants.sh: at HEAD: each hit of that invariant and of each one after it is new' \
+  'invariants.sh: at HEAD: I-1: git grep failed' 'invariants.sh: at HEAD: each hit of I-1 is new'; do
+  grep -qxF "$line" <<<"$err" || fail "no line on stderr: $line" "$err"
+done
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 

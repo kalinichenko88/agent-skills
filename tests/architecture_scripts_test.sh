@@ -188,6 +188,14 @@ cp "$inv" "$tmp/alone/scripts/"
 code=0
 out=$(cd "$empty" && bash "$tmp/alone/scripts/invariants.sh" 2>"$tmp/err") || code=$?
 check 'no debt skill beside it' "2 invariants.sh: the debt skill's data.ere is not beside this skill" "$code $(cat "$tmp/err")"
+# Without checks.awk beside it, the script cannot read the architecture file:
+# a check that did not run, not a failed invariant.
+mkdir -p "$tmp/half/architecture/scripts" "$tmp/half/debt/scripts"
+cp "$inv" "$tmp/half/architecture/scripts/"
+cp "$root/skills/debt/scripts/data.ere" "$tmp/half/debt/scripts/"
+code=0
+out=$(cd "$empty" && bash "$tmp/half/architecture/scripts/invariants.sh" 2>"$tmp/err") || code=$?
+check 'no checks.awk beside it' '2 invariants.sh: checks.awk is not beside this script' "$code $(cat "$tmp/err")"
 
 # The lines and files checks, and debt lists: a file and a folder past their
 # limits, a file and a folder that are known debt, a debt path that no longer

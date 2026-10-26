@@ -13,8 +13,9 @@
 # grep line that the base has fewer times in the file, by its path before a
 # rename; a file with no such hit at the base, or a smaller one; a folder the
 # same, by its path. An invariant is compared with the one of the same id and
-# kind of check at the base; with none there, each of its hits is new, as when
-# the base's file cannot be read or its check cannot run, which stderr says.
+# kind of check at the base; with none there, each of its hits is new. So it
+# is when the base's file stops before it or its check cannot run: stderr says
+# so, after "at <base>:".
 # The syntax of a Check: line is in the skill's first-file.md. No text of the
 # file runs as a command: a pattern and each path go to git grep as their own
 # arguments, after -e and --, as literal pathspecs. Documents and other data
@@ -88,14 +89,16 @@ else
   exit 0
 fi
 records=$(printf '%s\n' "$text" | awk "$checks") || exit 2
-# olds: the records of the base's own architecture file, or none. A base file
-# that cannot be read gives none: the branch can be the one that corrects it.
+# olds: the records of the base's own architecture file. A base file that
+# cannot be read gives the records above the line it stops at: the branch can
+# be the one that corrects that line.
 olds=
-if [ -n "$base" ] && text=$(file_at "$base"); then
-  olds=$(printf '%s\n' "$text" | awk "$checks") || {
-    olds=
-    echo "invariants.sh: the architecture file at $since cannot be read, so each hit is new" >&2
-  }
+if [ -z "$base" ]; then
+  :
+elif ! text=$(file_at "$base"); then
+  echo "invariants.sh: at $since: no architecture file, so each hit is new" >&2
+elif ! olds=$(printf '%s\n' "$text" | AT="at $since: " awk "$checks"); then
+  echo "invariants.sh: at $since: each hit of that invariant and of each one after it is new" >&2
 fi
 
 # was: each file that the branch renamed, as new path<TAB>old path, so that
@@ -166,7 +169,7 @@ size_hits() {
 # the base. The base may not have the paths of the check, and is not checked
 # for them.
 base_hits() {
-  local where=("$base") prefix=$base: arg=$barg except_=$bexcept ins
+  local where=("$base") prefix=$base: arg=$barg except_=$bexcept ins id="at $since: $id"
   IFS=$'\037' read -r -a ins <<<"$bin"
   if [ "$kind" = grep ]; then grep_hits; else listing | size_hits; fi
 }
@@ -250,7 +253,7 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
     IFS=$'\036' read -r _ _ barg bin bexcept bdebt <<<"$rec"
     old=$(base_hits) || {
       old=
-      echo "invariants.sh: $id: its check at $since cannot run, so each hit is new" >&2
+      echo "invariants.sh: at $since: each hit of $id is new" >&2
     }
   fi
   {
