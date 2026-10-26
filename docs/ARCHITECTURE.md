@@ -92,11 +92,9 @@ Where the split does not fit:
 
 - The rules of the product are prose in `SKILL.md`, and the model runs
   them. No code holds them, and no check sees them.
-- A script holds its roles as sections of one file, not as folders. Some
-  take a role from a sibling: roadmap's `read.sh` reads the tracker for
-  `roadmap.sh`, `next.sh` and `plan.sh`, the `.awk` files hold the logic of
-  those three, and github's `add-finding.sh` reads the tracker through
-  `collect.sh`.
+- The roles are sections of a script, not folders. A script can take part
+  of a role from a sibling in its folder, as roadmap's scripts take some
+  reads from `read.sh` and the graph logic from the `.awk` files.
 
 ## Patterns
 
