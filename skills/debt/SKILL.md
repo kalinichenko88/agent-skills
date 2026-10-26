@@ -87,15 +87,17 @@ start there.
    message, and name those invariants in the report as not checked.
 
    The architecture file can also name the one way to do a kind of work, as
-   the one HTTP client. A second way competes with it when it is code of its
-   own that other modules import, as a second client, a wrapper or a
-   dependency: then the fix must choose which way stays. Find it with
+   the one HTTP client. A second way competes with it when it does the same
+   work without the named way, and is code of its own that other modules
+   import, as a second client, a wrapper of another client or a dependency:
+   then the fix must choose which way stays. Find it with
    `git grep -n` over the scope, as for a rule above. It is a place of its
    own, or it joins the place of the invariant that covers it. The issue of
    that place says that the fix writes an ADR through
    `kalinichenko:architecture`, and that the other hits move to the way that
-   the ADR keeps. A direct call where the named way already serves, as one
-   module that calls `fetch`, is no second way: its issue asks for no ADR.
+   the ADR keeps. A place whose hits are only direct calls where the named
+   way already serves, as one module that calls `fetch`, has no second way:
+   its issue asks for no ADR.
 
    Keep a hit only when the rule's text, its exceptions included, forbids it.
    A hit that the text leaves open is *borderline*: name it in the report,
@@ -145,8 +147,9 @@ start there.
 A place is one fix: a file to split, a broken rule, the clones that one
 shared helper removes, or a piece of over-engineering to remove. The hits
 of one `grep` rule, its `debt` hits included, are one place over several
-files. Each path of a `lines` or `files` check is a place of its own, with
-its own score. Rank the places by their file's score from `measure.sh`: a
+files. Each path of a `lines` or `files` check is weighed as a place of its
+own: a file with its own score, and a folder with the highest score of its
+files. Rank the places by their file's score from `measure.sh`: a
 broken rule takes the importer's score, and a place over several files —
 the hits of one rule, clones, a dependency and its importers, a bundled
 finding — the highest of its files. A file outside the table gets its score
