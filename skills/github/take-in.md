@@ -72,8 +72,8 @@ the person decides. A rerun with another name stops the same way. A rerun goes
 on only when the issue has a linked branch in this repository, or no linked
 branch at all.
 
-A linked branch on an issue that nobody is assigned to can be someone else's:
-the script warns, and does not assign the issue to you. Find out whose the
+A linked branch in this repository, on an issue that nobody is assigned to,
+can be someone else's: the script warns, and does not assign the issue to you. Find out whose the
 branch is before you push to it. Someone else's: say so and wait. Yours: run
 the command the warning gives, which assigns the issue to you.
 
