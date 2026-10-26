@@ -360,6 +360,17 @@ case $out in *'--name feat/5-scout-citations --checkout'*) ;;
   *) fail 'worktree.sh checks out the linked branch it was given' "$out" ;;
 esac
 
+# A linked branch in another repository, as a fork's: gh would make a new
+# branch of that name in this one. worktree.sh stops before its first write.
+# The line is gh issue develop --list as recorded, with another owner.
+printf 'feat/5-linked\thttps://github.com/someone/agent-skills/tree/feat/5-linked\n' >"$tmp/linked"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations 2>&1) &&
+  fail 'worktree.sh goes on with a linked branch in another repository' "$out"
+case $out in *'#5 is linked to https://github.com/someone/agent-skills/tree/feat/5-linked, a branch in another repository: stop'*) ;;
+  *) fail 'worktree.sh names the linked branch in another repository' "$out" ;;
+esac
+case $out in *'dry run:'*) fail 'worktree.sh writes for a linked branch in another repository' "$out" ;; esac
+
 # worktree.sh --here, for "a branch only": it assigns the issue and checks the
 # branch out in the checkout where it runs.
 answer .

@@ -68,6 +68,10 @@ the script warns, and does not assign the issue to you. Find out whose the
 branch is before you push to it. Someone else's: say so and wait. Yours: run
 the command the warning gives, which assigns the issue to you.
 
+A linked branch in another repository, as a fork's, stops the script before
+it assigns or makes anything: without `--branch-repo`, `gh` would make a new
+branch of that name in this repository. Say so and wait.
+
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree
 as `workdir`, and every file path, read or patched, is written under it.

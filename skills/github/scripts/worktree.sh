@@ -9,10 +9,11 @@
 # branch can be someone else's.
 #
 # A branch already linked to the issue wins over a <branch> that is not
-# linked: the first one that gh lists. A branch already checked out somewhere
-# is worked on there. A session already in a worktree, as one started with
-# claude --worktree or codex --worktree, checks the branch out where it is;
-# --here does the same in any checkout, for "a branch only".
+# linked: the first one that gh lists. A linked branch in another repository,
+# as a fork's, stops the script before it writes. A branch already checked out
+# somewhere is worked on there. A session already in a worktree, as one started
+# with claude --worktree or codex --worktree, checks the branch out where it
+# is; --here does the same in any checkout, for "a branch only".
 #
 # DRY_RUN=1 prints the commands that would write, and runs none.
 
@@ -26,7 +27,26 @@ n=$1 branch=$2 here=${3:-}
 
 run() { if [ "${DRY_RUN:-}" = 1 ]; then echo "dry run:$(printf ' %q' "$@")"; else "$@"; fi; }
 
-linked=$(gh issue develop --list "$n" | cut -f1)
+list=$(gh issue develop --list "$n")
+linked=$(cut -f1 <<<"$list")
+case $'\n'$linked$'\n' in
+  *$'\n'"$branch"$'\n'* | $'\n\n') ;;
+  *)
+    branch=${linked%%$'\n'*}
+    echo "#$n is linked to the branch $branch already: using it"
+    ;;
+esac
+
+# Without --branch-repo, gh makes a new branch of that name in this
+# repository. A fork's branch is checked out by hand.
+url=$(awk -F'\t' -v b="$branch" '$1 == b { print $2; exit }' <<<"$list")
+if [ -n "$url" ]; then
+  repo=$(gh api 'repos/{owner}/{repo}' --jq .full_name)
+  case $url in
+    */"$repo"/tree/*) ;;
+    *) echo "#$n is linked to $url, a branch in another repository: stop" >&2; exit 1 ;;
+  esac
+fi
 
 # Assigned to you, the issue's linked branch counts as yours (collect.sh).
 # GitHub does not say whose a branch is: one that is linked while nobody is
@@ -42,13 +62,6 @@ if [ "$assignees" = 0 ]; then
 else
   run gh issue edit "$n" --add-assignee @me
 fi
-case $'\n'$linked$'\n' in
-  *$'\n'"$branch"$'\n'* | $'\n\n') ;;
-  *)
-    branch=${linked%%$'\n'*}
-    echo "#$n is linked to the branch $branch already: using it"
-    ;;
-esac
 
 path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
 if [ -n "$path" ]; then
