@@ -172,7 +172,10 @@ Sort the hits as `filing.md` does — *Already decided*, as a closed issue that
 settles a size cap or a layout; *Already filed*; *Fixed before* — and then:
 
 - **An open debt issue** whose `## Where` names the same file covers it. A
-  directory or a whole app named there does not. Re-measure it: put this run's
+  directory or a whole app named there does not. A folder of a `files` check
+  is covered only by an issue whose `## Where` names the same folder as its
+  place. That issue covers no file in the folder, and the issue of a file in
+  it does not cover the folder. Re-measure it: put this run's
   table in its `## Where`, in place of the old one or as the first, end the
   body with "Re-measured on <date> at <sha>.", and comment one line on what
   moved. It does not count towards the three. An issue that someone works on,
@@ -203,7 +206,9 @@ and no assignee. Its body has these parts, each under its own `##` heading, in
 at most 600 words, tables and code blocks not counted:
 
 1. `## Where`: the rows of `measure.sh` for the place's files, and the
-   "Measured on" line of the scope's run. No line numbers: a hot file's lines
+   "Measured on" line of the scope's run. A folder of a `files` check is
+   named as the place by its path, above the rows of its own files. No line
+   numbers: a hot file's lines
    move with the next pull request, and the SHA dates the evidence.
 2. `## What is broken`: the rule, quoted with its file and heading, or with
    its `I-<n>` for an invariant, or the
