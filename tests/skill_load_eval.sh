@@ -214,8 +214,9 @@ schemas() {
 # that reads the body on the request line, as `ky.get(…).json()` or
 # `api.get(…).then((r) => r.json())`. Each of these fails though it holds one
 # request: a body read other than `.json()`, as `.text()`, a hook with two
-# awaits that are not requests, and a `.then(` chain with two counted lines,
-# as a braced `.then((r) => {` with `return r.json();` and then `.then(set)`.
+# awaits that are not requests, and a `.then(` chain with two counted lines:
+# in a braced body read, the line `.then((r) => {` counts, as `.then(set)`
+# does after it.
 # Every recorded run wrote `export function`, `fetch` and `.json()`, one
 # request per line. No recorded run put two requests in one hook, so no fixture
 # fails through a hook: add one when a run does.
