@@ -73,9 +73,9 @@ on only when the issue has a linked branch in this repository, or no linked
 branch at all.
 
 A linked branch in this repository, on an issue that nobody is assigned to,
-can be someone else's: the script warns, and does not assign the issue to you. Find out whose the
-branch is before you push to it. Someone else's: say so and wait. Yours: run
-the command the warning gives, which assigns the issue to you.
+can be someone else's: the script warns, and does not assign the issue to you.
+Find out whose the branch is before you push to it. Someone else's: say so and
+wait. Yours: run the command the warning gives, which assigns the issue to you.
 
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree
