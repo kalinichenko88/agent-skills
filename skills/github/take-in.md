@@ -9,16 +9,17 @@ into work; a mention inside other work is not. Check it first: `bash
 <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints `take #91`, or
 each reason why not, one per line.
 
-**Then say what the task is.** When the check stops with an error
-(`tracker.md`), skip this step: the error is a line from `gh`, or one that
-starts with `usage:` or `take-in-check.sh:`. Otherwise read the issue: `gh
-issue view 91 --json title,body`, or with its URL. Before the next step, write its number, its title and two or
-three sentences of your own: what is wrong or what is wanted, and what must be
-true for the work to be done. For an issue with `## Also:` sections, name each
-added problem too. This is the first thing you say about the issue. Write your
-sentences in the person's language, and give the title as the issue has it.
-When this read fails, say so, and go on with what the check printed. The same
-read gives the files, symbols and words for `collect.sh` below.
+**Then say what the task is.** When the check stops with an error, report it
+and stop (`tracker.md`): no summary is due. The error is any line other than
+`take #91` and the lines that start with `#91`. Otherwise read the issue:
+`gh issue view 91 --json title,body`, or with its URL. Before the next step,
+write its number, its title and two or three sentences of your own: what is
+wrong or what is wanted, and what must be true for the work to be done. For an
+issue with `## Also:` sections, name each added problem too. This is the first
+thing you say about the issue. Write your sentences in the person's language,
+and give the title as the issue has it. When this read fails, say so, and go
+on with what the check printed. The same read gives the files, symbols and
+words for `collect.sh` below.
 
 Then act on what the check printed:
 
