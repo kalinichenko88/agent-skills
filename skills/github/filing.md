@@ -10,9 +10,10 @@ Scout Rule. Check each condition against the diff you would write:
 - **Same module** — it changes a file the task changes, or a file next to them
   in the same module. The module is the one that the project's instruction
   file or a conventions skill draws, as a feature or a package; with neither,
-  the directory of a file the task changes, not counting a test. A test
-  belongs only to the module of the code it tests, wherever it lives; a test
-  of several modules, or a helper that tests share, belongs to none.
+  the directory of a file the task changes. For a test, that is the directory
+  of the code it tests; a test helper gives no directory. A test belongs only
+  to the module of the code it tests, wherever it lives; a test of several
+  modules, or a helper that tests of several modules share, belongs to none.
 - **Clear** — there is only one way to fix it, and nothing outside the module
   relies on what it changes.
 - **Smaller** — its share of the diff is smaller than the task's own diff will

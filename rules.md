@@ -120,8 +120,9 @@ that only ever receives that kind of care does not rot.
 
 It covers the files the task edits and the files next to them in the same
 module: the module as the project's instruction file or a conventions skill
-draws it, or else the directory of a file the task edits, not counting a test.
-A test belongs only to the module of the code it tests. A finding there, from
+draws it, or else the directory of a file the task edits. For a test, that is
+the directory of the code it tests; a test helper gives no directory. A test
+belongs only to the module of the code it tests. A finding there, from
 a stale comment or a broken link to a bug in the next function, goes into this
 change when it meets three conditions. It is clear: there is one way to fix it,
 and nothing outside the module relies on what it changes. It is smaller than

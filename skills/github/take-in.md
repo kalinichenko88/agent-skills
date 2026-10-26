@@ -130,8 +130,8 @@ The issue in hand stays the task throughout. A hit that is someone else's work
      no code added for it but a bug's test. It closes with the PR.
    - **Rides along** — it passes the four tests in step 4, with *Same module*
      widened to the same area: its fix changes a file in the same module, or a
-     file of the screen, window or command the task changes, or a test of one
-     of them.
+     file of the screen, window or command the task changes, or a test of that
+     screen, window or command.
    - **Stays open** — none of these. If the change moves the code it cites,
      *Finishing* in `SKILL.md` corrects its text.
 4. **Check every other hit.** It rides along only if it passes all four,
