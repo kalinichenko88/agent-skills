@@ -1,7 +1,7 @@
 # Architecture
 
 This file holds what the code cannot tell: the modules, the layers, the
-patterns that every file keeps, and the invariants that
+patterns of the scripts and the tests, and the invariants that
 `skills/architecture/scripts/invariants.sh` checks. The principles are in
 `kalinichenko:architecture`. The ADRs go in `docs/adr/`.
 
@@ -19,8 +19,9 @@ start of each session and each subagent. A skill loads when its
 repository.
 
 To the checks, Markdown, JSON and everything under `fixtures/` are data
-(`skills/debt/scripts/data.ere`). The code they see is the bash and awk
-under `skills/`, `hooks/` and `tests/`, and the `Makefile`. The text of a
+(`skills/debt/scripts/data.ere`). The code they see is every other file
+that git tracks: the bash and awk under `skills/`, `hooks/` and `tests/`,
+the `Makefile`, and small files as `LICENSE` and `data.ere`. The text of a
 skill is the product, but no check sees it: an invariant on it is review
 only.
 
@@ -38,8 +39,8 @@ only.
 - `.claude/skills/` — `release` and `infographic`: skills of this
   repository, not of the plugin.
 - `.claude/CLAUDE.md`, `AGENTS.md` — the instructions for an agent that
-  works in this repository. The plugin does not give them to its users:
-  `rules.md` does that.
+  works in this repository. No host loads them from the installed plugin:
+  its users get `rules.md`.
 - `.claude-plugin/`, `.codex-plugin/` — the manifests. `Makefile` — `check:
   lint test`. `.github/workflows/check.yml` — CI.
 
@@ -66,10 +67,11 @@ uses another by its name, `kalinichenko:<name>`, in text, or by a script's
 usage block. In code, one link exists: `invariants.sh` reads the debt
 skill's `data.ere` (I-5).
 
-**Direction in text.** `rules.md` names github, roadmap, review-loop and the
-two conventions. architecture names debt, github and roadmap. debt names
-github and roadmap. roadmap names github. github names roadmap and
-review-loop, and both name github back: two cycles, in text only.
+**Direction in text.** `rules.md` names github, review-loop and the two
+conventions. architecture names debt, github, roadmap and
+react-conventions. debt names github, roadmap and review-loop. roadmap
+names github. github and review-loop name each other: one cycle, in text
+only.
 
 **Where a module's files are.** A module's test and fixtures are outside its
 folder, in `tests/`: the Makefile finds a test by `tests/<name>_test.sh`. So
@@ -80,74 +82,73 @@ a change to a script changes two folders.
 In a skill with scripts:
 
 - the edge is `SKILL.md` and the `.md` files beside it, which the model
-  reads to decide which script to run, and the usage block of each script
-  with its argument check (`usage`, exit 2);
-- the logic is the awk programs (`skills/roadmap/scripts/*.awk`, and the
-  awk inside `invariants.sh`, `measure.sh` and `collect.sh`) and the shell
-  after the argument check;
-- the data is the `gh`, `git`, `codex` and `npx` calls. `read.sh` and
-  `collect.sh` are data only: they turn the tracker into records, or into
-  one file, for the others.
+  reads to decide which script to run, and the argument check at the top of
+  each script;
+- the logic is the awk programs and the shell after the argument check;
+- the data is the `gh`, `git`, `codex` and `npx` calls.
 
 Where the split does not fit:
 
 - The rules of the product are prose in `SKILL.md`, and the model runs
   them. No code holds them, and no check sees them.
 - A script is one file with the roles as sections, not folders. Only
-  roadmap splits them into files: `read.sh` (data), `graph.awk` and the
-  other `.awk` programs (logic), `roadmap.sh`, `next.sh`, `plan.sh` and
-  `board.sh` (edge).
+  roadmap moves some of them into files of their own: `read.sh` reads the
+  tracker for `roadmap.sh`, `next.sh` and `plan.sh`, and the `.awk` files
+  hold the logic that they share.
 
 ## Patterns
 
-1. A script's header is its contract: what it does, `#   name.sh <args>`
-   lines, what it refuses, `DRY_RUN`, and a `Needs` line. `usage` prints
-   the usage to stderr and exits 2.
-2. Exit codes: 0, done; 1, a refusal or a finding, so the step is not done
-   and the reader decides; 2, a wrong call or a check that cannot run. An
-   error goes to stderr as `name.sh: <why>`.
-3. `set -euo pipefail`. A script that sets an EXIT trap empties `finished`
+The first five hold for each script in `skills/*/scripts/`.
+
+1. The header is the contract: what the script does, its
+   `#   name.sh <args>` lines, what it refuses, and `DRY_RUN` when it
+   writes. A wrong call prints the usage to stderr and exits 2.
+2. `set -euo pipefail`. A script that sets an EXIT trap empties `finished`
    before it and sets `finished=1` at each good end; the trap turns an exit
    of 0 without it into 1, because bash 3.2 runs the trap with `$?` at 0
    when `set -u` stops the script. `clean` in
    `skills/github/scripts/collect.sh` is the shape.
-4. A script is one file: `run`, `clean` and `usage` are copied, not sourced.
-   It finds its siblings by `$(dirname "$0")`. A `SKILL.md` runs it as
-   `bash <dir>/scripts/<name>.sh`, where `<dir>` is the skill's base
-   directory and `<skills>` the directory above: packaging can drop the
-   executable bit.
-5. A regex or a path goes to awk through `ENVIRON`, not `-v`: `-v` reads a
-   backslash as an escape.
-6. A test: `set -eu`, `tmp=$(mktemp -d)`, `trap 'rm -rf "$tmp"' EXIT`,
-   `fail`, `check`, and the last line `echo '<name>_test: ok'`. `make test`
-   passes a test only when it exits 0 and that line is last.
-   `tests/makefile_test.sh` checks the harness. A fake `gh`, `codex`, `npx`
-   or `claude` in `$tmp/bin`, first on `PATH`, answers from
-   `tests/fixtures/<area>/` and logs its calls.
+3. A script is one file: `run`, `clean` and `usage` are copied, not sourced.
+   It finds its siblings by `$(dirname "$0")`.
+4. A `SKILL.md` runs a script as `bash <dir>/scripts/<name>.sh`, because
+   packaging can drop the executable bit. `<dir>` is the skill's base
+   directory, and `<skills>` is the directory above it.
+5. A regex goes to awk through `ENVIRON`, not `-v`: `-v` reads a backslash
+   as an escape.
+6. A test prints `<name>_test: ok` as its last line. `make test` passes a
+   test only when it exits 0 and that line is last: under bash 3.2, a
+   script that `set -u` stops exits 0 when it has an EXIT trap.
+   `tests/makefile_test.sh` checks the harness.
 7. ShellCheck reads the paths that the `lint` target of the Makefile lists:
    a new `scripts/` folder joins that line.
 
 ## Invariants
 
-- **I-1.** `hooks/rules.sh` MUST need only bash: it calls no other program.
-  Check: grep `(^|[ |(])(jq|awk|sed|grep|tr|cut|perl|python3?)( |$)` in `hooks`.
+A `grep` check finds the usual forms of a breach, not every form: the review
+reads for the rest.
+
+- **I-1.** `hooks/rules.sh` MUST escape `rules.md` in bash: it calls no text
+  tool, as `jq`, `awk` or `sed`.
+  Check: grep `(^|[[:space:]|(;])(jq|awk|sed|grep|tr|cut|perl|python3?)([[:space:]]|$)` in `hooks`.
 - **I-2.** A script in `skills/` or `hooks/` MUST NOT call `jq`: a filter is
   `gh`'s own `--jq`, and the hook escapes by hand.
-  Check: grep `(^|[ |(;])jq( |$)` in `skills` `hooks`.
-- **I-3.** Bash code MUST run on bash 3.2: no associative array, `mapfile`,
-  `readarray`, `coproc`, `;;&` or case change as `${x,,}`.
-  Check: grep `declare -A|mapfile|readarray|coproc|;;&|\$\{[A-Za-z_]+(,,|\^\^)` in `skills` `hooks` `tests`.
+  Check: grep `(^|[[:space:]|(;])jq([[:space:]]|$)` in `skills` `hooks`.
+- **I-3.** Bash code MUST run on bash 3.2: no associative array or nameref,
+  no `mapfile`, `readarray`, `coproc`, `;&`, `;;&`, `|&` or `[[ -v`, and no
+  case change as `${x,,}`.
+  Check: grep `(declare|local|typeset)[[:space:]]+-[a-zA-Z]*[An]|mapfile|readarray|coproc|;;?&[[:space:]]*$|\|&[[:space:]]|\[\[[[:space:]]+-v[[:space:]]|\$\{[A-Za-z_0-9]+(\[[^]]*\])?[,^]` in `skills` `hooks` `tests`.
 - **I-4.** awk code MUST run on BWK awk, mawk and gawk: no gawk extension.
-  Check: grep `gensub|asorti?\(|strftime|systime|mktime|PROCINFO|IGNORECASE|FPAT|BEGINFILE|ENDFILE|patsplit` in `skills` `hooks` `tests`.
-- **I-5.** A script MUST read only the files of its own skill. The one
+  Check: grep `gensub|asorti?[[:space:]]*\(|strftime|systime|mktime|strtonum|PROCINFO|IGNORECASE|FPAT|BEGINFILE|ENDFILE|patsplit|@include` in `skills` `hooks` `tests`.
+- **I-5.** A script MUST NOT read a file of another skill. The one
   exception is `invariants.sh`, which reads the debt skill's `data.ere`: one
   data rule for `measure.sh`, `clones.sh` and the checks.
-  Check: grep `\.\./\.\./|skills/[a-z-]+/` in `skills` `hooks` except `skills/architecture/scripts/invariants.sh`.
+  Check: grep `\.\./\.\.|skills/[a-z-]+/` in `skills` `hooks` except `skills/architecture/scripts/invariants.sh`.
 - **I-6.** A script that writes to GitHub MUST take `DRY_RUN=1`: then it
   prints each write and runs none. Review only.
-- **I-7.** `make check` MUST reach no network and call no model: a test
-  replaces the tool with a fake on `PATH`. A script that calls the model is
-  a `tests/<name>_eval.sh`. Review only.
+- **I-7.** `make test` MUST reach no network and call no model: a fake
+  first on `PATH` takes the place of each tool that would. A test that calls
+  the model is a `tests/<name>_eval.sh`, which `make test` does not run.
+  Review only.
 
 ## Limits of decomposition
 
@@ -175,9 +176,9 @@ hold 10. A new number needs an ADR.
 - **Size.** `rules.md` stays under 10,000 characters, Claude Code's cap on
   hook context; `tests/rules_test.sh` checks it. Pictures are WebP, since
   the plugin installs as a copy of the repository.
-- **Safety.** No script runs the code of the project it works in. A write
-  reads its target again just before it. Nothing from a private source goes
-  into a public repository (`kalinichenko:github`).
+- **Safety.** No step of the debt and architecture skills runs the code of
+  the project it reads. Nothing from a private source goes into a public
+  repository (`kalinichenko:github`).
 - **Release.** `/release` alone moves `version` in
   `.codex-plugin/plugin.json` and writes `CHANGELOG.md`.
   `.claude-plugin/plugin.json` carries no `version`.
