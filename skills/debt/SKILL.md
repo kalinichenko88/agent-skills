@@ -175,7 +175,7 @@ settles a size cap or a layout; *Already filed*; *Fixed before* — and then:
   directory or a whole app named there does not. A folder of a `files` check
   is covered only by an issue whose `## Where` names the same folder as its
   place. That issue covers no file in the folder, and the issue of a file in
-  it does not cover the folder. Re-measure it: put this run's
+  it does not cover the folder. Re-measure the issue that covers the place: put this run's
   table in its `## Where`, in place of the old one or as the first, end the
   body with "Re-measured on <date> at <sha>.", and comment one line on what
   moved. It does not count towards the three. An issue that someone works on,
