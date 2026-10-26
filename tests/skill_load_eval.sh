@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Gives two TypeScript tasks and two React tasks to Haiku subagents. It counts
-# the runs that invoke the conventions skills before their first write, and
-# the written files with an implicit return in a method callback. It counts
+# Gives two TypeScript tasks and three React tasks to Haiku subagents. It
+# counts the runs that invoke the conventions skills before their first write,
+# and the written files with an implicit return in a method callback. It counts
 # the order runs with a file that does not open with its primary export, and
 # the order runs that put the order, its line, the customer or the discount
 # outside models/, or two of them in one file. It counts the feature runs that
 # put a sub-component's own hook at the feature root or in `shared`, and the
-# feature runs with a zod schema outside schemas/. Its runs call the model, so
-# they cost tokens and are not part of `make check`: run it by hand after a
-# change to rules.md or to a skill's description. It runs with this machine's
-# other plugins and settings, the setup the rules must work in.
+# feature runs with a zod schema outside schemas/. It counts the React runs
+# with a component or a hook that holds two async calls. Its runs call the
+# model, so they cost tokens and are not part of `make check`: run it by hand
+# after a change to rules.md or to a skill's description. It runs with this
+# machine's other plugins and settings, the setup the rules must work in.
 #
 # With --check, it runs only the checks, on the logs folder of an earlier run.
 # `make check` runs them so on tests/fixtures/skill_load, through
@@ -27,6 +28,7 @@ ts_task='Add src/cart-total.ts to this project. A cart item has an id, a name, a
 order_task='Add an order feature to this project, in src/. An order has an id, a customer and a list of lines. A line has a product id, a quantity and a unit price in cents. A customer has an id, a name and a discount, which is either a percent or a fixed amount in cents. Add a function that returns the order total in cents after the customer discount, and a function that returns a text summary of the order, one row per line and the total at the end, each in its own file. Both functions use the same order, line, customer and discount types. Write the files, then reply with the path and the contents of every file you wrote.'
 react_task='Add src/search-panel.tsx to this project: a React component with a text input and a Search button. On submit it fetches /api/search?q=<the text>, which returns a JSON array of { id, title, url }. While the request runs it shows "Loading…", on failure it shows the error message, and on success it shows the results as a list of links. Write the file, then reply with its contents.'
 feature_task='Add a products feature to this project, in src/features/products/. Its page shows a filter panel and a grid of products. The filter panel keeps the values the user is typing in a hook that only the panel uses, and it waits 300 ms after the last keystroke before it applies them: keep that number in a constant. The page loads the products once from GET /api/products, which returns a JSON array of { id, name, price, category }, checks the response with a zod schema, and the grid shows the products that match the applied filters. Write the files, then reply with the path and the contents of every file you wrote.'
+comments_task='Add a comments section to this project, in src/. It is a React component that takes a post id. When it mounts, it loads the comments from GET /api/posts/<the post id>/comments, which returns a JSON array of { id, author, text }, and shows them as a list. Below the list, a form with a text area and a Send button posts a new comment: POST /api/posts/<the post id>/comments with { text } returns the new comment, which joins the end of the list, and the text area is cleared. While the comments load, the section shows "Loading…"; while a comment is being sent, the form is disabled; a failed request shows its error message. Write the files, then reply with the path and the contents of every file you wrote.'
 # One Haiku session that hands the task to one Haiku subagent, as the main
 # model does with routine work. The installed copy of the plugin is turned off,
 # so the skill list and the rules come from this checkout. The files it writes
@@ -61,6 +63,8 @@ count() {
   local skill=$1 loaded=0 log calls
   shift
   for log; do
+    # The logs of an older eval have no log of a later task.
+    [ -f "$log" ] || { echo "no log: $log" && continue; }
     calls=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id != null)
       | .message.content[] | select(.type == "tool_use")
       | if .name == "Skill" then .input.skill
@@ -121,21 +125,32 @@ first() {
 # nested <dir>...: the feature runs that keep the filter panel's own hook out
 # of the feature root and out of `shared`, as react-conventions asks. It prints
 # each hook it finds there. The recorded runs without the rule wrote it as
-# src/features/products/use-filter-draft.ts.
+# src/features/products/use-filter-draft.ts. A hook at the root that a
+# `*-page.tsx` at the root imports is the page's own, and passes: a recorded
+# run with the rule on one hook per job wrote use-products.ts so.
 # ponytail: it checks only that shape, a `use-*` file found by its name. Each
 # of these passes: a feature-level hooks/ folder, a hook in the grid's folder,
 # a hook in src/hooks or another folder outside the feature, a camelCase name,
 # a hook folder with an index.ts, a hook in a folder named shared inside the
 # feature, a constant file at the feature root. A `use-*` file inside a `use-*`
 # folder at the feature root counts as a hook at the root. Each of these
-# fails, though the skill allows it: a page's own `use-*` hook at the feature
-# root, a generic `use-*` hook in src/shared. No recorded run wrote any of
-# these, so add a case when a run does.
+# fails, though the skill allows it: the page's own hook when the page file is
+# not named `*-page.tsx` or imports it in another form than `./use-products`,
+# as `./use-products.js`, a generic `use-*` hook in src/shared. No recorded run
+# wrote any of these, so add a case when a run does.
 nested() {
-  local ok=0 dir found
+  local ok=0 dir feature found
   for dir; do
-    [ -d "$dir/src/features/products" ] || { echo "no feature written: $dir" && continue; }
-    found=$(find "$dir/src" -type f -name 'use-*' \( -path "$dir/src/features/products/use-*" -o -path "$dir/src/shared/*" \))
+    feature=$dir/src/features/products
+    [ -d "$feature" ] || { echo "no feature written: $dir" && continue; }
+    found=$(find "$dir/src" -type f -name 'use-*' \( -path "$feature/use-*" -o -path "$dir/src/shared/*" \) |
+      while IFS= read -r file; do
+        hook=$(basename "${file%.*}")
+        if [ "$file" = "$feature/$(basename "$file")" ] && grep -qsE "from ['\"]\./${hook}['\"]" "$feature"/*-page.tsx; then
+          continue
+        fi
+        echo "$file"
+      done)
     if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
   done
   echo "own folder: $ok of $# feature runs keep the panel's hook out of the feature root and shared"
@@ -180,6 +195,47 @@ schemas() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
+# hooks <dir>...: the React runs whose every component and hook holds at most
+# one async call, as react-conventions asks: two requests and their state go
+# to a hook each. It prints the first line of each one that holds more. The
+# recorded comments runs without the rule loaded the comments in an effect and
+# sent a new one in a handler, both in the component body. The search panel
+# and the products page have one request each, and keep it.
+# ponytail: it finds a component or a hook by `export function` or `export
+# default function`, then a capital letter or `use` and a capital letter, at a
+# line's start. Its body ends at the first line that is `}`, with a `;` or a
+# `//` comment or neither. The line `}: Props) {` or `} {` of a signature over
+# several lines does not end it. It counts the lines in that body with `await`
+# or `.then(`, except a line with `.json()` and no `fetch(`: `await fetch(…)`
+# and then `await response.json()` is one request, and so are `fetch(…)`,
+# `.then((r) => r.json())` and `.then(set)` on three lines. Each of these
+# passes unseen: an arrow function, one that is not exported, two requests on
+# one line, a request with no `await` or `.then(`, as `useQuery`, or a client
+# that reads the body on the request line, as `ky.get(…).json()` or
+# `api.get(…).then((r) => r.json())`. Each of these fails though it holds one
+# request: a body read other than `.json()`, as `.text()`, a hook with two
+# awaits that are not requests, and a `.then(` chain with two counted lines:
+# in a braced body read, `.then((r) => {` counts and `return r.json();` on the
+# next line does not, so `.then(set)` after them makes two, and so does
+# `fetch(…).then((r) => r.json())` with `.then(set)` on the next line.
+# Every recorded run wrote `export function`, `fetch` and `.json()`, one
+# request per line. No recorded run put two requests in one hook, so no fixture
+# fails through a hook: add one when a run does.
+hooks() {
+  local ok=0 dir found
+  for dir; do
+    [ -n "$(find "$dir/src" \( -name '*.ts' -o -name '*.tsx' \))" ] || { echo "no TypeScript file written: $dir/src" && continue; }
+    found=$(find "$dir/src" \( -name '*.ts' -o -name '*.tsx' \) -exec awk '
+      FNR == 1 { open = 0 }
+      /^export (default )?function ([A-Z]|use[A-Z])/ { start = FILENAME ": " $0; calls = 0; open = 1; next }
+      open && /(^|[^[:alnum:]_])await[[:space:]]|\.then\(/ && !(/\.json\(\)/ && !/(^|[^[:alnum:]_])fetch\(/) { calls++ }
+      open && /^};?[[:space:]]*(\/\/.*)?$/ { if (calls > 1) print start; open = 0 }' {} +)
+    if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
+  done
+  echo "one job: $ok of $# React runs hold at most one async call in each component and hook"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
 if [ "${1:-}" = --check ]; then
   [ "$#" -eq 2 ] || usage
   [ -d "$2" ] || usage
@@ -195,13 +251,14 @@ else
     run "$react_task" "$logs/react-$i.jsonl" &
     run "$order_task" "$logs/order-$i.jsonl" &
     run "$feature_task" "$logs/feature-$i.jsonl" '"zod":"^4.6.0"' &
+    run "$comments_task" "$logs/comments-$i.jsonl" &
   done
   wait
 fi
 
 failed=0
-count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl "$logs"/order-*.jsonl "$logs"/feature-*.jsonl
-count react-conventions "$logs"/react-*.jsonl "$logs"/feature-*.jsonl
+count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl "$logs"/order-*.jsonl "$logs"/feature-*.jsonl "$logs"/comments-*.jsonl
+count react-conventions "$logs"/react-*.jsonl "$logs"/feature-*.jsonl "$logs"/comments-*.jsonl
 # A run's folder ends in its number, as order-1. Its log, order-1.jsonl, does
 # not.
 files=()
@@ -212,5 +269,6 @@ first "$logs"/order-*[0-9]
 models "$logs"/order-*[0-9]
 nested "$logs"/feature-*[0-9]
 schemas "$logs"/feature-*[0-9]
+hooks "$logs"/react-*[0-9] "$logs"/feature-*[0-9] "$logs"/comments-*[0-9]
 echo "logs: $logs"
 exit "$failed"

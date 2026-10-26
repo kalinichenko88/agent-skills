@@ -44,7 +44,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   — house TypeScript style.
 - **[`kalinichenko:react-conventions`](skills/react-conventions/README.md)** —
   layer and feature boundaries in a React app, where a sub-component's own
-  files go, request state as one union, and no `ref.current` in render.
+  files go, request state as one union, a hook for each of a component's two
+  jobs, and no `ref.current` in render.
 
 Each skill's README says when it starts and what you get. The github and
 roadmap READMEs show each scenario as a picture.
@@ -163,11 +164,13 @@ instead of its primary export, and the runs that put the order, its line, the
 customer or the discount outside `models/` or two of them in one file. In a
 React feature, it counts the runs that put a sub-component's own hook at the
 feature root or in `shared`, and the runs with a zod schema outside
-`schemas/`. With `--check <logs folder>` it runs only these checks, on the
-logs that an earlier run printed. `tests/skill_load_checks_test.sh` runs them
-so in `make check`, on `tests/fixtures/skill_load`: one recorded run and a
-case that fails each check. A change to a check updates the output that the
-test expects.
+`schemas/`. In the three React tasks, it counts the runs with a component or a
+hook that holds two requests or more: a comments section loads and sends
+comments, and the other two tasks have one request each. With
+`--check <logs folder>` it runs only these checks, on the logs that an earlier
+run printed. `tests/skill_load_checks_test.sh` runs them so in `make check`,
+on `tests/fixtures/skill_load`: two recorded runs and a case that fails each
+check. A change to a check updates the output that the test expects.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
 It checks that no count of rounds goes past three, and that a security review
 follows the last pass. Its fixture has a local `origin`, and its task says
