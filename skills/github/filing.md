@@ -112,9 +112,10 @@ Name the relation in the body — `Related to #12`, `Blocks #12`, `Supersedes
 agent reads something true, and leave a one-line comment saying what moved and
 why. GitHub keeps the edit history, so nothing is lost by correcting the text
 in place. A duplicate is closed against the survivor, never left standing as a
-second opinion. When the other side is busy, or a host that holds two added
-findings, it gets the one-line comment only, and its body stays as it is. A
-busy one also stays open, and the final report names it.
+second opinion. When the other side is busy, it gets the one-line comment
+only: it stays open, its body stays as it is, and the final report names it.
+When the other side is a host that holds two added findings, it gets the
+one-line comment, and its body stays as it is.
 
 ## A defect in this plugin
 

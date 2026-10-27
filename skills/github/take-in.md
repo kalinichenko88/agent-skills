@@ -126,9 +126,8 @@ you edit.
 
 Before the first edit, sort the open issues on the code the task will change.
 The issue in hand stays the task throughout. A busy hit (`tracker.md`) gets no
-verdict below and stays as it is. Say so. An entry that you made for this task
-does not count: an assignment after a verdict, as below, or the task's own pull
-request.
+new verdict below: it keeps the one this task gave it, or none, and stays as it
+is. Say so.
 
 1. **Search.** The scout's groups hold the hits, found by identifier and by
    title, so a report that names no file still shows up. When the work reaches
