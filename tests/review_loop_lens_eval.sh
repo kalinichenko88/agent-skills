@@ -243,13 +243,13 @@ for i in $(seq "$runs"); do
     invariant=$(grep -ciE "${kind}invariant[^|]*[|].*I-1([^0-9]|\$)" <<<"$report" || true)
     second=$(grep -ciE "${kind}second structure[^|]*[|]" <<<"$report" || true)
     outside=$(grep -ciE "${kind}outside[^|]*[|].*src/legacy/ping\.ts" <<<"$report" || true)
-    case $kase in
+    if case $kase in
       second-client) [ "$second" -ge 1 ] ;;
       direct-fetch) [ "$invariant" -ge 1 ] ;;
       amended) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
       legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
       *) false ;;
-    esac && verdict=pass || { verdict=FAIL; failed=1; }
+    esac; then verdict=pass; else verdict=FAIL failed=1; fi
     echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts: $verdict"
     echo "${report:-no report}"
   done
