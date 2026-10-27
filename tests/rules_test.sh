@@ -128,10 +128,11 @@ skills/roadmap/triage.md|when a row's label is `debt` and the repository has no 
 skills/roadmap/planning.md|except `debt` for a debt issue
 EOF
 # A zero count stops a fix, but an attacker can make the input of data loss or
-# a security hole. Each place that gives the zero-count rule names that
-# exception, so a person's report and a review finding get one verdict (#151).
+# a security hole. The rule for a person's report, in rules.md, and the rule
+# for a review finding, in review-loop, each name that exception, so both get
+# one verdict (#151).
 for f in rules.md skills/review-loop/SKILL.md; do
-  tr -s '[:space:]' ' ' <"$root/$f" | grep -qE 'data loss or a security hole[^.]*attacker can make the input' || {
+  tr -s '[:space:]' ' ' <"$root/$f" | grep -qE 'data loss or a security hole[^.]*(\. )?[^.]*attacker can make the input' || {
     echo "FAIL: $f: a zero count stops the fix of data loss or a security hole"
     exit 1
   }
