@@ -1,0 +1,27 @@
+> refactor(cart): split the cart feature into files by role
+
+1	1	docs/ARCHITECTURE.md
+10	0	src/features/cart/cart-api.ts
+8	0	src/features/cart/cart-summary.ts
+10	0	src/features/cart/cart-total.ts
+20	0	src/features/cart/cart.ts
+6	44	src/features/cart/index.ts
+1	0	src/features/cart/models/cart-item.ts
+3	0	src/features/cart/models/cart.ts
+ create mode 100644 src/features/cart/cart-api.ts
+ create mode 100644 src/features/cart/cart-summary.ts
+ create mode 100644 src/features/cart/cart-total.ts
+ create mode 100644 src/features/cart/cart.ts
+ create mode 100644 src/features/cart/models/cart-item.ts
+ create mode 100644 src/features/cart/models/cart.ts
+> feat(cart): take a percent off the cart total with a discount code
+
+9	0	src/features/cart/cart-api.ts
+3	1	src/features/cart/cart-summary.ts
+17	0	src/features/cart/cart-total.check.ts
+9	1	src/features/cart/cart-total.ts
+9	2	src/features/cart/cart.ts
+3	3	src/features/cart/index.ts
+1	1	src/features/cart/models/cart.ts
+1	1	tsconfig.json
+ create mode 100644 src/features/cart/cart-total.check.ts

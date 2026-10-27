@@ -1,0 +1,12 @@
+> refactor(cart): split the cart feature into its rules and its requests
+
+1	1	docs/ARCHITECTURE.md
+10	0	src/features/cart/api.ts
+35	0	src/features/cart/cart.ts
+2	44	src/features/cart/index.ts
+ create mode 100644 src/features/cart/api.ts
+ create mode 100644 src/features/cart/cart.ts
+> feat(cart): take a discount code's percent off the cart total
+
+10	1	src/features/cart/api.ts
+7	4	src/features/cart/cart.ts

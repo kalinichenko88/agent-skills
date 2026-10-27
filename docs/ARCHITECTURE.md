@@ -66,7 +66,7 @@ Each skill is a module, by the area of work it serves.
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
 | review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/review_loop_lens_eval.sh`, `tests/fixtures/review_loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/fixtures/debt/` |
-| architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_since_test.sh`, `tests/architecture_fences_test.sh` |
+| architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_since_test.sh`, `tests/architecture_fences_test.sh`, `tests/architecture_eval.sh`, `tests/architecture_checks_test.sh`, `tests/fixtures/architecture/` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
 | release, infographic | `.claude/skills/<name>/` | none |
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |

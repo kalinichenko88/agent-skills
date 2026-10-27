@@ -1,0 +1,6 @@
+> feat(cart): take a discount code's percent off the cart total
+
+1	1	docs/ARCHITECTURE.md
+21	0	src/features/cart/api.ts
+7	13	src/features/cart/index.ts
+ create mode 100644 src/features/cart/api.ts

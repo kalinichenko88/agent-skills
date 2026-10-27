@@ -195,9 +195,21 @@ it after a change to `skills/review-loop` or to its section in `rules.md`.
 `tests/review_loop_lens_eval.sh` sends the review of the architecture to four
 branches of one fixture: a second HTTP client, a `fetch` call that breaks an
 invariant, the same call with an ADR that amends it, and a base that breaks
-it already. Run it after a change to `skills/review-loop/architecture-lens.md`
-or to the parts of `skills/architecture/SKILL.md` that it reads. The three
-call the model, so their runs are not part of `make check`.
+it already. With `--codex`, Codex reads the four branches with the same
+prompt. Run it after a change to `skills/review-loop/architecture-lens.md`
+or to the parts of `skills/architecture/SKILL.md` that it reads.
+`tests/architecture_eval.sh` gives three tasks to Opus in a shop whose one
+module wraps every HTTP call, in four arms: no architecture file and no
+skill; the file and a link from `CLAUDE.md`; the same and the skill; the same
+and the `CLAUDE.md` line. It counts the runs that use the wrapper, write the
+block of *The start of a feature*, write one ADR for a new data store, split
+a file past its limit in a commit before the feature, and load the skill
+before the first write. It also counts how often `haiku` and `sonnet` find
+the code that a task can use. Run it after a change to the description of
+`kalinichenko:architecture`. `tests/architecture_checks_test.sh` runs its
+checks in `make check`, on `tests/fixtures/architecture`: one recorded run,
+and a case for each verdict that the run does not show.
+The four call the model, so their runs are not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
