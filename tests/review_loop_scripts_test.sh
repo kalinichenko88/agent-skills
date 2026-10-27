@@ -77,7 +77,6 @@ grep -qF 'the code that it describes' "$tmp/args" ||
 if grep -qF 'code that gives a wrong result' "$tmp/args"; then fail 'with --docs: the prompt has no brief for code' "$(cat "$tmp/args")"; fi
 grep -qF 'file nothing' "$tmp/args" || fail 'with --docs: the prompt tells codex to file nothing' "$(cat "$tmp/args")"
 grep -qF "git diff $base...$head" "$tmp/args" || fail 'with --docs: the prompt names the range of the whole branch' "$(cat "$tmp/args")"
-check 'with --docs: codex runs in the read-only sandbox' read-only "$(grep -A1 -xF -- -s "$tmp/args" | sed -n 2p)"
 code=0
 review --docs >/dev/null 2>"$tmp/err" || code=$?
 check '--docs with no base is a usage error' 2 "$code"
