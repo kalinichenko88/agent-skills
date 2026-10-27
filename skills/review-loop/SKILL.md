@@ -140,10 +140,12 @@ This step needs an architecture file or an ADR folder on the branch, where
 beside round 1: at `high` or `xhigh`, and for any change whose range touches
 the architecture file or an ADR, also a change to documents only. When the
 text of a skill or a prompt comes with code, use the level of the code alone.
-Skip it for a move that a script or a test proves unchanged. Start it in the
-background when round 1 starts, and change no file while it runs. Its
-findings go through *The findings* as findings of round 1: round 1 confirms
-no defect when neither review does, and their fixes are one commit.
+Skip it for a move that a script or a test proves unchanged, unless the range
+touches the architecture file or an ADR. Start it in the background when
+round 1 starts, and change no file while it runs. Its findings go through
+*The findings* as findings of round 1: round 1 confirms no defect when
+neither review does, and their fixes are one commit. A finding of this
+review whose fix changes code counts as a defect, so a round reads that fix.
 
 The subagent is an `Agent` call of its own, not a job in the prompt of round
 1, with `model: "opus"`, and `effort` at the level of round 1, or `high` when
@@ -359,7 +361,8 @@ Then report in this order, one line per item:
   `kalinichenko:architecture` can write the first file, unless the project
   keeps none. The security review's
   result. The check's result. For a change to documents only: round 1; the
-  Codex read and the count of findings it confirmed, or why it did not run;
+  review of the architecture, when it ran; the Codex read and the count of
+  findings it confirmed, or why it did not run;
   and `documents only` for each of the last pass and the security review that
   did not run.
 - **Decisions:** each choice you made: the finding, the choice, the reason.

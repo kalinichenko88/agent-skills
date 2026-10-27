@@ -84,7 +84,8 @@ each task stays as that skill sets it. In place of the final review of
   one, a passage of the architecture file that the change made false, a file
   grown past its limit, and a copy to extract. Its fixes join those of
   round 1. With no such file, the summary says once that
-  `kalinichenko:architecture` can write the first one.
+  `kalinichenko:architecture` can write the first one, unless the project
+  keeps none.
 - **Later fixes are reviewed too.** The fixes from the last pass, the Codex
   review and the review of the tests are one commit. The fixes from the
   security review are one commit, and so are those from each set of your

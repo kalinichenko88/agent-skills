@@ -10,7 +10,8 @@
 # - amended is direct-fetch with an ADR that amends I-1 and its Check: line:
 #   no Invariant finding that cites I-1;
 # - legacy adds a feature that uses the wrapper, on a base whose own code
-#   breaks I-1 already: no Invariant finding that cites I-1.
+#   breaks I-1 already: no Invariant finding that cites I-1, and an Outside
+#   finding on that code, src/legacy/ping.ts.
 #
 # It calls the model, so it costs tokens and is not part of `make check`: run
 # it by hand after a change to architecture-lens.md, or to the parts of
@@ -148,12 +149,12 @@ EOF
 ## Context
 
 The CSV export of a report is text. `request()` in `src/api/client.ts` reads
-each answer with `res.json()`, and retries a failed request up to three times.
+each answer with `res.json()`, and tries a request again after a 5xx answer,
+up to two times.
 
 ## Options considered
 
-- A `text` flag on `request()`: a flag for one caller, and the retry would
-  download a large export again.
+- A `text` flag on `request()`: a flag for one caller.
 - `exportReport()` calls `fetch` itself, with the token header.
 
 ## Decision
@@ -241,12 +242,14 @@ for i in $(seq "$runs"); do
     report=$(jq -r '.result // empty' "$logs/$kase-$i.json" 2>/dev/null || true)
     invariant=$(grep -ciE "${kind}invariant[^|]*[|].*I-1([^0-9]|\$)" <<<"$report" || true)
     second=$(grep -ciE "${kind}second structure[^|]*[|]" <<<"$report" || true)
+    outside=$(grep -ciE "${kind}outside[^|]*[|].*src/legacy/ping\.ts" <<<"$report" || true)
     case $kase in
       second-client) [ "$second" -ge 1 ] ;;
       direct-fetch) [ "$invariant" -ge 1 ] ;;
-      *) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
+      amended) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
+      legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
     esac && verdict=pass || { verdict=FAIL; failed=1; }
-    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1: $verdict"
+    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts: $verdict"
     echo "${report:-no report}"
   done
 done
