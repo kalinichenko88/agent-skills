@@ -45,7 +45,7 @@ if [ -n "$list" ]; then
   fi
 fi
 
-# Assigned to you, the issue's linked branch counts as yours (collect.sh).
+# Assigned to you, the issue's linked branch counts as yours.
 # GitHub does not say whose a branch is: one that is linked while nobody is
 # assigned can be someone else's, so you decide.
 # Read outside the if, so that a failed read stops the script.

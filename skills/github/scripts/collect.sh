@@ -24,8 +24,8 @@
 # when that issue is in this repository. No number gets a second entry. A
 # failed query writes nothing.
 #
-# status prints the state:, status: and also: lines of one issue. status:
-# names you as "you".
+# status prints the state:, status: and also: lines of one issue, or only
+# "state: a pull request". status: names you as "you".
 #
 # Needs only bash, gh and awk: every filter of gh's JSON is gh's own --jq.
 
