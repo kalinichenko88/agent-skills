@@ -30,6 +30,7 @@ each task stays as that skill sets it. In place of the final review of
   commit. Without ponytail the step is skipped, and the summary says so.
 - **A level with a reason.** `low` to `xhigh` by the weight of the change, and
   one sentence that says why. `ultra` only when you ask for it. A change to
+  tests only is never `low`: `/code-review low` skips test files. A change to
   documents only, the text of a skill or a prompt included, gets one review
   subagent in place of `/code-review`. When a skill's or a prompt's text comes
   with code, `/code-review` takes the level of the code, and the subagent
@@ -37,7 +38,8 @@ each task stays as that skill sets it. In place of the final review of
 - **Rounds that read less.** The first round reads the whole branch. Each round
   of fixes is one commit, and the next round reads only that commit.
 - **A stop.** The loop ends at the first round that confirms no defect. A
-  defect is a wrong result, a crash or a broken contract that real use
+  round that read no file of its range does not count, and runs again one
+  level up. A defect is a wrong result, a crash or a broken contract that real use
   reaches, or data loss or a security hole on any input, also in the fixes of
   the loop. A test, a comment, a name or wording is a nit, applied without
   another round. A finding that needs a particular input is counted first in

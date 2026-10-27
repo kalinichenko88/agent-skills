@@ -41,13 +41,14 @@ request goes through."
 
 | Level | The change |
 | --- | --- |
-| `low` | Wording in code, or a fix in one file that adds no logic. |
-| `medium` | UI over static data with no new state rules; a move that a script or a test proves unchanged. |
+| `low` | Wording in code, or a fix in one file outside tests that adds no logic. |
+| `medium` | A change to tests only; UI over static data with no new state rules; a move that a script or a test proves unchanged. |
 | `high` | New state rules or reducer logic, a new page, route or endpoint, and any change the other rows do not name. |
 | `xhigh` | Security, data loss, concurrency, or architecture across modules or apps. |
 
 `medium` is not a default: each level needs its own reason. `max` and `ultra`
-run only when the person asks; `ultra` is billed.
+run only when the person asks; `ultra` is billed. A change to tests only is
+never `low`: `/code-review low` skips test files, so it reads nothing.
 
 A change to documents only takes no `/code-review`: one review subagent reads
 the text the range changes against the code it describes, the rest of its
@@ -97,8 +98,10 @@ installed, skip it and say so in the summary.
    commit*. A review subagent gets `git show <sha>`. Inside the loop, never
    send the whole branch again.
 3. **Stop at the first round that confirms no defect**, whatever that round
-   declines, for the first time or again. A defect is a confirmed finding of
-   one of two kinds:
+   declines, for the first time or again. A round whose report says it read
+   no file of its range confirms nothing and does not count: run that range
+   again at the next level. A defect is a confirmed finding of one of two
+   kinds:
    - a wrong result, a crash or a broken contract, on an input or a state
      that the project's real use reaches;
    - data loss or a security hole, on any input.
