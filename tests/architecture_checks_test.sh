@@ -7,7 +7,8 @@
 # src/api/client.ts read the token from localStorage. call-none-1 keeps that
 # src/api/client.ts, which calls fetch and which the wrapper check must pass.
 # The runs numbered 2 change a recorded run into a case that a check must pass
-# or must fail. An empty log stands for a run whose log no check reads:
+# or must fail. An empty log is a run with no tool call: each check that reads
+# logs counts it as a run without what it counts.
 #   call-none-2    the block before the first write; the reports call fetch
 #   call-files-2   no tree and an empty log: a run that wrote no file
 #   call-line-2    only the Skill call: a run that stopped before a write
@@ -104,6 +105,7 @@ found=$(PATH="$stub:$PATH" command -v claude || true)
 }
 refused() {
   local code=0 err
+  rm -f "$stub/called"
   err=$(PATH="$stub:$PATH" TMPDIR="$stub" tests/architecture_eval.sh "$@" 2>&1 >/dev/null) || code=$?
   if [ "$code" != 2 ] || [ "${err#usage:}" = "$err" ] || [ -e "$stub/called" ]; then
     echo "FAIL: '$*' exited $code with '$err': it must exit 2 with the usage and not run claude"

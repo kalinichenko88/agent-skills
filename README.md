@@ -208,7 +208,10 @@ before the first write. It also counts how often `haiku` and `sonnet` find
 the code that a task can use. Run it after a change to the description of
 `kalinichenko:architecture`. `tests/architecture_checks_test.sh` runs its
 checks in `make check`, on `tests/fixtures/architecture`: one recorded run,
-and a case for each verdict that the run does not show.
+and a case for each verdict that the run does not show. It also runs the eval
+once with a stub `claude` in the place of the model.
+`tests/review_loop_lens_checks_test.sh` checks that the lens eval refuses a
+wrong call before it starts a paid run.
 The four `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 
