@@ -3,7 +3,8 @@
 A review that ends: rounds that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
-a review of the tests for `high` and `xhigh` changes, a security review last,
+a review of the tests for `high` and `xhigh` changes, a review against the
+project's architecture file and ADRs beside round 1, a security review last,
 and a summary of what was decided and fixed. A change to documents only gets
 one round and no security review. In Claude Code, Fable and Codex also read a
 superpowers spec, and one more subagent checks its plan against it.
@@ -73,6 +74,17 @@ each task stays as that skill sets it. In place of the final review of
   later rounds add tests too, and an older test then often repeats a newer
   one. When the rounds stop after the third round with a defect, the last
   pass and this review are both skipped.
+- **A review of the architecture.** In a project with `docs/ARCHITECTURE.md`
+  or ADRs, one Opus subagent, or `/review` in Codex, reads the branch against
+  them once, beside round 1: for `high` and `xhigh` changes, and for any
+  change to that file or an ADR. It runs `invariants.sh --new-since` of
+  `kalinichenko:architecture` and `clones.sh` of `kalinichenko:debt`. It finds
+  a second structure beside an existing one, a module used past its public
+  API, a broken invariant cited as `I-n`, a decision with no ADR or against
+  one, a passage of the architecture file that the change made false, a file
+  grown past its limit, and a copy to extract. Its fixes join those of
+  round 1. With no such file, the summary says once that
+  `kalinichenko:architecture` can write the first one.
 - **Later fixes are reviewed too.** The fixes from the last pass, the Codex
   review and the review of the tests are one commit. The fixes from the
   security review are one commit, and so are those from each set of your

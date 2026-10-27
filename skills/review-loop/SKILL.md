@@ -16,7 +16,10 @@ data first, and a count of zero declines it, except for data loss or a
 security hole. When the loop had more than one round, one last pass
 reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
 whole branch once too. At `high` and `xhigh`, and for a change to tests only,
-one review reads the tests of the whole branch once. A security review comes
+one review reads the tests of the whole branch once. In a project with an
+architecture file or ADRs, one review reads the branch against them once,
+beside round 1, at `high` and `xhigh` and for a change to that file or an
+ADR. A security review comes
 last. A change to documents only gets one round and no security review. In
 Claude Code, Codex reads it once when it changes the text of a skill, a
 prompt or a spec. The agent fixes and decides by itself, except for a change
@@ -128,6 +131,43 @@ installed, skip it and say so in the summary.
    second whole-branch pass: the rounds that reread the whole branch are the
    ones that did not stop.
 
+### A review of the architecture
+
+This step needs an architecture file or an ADR folder on the branch, where
+`kalinichenko:architecture` finds them: `docs/ARCHITECTURE.md` or
+`ARCHITECTURE.md` at the root, and `docs/adr/`, `doc/adr/` or
+`docs/decisions/`. Then one review subagent reads the range of round 1 once,
+beside round 1: at `high` or `xhigh`, and for any change whose range touches
+the architecture file or an ADR, also a change to documents only. When the
+text of a skill or a prompt comes with code, use the level of the code alone.
+Skip it for a move that a script or a test proves unchanged. Start it in the
+background when round 1 starts, and change no file while it runs. Its
+findings go through *The findings* as findings of round 1: round 1 confirms
+no defect when neither review does, and their fixes are one commit.
+
+The subagent is an `Agent` call of its own, not a job in the prompt of round
+1, with `model: "opus"`, and `effort` at the level of round 1, or `high` when
+that level is lower or there is none. `<dir>` is this skill's base
+directory, `<base>` is the base of step 1, and `<head>` is the SHA of `HEAD`
+that round 1 reads. It gets this prompt, with no other job:
+
+```
+Read <dir>/architecture-lens.md and do what it says.
+Range: <base>..<head>
+Tree: <the working tree of the branch>
+```
+
+In Codex: `/review` with the same three lines as its custom instructions.
+
+With no architecture file and no ADR folder, the step does not run. Then the
+summary says once per pull request that `kalinichenko:architecture` can
+write the first file, unless the project's `CLAUDE.md` says "This project
+keeps no `docs/ARCHITECTURE.md`."
+
+Why: `/code-review` reads the diff and the `CLAUDE.md` files, and none of its
+angles reads the architecture file or the ADRs. Why `opus`: the step runs at
+each `high` review there, and `fable` costs 2.5 times as much.
+
 ### A second model for `xhigh` changes
 
 At `xhigh` in Claude Code, Codex reads the whole branch once. Start
@@ -217,8 +257,10 @@ more: see the next section.
 A change to documents only, as *The level* says, gets one round:
 
 1. **One round.** The review subagent reads the whole branch, as step 1 of
-   *The rounds* says. The fixes of its confirmed findings and its nits are
-   one commit. No round reads that commit, and no last pass follows.
+   *The rounds* says. When the range touches the architecture file or an
+   ADR, the review of the architecture runs beside it. The fixes of their
+   confirmed findings and their nits are one commit. No round reads that
+   commit, and no last pass follows.
 2. **One read by Codex**, when the branch changes the text of a skill or a
    prompt, or a spec: the design document that `superpowers:brainstorming`
    writes, as `docs/superpowers/specs/*.md`. In Claude Code, run it once,
@@ -312,7 +354,10 @@ Then report in this order, one line per item:
   last pass, the same way. At `xhigh`, the Codex review: its range and the
   count of findings it confirmed, or why it did not run. At `high` and
   `xhigh`, and for a change to tests only, the review of the tests, the same
-  way. The security review's
+  way. The review of the architecture, the same way. With no architecture
+  file and no ADR folder, once per pull request, the line that
+  `kalinichenko:architecture` can write the first file, unless the project
+  keeps none. The security review's
   result. The check's result. For a change to documents only: round 1; the
   Codex read and the count of findings it confirmed, or why it did not run;
   and `documents only` for each of the last pass and the security review that
