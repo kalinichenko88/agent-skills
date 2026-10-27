@@ -223,6 +223,12 @@ else
     search sonnet "$logs/search-sonnet-$i.json" &
   done
   wait
+  # A session that ends in an error, as at a rate limit, writes nothing and
+  # counts as a run without each thing counted: name it.
+  for log in "$logs"/*.jsonl "$logs"/*.json; do
+    jq -eR 'fromjson? | select(.type == "result" and .is_error == false)' "$log" >/dev/null ||
+      echo "no successful end: $log"
+  done
 fi
 
 for arm in $arms; do
