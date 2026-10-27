@@ -36,13 +36,14 @@ each task stays as that skill sets it. In place of the final review of
   reviews the text.
 - **Rounds that read less.** The first round reads the whole branch. Each round
   of fixes is one commit, and the next round reads only that commit.
-- **A stop.** The loop ends at the first round that confirms no defect: no
-  wrong result, crash, data loss, broken contract or security hole that real
-  use reaches, and none in a fix of the loop. A test, a comment, a name or
-  wording is a nit, applied without another round. A finding that needs a
-  particular input is counted first in a sample of real data: a count of zero
-  declines it, unless it is data loss or a security hole. After the third
-  round with a defect, the rounds stop. Ask for more, and they run.
+- **A stop.** The loop ends at the first round that confirms no defect. A
+  defect is a wrong result, a crash or a broken contract that real use
+  reaches, or data loss or a security hole on any input, also in the fixes of
+  the loop. A test, a comment, a name or wording is a nit, applied without
+  another round. A finding that needs a particular input is counted first in
+  a sample of real data: a count of zero declines it, unless it is data loss
+  or a security hole. After the third round with a defect, the rounds stop.
+  Ask for more, and up to three more run.
 - **One round for documents.** A change to documents only gets one round of
   the review subagent, and no round reads its fixes. In Claude Code, Codex
   then reads the whole branch once, with the fixes in place, when the branch
@@ -72,7 +73,7 @@ each task stays as that skill sets it. In place of the final review of
   review and the review of the tests are one commit. The fixes from the
   security review are one commit, and so are those from each set of your
   review comments, also after the pull request opens. Each of these commits
-  has rounds of its own: at the level of the loop's round 1, or `xhigh` for a
+  that fixes a defect has rounds of its own: at the level of the loop's round 1, or `xhigh` for a
   fix to security code. On a change to documents only, a commit gets rounds
   only when you ask for rounds, or for the step that made it.
 - **Fewer questions.** The agent fixes the obvious findings and decides the

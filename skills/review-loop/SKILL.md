@@ -9,10 +9,11 @@ A review runs in rounds. An over-engineering review comes first, when its
 skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect, and at the latest after round 3. A defect is a wrong
-result that real use reaches, or a defect that a fix of the loop wrote; a
-test, a comment or wording is a nit, fixed with no round. A finding that
-needs a particular input is counted against real data first, and a count of
-zero declines it. When the loop had more than one round, one last pass
+result that real use reaches, or data loss or a security hole on any input,
+also in a fix of the loop; a test, a comment or wording is a nit, fixed with
+no round. A finding that needs a particular input is counted against real
+data first, and a count of zero declines it, except for data loss or a
+security hole. When the loop had more than one round, one last pass
 reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
 whole branch once too. At `high` and `xhigh`, one review reads the tests of
 the whole branch once. A security review comes last. A change to documents
@@ -98,10 +99,12 @@ installed, skip it and say so in the summary.
 3. **Stop at the first round that confirms no defect**, whatever that round
    declines, for the first time or again. A defect is a confirmed finding of
    one of two kinds:
-   - a wrong result, a crash, data loss, a broken contract or a security
-     hole, on an input or a state that the project's real use reaches;
-   - a defect that a fix of this loop wrote.
+   - a wrong result, a crash or a broken contract, on an input or a state
+     that the project's real use reaches;
+   - data loss or a security hole, on any input.
 
+   Both kinds hold in the code that a fix of this loop wrote too: most of
+   the defects that later rounds find are there.
    In the text of a skill or a prompt, a defect is a rule that, followed as
    written, gives a wrong result in a case that real use reaches. Every other
    confirmed finding is a nit: a missing or redundant test, a comment, a
@@ -111,8 +114,8 @@ installed, skip it and say so in the summary.
 4. **The third round still confirms a defect:** stop the rounds, and skip
    what is left of step 5. Then go to the security review, or to the summary
    when the security review has already run. The summary names the findings
-   of round 3. When the person asks for more rounds, they run as steps 2 to 4
-   say.
+   of round 3. When the person asks for more rounds, up to three more run,
+   and this step stops them at the third.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
    level, when the loop had more than one round. A round on one commit cannot
    see how a fix fits the rest of the branch; this pass can. It waits for the
@@ -191,7 +194,8 @@ of the last pass, the Codex review and the review of the tests find defects,
 their fixes are one commit. A count of rounds here does not start the Codex
 review or the review of the tests again. For each of them:
 
-- Its fixes are one commit, and that commit goes through steps 2 to 4.
+- Its fixes are one commit. When they fix a defect, as step 3 says, that
+  commit goes through steps 2 to 4. A commit of nits only gets no round.
 - Its rounds run at the level that the loop's round 1 used. In a new session,
   take that level from the pull request's `## Review`. A fix to security code
   runs at `xhigh`, whatever found it.
@@ -253,8 +257,9 @@ a real defect on two, in 53 to 204 seconds.
    A finding that fails only on a particular input or state needs a count
    too: how many of a sample of the real source carry that shape, as *The
    input comes from the source, not from your head* in the global prompt
-   says. A count of zero declines the finding in the same round. Write the
-   count in `## Review`, so that later rounds and sessions see it. A zero
+   says. A count of zero declines the finding in the same round. Give the
+   count as its reason on the summary's **Declined** line, so that
+   `## Review` carries it to later reviews and sessions. A zero
    count does not decline a finding of data loss or a security hole: an
    attacker can make the input. With no real source to sample, the count
    declines nothing.
