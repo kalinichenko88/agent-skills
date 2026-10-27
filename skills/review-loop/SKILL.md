@@ -294,8 +294,7 @@ You are one reviewer that another agent runs: start no skill and change no file.
 EOF
 ```
 
-The last line is there because Codex loads the global prompt too.
-`scripts/codex-review.sh` reads a diff, so it does not run here. When there
+The last line is there because Codex loads the global prompt too. When there
 is no `codex` command, or `codex login status` fails, go on with Fable alone,
 and say so when you hand over the document. Put the questions from both
 readers into the three piles of brainstorming.
