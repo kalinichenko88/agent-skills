@@ -26,10 +26,9 @@ stays unchecked — and the fix underneath it can be doing nothing, or harm.
 So before the report is even believed, count it: pull a sample of real payloads
 and say how many carry the shape. Zero means the fix does not need to exist, and
 that is the finding. Then write the case against a recorded payload — whitespace,
-pretty-printing and all — not a string typed to make the assertion pass. A
-report of data loss or a security hole is the exception. An attacker can make
-the input, so a zero count does not stop the fix. The test uses the input of the
-report.
+pretty-printing and all — not a string typed to make the assertion pass. A zero
+count does not stop the fix of data loss or a security hole. An attacker can
+make the input, so the test of that fix uses the input of the report.
 
 In Claude Code, a Haiku subagent does the counting: one `Agent` call with
 `subagent_type: "Explore"` and `model: "haiku"`, given the source, the sample
@@ -166,14 +165,14 @@ chat. Do not derail the task to fix it; do not ask first. If the Boy Scout Rule
 above takes it, it goes into the current PR instead, listed in the description
 as not part of the task. The skill's `filing.md` carries the how. Where there
 is no GitHub remote or `gh auth status` fails, name the finding in the final
-report instead.
+report instead of filing it.
 
 **A defect in this plugin goes to its tracker, after the person says yes.**
 These rules, the hooks, a `kalinichenko:` skill and its scripts are the plugin.
 A defect in one of them is an issue for `kalinichenko88/agent-skills`, not for
 the project you work in. In a checkout of `agent-skills`, the rule above
 applies instead. Do not derail the task. Unlike the rule above, ask the person
-first. The skill's `filing.md` carries the how.
+first. The github skill's `filing.md` carries the how.
 
 **Never add a `Co-Authored-By:` trailer** to a commit message — no Claude, no
 model name, no `noreply@anthropic.com`.

@@ -127,14 +127,20 @@ skills/roadmap/triage.md|except `debt` for a debt issue
 skills/roadmap/triage.md|when a row's label is `debt` and the repository has no debt label, create `debt`
 skills/roadmap/planning.md|except `debt` for a debt issue
 EOF
-# A zero count stops a fix, but an attacker can make the input of data loss or
-# a security hole. The rule for a person's report, in rules.md, and the rule
-# for a review finding, in review-loop, each name that exception, so both get
-# one verdict (#151).
-for f in rules.md skills/review-loop/SKILL.md; do
-  tr -s '[:space:]' ' ' <"$root/$f" | grep -qE 'data loss or a security hole[^.]*(\. )?[^.]*attacker can make the input' || {
-    echo "FAIL: $f: a zero count stops the fix of data loss or a security hole"
+# Sentences that must stay, word for word (#151). A zero count stops a fix,
+# but an attacker can make the input of data loss or a security hole: the rule
+# for a person's report, in rules.md, and the rule for a review finding, in
+# review-loop, each name that exception. The github skill does not load in a
+# repository with no GitHub remote, so rules.md keeps the fallback for an
+# out-of-scope finding.
+while IFS='|' read -r f phrase; do
+  tr -s '[:space:]' ' ' <"$root/$f" | grep -qF "$phrase" || {
+    echo "FAIL: $f: no \"$phrase\""
     exit 1
   }
-done
+done <<'EOF'
+rules.md|A zero count does not stop the fix of data loss or a security hole. An attacker can make the input
+skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input
+rules.md|Where there is no GitHub remote or `gh auth status` fails, name the finding in the final report instead of filing it.
+EOF
 echo 'rules_test: ok'
