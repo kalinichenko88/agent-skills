@@ -7,19 +7,27 @@
 # src/api/client.ts read the token from localStorage. call-none-1 keeps that
 # src/api/client.ts, which calls fetch and which the wrapper check must pass.
 # The runs numbered 2 change a recorded run into a case that a check must pass
-# or must fail:
+# or must fail. An empty log stands for a run whose log no check reads:
 #   call-none-2    the block before the first write; the reports call fetch
+#   call-files-2   no tree and an empty log: a run that wrote no file
+#   call-line-2    only the Skill call: a run that stopped before a write
 #   store-none-2   an ADR with two options and a Confirmation
 #   store-files-2  the same ADR with one option
+#   store-line-2   the same ADR with no Confirmation
 #   store-skill-2  the Skill call after the last write
-#   call-files-2   no tree: a run that wrote no file
-#   split-files-2  split-files-1 in two commits: the first creates api.ts and
-#                  adds a line to index.ts, and the second takes the lines out
-#   search-haiku-2 an answer that does not name src/lib/money.ts
+#   split-files-2  split-files-1 in two commits: the first creates api.ts,
+#                  adds a line to index.ts and takes one out of
+#                  docs/ARCHITECTURE.md, and the second takes the lines out
+#                  of index.ts
+#   split-line-2   a first commit that takes lines out of index.ts and
+#                  creates no file
+#   search-haiku-2  an answer that does not name src/lib/money.ts
+#   search-sonnet-2 an answer that does not name src/api/client.ts
 # A change to a check that moves a verdict changes the output and fails here.
-# Last, it gives the eval an argument too many, as `--check <folder> extra` and
+# Then it gives the eval an argument too many, as `--check <folder> extra` and
 # `3 --check <folder>`, with a stub claude: the eval must refuse before it
-# starts a paid run.
+# starts a paid run. Last, it runs the paid path once with that stub, whose
+# every session ends in an error: the eval must name each of the 14 logs.
 
 set -eu
 
@@ -48,14 +56,16 @@ tests/fixtures/architecture/store-skill-2: 0 ADRs
 store skill: 0 of 2 runs write one ADR with two options and a Confirmation
 split skill: 1 of 1 runs split the file in a commit before the feature
 skill in skill: 3 of 4 runs before the first write
-call line: 1 of 1 runs use request() and no second client
-block in call line: 0 of 1 runs before the first write
+no import of api/client: tests/fixtures/architecture/call-line-2/src/features/reports
+call line: 1 of 2 runs use request() and no second client
+block in call line: 0 of 2 runs before the first write
 tests/fixtures/architecture/store-line-1: 0 ADRs
-store line: 0 of 1 runs write one ADR with two options and a Confirmation
-split line: 1 of 1 runs split the file in a commit before the feature
-skill in line: 3 of 3 runs before the first write
+tests/fixtures/architecture/store-line-2/docs/adr/0001-recent-orders-in-local-storage.md: no two options or no Confirmation
+store line: 0 of 2 runs write one ADR with two options and a Confirmation
+split line: 1 of 2 runs split the file in a commit before the feature
+skill in line: 3 of 6 runs before the first write
 search haiku: 1 of 2 answers name src/api/client.ts and src/lib/money.ts
-search sonnet: 1 of 1 answers name src/api/client.ts and src/lib/money.ts
+search sonnet: 1 of 2 answers name src/api/client.ts and src/lib/money.ts
 logs: tests/fixtures/architecture
 EOF
 }
@@ -82,6 +92,7 @@ trap 'rm -rf "$stub"' EXIT
 cat >"$stub/claude" <<'EOF'
 #!/usr/bin/env bash
 touch "$(dirname "$0")/called"
+echo '{"type":"result","is_error":true}'
 EOF
 chmod +x "$stub/claude"
 # A folder that cannot run the stub, or a claude function, leaves the real
@@ -101,4 +112,12 @@ refused() {
 }
 refused --check tests/fixtures/architecture extra
 refused 3 --check tests/fixtures/architecture
+
+code=0
+out=$(PATH="$stub:$PATH" TMPDIR="$stub" tests/architecture_eval.sh 1 2>&1) || code=$?
+named=$(grep -c '^no successful end: ' <<<"$out" || true)
+[ "$code" = 0 ] && [ "$named" = 14 ] || {
+  printf 'FAIL: a run whose sessions all end in an error exited %s and named %s of 14 logs\n%s\n' "$code" "$named" "$out"
+  exit 1
+}
 echo 'architecture_checks_test: ok'

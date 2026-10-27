@@ -209,7 +209,8 @@ the code that a task can use. Run it after a change to the description of
 `kalinichenko:architecture`. `tests/architecture_checks_test.sh` runs its
 checks in `make check`, on `tests/fixtures/architecture`: one recorded run,
 and a case for each verdict that the run does not show.
-The four call the model, so their runs are not part of `make check`.
+The four `_eval.sh` scripts call the model, so their runs are not part of
+`make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
