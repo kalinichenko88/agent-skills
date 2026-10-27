@@ -64,7 +64,7 @@ Each skill is a module, by the area of work it serves.
 | rules | `rules.md`, `hooks/` | `tests/rules_test.sh`, `tests/hooks_scripts_test.sh`, `tests/fixtures/hooks/` |
 | github | `skills/github/` | `tests/github_scripts_test.sh`, `tests/fixtures/github/`, `docs/github/` |
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
-| review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/fixtures/review_loop/` |
+| review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/review_loop_lens_eval.sh`, `tests/fixtures/review_loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/fixtures/debt/` |
 | architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_since_test.sh`, `tests/architecture_fences_test.sh` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
@@ -82,10 +82,11 @@ and for a section also for its anchor, as `#the-ponytail-step`.
 **Direction in text.** `rules.md` names github, roadmap, review-loop and
 the two conventions. architecture names debt, github, roadmap and
 react-conventions. debt names architecture, github, roadmap and
-review-loop. roadmap names github. react-conventions names
-typescript-conventions. architecture and debt name each other, github and
-review-loop name each other, and github, review-loop and the two
-conventions name the global prompt back. No cycle closes in code.
+review-loop. review-loop names architecture, debt and github. roadmap
+names github. react-conventions names typescript-conventions. architecture
+and debt name each other, and so do github and review-loop, and debt and
+review-loop. github, review-loop and the two conventions name the global
+prompt back. No cycle closes in code.
 
 **Where a module's files are.** A module's test and fixtures are outside its
 folder, in `tests/`: the Makefile finds a test by `tests/<name>_test.sh`. So

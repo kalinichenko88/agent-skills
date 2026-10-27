@@ -31,8 +31,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   that ends: rounds that read only the last fixes, one last pass over the
   whole branch when the loop needed more than one round, Codex as a second
   reviewer for `xhigh` changes in Claude Code, a review of the tests for
-  `high` and `xhigh` changes and a change to tests only, a security review,
-  and a summary of what was decided and fixed. A change to documents only
+  `high` and `xhigh` changes and a change to tests only, a review against
+  the project's architecture file and ADRs beside round 1, a security
+  review, and a summary of what was decided and fixed. A change to documents only
   gets one round and no security review. In Claude Code, Fable and Codex
   also read a superpowers spec, and one more subagent checks its plan
   against it.
@@ -186,11 +187,17 @@ on `tests/fixtures/skill_load`: two recorded runs and a case that fails each
 check. A change to a check updates the output that the test expects.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
 It checks that no count of rounds goes past three, that the review of the
-tests runs once next to the last pass and never without one, and that a
-security review follows the last pass. Its fixture has a local `origin`, and
-its task says that no one can answer questions. Run it after a change to
-`skills/review-loop` or to its section in `rules.md`. Both call the model, so
-their runs are not part of `make check`.
+tests runs once next to the last pass and never without one, that the
+review of the architecture runs once before round 2, and that a security
+review follows the last pass. Its fixture has a local `origin` and an
+architecture file, and its task says that no one can answer questions. Run
+it after a change to `skills/review-loop` or to its section in `rules.md`.
+`tests/review_loop_lens_eval.sh` sends the review of the architecture to four
+branches of one fixture: a second HTTP client, a `fetch` call that breaks an
+invariant, the same call with an ADR that amends it, and a base that breaks
+it already. Run it after a change to `skills/review-loop/architecture-lens.md`
+or to the parts of `skills/architecture/SKILL.md` that it reads. The three
+call the model, so their runs are not part of `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
 `docs/github/brief.md`. To change a picture, change its brief and run
