@@ -46,7 +46,7 @@ Also:` sections is one task: its own problem and every added one.
 **Its duplicates close first.** A duplicate — the same report, in different
 words or not, about the same place — closes against the issue in hand before
 the work starts, once anything it adds (a repro, an error message, a surface)
-is carried into a comment on the survivor. One that is someone else's work
+is carried into a comment on the survivor. One that is busy (`tracker.md`)
 stays open: say so. A report that gives only what someone saw — no cause, no
 code — matches by symptom alone: it waits for the reproduction, run in the
 task's worktree, and closes the same way once that shows the same cause;
@@ -125,8 +125,8 @@ you edit.
 ## Taking neighbours along
 
 Before the first edit, sort the open issues on the code the task will change.
-The issue in hand stays the task throughout. A hit that is someone else's work
-(`tracker.md`) gets no verdict below and stays as it is. Say so.
+The issue in hand stays the task throughout. A busy hit (`tracker.md`) gets no
+verdict below and stays as it is. Say so.
 
 1. **Search.** The scout's groups hold the hits, found by identifier and by
    title, so a report that names no file still shows up. When the work reaches

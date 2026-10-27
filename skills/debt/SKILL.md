@@ -178,8 +178,9 @@ settles a size cap or a layout; *Already filed*; *Fixed before* — and then:
   it does not cover the folder. Re-measure the issue that covers the place: put this run's
   table in its `## Where`, in place of the old one or as the first, end the
   body with "Re-measured on <date> at <sha>.", and comment one line on what
-  moved. It does not count towards the three. An issue that someone works on,
-  or a parent with open steps, is named in the report and not edited.
+  moved. It does not count towards the three. A busy issue, by
+  `<skills>/github/tracker.md`, or a parent with open steps, is named in the
+  report and not edited.
 - **An open issue with another label** that already proposes the same change:
   name it in the report, and file nothing.
 - **An issue closed as not planned:** name it in the report, and do not file

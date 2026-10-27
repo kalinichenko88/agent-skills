@@ -45,7 +45,7 @@ Header: label "SCENARIO 2 OF 3", title "Found something outside the task".
 Trigger box: "WHEN: while working on #91, the agent sees another problem."
 1. "Near the task and clear? Fix it now." — THE AGENT corrects a blank card with a small brush, using simple line strokes. Caption: "A typo or a small bug next to the task, with one clear fix: fixed in this PR and listed under Also fixed."
 2. "Already known?" — THE AGENT looks through a drawer of blank tickets with a large magnifier. Caption: "It searches the tracker by file and function name, open and closed. Known already: nothing new is filed."
-3. "Same code as an open issue?" — THE AGENT clips a blank note onto an existing ticket "#12". Caption: "The finding goes into that issue, if no one else is working on it."
+3. "Same code as an open issue?" — THE AGENT clips a blank note onto an existing ticket "#12". Caption: "The finding goes into that issue, if nobody works on it: not someone else, not another session of yours."
 4. "New problem? New issue." — THE AGENT pins a fresh ticket "#97" to a small board. Caption: "One issue per finding: where it is, how it shows, why it is not part of this task."
 Result box: "YOU GET: nothing lost in the chat. The final report lists every issue number."
 </image>

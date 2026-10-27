@@ -71,8 +71,6 @@ report replaces your own search of the tracker: for a name it did not get, run
 
 An open issue's `status:` is `free`, or it names who works on it: `assigned to
 <login>`, `branch <name>`, `PR #<n> by <login>`, with `you` for your own
-account. One entry that is not yours makes the issue **someone else's work**.
-GitHub does not say whose a linked branch is: it counts as yours when the
-issue is assigned to you alone, as `worktree.sh` leaves it. `take-in-check.sh`
-stops on your own entries too, because another session of yours can work on
-the issue.
+account. Any entry makes the issue **busy**, and an entry with `you` counts
+too: another session of yours, on this computer or on another one, can work on
+the issue. `take-in-check.sh` stops on your own entries for the same reason.

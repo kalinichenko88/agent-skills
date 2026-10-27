@@ -69,15 +69,15 @@ answer() { jq "${2:-.data.repository.n5} |= ($1)" "$fixtures/${3:-tracker.json}"
 writes() { grep -E '^issue (edit|comment)|^issue develop [0-9]+ --name' "$tmp/calls" || true; }
 
 # status: and also: of a host. As recorded, #5's one open pull request is #9,
-# which you wrote and which only names #5: the issue is not taken.
+# which you wrote and which only names #5.
 answer .
-check 'status of an issue whose one open PR is yours' "$(printf 'state: open\nstatus: PR #9 by you\nalso: 0\ntaken: no')" \
+check 'status of an issue whose one open PR is yours' "$(printf 'state: open\nstatus: PR #9 by you\nalso: 0')" \
   "$(bash "$scripts/collect.sh" status 5)"
 check 'status takes the number with its #' "$(bash "$scripts/collect.sh" status 5)" \
   "$(bash "$scripts/collect.sh" status '#5')"
 
 answer '.timelineItems.nodes = []'
-check 'status of a free issue' "$(printf 'state: open\nstatus: free\nalso: 0\ntaken: no')" \
+check 'status of a free issue' "$(printf 'state: open\nstatus: free\nalso: 0')" \
   "$(bash "$scripts/collect.sh" status 5)"
 
 answer '.assignees.nodes = [{login: "someone"}]
@@ -90,18 +90,8 @@ answer '.assignees.nodes = [{login: "someone"}]
       {isCrossRepository: true, source: {__typename: "PullRequest", number: 14, title: "t", state: "OPEN", author: {login: "someone"}}},
       {isCrossRepository: false, source: {__typename: "Issue", number: 15, title: "t", state: "OPEN"}}]'
 check 'status of a busy issue' \
-  "$(printf 'status: assigned to someone, branch fix/5-citations, PR #9 by you, PR #12 by someone, PR #13 by ghost\nalso: 0\ntaken: yes')" \
+  "$(printf 'status: assigned to someone, branch fix/5-citations, PR #9 by you, PR #12 by someone, PR #13 by ghost\nalso: 0')" \
   "$(bash "$scripts/collect.sh" status 5 | sed 1d)"
-
-# A linked branch is yours when the issue is assigned to you alone, as
-# worktree.sh leaves it; otherwise GitHub does not say whose it is.
-answer '.assignees.nodes = [{login: "kalinichenko88"}] | .linkedBranches.nodes = [{ref: {name: "fix/5-citations"}}]'
-check 'a branch on an issue assigned to you alone is yours' \
-  "$(printf 'status: assigned to you, branch fix/5-citations, PR #9 by you\nalso: 0\ntaken: no')" \
-  "$(bash "$scripts/collect.sh" status 5 | sed 1d)"
-answer '.linkedBranches.nodes = [{ref: {name: "fix/5-citations"}}]'
-check 'a branch on an issue with no assignee is not yours' 'taken: yes' \
-  "$(bash "$scripts/collect.sh" status 5 | sed -n '/^taken: /p')"
 
 answer '.body += "\n\n## Also: one\r\n\r\nx\n\n## Also: two\n\nNot a heading: ## Also: three\n### Also: four\n"'
 check 'also: counts the added sections' 'also: 2' \
@@ -234,22 +224,33 @@ check 'usage names every job' 4 "$(bash "$scripts/collect.sh" 2>&1 | grep -c '^u
 # add-finding.sh refuses a busy host and a full one, and writes nothing.
 printf '## Also: the scout misses a cited line\n\nWhere: scout.md:26.\n' >"$tmp/section.md"
 add() { bash "$scripts/add-finding.sh" 5 "$tmp/section.md" 'New title' "$@"; }
+# Sets #5 with no open pull request, so that its status: is free, changed by
+# the jq filter $1.
+host() { answer ".timelineItems.nodes = [] | $1"; }
 
-for case in 'busy|.assignees.nodes = [{login: "someone"}]|someone works on it: assigned to someone' \
+# Your own entries make a host busy too: another session of yours can work on
+# it, as #119 was while a session worked on it.
+for case in 'yours|. + {assignees: {nodes: [{login: "kalinichenko88"}]}, linkedBranches: {nodes: [{ref: {name: "fix/5-citations"}}]}}|it is busy: assigned to you, branch fix/5-citations' \
+  'busy|.assignees.nodes = [{login: "someone"}]|it is busy: assigned to someone' \
   'full|.body += "\n## Also: one\n## Also: two\n"|it holds 2 added findings already' \
   'closed|.state = "CLOSED"|it is closed' \
   'pull request|{__typename: "PullRequest", number: 5, title: "t", state: "OPEN", body: ""}|it is a pull request'; do
   IFS='|' read -r name change reason <<<"$case"
-  answer "$change"
+  host "$change"
   : >"$tmp/calls"
   out=$(add) && fail "add-finding.sh wrote to a $name host"
   case $out in *"$reason"*) ;; *) fail "add-finding.sh on a $name host" "$out" ;; esac
   check "add-finding.sh writes nothing to a $name host" '' "$(writes)"
 done
+# As recorded, #5's one open pull request is #9, which you wrote.
+answer .
+: >"$tmp/calls"
+out=$(add) && fail 'add-finding.sh wrote to a host with your open PR'
+case $out in *'it is busy: PR #9 by you'*) ;; *) fail 'add-finding.sh on a host with your open PR' "$out" ;; esac
+check 'add-finding.sh writes nothing to a host with your open PR' '' "$(writes)"
 
-# A host whose every entry is yours takes the finding. DRY_RUN=1 prints the
-# writes and runs none.
-answer '.assignees.nodes = [{login: "kalinichenko88"}]'
+# A free host takes the finding. DRY_RUN=1 prints the writes and runs none.
+host .
 : >"$tmp/calls"
 out=$(DRY_RUN=1 add bug)
 case $out in *'dry run: gh issue edit 5 --title New\ title --body-file '*'--add-label bug'*'dry run: gh issue comment 5'*) ;;
@@ -259,7 +260,7 @@ esac
 check 'add-finding.sh with DRY_RUN=1 runs no write' '' "$(writes)"
 
 # Without it, the body keeps the old text and gains the section.
-answer .
+host .
 : >"$tmp/calls"
 add >/dev/null
 check 'add-finding.sh edits and comments' \
@@ -273,11 +274,11 @@ stops add-finding.sh 1 5 "$tmp/section.md" 'New title'
 # section there, adds the label again without the body or the title, and
 # comments, on a host with no added finding before and on one with one before.
 for change in . '.body += "\n## Also: one\n"'; do
-  answer "$change"
+  host "$change"
   rm -f "$tmp/body"
   FAKE_FAIL='issue comment' add bug >/dev/null 2>&1 && fail 'add-finding.sh passed with a failed comment'
   [ -f "$tmp/body" ] || fail "add-finding.sh did not edit before the comment ($change)"
-  answer ".body = $(jq -Rs . "$tmp/body")"
+  host ".body = $(jq -Rs . "$tmp/body")"
   : >"$tmp/calls"
   out=$(add bug) || fail "a rerun of add-finding.sh after a failed comment ($change)" "$out"
   check "a rerun after a failed comment leaves the body ($change)" \
@@ -290,7 +291,7 @@ done
 # A dry rerun with no label prints only the comment, and removes the body that
 # no printed edit names.
 rm -f "$tmp"/body.*
-answer '.body += "\n## Also: the scout misses a cited line\n"'
+host '.body += "\n## Also: the scout misses a cited line\n"'
 check 'a dry rerun with no label only comments' \
   'dry run: gh issue comment 5 --body Added\ to\ the\ body:\ the\ scout\ misses\ a\ cited\ line.' "$(DRY_RUN=1 add)"
 check 'a dry rerun leaves no body' '' "$(find "$tmp" -maxdepth 1 -name 'body.*')"
@@ -299,7 +300,7 @@ check 'a dry rerun leaves no body' '' "$(find "$tmp" -maxdepth 1 -name 'body.*')
 # names. One after it, in a dry run, removes its own body.
 touch "$tmp/keep"
 for change in '.state = "CLOSED"' '.body += "\n## Also: one\n## Also: two\n"'; do
-  answer "$change"
+  host "$change"
   body=$tmp/keep DRY_RUN=1 add >/dev/null && fail "add-finding.sh passed on a refused host ($change)"
   [ -f "$tmp/keep" ] || fail "a refusal removed the file that \$body names ($change)"
   check "a refused dry run leaves no body ($change)" '' "$(find "$tmp" -maxdepth 1 -name 'body.*')"

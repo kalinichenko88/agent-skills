@@ -24,10 +24,8 @@
 # when that issue is in this repository. No number gets a second entry. A
 # failed query writes nothing.
 #
-# status prints the state:, status:, also: and taken: lines of one issue.
-# status: names you as "you", and taken: is yes when an entry of status: is
-# not yours. GitHub does not say whose a linked branch is: it counts as yours
-# when the issue is assigned to you alone, as worktree.sh leaves it.
+# status prints the state:, status: and also: lines of one issue, or only
+# "state: a pull request". status: names you as "you".
 #
 # Needs only bash, gh and awk: every filter of gh's JSON is gh's own --jq.
 
@@ -87,12 +85,6 @@ def status($me):
     (.linkedBranches.nodes[] | select(.ref) | "branch \(.ref.name)"),
     (prs | "PR #\(.number) by \(.author | who($me))") ]
   | if length > 0 then join(", ") else "free" end;
-def taken($me):
-  ([.assignees.nodes[].login] | length > 0 and all(. == $me)) as $yours
-  | [ (.assignees.nodes[] | select(.login != $me)),
-      (.linkedBranches.nodes[] | select(.ref and ($yours | not))),
-      (prs | select(.author != $me)) ]
-  | if length > 0 then "yes" else "no" end;
 def also: [.body | split("\n")[] | select(startswith("## Also:"))] | length;
 def text: if . == "" then "(empty)" else gsub("\r"; "") end;
 def entry($me):
@@ -210,7 +202,7 @@ case $job in
     number "$1"
     each "$fields" "$defs"'.data.viewer.login as $me | .data.repository[]
       | if .__typename == "Issue"
-        then "state: \(.state | lower)", "status: \(status($me))", "also: \(also)", "taken: \(taken($me))"
+        then "state: \(.state | lower)", "status: \(status($me))", "also: \(also)"
         else "state: a pull request" end' "$n"
     exit 0
     ;;
