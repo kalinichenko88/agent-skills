@@ -26,7 +26,10 @@ stays unchecked — and the fix underneath it can be doing nothing, or harm.
 So before the report is even believed, count it: pull a sample of real payloads
 and say how many carry the shape. Zero means the fix does not need to exist, and
 that is the finding. Then write the case against a recorded payload — whitespace,
-pretty-printing and all — not a string typed to make the assertion pass.
+pretty-printing and all — not a string typed to make the assertion pass. A
+report of data loss or a security hole is the exception: an attacker can make
+the input, so a zero count does not stop the fix, and the case uses the input of
+the report.
 
 In Claude Code, a Haiku subagent does the counting: one `Agent` call with
 `subagent_type: "Explore"` and `model: "haiku"`, given the source, the sample
@@ -156,30 +159,19 @@ each finding in its report, and the agent that sent it decides on each one.
 One sent with the skill's `scout.md`, or with the roadmap skill's `lanes.md`,
 follows that file instead.
 
-Three rules stay here in full, because they have to fire when nobody is thinking
-about GitHub at all.
-
 **Out-of-scope findings become issues.** Anything worth fixing that is **not**
 part of the current task — a bug, a latent defect, an improvement worth making
 later — gets filed as an issue instead of being fixed inline or dropped in the
 chat. Do not derail the task to fix it; do not ask first. If the Boy Scout Rule
 above takes it, it goes into the current PR instead, listed in the description
-as not part of the task. The skill draws that
-line and carries the how: a search of the tracker first, adding to an open
-issue on the same code before opening a new one, existing labels only (`debt` is
-created for a debt finding when no debt label exists), and every number listed
-in the final report. Where there is no GitHub remote or `gh auth status` fails,
-name the finding in the final report instead.
+as not part of the task. The skill's `filing.md` carries the how.
 
 **A defect in this plugin goes to its tracker, after the person says yes.**
 These rules, the hooks, a `kalinichenko:` skill and its scripts are the plugin.
-One of them can be wrong: a script fails on valid input, two rules say opposite
-things, or a rule followed as written gives a wrong result. That is an issue
-for `kalinichenko88/agent-skills`, not for the project you work in. In a
-checkout of `agent-skills`, the rule above applies instead. A step you skipped
-is not a defect. Do not derail the task. Unlike the rule above, ask first: show
-the person the title and the body, with nothing from their project in it, and
-file only after a yes. The skill's `filing.md` carries the how.
+A defect in one of them is an issue for `kalinichenko88/agent-skills`, not for
+the project you work in. In a checkout of `agent-skills`, the rule above
+applies instead. Do not derail the task. Unlike the rule above, ask first:
+`filing.md` carries the how.
 
 **Never add a `Co-Authored-By:` trailer** to a commit message — no Claude, no
 model name, no `noreply@anthropic.com`.

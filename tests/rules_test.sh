@@ -118,7 +118,6 @@ while IFS='|' read -r f phrase; do
     exit 1
   }
 done <<'EOF'
-rules.md|existing labels only (`debt` is created for a debt finding when no debt label exists)
 skills/github/filing.md|The one exception is debt: a file or a folder to split,
 skills/github/filing.md|create `debt` first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`
 skills/github/filing.md|For a debt finding, when the repository has no debt label, create `debt` first.
@@ -128,4 +127,13 @@ skills/roadmap/triage.md|except `debt` for a debt issue
 skills/roadmap/triage.md|when a row's label is `debt` and the repository has no debt label, create `debt`
 skills/roadmap/planning.md|except `debt` for a debt issue
 EOF
+# A zero count stops a fix, but an attacker can make the input of data loss or
+# a security hole. Each place that gives the zero-count rule names that
+# exception, so a person's report and a review finding get one verdict (#151).
+for f in rules.md skills/review-loop/SKILL.md; do
+  tr -s '[:space:]' ' ' <"$root/$f" | grep -qE 'data loss or a security hole[^.]*attacker can make the input' || {
+    echo "FAIL: $f: a zero count stops the fix of data loss or a security hole"
+    exit 1
+  }
+done
 echo 'rules_test: ok'
