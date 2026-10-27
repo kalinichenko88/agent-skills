@@ -5,6 +5,29 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 1.0.0 - 2026-10-27
+
+### Added
+
+- (review-loop) start a round only for a defect that real use reaches
+- (review-loop) give a change to documents only one round, one Codex read and no security review (#157)
+- (review-loop) read a superpowers spec with Fable and Codex, and check its plan against it (#154)
+- (review-loop) review the tests of the whole branch once, when the rounds end (#149)
+- (debt) check the invariants of docs/ARCHITECTURE.md in step 2 (#142)
+- (hooks) name a Claude Code session after the issue it takes in
+
+### Changed
+
+- (codex) trust the hooks again in /hooks (breaking)
+- (tests) name each fixture folder after the tests that read it (#139)
+
+### Fixed
+
+- (github) count your own entries as busy on the duplicate, neighbour and host paths
+- (hooks) keep the first part of the issue title whole in the session name (#146)
+- (architecture) run each invariant at the base by the base's own Check: line in --new-since (#145)
+- (hooks) name the session after a short form of the issue title (#143)
+
 ## 0.10.0 - 2026-10-26
 
 ### Added
