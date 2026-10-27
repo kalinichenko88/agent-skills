@@ -1,0 +1,9 @@
+> feat(cart): add the discount request
+
+21	0	src/features/cart/api.ts
+1	0	src/features/cart/index.ts
+1	1	docs/ARCHITECTURE.md
+ create mode 100644 src/features/cart/api.ts
+> feat(cart): take a discount code's percent off the cart total
+
+6	13	src/features/cart/index.ts

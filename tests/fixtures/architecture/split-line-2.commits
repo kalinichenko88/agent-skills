@@ -1,0 +1,6 @@
+> refactor(cart): shorten the cart
+
+2	10	src/features/cart/index.ts
+> feat(cart): take a discount code's percent off the cart total
+
+9	2	src/features/cart/index.ts

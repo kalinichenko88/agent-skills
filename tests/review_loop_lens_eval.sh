@@ -13,18 +13,26 @@
 #   breaks I-1 already: no Invariant finding that cites I-1, and an Outside
 #   finding on that code, src/legacy/ping.ts.
 #
+# With --codex, Codex reads each case in its place, with the same prompt, in
+# its read-only sandbox and with the person's Codex config, as codex-review.sh
+# runs it: for #87, whether Codex finds what the Claude lens misses.
+#
 # It calls the model, so it costs tokens and is not part of `make check`: run
 # it by hand after a change to architecture-lens.md, or to the parts of
 # skills/architecture/SKILL.md that the lens reads.
 # It runs with this machine's other plugins and settings.
 #
-# Usage: tests/review_loop_lens_eval.sh [runs of each case, default 1]
+# Usage: tests/review_loop_lens_eval.sh [--codex] [runs of each case, default 1]
 
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
+reader=claude
+[ "${1:-}" != --codex ] || { reader=codex; shift; }
 runs=${1:-1}
-[ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [runs of each case, at least 1]" >&2; exit 2; }
+# An argument too many, as `3 --codex`, must not start paid runs.
+[ "$#" -le 1 ] && [ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [--codex] [runs of each case, at least 1]" >&2; exit 2; }
+[ "$reader" = claude ] || codex login status >/dev/null 2>&1 || { echo "$0: codex is not installed or not logged in" >&2; exit 2; }
 logs=$(mktemp -d)
 cases='second-client direct-fetch amended legacy'
 
@@ -211,7 +219,8 @@ EOF
 # The installed copy of the plugin is turned off, so the rules come from this
 # checkout. The last line of the prompt is the one that review-loop gives
 # Codex as a reader: claude -p runs as a main session, not as a subagent.
-# run <case> <run>: the base of a case is the branch that it starts from.
+# run <case> <run>: the base of a case is the branch that it starts from. The
+# report goes to <case>-<run>.txt.
 run() {
   local work=$logs/$1-$2 base=main prompt
   [ "$1" != legacy ] || base=legacy-base
@@ -221,9 +230,15 @@ run() {
 Range: $(git -C "$work" rev-parse "$base")..$(git -C "$work" rev-parse HEAD)
 Tree: $work
 You are one reviewer that another agent runs: start no skill, change no file, and file nothing."
+  if [ "$reader" = codex ]; then
+    codex exec -s read-only --ephemeral -C "$work" -o "$work.txt" "$prompt" </dev/null >"$work.log" 2>&1 || true
+    return
+  fi
   (cd "$work" && claude -p --model opus --effort high --output-format json \
     --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
-    --plugin-dir "$root" --dangerously-skip-permissions "$prompt") >"$work.json" 2>&1
+    --plugin-dir "$root" --dangerously-skip-permissions "$prompt") >"$work.json" 2>&1 || true
+  # The text of a session that ends in an error is no report.
+  jq -r 'select(.is_error != true) | .result // empty' "$work.json" >"$work.txt" 2>/dev/null || true
 }
 
 for i in $(seq "$runs"); do
@@ -234,15 +249,17 @@ done
 wait
 
 # A finding is a line whose kind comes before the first |, as the lens
-# returns it, in a list or a table.
+# returns it, in a list or a table. Only spaces, * or : stand between the kind
+# and the |: a line for a script that did not run, as `invariants.sh | <why>`,
+# is not an Invariant finding.
 kind='^[[:space:]]*[|]?[^|]*'
 failed=0
 for i in $(seq "$runs"); do
   for kase in $cases; do
-    report=$(jq -r '.result // empty' "$logs/$kase-$i.json" 2>/dev/null || true)
-    invariant=$(grep -ciE "${kind}invariant[^|]*[|].*I-1([^0-9]|\$)" <<<"$report" || true)
-    second=$(grep -ciE "${kind}second structure[^|]*[|]" <<<"$report" || true)
-    outside=$(grep -ciE "${kind}outside[^|]*[|].*src/legacy/ping\.ts" <<<"$report" || true)
+    report=$(cat "$logs/$kase-$i.txt" 2>/dev/null || true)
+    invariant=$(grep -ciE "${kind}invariant[[:space:]*:]*[|].*I-1([^0-9]|\$)" <<<"$report" || true)
+    second=$(grep -ciE "${kind}second structure[[:space:]*:]*[|]" <<<"$report" || true)
+    outside=$(grep -ciE "${kind}outside[[:space:]*:]*[|].*src/legacy/ping\.ts" <<<"$report" || true)
     if case $kase in
       second-client) [ "$second" -ge 1 ] ;;
       direct-fetch) [ "$invariant" -ge 1 ] ;;
