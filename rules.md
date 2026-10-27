@@ -173,7 +173,7 @@ These rules, the hooks, a `kalinichenko:` skill and its scripts are the plugin.
 A defect in one of them is an issue for `kalinichenko88/agent-skills`, not for
 the project you work in. In a checkout of `agent-skills`, the rule above
 applies instead. Do not derail the task. Unlike the rule above, ask the person
-first. Show the title and the body that the github skill's `filing.md` writes.
+first: show the text that the github skill's `filing.md` writes.
 
 **Never add a `Co-Authored-By:` trailer** to a commit message — no Claude, no
 model name, no `noreply@anthropic.com`.

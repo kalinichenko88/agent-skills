@@ -98,9 +98,10 @@ done
 #   `debt` label in the repository, "never invent a new label" left it `bug` or
 #   unlabelled (#133). Each place that gives the labels rule, for a new issue or
 #   for a host, names the exception.
-# - The GitHub section keeps each trigger that must fire with no skill loaded
-#   (#151). With no GitHub remote, an agent that finds something out of scope
-#   may never load the github skill, so rules.md keeps the fallback too. The
+# - The GitHub section keeps the headings of its two rules that must fire with
+#   no skill loaded (#151). With no GitHub remote, an agent that finds
+#   something out of scope may never load the github skill, so rules.md keeps
+#   the fallback too. The
 #   ask for a plugin defect shows the text that filing.md writes, so its check
 #   of the defect runs before the person is asked.
 # - A zero count stops a fix, but an attacker can make the input of data loss
@@ -126,7 +127,7 @@ skills/roadmap/planning.md|except `debt` for a debt issue
 rules.md|**Out-of-scope findings become issues.**
 rules.md|Where there is no GitHub remote or `gh auth status` fails, name the finding in the final report instead of filing it.
 rules.md|**A defect in this plugin goes to its tracker, after the person says yes.**
-rules.md|Unlike the rule above, ask the person first. Show the title and the body that the github skill's `filing.md` writes.
+rules.md|Unlike the rule above, ask the person first: show the text that the github skill's `filing.md` writes.
 rules.md|For a report of data loss or a security hole, a zero count does not stop the fix. An attacker can make the input, so the test of that fix uses the input of the report.
 skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input, and the test of its fix uses the input of the finding.
 EOF
