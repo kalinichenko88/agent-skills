@@ -43,8 +43,7 @@ each task stays as that skill sets it. In place of the final review of
   the review subagent, and no round reads its fixes. In Claude Code, Codex
   then reads the whole branch once, with the fixes in place, when the branch
   changes the text of a skill or a prompt, or a superpowers spec. No last
-  pass and no security review run: the prompt of `/security-review` excludes
-  Markdown. The fixes for your review comments are one commit, with no round.
+  pass runs, and no security review: its prompt excludes Markdown. The fixes for your review comments are one commit, with no round.
   Ask for more rounds, a last pass or a security review, and they run.
 - **One last look at the whole branch.** When the loop needed more than one
   round, one pass reads the whole branch again after it stops, to see how the
@@ -68,7 +67,8 @@ each task stays as that skill sets it. In place of the final review of
   security review are one commit, and so are those from each set of your
   review comments, also after the pull request opens. Each of these commits
   has rounds of its own: at the level of the loop's round 1, or `xhigh` for a
-  fix to security code.
+  fix to security code. On a change to documents only, they have none, unless
+  you ask for them.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.

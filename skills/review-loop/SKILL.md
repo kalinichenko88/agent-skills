@@ -182,7 +182,8 @@ The fix for an answer to a question joins the next fix commit. When no rounds
 are running, it starts a new count, as above. A person's review comments go
 through *The findings* below, and the reply names the fix commit.
 
-A change to documents only has no such rounds: see the next section.
+A change to documents only has no such rounds, unless the person asks for
+more: see the next section.
 
 ## A change to documents only
 
@@ -193,14 +194,16 @@ A change to documents only, as *The level* says, gets one round:
    one commit. No round reads that commit, and no last pass follows.
 2. **One read by Codex**, when the branch changes the text of a skill or a
    prompt, or a spec: the design document that `superpowers:brainstorming`
-   writes, as `docs/superpowers/specs/*.md`. In Claude Code, run it after the
-   fix commit of round 1, so Codex reads the fixes in place:
+   writes, as `docs/superpowers/specs/*.md`. In Claude Code, run it after
+   round 1 and its fix commit, when there is one, so Codex reads the fixes in
+   place:
 
    ```bash
    bash <dir>/scripts/codex-review.sh --docs <base>
    ```
 
-   Its exits are as in *A second model for `xhigh` changes*. Its findings go
+   `<dir>`, `<base>`, where it runs and its exits are as in *A second model
+   for `xhigh` changes*. Change no file while it runs. Its findings go
    through *The findings*. Its fixes are one commit, and no round reads it.
    Other documents, as a README or a note in `docs/`, get no Codex read. In
    Codex, there is no Codex read.
@@ -210,7 +213,7 @@ A change to documents only, as *The level* says, gets one round:
    one commit, and no round reads it.
 
 When the person asks for more, as more rounds, a last pass or a security
-review, that step runs as the other sections say.
+review, that step and the rounds on its fixes run as the other sections say.
 
 Why: on eight branches of this plugin that changed only Markdown, the rounds
 ran 60 reviews, seven a branch at the median. From the second round on, most
@@ -270,9 +273,10 @@ Then report in this order, one line per item:
   last pass, the same way. At `xhigh`, the Codex review: its range and the
   count of findings it confirmed, or why it did not run. At `high` and
   `xhigh`, the review of the tests, the same way. The security review's
-  result. The check's result. For a change to documents only: round 1, the
-  Codex read or why it did not run, and `no last pass and no security
-  review: documents only`.
+  result. The check's result. For a change to documents only: round 1; the
+  Codex read and the count of findings it confirmed, or why it did not run;
+  and `documents only` for each of the last pass and the security review that
+  did not run.
 - **Decisions:** each choice you made: the finding, the choice, the reason.
   Each question on business logic, with the person's answer, or `open`.
 - **Fixed:** what changed and in which file, the commit, and any side effect

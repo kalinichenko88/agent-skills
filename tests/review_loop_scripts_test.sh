@@ -80,6 +80,7 @@ grep -qF "git diff $base...$head" "$tmp/args" || fail 'with --docs: the prompt n
 code=0
 review --docs >/dev/null 2>"$tmp/err" || code=$?
 check '--docs with no base is a usage error' 2 "$code"
+grep -qxF 'usage: codex-review.sh [--docs] <base>' "$tmp/err" || fail 'the usage line names --docs' "$(cat "$tmp/err")"
 rm -f "$tmp/args"
 review HEAD~1 >/dev/null
 grep -qF "git diff $base...$head" "$tmp/args" || fail 'a base given as a name goes into the prompt as its SHA' "$(cat "$tmp/args")"
