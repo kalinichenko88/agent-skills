@@ -62,15 +62,15 @@ verdict too.
 A duplicate is the same report about the same place, by *Its duplicates
 close first* in `<github>/take-in.md`, with its two exceptions. A duplicate
 with an entry in its `status:` line, yours too (`<github>/tracker.md`), stays
-open. A match by symptom alone gets its verdict first: when that shows the
-same cause, it is a duplicate; otherwise it keeps its own verdict. The
-survivor is the one with such an entry, else the older one. The verdict of the
-other one is `duplicate of #<n>`, with what it adds to carry into a comment on
-the survivor. When its milestone comes before
-the survivor's, in the order of `roadmap.sh`, or the survivor has none, the
-survivor takes it. When the survivor is in the list too, the duplicate's row
-gives it no milestone: its own row carries the earlier of the two, unless its
-verdict gives it none.
+open. When both have such an entry, each keeps its own verdict. A match by
+symptom alone gets its verdict first: when that shows the same cause, it is a
+duplicate; otherwise it keeps its own verdict. The survivor is the one with
+such an entry, else the older one. The verdict of the other one is
+`duplicate of #<n>`, with what it adds to carry into a comment on the
+survivor. When its milestone comes before the survivor's, in the order of
+`roadmap.sh`, or the survivor has none, the survivor takes it. When the
+survivor is in the list too, the duplicate's row gives it no milestone: its
+own row carries the earlier of the two, unless its verdict gives it none.
 
 ## Verdict
 

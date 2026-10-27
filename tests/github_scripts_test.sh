@@ -244,8 +244,10 @@ for case in 'yours|. + {assignees: {nodes: [{login: "kalinichenko88"}]}, linkedB
 done
 # As recorded, #5's one open pull request is #9, which you wrote.
 answer .
+: >"$tmp/calls"
 out=$(add) && fail 'add-finding.sh wrote to a host with your open PR'
 case $out in *'it is busy: PR #9 by you'*) ;; *) fail 'add-finding.sh on a host with your open PR' "$out" ;; esac
+check 'add-finding.sh writes nothing to a host with your open PR' '' "$(writes)"
 
 # A free host takes the finding. DRY_RUN=1 prints the writes and runs none.
 host .

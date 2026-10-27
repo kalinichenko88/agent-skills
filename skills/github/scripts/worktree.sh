@@ -45,7 +45,8 @@ if [ -n "$list" ]; then
   fi
 fi
 
-# Assigned to you, the issue's linked branch counts as yours.
+# When the issue has an assignee, its linked branch counts as yours:
+# take-in-check.sh stops first on an assignee who is not you.
 # GitHub does not say whose a branch is: one that is linked while nobody is
 # assigned can be someone else's, so you decide.
 # Read outside the if, so that a failed read stops the script.

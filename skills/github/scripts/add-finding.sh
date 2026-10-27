@@ -6,8 +6,8 @@
 #
 # The section file starts with the line "## Also: <the problem>". The host must
 # be an open issue that is free (collect.sh status says status: free) and that
-# holds fewer than two added findings. Your own entries count too: another
-# session of yours can work on the issue. All of this is read again just
+# holds fewer than two added findings. Your own entries in status: count too:
+# another session of yours can work on the issue. All of this is read again just
 # before the write. Otherwise it prints why and exits 1, and writes nothing.
 # Run it for one host at a time: it reads the body and writes it back whole.
 # When gh stops it with an error, the step is not done. A rerun with the same
