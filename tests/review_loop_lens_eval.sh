@@ -29,9 +29,9 @@ set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)
 reader=claude
 [ "${1:-}" != --codex ] || { reader=codex; shift; }
-[ "$reader" = claude ] || codex login status >/dev/null 2>&1 || { echo "$0: codex is not installed or not logged in" >&2; exit 2; }
 runs=${1:-1}
 [ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [--codex] [runs of each case, at least 1]" >&2; exit 2; }
+[ "$reader" = claude ] || codex login status >/dev/null 2>&1 || { echo "$0: codex is not installed or not logged in" >&2; exit 2; }
 logs=$(mktemp -d)
 cases='second-client direct-fetch amended legacy'
 
@@ -235,8 +235,9 @@ You are one reviewer that another agent runs: start no skill, change no file, an
   fi
   (cd "$work" && claude -p --model opus --effort high --output-format json \
     --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
-    --plugin-dir "$root" --dangerously-skip-permissions "$prompt") >"$work.json" 2>&1
-  jq -r '.result // empty' "$work.json" >"$work.txt" 2>/dev/null || true
+    --plugin-dir "$root" --dangerously-skip-permissions "$prompt") >"$work.json" 2>&1 || true
+  # The text of a session that ends in an error is no report.
+  jq -r 'select(.is_error != true) | .result // empty' "$work.json" >"$work.txt" 2>/dev/null || true
 }
 
 for i in $(seq "$runs"); do
