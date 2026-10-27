@@ -84,6 +84,14 @@ tr '\n' ' ' <"$root/rules.md" | grep -qE '\. In `superpowers:subagent-driven-dev
   echo "FAIL: no sentence keeps the per-task review of subagent-driven development and invokes review-loop after the last task"
   exit 1
 }
+# The checks of a spec and a plan are not a review of a change, so the trigger
+# above does not fire there. rules.md is at its cap, so the steps live in
+# review-loop, and only this sentence starts it (#101).
+# shellcheck disable=SC2016 # Markdown backticks, not shell
+tr '\n' ' ' <"$root/rules.md" | grep -qE 'In Claude Code, invoke it also in place of the builder check of `superpowers:brainstorming`, and after the self-review of `superpowers:writing-plans`\.' || {
+  echo "FAIL: no sentence invokes review-loop for the spec and the plan of superpowers"
+  exit 1
+}
 # A fix outside the task goes into its PR or into an issue by one scope: the
 # task's module. Each place that draws that line names the module, and none
 # keeps the three tests without it (#103).

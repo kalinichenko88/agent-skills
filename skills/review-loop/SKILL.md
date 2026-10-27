@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Use when a change is reviewed, before or after its pull request opens — running /code-review or /security-review in Claude Code or /review in Codex, sending a review subagent, choosing a review level, deciding whether another round is needed, or handling the findings a review or a person's review comments return.
+description: Use when a change is reviewed, before or after its pull request opens — running /code-review or /security-review in Claude Code or /review in Codex, sending a review subagent, choosing a review level, deciding whether another round is needed, or handling the findings a review or a person's review comments return. Also at the builder check of superpowers:brainstorming and after the self-review of superpowers:writing-plans.
 ---
 
 # Review loop
@@ -273,3 +273,36 @@ Then:
    run the merge, then do *Finishing* from that skill.
 
 Only the merge and the open questions on business logic wait for the person.
+
+## A spec and a plan
+
+In Claude Code, the global prompt sends you here at two checks of
+superpowers. They are not a review of a change, and the rounds above do not
+run on them. In Codex this section does not apply, and the two checks run as
+superpowers sets them: Codex has no Fable, and it does not call itself.
+
+**The spec.** `superpowers:brainstorming` sends one subagent with its
+`builder-check-prompt.md` when the written design exists. Send two readers
+instead, in one message, with the same prompt: an `Agent` call with
+`model: "fable"`, and Codex in the background, from the root of the
+repository:
+
+```bash
+codex exec -s read-only --ephemeral - <<'EOF'
+<the prompt, filled in>
+You are one reviewer that another agent runs: start no skill, change no file, and file nothing.
+EOF
+```
+
+The last line is there because Codex loads the global prompt too. When there
+is no `codex` command, `codex login status` fails, or the run fails, as in a
+folder that Codex does not trust, go on with Fable alone, and say so when you
+hand over the document. Put the questions from both readers into the three
+piles of brainstorming.
+
+**The plan.** `superpowers:writing-plans` checks the plan against the spec
+itself. After that check, send one `general-purpose` subagent with no
+`model`. It reads the spec and the plan, and returns each spec requirement
+with no task, each task that contradicts the spec, and each value that
+differs from the spec, with the spec line and the plan line, or "none". Fix
+the plan before the handoff.
