@@ -5,6 +5,22 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 1.1.0 - 2026-10-27
+
+### Added
+
+- (review-loop) review a branch against the architecture file and the ADRs, beside round 1 (#166)
+
+### Changed
+
+- (architecture) measure the skill in four arms, and compare the lens on Codex (#169)
+- (hooks) check the bare number and the URL prompts as rows of the prompt table (#160)
+
+### Fixed
+
+- (rules) keep only the GitHub triggers in rules.md, and add the zero count's security exception (#163)
+- (review-loop) keep a change to a test file off low, and rerun a round that read no file (#162)
+
 ## 1.0.0 - 2026-10-27
 
 ### Added
