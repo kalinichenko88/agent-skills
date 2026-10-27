@@ -115,7 +115,7 @@ in place. A duplicate is closed against the survivor, never left standing as a
 second opinion. When the other side is busy, it gets the one-line comment
 only: it stays open, its body stays as it is, and the final report names it.
 When the other side is a host that holds two added findings, it gets the
-one-line comment, and its body stays as it is.
+one-line comment only: its body stays as it is.
 
 ## A defect in this plugin
 
