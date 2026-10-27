@@ -194,9 +194,10 @@ A change to documents only, as *The level* says, gets one round:
    one commit. No round reads that commit, and no last pass follows.
 2. **One read by Codex**, when the branch changes the text of a skill or a
    prompt, or a spec: the design document that `superpowers:brainstorming`
-   writes, as `docs/superpowers/specs/*.md`. In Claude Code, run it after
-   round 1 and its fix commit, when there is one, so Codex reads the fixes in
-   place:
+   writes, as `docs/superpowers/specs/*.md`. In Claude Code, run it when the
+   rounds end, so Codex reads their fixes in place: after round 1 and its fix
+   commit, when there is one, or after the last round that the person asked
+   for:
 
    ```bash
    bash <dir>/scripts/codex-review.sh --docs <base>

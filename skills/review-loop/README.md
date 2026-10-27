@@ -43,8 +43,10 @@ each task stays as that skill sets it. In place of the final review of
   the review subagent, and no round reads its fixes. In Claude Code, Codex
   then reads the whole branch once, with the fixes in place, when the branch
   changes the text of a skill or a prompt, or a superpowers spec. No last
-  pass runs, and no security review: its prompt excludes Markdown. The fixes for your review comments are one commit, with no round.
-  Ask for more rounds, a last pass or a security review, and they run.
+  pass runs, and no `/security-review`: its prompt excludes Markdown. The
+  fixes for your review comments are one commit, with no round. Ask for more
+  rounds, a last pass or a security review, and they run, with rounds on
+  their fixes.
 - **One last look at the whole branch.** When the loop needed more than one
   round, one pass reads the whole branch again after it stops, to see how the
   fixes fit the rest. It never runs twice.
@@ -67,14 +69,14 @@ each task stays as that skill sets it. In place of the final review of
   security review are one commit, and so are those from each set of your
   review comments, also after the pull request opens. Each of these commits
   has rounds of its own: at the level of the loop's round 1, or `xhigh` for a
-  fix to security code. On a change to documents only, they have none, unless
-  you ask for them.
+  fix to security code. On a change to documents only, a commit gets rounds
+  only when you ask for rounds, or for the step that made it.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.
 - **A security review last.** `/security-review` runs once on the final
   branch. Its fixes get rounds of their own, as the later fixes above. A
-  change to documents only gets none, unless you ask.
+  change to documents only gets no security review, unless you ask for one.
 - **A summary.** First a run of the repository's check on the final branch.
   Then the rounds, the decisions with their reasons, what was fixed, what was
   declined and why, and the issues filed. Last, the docs the branch changed,
