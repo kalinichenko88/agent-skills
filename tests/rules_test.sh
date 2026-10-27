@@ -68,30 +68,6 @@ tr '\n' ' ' <"$root/rules.md" | grep -qE 'read-only subagent[^.]* review[^.]* fi
   echo "FAIL: SubagentStart: no sentence tells a read-only review subagent to file nothing"
   exit 1
 }
-# superpowers' review skills start at the same moments as review-loop and give
-# other steps, and subagent-driven-development's per-task reviewer is a review
-# subagent too. The rules must say which skill wins, keep review-loop out of the
-# per-task review, and invoke review-loop after the last task: the review there
-# is not the first review of the change, so the trigger in rules.md does not
-# fire.
-# shellcheck disable=SC2016 # Markdown backticks, not shell
-tr '\n' ' ' <"$root/rules.md" | grep -qE 'review-loop` replaces `superpowers:requesting-code-review` and `superpowers:receiving-code-review`' || {
-  echo "FAIL: no sentence says that review-loop replaces the superpowers review skills"
-  exit 1
-}
-# shellcheck disable=SC2016 # Markdown backticks, not shell
-tr '\n' ' ' <"$root/rules.md" | grep -qE '\. In `superpowers:subagent-driven-development`, the review after each task stays as that skill sets it, without `kalinichenko:review-loop`\. Invoke review-loop after the last task, in place of the final review\.' || {
-  echo "FAIL: no sentence keeps the per-task review of subagent-driven development and invokes review-loop after the last task"
-  exit 1
-}
-# The checks of a spec and a plan are not a review of a change, so the trigger
-# above does not fire there. rules.md is at its cap, so the steps live in
-# review-loop, and only this sentence starts it (#101).
-# shellcheck disable=SC2016 # Markdown backticks, not shell
-tr '\n' ' ' <"$root/rules.md" | grep -qE 'In Claude Code, invoke it also in place of the builder check of `superpowers:brainstorming`, and after the self-review of `superpowers:writing-plans`\.' || {
-  echo "FAIL: no sentence invokes review-loop for the spec and the plan of superpowers"
-  exit 1
-}
 # A fix outside the task goes into its PR or into an issue by one scope: the
 # task's module. Each place that draws that line names the module, and none
 # keeps the three tests without it (#103).
@@ -107,17 +83,38 @@ for f in rules.md skills/github/filing.md skills/github/take-in.md \
     exit 1
   fi
 done
-# architecture and review-loop file a debt issue through filing.md. With no
-# `debt` label in the repository, "never invent a new label" left it `bug` or
-# unlabelled (#133). Each place that gives the labels rule, for a new issue or
-# for a host, names the exception. Each line loses one leading #, so a phrase
-# can span a script's comment lines.
+# Sentences that must stay, word for word. Each line loses one leading #, so a
+# phrase can span a script's comment lines.
+# - superpowers' review skills start at the same moments as review-loop and
+#   give other steps, and subagent-driven-development's per-task reviewer is a
+#   review subagent too. The rules must say which skill wins, keep review-loop
+#   out of the per-task review, and invoke review-loop after the last task: the
+#   review there is not the first review of the change, so the trigger in
+#   rules.md does not fire.
+# - The checks of a spec and a plan are not a review of a change, so the
+#   trigger above does not fire there. The steps live in review-loop, and only
+#   this sentence starts it (#101).
+# - architecture and review-loop file a debt issue through filing.md. With no
+#   `debt` label in the repository, "never invent a new label" left it `bug` or
+#   unlabelled (#133). Each place that gives the labels rule, for a new issue or
+#   for a host, names the exception.
+# - The GitHub section keeps each trigger that must fire with no skill loaded
+#   (#151). With no GitHub remote, an agent that finds something out of scope
+#   may never load the github skill, so rules.md keeps the fallback too. The
+#   ask for a plugin defect shows the text that filing.md writes, so its check
+#   of the defect runs before the person is asked.
+# - A zero count stops a fix, but an attacker can make the input of data loss
+#   or a security hole: the rule for a person's report, in rules.md, and the
+#   rule for a review finding, in review-loop, each name that exception (#151).
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
-    echo "FAIL: $f: a debt finding with no debt label gets another label or none: no \"$phrase\""
+    echo "FAIL: $f: no \"$phrase\""
     exit 1
   }
 done <<'EOF'
+rules.md|`kalinichenko:review-loop` replaces `superpowers:requesting-code-review` and `superpowers:receiving-code-review`.
+rules.md|. In `superpowers:subagent-driven-development`, the review after each task stays as that skill sets it, without `kalinichenko:review-loop`. Invoke review-loop after the last task, in place of the final review.
+rules.md|In Claude Code, invoke it also in place of the builder check of `superpowers:brainstorming`, and after the self-review of `superpowers:writing-plans`.
 skills/github/filing.md|The one exception is debt: a file or a folder to split,
 skills/github/filing.md|create `debt` first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`
 skills/github/filing.md|For a debt finding, when the repository has no debt label, create `debt` first.
@@ -126,21 +123,11 @@ skills/github/scripts/add-finding.sh|A debt finding keeps its debt label: when t
 skills/roadmap/triage.md|except `debt` for a debt issue
 skills/roadmap/triage.md|when a row's label is `debt` and the repository has no debt label, create `debt`
 skills/roadmap/planning.md|except `debt` for a debt issue
-EOF
-# Sentences that must stay, word for word (#151). A zero count stops a fix,
-# but an attacker can make the input of data loss or a security hole: the rule
-# for a person's report, in rules.md, and the rule for a review finding, in
-# review-loop, each name that exception. With no GitHub remote, an agent that
-# finds something out of scope may never load the github skill, so rules.md
-# keeps the fallback for that finding.
-while IFS='|' read -r f phrase; do
-  tr -s '[:space:]' ' ' <"$root/$f" | grep -qF "$phrase" || {
-    echo "FAIL: $f: no \"$phrase\""
-    exit 1
-  }
-done <<'EOF'
-rules.md|A zero count does not stop the fix of data loss or a security hole. An attacker can make the input, so the test of that fix uses the input of the report.
-skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input, and the test of its fix uses the input of the finding.
+rules.md|**Out-of-scope findings become issues.**
 rules.md|Where there is no GitHub remote or `gh auth status` fails, name the finding in the final report instead of filing it.
+rules.md|**A defect in this plugin goes to its tracker, after the person says yes.**
+rules.md|Unlike the rule above, ask the person first. Show the title and the body that the github skill's `filing.md` writes.
+rules.md|For a report of data loss or a security hole, a zero count does not stop the fix. An attacker can make the input, so the test of that fix uses the input of the report.
+skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input, and the test of its fix uses the input of the finding.
 EOF
 echo 'rules_test: ok'
