@@ -130,17 +130,17 @@ EOF
 # Sentences that must stay, word for word (#151). A zero count stops a fix,
 # but an attacker can make the input of data loss or a security hole: the rule
 # for a person's report, in rules.md, and the rule for a review finding, in
-# review-loop, each name that exception. The github skill does not load in a
-# repository with no GitHub remote, so rules.md keeps the fallback for an
-# out-of-scope finding.
+# review-loop, each name that exception. With no GitHub remote, an agent that
+# finds something out of scope may never load the github skill, so rules.md
+# keeps the fallback for that finding.
 while IFS='|' read -r f phrase; do
   tr -s '[:space:]' ' ' <"$root/$f" | grep -qF "$phrase" || {
     echo "FAIL: $f: no \"$phrase\""
     exit 1
   }
 done <<'EOF'
-rules.md|A zero count does not stop the fix of data loss or a security hole. An attacker can make the input
-skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input
+rules.md|A zero count does not stop the fix of data loss or a security hole. An attacker can make the input, so the test of that fix uses the input of the report.
+skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input, and the test of its fix uses the input of the finding.
 rules.md|Where there is no GitHub remote or `gh auth status` fails, name the finding in the final report instead of filing it.
 EOF
 echo 'rules_test: ok'
