@@ -39,23 +39,18 @@ calls() { cat "$tmp/calls" 2>/dev/null || true; }
 recorded='#133 filing.md forbids a new label'
 
 cp "$fixtures/issue.json" "$tmp/issue.json"
-out=$(run claude-prompt.json '#133') || fail "#133: exit $?"
-check '#133: the title' "$recorded" "$(field sessionTitle)"
-check '#133: the event' UserPromptSubmit "$(field hookEventName)"
-check '#133: gh reads the issue' 'issue view 133' "$(calls)"
-
+# Each line is the prompt|the issue gh gets. The prompts are JSON text: \n is
+# a pasted newline. Row 3 keeps the spaces of a prompt that Claude Code sent
+# as "  #91  ".
 url=https://github.com/kalinichenko88/agent-skills/issues/133
-out=$(run claude-prompt.json "$url") || fail "URL: exit $?"
-check 'URL: the title' "$recorded" "$(field sessionTitle)"
-check 'URL: gh reads the issue' "issue view $url" "$(calls)"
-
-# Claude Code sent "  #91  " as it was typed. The prompts below are JSON text:
-# \n is a pasted newline. Each line is the prompt|the issue gh gets.
 while IFS='|' read -r prompt issue; do
   out=$(run claude-prompt.json "$prompt") || fail "$prompt: exit $?"
+  check "$prompt: the event" UserPromptSubmit "$(field hookEventName)"
   check "$prompt: the title" "$recorded" "$(field sessionTitle)"
   check "$prompt: gh reads the issue" "issue view $issue" "$(calls)"
 done <<EOF
+#133|133
+$url|$url
   #133  |133
 $url\n|$url
 #133\t|133
