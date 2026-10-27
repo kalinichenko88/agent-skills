@@ -153,12 +153,13 @@ wrapper() {
 # least two list items under its Options heading and a line of text under its
 # Confirmation heading.
 adr() {
-  local label=$1 ok=0 log files
+  local label=$1 ok=0 log files count
   shift
   for log; do
     files=$(find "${log%.jsonl}/docs/adr" -name '*.md' 2>/dev/null || true)
-    if [ -z "$files" ] || [ "$(wc -l <<<"$files")" -ne 1 ]; then
-      echo "${log%.jsonl}: $(grep -c . <<<"$files" || true) ADRs"
+    count=$(grep -c . <<<"$files" || true)
+    if [ "$count" -ne 1 ]; then
+      echo "${log%.jsonl}: $count ADRs"
     elif awk '/^## / { options = /^## Options/; confirmation = /^## Confirmation/; next }
       options && /^[-*] / { n++ } confirmation && NF { c++ }
       END { exit !(n >= 2 && c >= 1) }' "$files"; then
