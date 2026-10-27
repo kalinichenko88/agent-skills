@@ -8,7 +8,9 @@ prompt of engineering rules, plus the skills those rules lean on.
   a dependency, keep code and commits in English, write prose in Simplified
   Technical English, move docs with the change, verify review findings before
   acting on them and load the review loop in place of superpowers' review
-  skills before the first review of a change,
+  skills before the first review of a change and, in Claude Code, in place
+  of the builder check of a superpowers spec and after the self-review of its
+  plan,
   load the TypeScript conventions before the first write to a TypeScript file
   and the React conventions before the first write to a React component or
   hook. Outside this repository, report a defect in this plugin to its
@@ -30,7 +32,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   whole branch when the loop needed more than one round, Codex as a second
   reviewer for `xhigh` changes in Claude Code, a review of the tests for
   `high` and `xhigh` changes, a security review, and a summary of what was
-  decided and fixed.
+  decided and fixed. In Claude Code, Fable and Codex also read a superpowers
+  spec, and one more subagent checks its plan against it.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
   over-engineering, filed as at most three `debt` issues a run.

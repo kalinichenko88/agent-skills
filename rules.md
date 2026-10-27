@@ -114,7 +114,9 @@ defect.
 `superpowers:receiving-code-review`. In
 `superpowers:subagent-driven-development`, the review after each task stays as
 that skill sets it, without `kalinichenko:review-loop`. Invoke review-loop
-after the last task, in place of the final review.
+after the last task, in place of the final review. In Claude Code, invoke it
+also in place of the builder check of `superpowers:brainstorming`, and after
+the self-review of `superpowers:writing-plans`.
 
 ## The Boy Scout Rule (always)
 
@@ -148,13 +150,11 @@ Before the first write or edit to a React component or hook, invoke
 A commit message, a pull request, an issue, a workflow file — anything that
 touches a repository's GitHub surface goes through the `kalinichenko:github`
 skill. Invoke it before the first `git commit`, `gh` call or workflow edit, not
-after: it carries commit trailers, PR ownership and merge style, issue filing,
-keeping issues true as the code moves, which open issues ride along with a task,
-and action pinning. A read-only subagent, as a review or a Haiku subagent
-above, files nothing, whatever the rules below say. It does not load the
-skill. It names each finding in its report, and the agent that sent it decides
-on each one. One sent with the skill's `scout.md`, or with the roadmap skill's
-`lanes.md`, follows that file instead.
+after. A read-only subagent, as a review or a Haiku subagent above, files
+nothing, whatever the rules below say. It does not load the skill. It names
+each finding in its report, and the agent that sent it decides on each one.
+One sent with the skill's `scout.md`, or with the roadmap skill's `lanes.md`,
+follows that file instead.
 
 Three rules stay here in full, because they have to fire when nobody is thinking
 about GitHub at all.

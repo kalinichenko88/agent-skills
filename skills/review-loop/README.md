@@ -4,7 +4,9 @@ A review that ends: rounds that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a security review last,
-and a summary of what was decided and fixed.
+and a summary of what was decided and fixed. In Claude Code, Fable and Codex
+also read a superpowers spec, and one more subagent checks its plan against
+it.
 
 ## When it starts
 
@@ -12,6 +14,8 @@ and a summary of what was decided and fixed.
   `/security-review` in Claude Code, `/review` in Codex, or a review subagent.
 - A person's review comments arrive.
 - You choose a review level, or decide whether another round is needed.
+- In Claude Code, `rules.md` starts it in place of the builder check of
+  superpowers' `brainstorming`, and after the self-review of `writing-plans`.
 
 With superpowers installed, it replaces `requesting-code-review` and
 `receiving-code-review`. In `subagent-driven-development`, the review after
@@ -75,6 +79,12 @@ each task stays as that skill sets it. In place of the final review of
   to merge, in the same turn. This needs a passing check and a branch other
   than the default branch. Only the merge and the open questions on business
   logic wait for you.
+- **Two readers of a spec, one of a plan.** In Claude Code, the builder check
+  of a superpowers spec goes to Fable and Codex in parallel, in place of one
+  subagent. Without the Codex CLI or its login, Fable reads it alone, and the
+  agent says so. After the self-review of the plan, one more subagent checks
+  the plan against the spec: a requirement with no task, a task that
+  contradicts the spec, or a value that differs from it.
 
 ## The ponytail step
 
