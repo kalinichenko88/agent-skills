@@ -36,9 +36,13 @@ each task stays as that skill sets it. In place of the final review of
   reviews the text.
 - **Rounds that read less.** The first round reads the whole branch. Each round
   of fixes is one commit, and the next round reads only that commit.
-- **A stop.** The loop ends at the first round that confirms no defect. Nits
-  are applied without another round. After the third round with a defect, the
-  agent asks you, and again after every three more rounds.
+- **A stop.** The loop ends at the first round that confirms no defect: no
+  wrong result, crash, data loss, broken contract or security hole that real
+  use reaches, and none in a fix of the loop. A test, a comment, a name or
+  wording is a nit, applied without another round. A finding that needs a
+  particular input is counted first in a sample of real data: a count of zero
+  declines it, unless it is data loss or a security hole. After the third
+  round with a defect, the rounds stop. Ask for more, and they run.
 - **One round for documents.** A change to documents only gets one round of
   the review subagent, and no round reads its fixes. In Claude Code, Codex
   then reads the whole branch once, with the fixes in place, when the branch
@@ -62,8 +66,8 @@ each task stays as that skill sets it. In place of the final review of
   its code deleted, a test that the change left stale, a test that repeats
   another, and brittle or heavy tests. It runs at the end because the fixes of
   later rounds add tests too, and an older test then often repeats a newer
-  one. When the agent asks you after a round with a defect and you say to
-  stop, or no one can answer, the last pass and this review are both skipped.
+  one. When the rounds stop after the third round with a defect, the last
+  pass and this review are both skipped.
 - **Later fixes are reviewed too.** The fixes from the last pass, the Codex
   review and the review of the tests are one commit. The fixes from the
   security review are one commit, and so are those from each set of your
