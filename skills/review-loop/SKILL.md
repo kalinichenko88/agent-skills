@@ -8,7 +8,12 @@ description: Use when a change is reviewed, before or after its pull request ope
 A review runs in rounds. An over-engineering review comes first, when its
 skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
-that confirms no defect. When the loop had more than one round, one last pass
+that confirms no defect, and at the latest after round 3. A defect is a wrong
+result that real use reaches, or data loss or a security hole on any input,
+also in a fix of the loop; a test, a comment or wording is a nit, fixed with
+no round. A finding that needs a particular input is counted against real
+data first, and a count of zero declines it, except for data loss or a
+security hole. When the loop had more than one round, one last pass
 reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
 whole branch once too. At `high` and `xhigh`, one review reads the tests of
 the whole branch once. A security review comes last. A change to documents
@@ -22,6 +27,11 @@ conditions in *The pull request*.
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
 product code. One declined alternative came back in eight of the nine rounds.
+On 42 merged pull requests of this plugin, the rounds after round 1 confirmed
+24 defects that normal use reaches and 44 in the fixes of their own loop,
+against 237 edge cases that real use does not produce, tests and wording. In
+the six of them where the person said to go on after round 3, no later run
+found a defect that normal use reaches.
 
 ## The level
 
@@ -46,7 +56,7 @@ round, as *A change to documents only* says. The text of a skill or a prompt,
 as a `SKILL.md` or `rules.md`, counts as a document, though it is the product.
 Why: on a skill's own branch, eight runs of `/code-review high` found 9 or 10
 findings each. From the second run on, most were in the sentences the run
-before had written. The rounds stopped only at the ask in step 4.
+before had written. The rounds stopped only when the person stopped them.
 
 When that text comes with code, each range of the rounds and the last pass
 goes to one review or to both, by what it changes. The code review,
@@ -87,14 +97,25 @@ installed, skip it and say so in the summary.
    commit*. A review subagent gets `git show <sha>`. Inside the loop, never
    send the whole branch again.
 3. **Stop at the first round that confirms no defect**, whatever that round
-   declines, for the first time or again. Apply its nits — wording, line
-   wrapping — without another round.
-4. **The third round still confirms a defect:** stop, and ask the person
-   whether to go on. Give the findings of the three rounds. When the person
-   says to go on, ask again after three more rounds. When the person says to
-   stop, or nobody can answer, end these rounds and skip what is left of
-   step 5. Then go to the security review, or to the summary when the
-   security review has already run.
+   declines, for the first time or again. A defect is a confirmed finding of
+   one of two kinds:
+   - a wrong result, a crash or a broken contract, on an input or a state
+     that the project's real use reaches;
+   - data loss or a security hole, on any input.
+
+   Both kinds hold in the code that a fix of this loop wrote too: most of
+   the defects that later rounds find are there.
+   In the text of a skill or a prompt, a defect is a rule that, followed as
+   written, gives a wrong result in a case that real use reaches. Every other
+   confirmed finding is a nit: a missing or redundant test, a comment, a
+   name, wording, line wrapping. A nit starts no round. The nits of a round
+   with a defect join its fix commit. The nits of a round with no defect are
+   one commit, and no round reads it.
+4. **The third round still confirms a defect:** stop the rounds, and skip
+   what is left of step 5. Then go to the security review, or to the summary
+   when the security review has already run. The summary names the findings
+   of round 3. When the person asks for more rounds, up to three more run,
+   and this step stops them at the third.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
    level, when the loop had more than one round. A round on one commit cannot
    see how a fix fits the rest of the branch; this pass can. It waits for the
@@ -173,7 +194,8 @@ of the last pass, the Codex review and the review of the tests find defects,
 their fixes are one commit. A count of rounds here does not start the Codex
 review or the review of the tests again. For each of them:
 
-- Its fixes are one commit, and that commit goes through steps 2 to 4.
+- Its fixes are one commit. When they fix a defect, as step 3 says, that
+  commit goes through steps 2 to 4. A commit of nits only gets no round.
 - Its rounds run at the level that the loop's round 1 used. In a new session,
   take that level from the pull request's `## Review`. A fix to security code
   runs at `xhigh`, whatever found it.
@@ -231,6 +253,16 @@ a real defect on two, in 53 to 204 seconds.
    code or in a browser. Reviewers report findings that are wrong, stale, or
    right for the wrong reason, and a confident wrong fix is worse than the
    defect. A finding that does not survive is declined, with the reason.
+
+   A finding that fails only on a particular input or state needs a count
+   too: how many of a sample of the real source carry that shape, as *The
+   input comes from the source, not from your head* in the global prompt
+   says. A count of zero declines the finding in the same round. Give the
+   count as its reason on the summary's **Declined** line, so that
+   `## Review` carries it to later reviews and sessions. A zero
+   count does not decline a finding of data loss or a security hole: an
+   attacker can make the input, and the test of its fix uses the input of
+   the finding. With no real source to sample, the count declines nothing.
 2. **Fix every obvious one now, without asking:** real bugs, dead code,
    accessibility and contrast failures, code that contradicts its own
    documentation, wrong numbers in documents.
