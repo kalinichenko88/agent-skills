@@ -290,15 +290,15 @@ repository:
 ```bash
 codex exec -s read-only --ephemeral - <<'EOF'
 <the prompt, filled in>
-You are one reviewer that another agent runs: start no skill and change no file.
+You are one reviewer that another agent runs: start no skill, change no file, and file nothing.
 EOF
 ```
 
 The last line is there because Codex loads the global prompt too. When there
 is no `codex` command, `codex login status` fails, or the run fails, as in a
 folder that Codex does not trust, go on with Fable alone, and say so when you
-hand over the document. Put the questions from both
-readers into the three piles of brainstorming.
+hand over the document. Put the questions from both readers into the three
+piles of brainstorming.
 
 **The plan.** `superpowers:writing-plans` checks the plan against the spec
 itself. After that check, send one `general-purpose` subagent with no
