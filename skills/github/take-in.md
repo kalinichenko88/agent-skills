@@ -126,13 +126,13 @@ you edit.
 
 Before the first edit, sort the open issues on the code the task will change.
 The issue in hand stays the task throughout. A busy hit (`tracker.md`) gets no
-new verdict below. One that this task gave a verdict keeps it. Any other one
-stays as it is: say so.
+verdict below and stays as it is. Say so.
 
 1. **Search.** The scout's groups hold the hits, found by identifier and by
    title, so a report that names no file still shows up. When the work reaches
    a file or symbol that `collect.sh` did not get, run
-   `collect.sh filing verify_target` and read its file.
+   `collect.sh filing verify_target` and read its file. A hit sorted before
+   keeps its verdict.
 2. **Pull in the task's own defect.** A hit reporting the same wrong behaviour,
    fixed the same way, in another function or file is not a ride-along: it is
    the task, because a bug fix guards every surface the bug shows on (the
