@@ -20,11 +20,16 @@ of the project.
    `bash <skills>/architecture/scripts/invariants.sh --new-since <base> <head>`.
    Each hit marked `new` is the branch's, except in the five cases that
    *`invariants.sh`* names: read the diff for them. A FAIL whose failing hits
-   have no `new` mark was on the base already. On exit 2, read its lines on
-   stderr. A cause in a line of the architecture file, or in a path that it
-   names, is a False doc finding when the range changes that line or that
-   path, and an Outside finding when it does not. Give any other cause in
-   your last lines. Then go on.
+   have no `new` mark was on the base already.
+
+   On exit 2, read its lines on stderr, and run
+   `bash <skills>/architecture/scripts/invariants.sh <base>` too. A cause in
+   the architecture file or in a path that it names is a False doc finding,
+   or an Outside finding when the run at `<base>` gives the same cause. Give
+   any other cause in your last lines. Exit 2 stops the checks: read the code
+   against the statement of each invariant that the script did not reach, as
+   for one that is review only, and name those invariants in your last
+   lines.
 4. When `npx` or `bunx` is on `PATH`, run
    `bash <skills>/debt/scripts/clones.sh <tree>`, and keep the rows that name
    a file the range changes. With neither, or when it fails, say so in your
@@ -50,8 +55,9 @@ Report:
 - **Invariant.** Each `new` hit that fails, and each `new` `debt` hit of a
   `grep` check, as a second `fetch(` call in a path of the `debt` list. Also
   each breach of an invariant's statement in the code that the range
-  changes, when no `Check:` line finds it, as for an invariant that is
-  review only. Put its `I-n` in the claim. No ADR excuses a FAIL: an ADR
+  changes, outside its `except` and `debt` paths, that its `Check:` line does
+  not find, as for an invariant that is review only. Put its `I-n` in the
+  claim. No ADR excuses a FAIL: an ADR
   that amends an invariant changes its `Check:` line in the same commit.
 - **No ADR.** A decision that needs an ADR by the four reasons of *ADRs*,
   with no ADR in the range.
@@ -67,13 +73,15 @@ Report:
 - **Wrong abstraction.** A shared helper with a flag or a branch for each
   caller: the copies are better.
 - **Outside.** A FAIL whose failing hits have no `new` mark, and each other
-  finding in code that the range does not change. The agent that sent you
-  files it.
+  finding in code or text that the range does not change. The agent that
+  sent you files it.
 
 Give the evidence for each finding: the existing code with its `path:line`
 for a Second structure or a Copy, the line that `invariants.sh` printed for an
-Invariant or a Size, and the sentence of the ADR or the architecture file for
-the other kinds. A finding with no evidence is not a finding.
+Invariant or a Size, the statement of the invariant and the code's
+`path:line` for a breach that no `Check:` line finds, and the sentence of the
+ADR or the architecture file for the other kinds. A finding with no
+evidence is not a finding.
 
 Return one line per finding, `<kind> | path:line | the claim | the evidence`,
 then one line for each script that did not run, with the reason, then a last

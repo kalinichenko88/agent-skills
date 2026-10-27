@@ -144,8 +144,10 @@ Skip it for a move that a script or a test proves unchanged, unless the range
 touches the architecture file or an ADR. Start it in the background when
 round 1 starts, and change no file while it runs. Its findings go through
 *The findings* as findings of round 1: round 1 confirms no defect when
-neither review does, and their fixes are one commit. A finding of this
-review whose fix changes code counts as a defect, so a round reads that fix.
+neither review does, and their fixes are one commit. A fix of its finding
+that changes code is the fix of a defect: a round reads it, as step 2 says.
+On a change to documents only, that round is `/code-review` at the level of
+that code.
 
 The subagent is an `Agent` call of its own, not a job in the prompt of round
 1, with `model: "opus"`, and `effort` at the level of round 1, or `high` when
@@ -262,7 +264,8 @@ A change to documents only, as *The level* says, gets one round:
    *The rounds* says. When the range touches the architecture file or an
    ADR, the review of the architecture runs beside it. The fixes of their
    confirmed findings and their nits are one commit. No round reads that
-   commit, and no last pass follows.
+   commit, except as *A review of the architecture* says, and no last pass
+   follows.
 2. **One read by Codex**, when the branch changes the text of a skill or a
    prompt, or a spec: the design document that `superpowers:brainstorming`
    writes, as `docs/superpowers/specs/*.md`. In Claude Code, run it once,

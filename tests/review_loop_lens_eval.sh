@@ -248,6 +248,7 @@ for i in $(seq "$runs"); do
       direct-fetch) [ "$invariant" -ge 1 ] ;;
       amended) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
       legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
+      *) false ;;
     esac && verdict=pass || { verdict=FAIL; failed=1; }
     echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts: $verdict"
     echo "${report:-no report}"
