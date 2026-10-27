@@ -15,11 +15,12 @@ no round. A finding that needs a particular input is counted against real
 data first, and a count of zero declines it, except for data loss or a
 security hole. When the loop had more than one round, one last pass
 reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
-whole branch once too. At `high` and `xhigh`, one review reads the tests of
-the whole branch once. A security review comes last. A change to documents
-only gets one round and no security review. In Claude Code, Codex reads it
-once when it changes the text of a skill, a prompt or a spec. The agent fixes
-and decides by itself, except for a change to business logic, and writes a
+whole branch once too. At `high` and `xhigh`, and for a change to tests only,
+one review reads the tests of the whole branch once. A security review comes
+last. A change to documents only gets one round and no security review. In
+Claude Code, Codex reads it once when it changes the text of a skill, a
+prompt or a spec. The agent fixes and decides by itself, except for a change
+to business logic, and writes a
 summary. When the task is an issue taken into work, or the person asked for a
 pull request, the push and the pull request follow in the same turn, on the
 conditions in *The pull request*.
@@ -41,13 +42,14 @@ request goes through."
 
 | Level | The change |
 | --- | --- |
-| `low` | Wording in code, or a fix in one file that adds no logic. |
-| `medium` | UI over static data with no new state rules; a move that a script or a test proves unchanged. |
+| `low` | Wording in code, or a fix in one file that adds no logic, when no test file changes. |
+| `medium` | A change to tests only, or a fix in one file that adds no logic, with its tests; UI over static data with no new state rules; a move that a script or a test proves unchanged. |
 | `high` | New state rules or reducer logic, a new page, route or endpoint, and any change the other rows do not name. |
 | `xhigh` | Security, data loss, concurrency, or architecture across modules or apps. |
 
 `medium` is not a default: each level needs its own reason. `max` and `ultra`
-run only when the person asks; `ultra` is billed.
+run only when the person asks; `ultra` is billed. A change to a test file is
+never `low`: `/code-review low` skips test files.
 
 A change to documents only takes no `/code-review`: one review subagent reads
 the text the range changes against the code it describes, the rest of its
@@ -97,8 +99,11 @@ installed, skip it and say so in the summary.
    commit*. A review subagent gets `git show <sha>`. Inside the loop, never
    send the whole branch again.
 3. **Stop at the first round that confirms no defect**, whatever that round
-   declines, for the first time or again. A defect is a confirmed finding of
-   one of two kinds:
+   declines, for the first time or again. A round whose report says it read
+   no file of its range confirms nothing and does not count. When its level
+   skipped the files, run that range again one level up, in its place.
+   Otherwise correct the range, and run it again. A defect is a confirmed
+   finding of one of two kinds:
    - a wrong result, a crash or a broken contract, on an input or a state
      that the project's real use reaches;
    - data loss or a security hole, on any input.
@@ -158,12 +163,12 @@ seconds each.
 
 This step depends on the level of the change in the table of *The level*.
 When the text of a skill or a prompt comes with code, use the level of the
-code alone. At `high` or `xhigh`, one review subagent, or `/review` in Codex,
-reads the tests of the whole branch once. A change to documents only gets no
-review of the tests. Start it when the last pass starts. When the loop had
-one round, start it when that round confirms no defect and its nits are
-committed. When step 4 skips the last pass, skip this step too. Change no
-file while it runs.
+code alone. At `high` or `xhigh`, and for a change to tests only, one review
+subagent, or `/review` in Codex, reads the tests of the whole branch once. A
+change to documents only gets no review of the tests. Start it when the last
+pass starts. When the loop had one round, start it when that round confirms
+no defect and its nits are committed. When step 4 skips the last pass, skip
+this step too. Change no file while it runs.
 `<dir>` is this skill's base directory, `<base>` is the base of step 1, and
 `<head>` is the SHA of `HEAD`. Its findings go through *The findings*. The
 subagent gets this prompt:
@@ -306,7 +311,8 @@ Then report in this order, one line per item:
   round, its level and range, and the count of findings it confirmed. The
   last pass, the same way. At `xhigh`, the Codex review: its range and the
   count of findings it confirmed, or why it did not run. At `high` and
-  `xhigh`, the review of the tests, the same way. The security review's
+  `xhigh`, and for a change to tests only, the review of the tests, the same
+  way. The security review's
   result. The check's result. For a change to documents only: round 1; the
   Codex read and the count of findings it confirmed, or why it did not run;
   and `documents only` for each of the last pass and the security review that
