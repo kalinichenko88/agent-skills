@@ -207,25 +207,17 @@ EOF
   commit "$work" "feat: list the reports"
 }
 
-# The base of each case: the branch it starts from.
-base() {
-  case $1 in
-    legacy) echo legacy-base ;;
-    *) echo main ;;
-  esac
-}
-
 # The installed copy of the plugin is turned off, so the rules come from this
 # checkout. The last line of the prompt is the one that review-loop gives
 # Codex as a reader: claude -p runs as a main session, not as a subagent.
+# run <case> <run>: the base of a case is the branch that it starts from.
 run() {
-  local name=$1 work=$logs/$1
-  local kase=${name%-[0-9]*}
+  local work=$logs/$1-$2 base=main prompt
+  [ "$1" != legacy ] || base=legacy-base
   fixture "$work"
-  git -C "$work" checkout -q "$kase"
-  local prompt
+  git -C "$work" checkout -q "$1"
   prompt="Read $root/skills/review-loop/architecture-lens.md and do what it says.
-Range: $(git -C "$work" rev-parse "$(base "$kase")")..$(git -C "$work" rev-parse HEAD)
+Range: $(git -C "$work" rev-parse "$base")..$(git -C "$work" rev-parse HEAD)
 Tree: $work
 You are one reviewer that another agent runs: start no skill, change no file, and file nothing."
   (cd "$work" && claude -p --model opus --effort high --output-format json \
@@ -235,7 +227,7 @@ You are one reviewer that another agent runs: start no skill, change no file, an
 
 for i in $(seq "$runs"); do
   for kase in $cases; do
-    run "$kase-$i" &
+    run "$kase" "$i" &
   done
 done
 wait
@@ -250,13 +242,12 @@ for i in $(seq "$runs"); do
     invariant=$(grep -ciE "${kind}invariant[^|]*[|].*I-1([^0-9]|\$)" <<<"$report" || true)
     second=$(grep -ciE "${kind}second structure[^|]*[|]" <<<"$report" || true)
     case $kase in
-      second-client) ok=$([ "$second" -ge 1 ] && echo 1 || echo 0) ;;
-      direct-fetch) ok=$([ "$invariant" -ge 1 ] && echo 1 || echo 0) ;;
-      *) ok=$([ "$invariant" -eq 0 ] && [ -n "$report" ] && echo 1 || echo 0) ;;
-    esac
-    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1: $([ "$ok" -eq 1 ] && echo pass || echo FAIL)"
+      second-client) [ "$second" -ge 1 ] ;;
+      direct-fetch) [ "$invariant" -ge 1 ] ;;
+      *) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
+    esac && verdict=pass || { verdict=FAIL; failed=1; }
+    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1: $verdict"
     echo "${report:-no report}"
-    [ "$ok" -eq 1 ] || failed=1
   done
 done
 echo "Logs: $logs"
