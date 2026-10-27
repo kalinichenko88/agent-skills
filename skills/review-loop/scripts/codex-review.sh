@@ -4,7 +4,10 @@
 # its findings as JSON:
 # {"findings": [{"file", "line", "summary", "failure_scenario"}]}.
 #
-#   codex-review.sh <base>
+#   codex-review.sh [--docs] <base>
+#
+# With --docs, Codex reviews a change to documents: their text against the code
+# and the other documents. Without it, Codex looks for defects in code.
 #
 # When the Codex CLI is not installed or not logged in, it prints
 # "skipped: <why>" and exits 0: the review goes on without Codex. When codex
@@ -17,6 +20,11 @@
 
 set -euo pipefail
 
+docs=
+[ "${1:-}" != --docs ] || {
+  docs=1
+  shift
+}
 [ $# -eq 1 ] || {
   sed -n "s/^#   ${0##*/}/usage: ${0##*/}/p" "$0" >&2
   exit 2
@@ -92,11 +100,22 @@ cat >"$tmp/schema.json" <<'EOF'
 }
 EOF
 
-# The prompt that found three defects no /code-review round had reported, on
-# three finished branches of this plugin (#59). Its second sentence came after
-# that measurement: it keeps a person's Codex rules, as this plugin's rules.md,
-# from starting a review loop inside this one review, or filing an issue.
-prompt="You review a change in this git repository: \`git diff $base...$head\`. You are one reviewer inside a review that another agent runs: start no review loop and no review skill, and file nothing. Read the diff, and read the code around it as you need. Find defects: code that gives a wrong result, crashes, loses or corrupts data, opens a security hole, races, or breaks a contract that other code depends on. Look hardest at trust boundaries, partial failure and retries, concurrency and ordering, and empty, missing and timeout cases. Do not report style, names or cleanup. Report a finding only when you can name the input or the state that makes it fail, from the code. Do not change files. For each finding give the file, the line, a one-sentence summary and the failure scenario. Return no findings when the change has none."
+# The second sentence of ask keeps a person's Codex rules, as this plugin's
+# rules.md, from starting a review loop inside this one review, or filing an
+# issue.
+ask="You review a change in this git repository: \`git diff $base...$head\`. You are one reviewer inside a review that another agent runs: start no review loop and no review skill, and file nothing."
+tell="Do not change files. For each finding give the file, the line, a one-sentence summary and the failure scenario. Return no findings when the change has none."
+if [ -n "$docs" ]; then
+  # What the review subagent for documents reads, from *The level* in
+  # SKILL.md, and what a defect in a document is (#152). It found a real
+  # defect on two of three branches.
+  prompt="$ask The change is to documents. Read the text that the diff changes against the code that it describes, the rest of its document, and the other documents that describe the same thing. Find defects: a statement that the code or another document contradicts; a name, a path, a flag or a number that is wrong; a step that a reader cannot follow, or can skip; two rules that say different things for one case. Do not report style, or wording that has only one meaning. Report a finding only when you can name the line that contradicts it, or the wrong action that a reader takes. $tell"
+else
+  # The prompt that found three defects no /code-review round had reported, on
+  # three finished branches of this plugin (#59). The second sentence of ask
+  # came after that measurement.
+  prompt="$ask Read the diff, and read the code around it as you need. Find defects: code that gives a wrong result, crashes, loses or corrupts data, opens a security hole, races, or breaks a contract that other code depends on. Look hardest at trust boundaries, partial failure and retries, concurrency and ordering, and empty, missing and timeout cases. Do not report style, names or cleanup. Report a finding only when you can name the input or the state that makes it fail, from the code. $tell"
+fi
 
 if ! codex exec -s read-only --ephemeral --output-schema "$tmp/schema.json" \
   -o "$tmp/findings.json" "$prompt" </dev/null >"$tmp/log" 2>&1 ||

@@ -11,8 +11,10 @@ reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect. When the loop had more than one round, one last pass
 reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
 whole branch once too. At `high` and `xhigh`, one review reads the tests of
-the whole branch once. A security review comes last. The agent fixes and
-decides by itself, except for a change to business logic, and writes a
+the whole branch once. A security review comes last. A change to documents
+only gets one round and no security review. In Claude Code, Codex reads it
+once when it changes the text of a skill, a prompt or a spec. The agent fixes
+and decides by itself, except for a change to business logic, and writes a
 summary. When the task is an issue taken into work, or the person asked for a
 pull request, the push and the pull request follow in the same turn, on the
 conditions in *The pull request*.
@@ -39,12 +41,12 @@ run only when the person asks; `ultra` is billed.
 
 A change to documents only takes no `/code-review`: one review subagent reads
 the text the range changes against the code it describes, the rest of its
-document, and the other documents that describe the same thing, and the
-rounds below apply to it. The text of a skill or a prompt, as a `SKILL.md` or
-`rules.md`, counts as a document, though it is the product. Why: on a skill's
-own branch, eight runs of `/code-review high` found 9 or 10 findings each.
-From the second run on, most were in the sentences the run before had
-written. The rounds stopped only at the ask in step 4.
+document, and the other documents that describe the same thing. It gets one
+round, as *A change to documents only* says. The text of a skill or a prompt,
+as a `SKILL.md` or `rules.md`, counts as a document, though it is the product.
+Why: on a skill's own branch, eight runs of `/code-review high` found 9 or 10
+findings each. From the second run on, most were in the sentences the run
+before had written. The rounds stopped only at the ask in step 4.
 
 When that text comes with code, each range of the rounds and the last pass
 goes to one review or to both, by what it changes. The code review,
@@ -180,6 +182,49 @@ The fix for an answer to a question joins the next fix commit. When no rounds
 are running, it starts a new count, as above. A person's review comments go
 through *The findings* below, and the reply names the fix commit.
 
+A change to documents only has no such rounds, unless the person asks for
+more: see the next section.
+
+## A change to documents only
+
+A change to documents only, as *The level* says, gets one round:
+
+1. **One round.** The review subagent reads the whole branch, as step 1 of
+   *The rounds* says. The fixes of its confirmed findings and its nits are
+   one commit. No round reads that commit, and no last pass follows.
+2. **One read by Codex**, when the branch changes the text of a skill or a
+   prompt, or a spec: the design document that `superpowers:brainstorming`
+   writes, as `docs/superpowers/specs/*.md`. In Claude Code, run it once,
+   when the rounds end, so Codex reads their fixes in place: after round 1
+   and its fix commit, when there is one. When the person asked for more
+   rounds before then, run it after the last of them. A Codex read that has
+   run does not run again:
+
+   ```bash
+   bash <dir>/scripts/codex-review.sh --docs <base>
+   ```
+
+   `<dir>`, `<base>`, where it runs and its exits are as in *A second model
+   for `xhigh` changes*. Change no file while it runs. Its findings go
+   through *The findings*. Its fixes are one commit, and no round reads it.
+   Other documents, as a README or a note in `docs/`, get no Codex read. In
+   Codex, there is no Codex read.
+3. **No security review.** The prompt of `/security-review` says: "Do not
+   report any findings in documentation files such as markdown files."
+4. **A person's review comments** go through *The findings*. Their fixes are
+   one commit, and no round reads it.
+
+When the person asks for more, as more rounds, a last pass or a security
+review, that step and the rounds on its fixes run as the other sections say.
+
+Why: on eight branches of this plugin that changed only Markdown, the rounds
+ran 60 reviews, seven a branch at the median. From the second round on, most
+findings were in the sentences that the round before had written.
+`/security-review` found nothing on all eight. A second read of the whole
+branch, after the fixes, found 1 to 5 defects on each of the five branches
+where it ran. Codex with `--docs`, run after round 1 on three of them, found
+a real defect on two, in 53 to 204 seconds.
+
 ## The findings
 
 1. **Verify each finding before acting on it.** Reproduce it against the real
@@ -208,7 +253,8 @@ through *The findings* below, and the reply names the fix commit.
 After the last pass, the Codex review, the review of the tests and their
 rounds, run `/security-review` once, on the final branch. It reads the branch
 against origin's default branch and takes no target, so it never runs inside
-the loop. Its findings go through *The findings*, and its fixes through
+the loop. A change to documents only gets none, unless the person asks for
+it. Its findings go through *The findings*, and its fixes through
 *Fixes from other places*. In Codex: `/review` with the custom instructions
 "Find security defects on this branch against origin/<default branch>:
 injection, authentication, authorization, secrets and data exposure." Where
@@ -229,7 +275,10 @@ Then report in this order, one line per item:
   last pass, the same way. At `xhigh`, the Codex review: its range and the
   count of findings it confirmed, or why it did not run. At `high` and
   `xhigh`, the review of the tests, the same way. The security review's
-  result. The check's result.
+  result. The check's result. For a change to documents only: round 1; the
+  Codex read and the count of findings it confirmed, or why it did not run;
+  and `documents only` for each of the last pass and the security review that
+  did not run.
 - **Decisions:** each choice you made: the finding, the choice, the reason.
   Each question on business logic, with the person's answer, or `open`.
 - **Fixed:** what changed and in which file, the commit, and any side effect

@@ -32,7 +32,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   whole branch when the loop needed more than one round, Codex as a second
   reviewer for `xhigh` changes in Claude Code, a review of the tests for
   `high` and `xhigh` changes, a security review, and a summary of what was
-  decided and fixed. In Claude Code, Fable and Codex also read a superpowers
+  decided and fixed. A change to documents only gets one round and no
+  security review. In Claude Code, Fable and Codex also read a superpowers
   spec, and one more subagent checks its plan against it.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,

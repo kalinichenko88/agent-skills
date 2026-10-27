@@ -4,9 +4,9 @@ A review that ends: rounds that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a security review last,
-and a summary of what was decided and fixed. In Claude Code, Fable and Codex
-also read a superpowers spec, and one more subagent checks its plan against
-it.
+and a summary of what was decided and fixed. A change to documents only gets
+one round and no security review. In Claude Code, Fable and Codex also read a
+superpowers spec, and one more subagent checks its plan against it.
 
 ## When it starts
 
@@ -39,6 +39,14 @@ each task stays as that skill sets it. In place of the final review of
 - **A stop.** The loop ends at the first round that confirms no defect. Nits
   are applied without another round. After the third round with a defect, the
   agent asks you, and again after every three more rounds.
+- **One round for documents.** A change to documents only gets one round of
+  the review subagent, and no round reads its fixes. In Claude Code, Codex
+  then reads the whole branch once, with the fixes in place, when the branch
+  changes the text of a skill or a prompt, or a superpowers spec. No last
+  pass runs, and no `/security-review`: its prompt excludes Markdown. The
+  fixes for your review comments are one commit, with no round. Ask for more
+  rounds, a last pass or a security review, and they run, with rounds on
+  their fixes.
 - **One last look at the whole branch.** When the loop needed more than one
   round, one pass reads the whole branch again after it stops, to see how the
   fixes fit the rest. It never runs twice.
@@ -61,12 +69,14 @@ each task stays as that skill sets it. In place of the final review of
   security review are one commit, and so are those from each set of your
   review comments, also after the pull request opens. Each of these commits
   has rounds of its own: at the level of the loop's round 1, or `xhigh` for a
-  fix to security code.
+  fix to security code. On a change to documents only, a commit gets rounds
+  only when you ask for rounds, or for the step that made it.
 - **Fewer questions.** The agent fixes the obvious findings and decides the
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.
 - **A security review last.** `/security-review` runs once on the final
-  branch. Its fixes get rounds of their own, as the later fixes above.
+  branch. Its fixes get rounds of their own, as the later fixes above. A
+  change to documents only gets no security review, unless you ask for one.
 - **A summary.** First a run of the repository's check on the final branch.
   Then the rounds, the decisions with their reasons, what was fixed, what was
   declined and why, and the issues filed. Last, the docs the branch changed,
