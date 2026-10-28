@@ -6,9 +6,10 @@ You do not review the code for defects: the rounds of the review loop read
 it. You do not see the conversation that wrote the branch, so its reasons do
 not bias you.
 
-Your prompt gives the range `<base>..<head>` and the tree. `<skills>` is the
-directory above the directory of this file. Change no file, and run no code
-of the project.
+Your prompt gives the range `<base>..<head>` and the tree. Read the range as
+one change, at `<head>`: the state of a commit inside it is no finding.
+`<skills>` is the directory above the directory of this file. Change no file,
+and run no code of the project.
 
 1. Read `<skills>/architecture/SKILL.md` for its principles: *Consistency
    first*, *Modules and layers*, *Decomposition*, *ADRs* and
@@ -22,14 +23,18 @@ of the project.
    *`invariants.sh`* names: read the diff for them. A FAIL whose failing hits
    have no `new` mark was on the base already.
 
-   On exit 2, read its lines on stderr, and run
-   `bash <skills>/architecture/scripts/invariants.sh <base>` too. A cause in
-   the architecture file or in a path that it names is a False doc finding,
-   or an Outside finding when the run at `<base>` gives the same cause. Give
-   any other cause in your last lines. Exit 2 stops the checks: read the code
-   against the statement of each invariant that the script did not reach, as
-   for one that is review only, and name those invariants in your last
-   lines.
+   On exit 2, read its lines on stderr. The cause is the last line, and its
+   line numbers are those of the file at `<head>`. A cause in the
+   architecture file, or in a path that it names, is an Outside finding when
+   the base has the same fault in the same place: in the invariant that the
+   cause names, or, when it names none, in the text that it names.
+   Otherwise it is a False doc finding. Read the base's architecture file
+   with `git show <base>:<file>`, and the files under a path with
+   `git ls-tree -r --name-only <base> -- <path>`. Do not run the script at
+   `<base>`: it stops at the first cause of the base. Give any other cause
+   in your last lines. Exit 2 stops the checks: read the code against the
+   statement of each invariant that the script did not reach, as for one
+   that is review only, and name those invariants in your last lines.
 4. When `npx` or `bunx` is on `PATH`, run
    `bash <skills>/debt/scripts/clones.sh <tree>`, and keep the rows that name
    a file the range changes. With neither, or when it fails, say so in your
@@ -54,11 +59,11 @@ Report:
   against the direction, or in a cycle.
 - **Invariant.** Each `new` hit that fails, and each `new` `debt` hit of a
   `grep` check, as a second `fetch(` call in a path of the `debt` list. Also
-  each breach of an invariant's statement in the code that the range
-  changes, outside its `except` and `debt` paths, that its `Check:` line does
-  not find, as for an invariant that is review only. Put its `I-n` in the
-  claim. No ADR excuses a FAIL: an ADR
-  that amends an invariant changes its `Check:` line in the same commit.
+  each breach of an invariant's statement that its `Check:` line does not
+  find, as for an invariant that is review only: each breach that the range
+  adds, outside the `except` paths of the invariant. Put its `I-n` in the
+  claim. No ADR excuses a FAIL: an ADR that amends an invariant changes its
+  `Check:` line in the same change.
 - **No ADR.** A decision that needs an ADR by the four reasons of *ADRs*,
   with no ADR in the range.
 - **ADR.** A change against an accepted ADR with no ADR that supersedes it,
@@ -73,8 +78,8 @@ Report:
 - **Wrong abstraction.** A shared helper with a flag or a branch for each
   caller: the copies are better.
 - **Outside.** A FAIL whose failing hits have no `new` mark, and each other
-  finding in code or text that the range does not change. The agent that
-  sent you files it.
+  finding in code or text that the range does not change. Step 3 gives the
+  kind of a cause of exit 2. The agent that sent you files it.
 
 Give the evidence for each finding: the existing code with its `path:line`
 for a Second structure or a Copy, the line that `invariants.sh` printed for an

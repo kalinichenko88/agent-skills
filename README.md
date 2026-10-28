@@ -193,12 +193,15 @@ review of the architecture runs once before round 2, and that a security
 review follows the last pass. Its fixture has a local `origin` and an
 architecture file, and its task says that no one can answer questions. Run
 it after a change to `skills/review-loop` or to its section in `rules.md`.
-`tests/review_loop_lens_eval.sh` sends the review of the architecture to four
+`tests/review_loop_lens_eval.sh` sends the review of the architecture to six
 branches of one fixture: a second HTTP client, a `fetch` call that breaks an
-invariant, the same call with an ADR that amends it, and a base that breaks
-it already. With `--codex`, Codex reads the four branches with the same
-prompt. Run it after a change to `skills/review-loop/architecture-lens.md`
-or to the parts of `skills/architecture/SKILL.md` that it reads.
+invariant, the same call with an ADR that amends it, a base that breaks it
+already, a folder with no code file added to the `Check:` line of an
+invariant, and that folder taken out again on a base where a second
+invariant names one too. With `--codex`, Codex reads the six branches with
+the same prompt. Run it after a change to
+`skills/review-loop/architecture-lens.md` or to the parts of
+`skills/architecture/SKILL.md` that it reads.
 `tests/architecture_eval.sh` gives three tasks to Opus in a shop whose one
 module wraps every HTTP call, in four arms: no architecture file and no
 skill; the file and a link from `CLAUDE.md`; the same and the skill; the same

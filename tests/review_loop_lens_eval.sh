@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sends the review of the architecture, skills/review-loop/architecture-lens.md,
-# to four branches of one fixture, with the prompt that the review loop gives
+# to six branches of one fixture, with the prompt that the review loop gives
 # it, at model opus and effort high. The fixture's main has one HTTP wrapper,
 # and its I-1 says that only the wrapper calls fetch. It prints each report,
 # and exits 1 when a report misses the check of its case:
@@ -11,7 +11,13 @@
 #   no Invariant finding that cites I-1;
 # - legacy adds a feature that uses the wrapper, on a base whose own code
 #   breaks I-1 already: no Invariant finding that cites I-1, and an Outside
-#   finding on that code, src/legacy/ping.ts.
+#   finding on that code, src/legacy/ping.ts;
+# - bad-path adds a folder with no code file to the Check: line of I-2, so
+#   invariants.sh exits 2: a False doc finding that cites I-2, and no Outside
+#   finding that cites I-2;
+# - fixed-path takes that folder out again, on a base whose I-3 names a
+#   folder with no code file too: an Outside finding that cites I-3, and no
+#   False doc finding.
 #
 # With --codex, Codex reads each case in its place, with the same prompt, in
 # its read-only sandbox and with the person's Codex config, as codex-review.sh
@@ -24,6 +30,7 @@
 #
 # Usage: tests/review_loop_lens_eval.sh [--codex] [runs of each case, default 1]
 
+# shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -34,7 +41,7 @@ runs=${1:-1}
 [ "$#" -le 1 ] && [ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [--codex] [runs of each case, at least 1]" >&2; exit 2; }
 [ "$reader" = claude ] || codex login status >/dev/null 2>&1 || { echo "$0: codex is not installed or not logged in" >&2; exit 2; }
 logs=$(mktemp -d)
-cases='second-client direct-fetch amended legacy'
+cases='second-client direct-fetch amended legacy bad-path fixed-path'
 
 commit() {
   git -C "$1" add .
@@ -70,6 +77,13 @@ None yet.
 EOF
 }
 
+# add_invariant <dir> <lines>: the lines become the last invariant of the
+# architecture file. awk reads them from ENVIRON: awk -v turns \. into .
+add_invariant() {
+  ADD=$2 awk '/^## ADRs$/ { print ENVIRON["ADD"]; print "" } { print }' "$1/docs/ARCHITECTURE.md" >"$1/docs/ARCHITECTURE.md.new"
+  mv "$1/docs/ARCHITECTURE.md.new" "$1/docs/ARCHITECTURE.md"
+}
+
 reports_by_fetch() {
   mkdir -p "$1/src/features/reports"
   cat >"$1/src/features/reports/index.ts" <<'EOF'
@@ -84,7 +98,8 @@ EOF
 }
 
 # fixture <dir>: main, and a branch for each case. legacy-base is main with
-# a call to fetch outside the wrapper.
+# a call to fetch outside the wrapper. tokens is main with I-2, and
+# bad-paths is bad-path with I-3, whose folder has no code file either.
 fixture() {
   local work=$1
   mkdir -p "$work/src/api" "$work/src/features/orders" "$work/docs"
@@ -214,6 +229,26 @@ export function listReports(): Promise<Report[]> {
 }
 EOF
   commit "$work" "feat: list the reports"
+
+  git -C "$work" checkout -qb tokens main
+  add_invariant "$work" '- **I-2.** Only `src/api/` reads the token from `localStorage`.
+  Check: grep `localStorage` in `src/features`.'
+  commit "$work" "docs: only the api reads the token"
+
+  git -C "$work" checkout -qb bad-path tokens
+  awk '{ sub(/in `src\/features`\./, "in `src/features`, `src/lib`.") } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
+  mv "$work/docs/ARCHITECTURE.md.new" "$work/docs/ARCHITECTURE.md"
+  commit "$work" "docs: check src/lib for the token too"
+
+  git -C "$work" checkout -qb bad-paths bad-path
+  add_invariant "$work" '- **I-3.** No screen writes to the console.
+  Check: grep `console\.` in `src/screens`.'
+  commit "$work" "docs: no screen writes to the console"
+
+  git -C "$work" checkout -qb fixed-path bad-paths
+  awk '{ sub(/, `src\/lib`\./, ".") } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
+  mv "$work/docs/ARCHITECTURE.md.new" "$work/docs/ARCHITECTURE.md"
+  commit "$work" "docs: take src/lib out of I-2, it has no code yet"
 }
 
 # The installed copy of the plugin is turned off, so the rules come from this
@@ -223,7 +258,11 @@ EOF
 # report goes to <case>-<run>.txt.
 run() {
   local work=$logs/$1-$2 base=main prompt
-  [ "$1" != legacy ] || base=legacy-base
+  case $1 in
+    legacy) base=legacy-base ;;
+    bad-path) base=tokens ;;
+    fixed-path) base=bad-paths ;;
+  esac
   fixture "$work"
   git -C "$work" checkout -q "$1"
   prompt="Read $root/skills/review-loop/architecture-lens.md and do what it says.
@@ -253,21 +292,30 @@ wait
 # and the |: a line for a script that did not run, as `invariants.sh | <why>`,
 # is not an Invariant finding.
 kind='^[[:space:]]*[|]?[^|]*'
+# found <kind> <text>: the count of the report's findings of the kind whose
+# line has the text after the first |.
+found() { grep -ciE "${kind}$1[[:space:]*:]*[|].*$2" <<<"$report" || true; }
 failed=0
 for i in $(seq "$runs"); do
   for kase in $cases; do
     report=$(cat "$logs/$kase-$i.txt" 2>/dev/null || true)
-    invariant=$(grep -ciE "${kind}invariant[[:space:]*:]*[|].*I-1([^0-9]|\$)" <<<"$report" || true)
-    second=$(grep -ciE "${kind}second structure[[:space:]*:]*[|]" <<<"$report" || true)
-    outside=$(grep -ciE "${kind}outside[[:space:]*:]*[|].*src/legacy/ping\.ts" <<<"$report" || true)
+    invariant=$(found invariant 'I-1([^0-9]|$)')
+    second=$(found 'second structure' '')
+    outside=$(found outside 'src/legacy/ping\.ts')
+    doc=$(found 'false doc' '')
+    doc2=$(found 'false doc' 'I-2([^0-9]|$)')
+    outside2=$(found outside 'I-2([^0-9]|$)')
+    outside3=$(found outside 'I-3([^0-9]|$)')
     if case $kase in
       second-client) [ "$second" -ge 1 ] ;;
       direct-fetch) [ "$invariant" -ge 1 ] ;;
       amended) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
       legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
+      bad-path) [ "$doc2" -ge 1 ] && [ "$outside2" -eq 0 ] ;;
+      fixed-path) [ "$doc" -eq 0 ] && [ "$outside3" -ge 1 ] ;;
       *) false ;;
     esac; then verdict=pass; else verdict=FAIL failed=1; fi
-    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts: $verdict"
+    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts, $doc False doc ($doc2 on I-2), $outside2 Outside on I-2, $outside3 Outside on I-3: $verdict"
     echo "${report:-no report}"
   done
 done
