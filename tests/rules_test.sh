@@ -107,6 +107,10 @@ done
 # - A zero count stops a fix, but an attacker can make the input of data loss
 #   or a security hole: the rule for a person's report, in rules.md, and the
 #   rule for a review finding, in review-loop, each name that exception (#151).
+# - Run from another checkout, gh 2.103 removes the branch's linked worktree
+#   and its local branch at the merge, with no check of Cleanup. The merge
+#   runs in the checkout that holds the branch, and review-loop asks that
+#   checkout, not the session's directory, whether there is a worktree (#176).
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
     echo "FAIL: $f: no \"$phrase\""
@@ -130,7 +134,7 @@ rules.md|**A defect in this plugin goes to its tracker, after the person says ye
 rules.md|Unlike the rule above, ask the person first: show the text that the github skill's `filing.md` writes.
 rules.md|For a report of data loss or a security hole, a zero count does not stop the fix. An attacker can make the input, so the test of that fix uses the input of the report.
 skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input, and the test of its fix uses the input of the finding.
-skills/github/SKILL.md|Run the merge in the checkout that holds the branch: its linked worktree, when `git worktree list` shows the branch in one.
-skills/review-loop/SKILL.md|When `git worktree list` shows the branch on none of its lines after the first, the branch has no linked worktree
+skills/github/SKILL.md|Run the merge in the checkout that holds the branch, whatever directory the session is in: `(cd <path> && gh pr merge …)`
+skills/review-loop/SKILL.md|When `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints nothing or the first path of `git worktree list`, the branch has no linked worktree
 EOF
 echo 'rules_test: ok'
