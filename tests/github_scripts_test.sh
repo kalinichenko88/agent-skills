@@ -350,6 +350,10 @@ check 'take-in-check.sh continues an issue with your open pull request' \
 answer ".closedByPullRequestsReferences.nodes[0].headRefOid = \"$pushed\"
   | .assignees.nodes += [{login: \"someone\"}]" .data.repository.issue take-in-153.json
 check 'take-in-check.sh does not continue an issue that someone else is assigned to' 'exit 1' "$(take 153 | tail -1)"
+# Another account can have the login "you": the check compares logins.
+answer ".closedByPullRequestsReferences.nodes[0].headRefOid = \"$pushed\"
+  | .assignees.nodes = [{login: \"you\"}]" .data.repository.issue take-in-153.json
+check 'take-in-check.sh does not continue an issue of the account "you"' 'exit 1' "$(take 153 | tail -1)"
 # Two branches of yours, both here: which one holds the work is not sure.
 answer "$(jq -c .data.repository.issue.linkedBranches "$fixtures/take-in-167.json") as \$linked
   | .closedByPullRequestsReferences.nodes[0].headRefOid = \"$pushed\"
