@@ -203,20 +203,22 @@ export type FixedDiscount = { kind: 'fixed'; amountCents: number };
 ```
 
 A literal is a value that is known when the code is written: a string, a
-number, a boolean, a function, JSX, or an array or object of these. A call, a
-`new` or a read of the environment makes a value that is known only when the
+number, a boolean, or an array or object of these, of functions and of JSX. A
+function or JSX alone is not a literal. A call, a `new` or a read of the
+environment outside a function body makes a value that is known only when the
 code runs: `{ apiUrl: process.env.API_URL }` and
-`{ money: new Intl.NumberFormat(…) }` are not literals. A module-level literal
-of more than 15 lines that no code changes — a list of entries, a lookup
-table, a config such as column definitions or filter descriptors — goes to
-the constants file beside the file that uses it, even when only that one file
-uses it. The lines of the literal count, not those of the declaration around
-it. A folder has one constants file: `constants.ts`, or `constants.tsx` when
-one of its literals holds JSX. It is an exception to one entity per file: it
-holds every long literal of its folder. A shorter module-level literal that
-only this file uses stays in it: below the export, or above it when the
-export reads it while the module loads. A file whose primary export is the
-literal itself, as `locales/en.ts`, keeps its literal.
+`{ money: new Intl.NumberFormat(…) }` are not literals. A literal of more than
+15 lines that no code changes and that reads no variable of a function around
+it — a list of entries, a lookup table, a config such as column definitions
+or filter descriptors — goes to the constants file beside the file that uses
+it, even when only that one file uses it. The lines of the literal count, not
+those of the declaration around it. A folder has one constants file:
+`constants.ts`, or `constants.tsx` when one of its literals holds JSX. It is an
+exception to one entity per file: it holds every long literal of its folder.
+A shorter module-level literal that only this file uses stays in it: below
+the export, or above it when the export reads it while the module loads. A
+file whose primary export is the literal itself, as `locales/en.ts`, keeps
+its literal.
 
 ```ts
 // constants.ts
@@ -265,8 +267,13 @@ HTML tag. This rule wins over CONSTANT_CASE. Every other `const` is camelCase:
 - a value that the code makes when it runs, also at module level:
   `new Intl.NumberFormat(…)`, as `money` above, `Date.now()`, `z.object(…)`,
   `new Map([…])`;
+- a function that is not a component, as
+  `const formatCents = (cents: number) => {…}` or `const useTableSort = () => {…}`;
 - an object or an array that the code changes, as a cache;
 - a `const` inside a function, also when its value is a literal.
+
+A name that a framework reads, as `export const metadata` or `revalidate` in
+Next.js, stays as the framework wants it.
 
 Not: `const PRICE_FORMAT = new Intl.NumberFormat(…)`. The formatter is an
 object that the module makes when it loads, not a value written in the code.

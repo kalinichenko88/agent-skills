@@ -33,15 +33,17 @@ agent matches it and says so.
 - **Files are kebab-case, one entity per file.** A file opens with its
   primary export; its helpers, module-level `const`s and own types go below
   it, and so do the variants of a tagged union. A `const` that the export
-  reads while the module loads goes above it. A module-level literal of more
-  than 15 lines that no code changes goes to the folder's constants file,
-  `constants.ts` or `constants.tsx`, even when only one file uses it.
+  reads while the module loads goes above it. A literal of more than 15 lines
+  that no code changes goes to the folder's constants file, `constants.ts` or
+  `constants.tsx`, even when only one file uses it.
 - **A constant's name is CONSTANT_CASE.** A constant is a module-level
   `const` whose value is known when the code is written and that no code
   changes, as `MAX_RETRIES = 3`. A `const` that holds a component or a
-  context, or whose name opens a JSX tag, is PascalCase. A value
-  made when the code runs, as `new Intl.NumberFormat(…)`, and a `const` inside
-  a function are camelCase.
+  context, or whose name opens a JSX tag, is PascalCase, wherever it is and
+  however it is made. A value made when the code runs, as
+  `new Intl.NumberFormat(…)`, a function, and a `const` inside a function are
+  camelCase. A name that a framework reads, as Next.js `metadata`, stays as
+  the framework wants it.
 - **A shared type is a model in `models/`, a schema is in `schemas/`.** A type
   or an enum that two files or more use goes to the `models/` folder of their
   nearest common folder, one model per file. A model made by an operation on
