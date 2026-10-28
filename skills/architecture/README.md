@@ -48,7 +48,10 @@ checks, and an ADR for each decision that needs one.
 - **A first file, when you want one.** In a project with none, it offers once
   a session to write `docs/ARCHITECTURE.md` from the code as it is, and writes
   nothing without your yes. After a no, one line in `CLAUDE.md` stops the
-  offer.
+  offer. What your `CLAUDE.md` and `AGENTS.md` already say about the
+  architecture, as the list of folders or the direction of imports, moves
+  into the new file, after your yes to each move, so that no rule lives in
+  two places.
 - **No code of yours runs.** No step runs a package manager, a script of the
   project or a build in your project's tree. The text of `docs/ARCHITECTURE.md` never runs as a
   command: `invariants.sh` passes each pattern and path to `git grep` as an

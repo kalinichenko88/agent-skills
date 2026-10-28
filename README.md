@@ -40,7 +40,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   against it.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
-  over-engineering, filed as at most three `debt` issues a run.
+  over-engineering, filed as at most three `debt` issues a run, and one
+  more for the rules that the instruction files repeat or contradict.
 - **[`kalinichenko:architecture`](skills/architecture/README.md)** — new code
   that grows into the project's structure, not beside it: the problem before
   the code, one way to do one kind of work, a split before a file grows past

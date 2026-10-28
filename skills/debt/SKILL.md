@@ -1,17 +1,18 @@
 ---
 name: debt
-description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file or the invariants of its docs/ARCHITECTURE.md, duplicated code, or over-engineering — and filing or re-measuring debt issues for refactoring.
+description: Use when mapping a repository's technical debt — finding hotspots, files that break the layer rules of the project's instruction file or the invariants of its docs/ARCHITECTURE.md, duplicated code, over-engineering, or rules that the instruction files and docs/ARCHITECTURE.md repeat or contradict — and filing or re-measuring debt issues for refactoring.
 ---
 
 # Technical debt map
 
 The map measures where the structural debt sits — hotspots, broken layer
-rules, copies and, with ponytail installed, over-engineering — and files at
-most three places a run as issues labelled `debt`. Take-in in the
-`kalinichenko:github` skill then checks those issues whenever a task touches
-their area, so one pull request can remove the debt next to the task. A place
-larger than one pull request becomes steps that the `kalinichenko:roadmap`
-skill offers in order.
+rules, copies, the repeats and contradictions of the instruction files and,
+with ponytail installed, over-engineering — and files at most three places a
+run as issues labelled `debt`, and one more for the instruction files.
+Take-in in the `kalinichenko:github` skill then checks those issues whenever a
+task touches their area, so one pull request can remove the debt next to the
+task. A place larger than one pull request becomes steps that the
+`kalinichenko:roadmap` skill offers in order.
 
 First check that the project has no debt skill of its own: a skill named
 `debt` in your skill list other than this one, or a file that
@@ -141,6 +142,30 @@ start there.
    exits with an error, as with neither `npx` nor `bunx` or with a shared
    `TMPDIR`, skip this step and give its message in the report. `jscpd` never
    goes into a `package.json`.
+5. **Instruction files.** With no `CLAUDE.md` and no `AGENTS.md` in `<tree>`,
+   skip this step and say so. Otherwise send two readers right after you
+   make `<tree>`, beside the subagent of step 3, as for a spec in
+   `kalinichenko:review-loop`: in one message, an `Agent` call with
+   `model: "fable"`, and Codex in the background from the root of `<tree>`.
+   Both get this prompt:
+
+   ```
+   Read <dir>/instructions-lens.md and do what it says.
+   Tree: <tree>
+   You are one reviewer that another agent runs: start no skill, change no file, and file nothing.
+   ```
+
+   ```bash
+   codex exec -s read-only --ephemeral -C <tree> - <<'EOF'
+   <the prompt>
+   EOF
+   ```
+
+   When there is no `codex` command, `codex login status` fails, or the run
+   fails, go on with Fable alone, and say so in the report. In Codex, do the
+   job of `instructions-lens.md` yourself. A finding that both readers give
+   counts once. Read the two places of each finding, and drop one that they
+   do not bear out. The findings that hold are one place.
 
 ## Choose the places
 
@@ -155,6 +180,10 @@ broken rule takes the importer's score, and a place over several files —
 the hits of one rule, clones, a dependency and its importers, a bundled
 finding — the highest of its files. A file outside the table gets its score
 from `measure.sh <file>`.
+
+The findings of step 5 are one place of their own: it has no score, and it
+does not count towards the three below. An open debt issue whose `## Where`
+names the same instruction files covers it.
 
 A hotspot, a file or a folder from a `debt` hit of a `lines` or `files`
 check included, is a place only when it holds more than one concern, the
@@ -223,6 +252,15 @@ at most 600 words, tables and code blocks not counted:
 5. `## Risks`: what can break, and which test would show it.
 6. `## Out of scope`.
 
+The issue of the instruction files has the same parts. Its `## Where` names
+the two places of each finding, by path and heading, in place of the rows of
+`measure.sh`. Its `## The split` names, for each finding, the place that
+keeps the text: the other place drops it, and keeps only the line that points
+to the architecture file. Its `## The order` names the citations that the fix
+corrects, and puts each contradiction that a person must choose into a step
+of its own: when the choice is architectural, that step writes an ADR through
+`kalinichenko:architecture`.
+
 The last line is "Found by `kalinichenko:debt` on <date> at <sha>." Another
 open issue on the same code is named in the body, and its side is corrected
 as `filing.md` says under *Filing one next to an existing issue*. A closed
@@ -253,6 +291,7 @@ invariants that an exit 2 of `invariants.sh` left unchecked, with its
 message; the copies kept on purpose; the small cuts, one line each with the score of
 the file it names, or of its highest file; the ponytail findings dropped, with
 the rule; the lines the kept findings would save, marked as your estimate,
-not ponytail's own `net:`; the steps skipped and
+not ponytail's own `net:`; the findings of step 5 that their places did not
+bear out, and whether Codex read; the steps skipped and
 why; the share of moved code files when it was large; the SHA measured, and
 that it was `HEAD` when it was.

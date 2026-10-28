@@ -8,7 +8,9 @@
 # - second-client adds axios beside the wrapper: a Second structure finding;
 # - direct-fetch calls fetch in a feature: an Invariant finding that cites I-1;
 # - amended is direct-fetch with an ADR that amends I-1 and its Check: line:
-#   no Invariant finding that cites I-1;
+#   no Invariant finding that cites I-1, and a False doc finding on
+#   AGENTS.md, which the range does not touch and which still says that only
+#   the wrapper calls fetch;
 # - legacy adds a feature that uses the wrapper, on a base whose own code
 #   breaks I-1 already: no Invariant finding that cites I-1, and an Outside
 #   finding on that code, src/legacy/ping.ts;
@@ -133,6 +135,7 @@ export function listOrders(): Promise<Order[]> {
 }
 EOF
   architecture "$work"
+  printf '%s\n' '# Agents' '' 'Only `src/api/client.ts` calls `fetch`: a feature calls `request()`.' >"$work/AGENTS.md"
   commit "$work" "feat: list the orders"
 
   git -C "$work" checkout -qb second-client main
@@ -304,18 +307,19 @@ for i in $(seq "$runs"); do
     outside=$(found outside 'src/legacy/ping\.ts')
     doc=$(found 'false doc' '')
     doc2=$(found 'false doc' 'I-2([^0-9]|$)')
+    agents=$(found 'false doc' 'AGENTS\.md')
     outside2=$(found outside 'I-2([^0-9]|$)')
     outside3=$(found outside 'I-3([^0-9]|$)')
     if case $kase in
       second-client) [ "$second" -ge 1 ] ;;
       direct-fetch) [ "$invariant" -ge 1 ] ;;
-      amended) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
+      amended) [ "$invariant" -eq 0 ] && [ "$agents" -ge 1 ] ;;
       legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
       bad-path) [ "$doc2" -ge 1 ] && [ "$outside2" -eq 0 ] ;;
       fixed-path) [ "$doc" -eq 0 ] && [ "$outside3" -ge 1 ] ;;
       *) false ;;
     esac; then verdict=pass; else verdict=FAIL failed=1; fi
-    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts, $doc False doc ($doc2 on I-2), $outside2 Outside on I-2, $outside3 Outside on I-3: $verdict"
+    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts, $doc False doc ($doc2 on I-2, $agents on AGENTS.md), $outside2 Outside on I-2, $outside3 Outside on I-3: $verdict"
     echo "${report:-no report}"
   done
 done

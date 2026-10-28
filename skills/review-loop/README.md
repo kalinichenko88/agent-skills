@@ -82,7 +82,8 @@ each task stays as that skill sets it. In place of the final review of
   `kalinichenko:architecture` and `clones.sh` of `kalinichenko:debt`. It finds
   a second structure beside an existing one, a module used past its public
   API, a broken invariant cited as `I-n`, a decision with no ADR or against
-  one, a passage of the architecture file that the change made false, a file
+  one, a passage of the architecture file or of any `CLAUDE.md` or
+  `AGENTS.md` that the change made false, also one it does not touch, a file
   grown past its limit, and a copy to extract. Its fixes join those of
   round 1. With no such file, the summary says once that
   `kalinichenko:architecture` can write the first one, unless the project
