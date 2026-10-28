@@ -23,14 +23,14 @@ and run no code of the project.
    *`invariants.sh`* names: read the diff for them. A FAIL whose failing hits
    have no `new` mark was on the base already.
 
-   On exit 2, read its lines on stderr. The cause is the line without
-   `at <base>:`, and its line numbers are those of the file at `<head>`. A
-   cause in the architecture file, or in a path that it names, is an Outside
-   finding when the base has the same defect in the same text: read that
-   text in the base's architecture file and tree. Otherwise it is a False doc
-   finding. Do not run the script at `<base>`: it stops at the first cause of
-   the base. Give any other cause in your last lines. Exit 2 stops the
-   checks: read the code against the statement of each invariant that the
+   On exit 2, read its lines on stderr. The cause is the last line, and its
+   line numbers are those of the file at `<head>`. A cause in the
+   architecture file, or in a path that it names, is an Outside finding when
+   the base has the defect that the cause names: read the base's file with
+   `git show <base>:<path>`, and its tree with `git ls-tree -r <base>`.
+   Otherwise it is a False doc finding. Do not run the script at `<base>`:
+   it stops at the first cause of the base. Give any other cause in your
+   last lines. Exit 2 stops the checks: read the code against the statement of each invariant that the
    script did not reach, as for one that is review only, and name those
    invariants in your last lines.
 4. When `npx` or `bunx` is on `PATH`, run
@@ -76,8 +76,8 @@ Report:
 - **Wrong abstraction.** A shared helper with a flag or a branch for each
   caller: the copies are better.
 - **Outside.** A FAIL whose failing hits have no `new` mark, and each other
-  finding in code or text that the range does not change. The agent that
-  sent you files it.
+  finding in code or text that the range does not change. Step 3 gives the
+  kind of a cause of exit 2. The agent that sent you files it.
 
 Give the evidence for each finding: the existing code with its `path:line`
 for a Second structure or a Copy, the line that `invariants.sh` printed for an
