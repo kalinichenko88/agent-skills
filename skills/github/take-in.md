@@ -44,29 +44,34 @@ Then act on what the check printed:
 
 **Continuing the work.** The session that worked on the issue can still be
 open, and git does not show it. In Claude Code, look for it first:
-`ListAgents` lists your open sessions, and the plugin's hook names a session
-whose first message was the issue alone `#91 <the start of its title>`. When
-such a session is listed and not `offline`, the work runs there: give its
-name, and stop. A session with another name, or a Codex session, does not
-show in the list, and Codex has no list: when the person says that one is
-open, stop too.
+`ListAgents` lists your other open sessions, not this one, and the plugin's
+hook names a session `#91 <the start of its title>` when a message to it was
+the issue alone. When such a session is listed and not `offline`, the work
+runs there: give its name, and stop. A session under another name, as one
+started with "take #91", is not found this way, and a Codex session is not
+listed: the line that says the work continues lets the person stop it.
 
-Then run `bash <dir>/scripts/worktree.sh 91 <branch> --local`, and move into
-the path it prints: in Claude Code with `EnterWorktree`, in Codex as the
-`workdir` of every command. Name once the command that opens the old session
-with its context, so that the person can go on there instead. It runs in the
-main checkout, where the take-in started: `claude --resume`, or
-`claude --from-pr <PR>` with an open pull request, and pick the older `#91`
-session; in Codex, `codex resume`.
+Then run `bash <dir>/scripts/worktree.sh 91 <branch> --local`. When the path
+it prints is a worktree, move into it: in Claude Code with `EnterWorktree`, in
+Codex as the `workdir` of every command. Name once the command that opens the
+old session with its context, so that the person can go on there instead: in
+the main checkout, `claude --resume`, which lists the sessions of the
+repository's worktrees too, or `claude --from-pr <PR>` with an open pull
+request; in Codex, `codex resume --all`.
 
-In this session, first read what the worktree holds: `git fetch`, then
-`git status -sb`. Changes, and commits ahead of the remote branch, are work in
-progress: finish it, and it goes through the review before any merge question.
-Then, with an open pull request, its `## Review` says which steps of
-`kalinichenko:review-loop` ran: go on from the first one that did not. Without
-one, run *The tracker is read next* and *Its duplicates close first*, then go
-on from "Then read what points at it", below. Check the issue's citations
-against the default branch, not the worktree: the worktree holds the work.
+In this session, read what the branch holds: `git fetch origin <branch>`, then
+`git status --short` for changes, `git log origin/<branch>..HEAD` for commits
+that GitHub does not have, and `git log HEAD..origin/<branch>` for commits
+pushed from somewhere else since the check. Commits from somewhere else: the
+work runs there too, so say so, and stop. Then, with an open pull request, its
+`## Review` says which steps of `kalinichenko:review-loop` ran: go on from the
+first one that did not, or, when all ran, from the open questions and the
+merge question. Without one, run *The tracker is read next* and *Its
+duplicates close first*, then go on from "Then read what points at it",
+below, and skip the check of the issue's citations: the first take-in did it,
+and the worktree holds the work. In both cases, changes and commits that
+GitHub does not have are work in progress: they go through the review before
+any merge question.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can

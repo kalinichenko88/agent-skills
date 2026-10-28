@@ -76,15 +76,13 @@ reasons=$(gh api graphql -f owner="${repo%/*}" -f name="${repo#*/}" -F n="$n" -f
     | def who: if . == $me then "you" else . // "ghost" end;
     .data.repository.issue
     | (select(.state != "OPEN") | "closed\tother"),
-      (.assignees.nodes[] | (.login | who) as $who
-        | "assigned to \($who)\t\(if $who == "you" then "you" else "other" end)"),
+      (.assignees.nodes[] | "assigned to \(.login | who)\t\(if .login == $me then "you" else "other" end)"),
       (.linkedBranches.nodes[].ref
         | "branch \(.name), \(.compare.behindBy) commits ahead of \($main), last commit \(.target.committedDate)\t"
           + (if .repository.nameWithOwner == $repo then "branch\t\(.name)\t\(.target.oid)" else "other" end)),
       (.closedByPullRequestsReferences.nodes[] | select(.state == "OPEN")
-        | (.author.login | who) as $who
-        | "PR #\(.number) by \($who) is open and closes it\t"
-          + (if $who == "you" and .headRepository.nameWithOwner == $repo
+        | "PR #\(.number) by \(.author.login | who) is open and closes it\t"
+          + (if .author.login == $me and .headRepository.nameWithOwner == $repo
             then "branch\t\(.headRefName)\t\(.headRefOid)" else "other" end))')
 
 if [ -z "$reasons" ]; then
