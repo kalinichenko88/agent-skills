@@ -161,13 +161,16 @@ git branch -D <branch>
 ```
 
 `git worktree remove` refuses a tree with changes or untracked files: then
-keep both, and name the files. A squash merge leaves no commit of the branch
-on the default branch, so git cannot see that the branch is merged. Run `-D`
-only when `git rev-parse <branch>` prints the `headRefOid` of
-`gh pr view <PR> --json headRefOid`. Otherwise keep the branch, and name its
-commits that the pull request does not have. When both are gone, say that
-nothing waits, and that the session can close. Otherwise say what stays, and
-why.
+keep both, and name the files. It deletes the ignored files with no word, so
+list them first with `git -C <path> status --short --ignored`. When one of
+them is not made again by the build or the package manager, as `.env` or a
+local database, keep both, and name it. A squash merge leaves no commit of
+the branch on the default branch, so git cannot see that the branch is
+merged. Run `-D` only when `git rev-parse <branch>` prints the `headRefOid`
+of `gh pr view <PR> --json headRefOid`. Otherwise keep the branch, and name
+its commits that the pull request does not have. When both are gone, say
+that nothing waits, and that the session can close. Otherwise say what
+stays, and why.
 
 ## Public repositories
 
