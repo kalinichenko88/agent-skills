@@ -1,11 +1,11 @@
-import { declineMessages } from './constants';
+import { DECLINE_MESSAGES } from './constants';
 
 export function declineMessage(code: string): string {
-  if (!Object.prototype.hasOwnProperty.call(declineMessages, code)) {
-    return unknownDeclineMessage;
+  if (!Object.prototype.hasOwnProperty.call(DECLINE_MESSAGES, code)) {
+    return FALLBACK_DECLINE_MESSAGE;
   }
 
-  return declineMessages[code];
+  return DECLINE_MESSAGES[code];
 }
 
-const unknownDeclineMessage = 'The payment failed. Try another card.';
+const FALLBACK_DECLINE_MESSAGE = 'The payment failed. Try another card.';

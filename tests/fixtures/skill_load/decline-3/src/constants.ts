@@ -1,4 +1,4 @@
-export const declineMessages: Record<string, string> = {
+export const DECLINE_MESSAGES: Record<string, string> = {
   authentication_required: 'The bank asks you to confirm this payment.',
   approve_with_id: 'The bank could not approve this payment.',
   call_issuer: 'Call your bank about this payment.',
@@ -31,4 +31,4 @@ export const declineMessages: Record<string, string> = {
   try_again_later: 'Try again later.',
 };
 
-export const fallbackMessage = 'The payment failed. Try another card.';
+export const FALLBACK_DECLINE_MESSAGE = 'The payment failed. Try another card.';

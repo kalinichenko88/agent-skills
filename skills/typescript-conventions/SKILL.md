@@ -1,6 +1,6 @@
 ---
 name: typescript-conventions
-description: Use when writing or reviewing TypeScript — declaring an object shape, placing a type, an enum or a schema that several files use, naming a new file, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
+description: Use when writing or reviewing TypeScript — declaring an object shape, placing a type, an enum or a schema that several files use, naming a new file or a constant, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
 ---
 
 # TypeScript conventions
@@ -87,7 +87,7 @@ return name;
 
 A `return` that is the only statement in its block takes no blank line.
 
-## Render conditions are named constants
+## Render conditions get a name
 
 ```tsx
 const settings = config.data?.settings;
@@ -161,7 +161,7 @@ than inheriting whatever the host has.
 ## Files are kebab-case, one entity per file
 
 `create-vault.ts`, not `createVault.ts`. Intra-file order: imports → the primary
-export → everything it uses below it: private helpers, short module constants,
+export → everything it uses below it: private helpers, module-level `const`s,
 and the types that only this file uses. A file opens with what it is for.
 
 ```ts
@@ -201,13 +201,13 @@ export type FixedDiscount = { kind: 'fixed'; amountCents: number };
 A literal of more than 15 lines — a list of entries, a lookup table, a config
 such as column definitions or filter descriptors — goes to a `constants.ts`
 beside the file that uses it, even when only that one file uses it. The lines
-of the literal count, not those of the declaration around it. A short
-constant, as `money` above, stays below the export. `constants.ts` is the one
-exception to one entity per file: it holds every long literal of its folder.
+of the literal count, not those of the declaration around it. A shorter
+literal stays below the export. `constants.ts` is the one exception to one
+entity per file: it holds every long literal of its folder.
 
 ```ts
 // constants.ts
-export const shippingCountries = [
+export const SHIPPING_COUNTRIES = [
   { code: 'AT', name: 'Austria' },
   { code: 'BE', name: 'Belgium' },
   // … 28 more countries, one per line
@@ -216,21 +216,42 @@ export const shippingCountries = [
 
 ```ts
 // shipping-country.ts
-import { shippingCountries } from './constants';
+import { SHIPPING_COUNTRIES } from './constants';
 
 export function shippingCountryName(code: string): string {
-  const country = shippingCountries.find((entry) => {
+  const country = SHIPPING_COUNTRIES.find((entry) => {
     return entry.code === code;
   });
 
-  return country?.name ?? otherCountry;
+  return country?.name ?? OTHER_COUNTRY;
 }
 
-const otherCountry = 'Another country';
+const OTHER_COUNTRY = 'Another country';
 ```
 
 Not: the 30 countries below `shippingCountryName` in its own file, and not
-`otherCountry` in `constants.ts`.
+`OTHER_COUNTRY` in `constants.ts`.
+
+## A constant's name is CONSTANT_CASE
+
+A constant is a module-level `const` whose value is a literal in the code: a
+string, a number, a boolean, or an array or object made only of these. The
+value is fixed when the code is written, as a constant of a compiled language.
+
+```ts
+const MAX_RETRIES = 3;
+const FALLBACK_MESSAGE = 'The payment failed. Try another card.';
+```
+
+Every other `const` is camelCase:
+
+- a value that the code makes when it runs, also at module level:
+  `new Intl.NumberFormat(…)`, as `money` above, `Date.now()`, `z.object(…)`,
+  `new Map([…])`;
+- a `const` inside a function, also when its value is a literal.
+
+Not: `const PRICE_FORMAT = new Intl.NumberFormat(…)`. The formatter is an
+object that the module makes when it loads, not a value written in the code.
 
 ## A shared type is a model in `models/`, a schema is in `schemas/`
 

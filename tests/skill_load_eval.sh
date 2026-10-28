@@ -1,19 +1,10 @@
 #!/usr/bin/env bash
-# Gives three TypeScript tasks and three React tasks to Haiku subagents. It
-# counts the runs that invoke the conventions skills before their first write,
-# and the written files with an implicit return in a method callback. It counts
-# the order and decline runs with a file that does not open with its primary
-# export, and the order runs that put the order, its line, the customer or the
-# discount outside models/, or two of them in one file, and the order runs whose
-# discount file opens with its variants, not the union. It counts the decline
-# runs that keep their 30-line table out of constants.ts, or put their short
-# fallback message in it. It counts the feature runs that
-# put a sub-component's own hook at the feature root or in `shared`, and the
-# feature runs with a zod schema outside schemas/. It counts the React runs
-# with a component or a hook that holds two async calls. Its runs call the
-# model, so they cost tokens and are not part of `make check`: run it by hand
-# after a change to rules.md or to a skill's description. It runs with this
-# machine's other plugins and settings, the setup the rules must work in.
+# Gives three TypeScript tasks and three React tasks to Haiku subagents, and
+# runs the checks below on what they did: each check says what it counts. Its
+# runs call the model, so they cost tokens and are not part of `make check`:
+# run it by hand after a change to rules.md, to a skill's description or to the
+# text of a conventions skill. It runs with this machine's other plugins and
+# settings, the setup the rules must work in.
 #
 # With --check, it runs only the checks, on the logs folder of an earlier run.
 # `make check` runs them so on tests/fixtures/skill_load, through
@@ -126,15 +117,11 @@ first() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
-# constants <dir>...: the decline runs that keep the 30-line message table in a
-# constants.ts and the short fallback message out of it, as
-# typescript-conventions asks. It prints each file that breaks it.
-# ponytail: it finds the table by one of its messages and the fallback by its
-# text, as the task gives them. A run that rewords one of them fails as one
-# that wrote neither.
+# constants <dir>...: the decline runs with the 30-line message table in a
+# constants.ts and the short fallback message outside it. It prints each file
+# that breaks it. It finds both by their text, as the task gives it.
 constants() {
-  local table='Your bank has new details for this card.' fallback='The payment failed. Try another card.'
-  local ok=0 dir found
+  local table='Your bank has new details for this card.' fallback='The payment failed. Try another card.' ok=0 dir found
   for dir; do
     if ! grep -rqsF "$table" "$dir/src" || ! grep -rqsF "$fallback" "$dir/src"; then
       echo "no table or no fallback written: $dir/src" && continue
@@ -204,13 +191,32 @@ models() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
-# union <dir>...: the order runs whose Discount file declares the union above
-# its variants, as typescript-conventions asks of a union's file. It prints the
-# first type line of each file that opens with something else. The recorded
-# runs without the rule exported both variants above the union.
-# ponytail: it reads the first file with `export type Discount =` or `export
-# type Discount ` at a line's start, and in it the first line that starts with
-# `type` or `export type`.
+# names <dir>...: the runs that name a module-level const with a literal value
+# in CONSTANT_CASE, and any other const in camelCase. It prints each line that
+# breaks it: the recorded runs without the rule named the decline table and
+# message in camelCase, and an Intl.NumberFormat PRICE_FORMAT.
+# ponytail: a literal starts with a quote, a backtick, a digit, a minus, `[`,
+# `{`, `true` or `false`: an object with a function in it is one too. A const
+# inside a function passes unseen: no recorded run named one in CONSTANT_CASE.
+names() {
+  local ok=0 dir found
+  for dir; do
+    [ -n "$(find "$dir/src" \( -name '*.ts' -o -name '*.tsx' \))" ] || { echo "no TypeScript file written: $dir/src" && continue; }
+    found=$(find "$dir/src" \( -name '*.ts' -o -name '*.tsx' \) -exec awk 'BEGIN { literal = "^([-\"`[{0-9" sprintf("%c", 39) "]|true|false)" }
+      /^(export )?const [A-Za-z_$]/ {
+        rest = $0; sub(/^(export )?const /, "", rest); name = rest; sub(/[^A-Za-z0-9_$].*/, "", name)
+        if (sub(/^[^=]*=[[:space:]]*/, "", rest) && (rest ~ literal) != (name ~ /^[A-Z][A-Z0-9_]*$/)) print FILENAME ": " $0
+      }' {} +)
+    if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
+  done
+  echo "names: $ok of $# runs name a literal const in CONSTANT_CASE and any other const in camelCase"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
+# union <dir>...: the order runs whose file of `export type Discount` declares
+# it above its variants. It prints the first type line of each file that opens
+# with something else: the recorded runs without the rule exported both
+# variants above the union.
 union() {
   local ok=0 dir file line
   for dir; do
@@ -316,6 +322,7 @@ first "$logs"/order-*[0-9] "$logs"/decline-*[0-9]
 models "$logs"/order-*[0-9]
 union "$logs"/order-*[0-9]
 constants "$logs"/decline-*[0-9]
+names "$logs"/ts-*[0-9] "$logs"/react-*[0-9] "$logs"/order-*[0-9] "$logs"/decline-*[0-9] "$logs"/feature-*[0-9] "$logs"/comments-*[0-9]
 nested "$logs"/feature-*[0-9]
 schemas "$logs"/feature-*[0-9]
 hooks "$logs"/react-*[0-9] "$logs"/feature-*[0-9] "$logs"/comments-*[0-9]

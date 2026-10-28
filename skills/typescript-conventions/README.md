@@ -24,17 +24,21 @@ agent matches it and says so.
   a JSX `.map` included, no one-line braced `if`.
 - **A blank line before `return`**, unless it is the only statement in its
   block.
-- **Render conditions are named constants**, declared above the `return`.
+- **Render conditions get a name**, a `const` declared above the `return`.
 - **A branch becomes a component** only when it has handlers of its own and
   JSX more than two levels deep.
 - **The runtime before a dependency.** `Intl`, `Object.groupBy`,
   `structuredClone`, `fetch` and `AbortSignal.timeout`, at the version that
   the project pins.
 - **Files are kebab-case, one entity per file.** A file opens with its
-  primary export; its helpers, short module constants and own types go below
+  primary export; its helpers, module-level `const`s and own types go below
   it, and so do the variants of a tagged union. A literal of more than 15
   lines goes to a `constants.ts` beside the file, even when only that file
   uses it.
+- **A constant's name is CONSTANT_CASE.** A constant is a module-level
+  `const` whose value is a literal in the code, as `MAX_RETRIES = 3`. A value
+  made when the code runs, as `new Intl.NumberFormat(…)`, and a `const` inside
+  a function are camelCase.
 - **A shared type is a model in `models/`, a schema is in `schemas/`.** A type
   or an enum that two files or more use goes to the `models/` folder of their
   nearest common folder, one model per file. A model made by an operation on

@@ -5,7 +5,8 @@
 # order-2 and the tree of order-1 are one recorded run, trimmed to what the
 # checks read. comments-1, its log and its tree, is a later run with the rule
 # on one hook per job. decline-1, its log and its tree, is a run without the
-# rule on long literals, and decline-2 is a tree of a run with it. The other
+# rules on long literals and on the names of constants, and decline-2 is a
+# tree of a run with them. The other
 # runs change them into a case that a check must fail or must pass. order-3,
 # decline-2, decline-3, feature-2 to feature-5 and comments-2 have no log:
 # count reads only the logs, and the other checks read only the trees. In
@@ -20,14 +21,16 @@
 #              discount.ts of a run without the rule on a union's file, which
 #              exports both variants above the union
 #   decline-1  the 30-line message table below the export of
-#              decline-message.ts
+#              decline-message.ts; the table and the fallback named in
+#              camelCase
 #   decline-3  decline-2 with the short fallback message moved to constants.ts
 #   feature-2  the panel's hook at the feature root, and no schemas/ folder
 #   feature-3  the panel's hook in src/shared/hooks; a second schema beside
 #              the fetch
 #   feature-4  what nested must pass: src/shared/reuse-cache.ts, a
 #              src/shared/use-cases/ folder, a hook in a shared/ folder inside
-#              the feature
+#              the feature; the recorded products-grid.tsx of a run with the
+#              rule on names, which calls its Intl.NumberFormat PRICE_FORMAT
 #   feature-5  what nested must pass: the page's own use-products.ts at the
 #              feature root, which products-page.tsx imports
 #   comments-2 a run without the rule: the comments load in an effect and a
@@ -61,6 +64,11 @@ union first: 2 of 3 order runs declare Discount above its variants
 tests/fixtures/skill_load/decline-1/src/decline-message.ts
 tests/fixtures/skill_load/decline-3/src/constants.ts
 constants: 1 of 3 decline runs keep the table in constants.ts and the fallback beside its use
+tests/fixtures/skill_load/decline-1/src/decline-message.ts: const fallbackDeclineMessage = 'The payment failed. Try another card.';
+tests/fixtures/skill_load/decline-1/src/decline-message.ts: const declineMessages: Readonly<Record<string, string>> = {
+tests/fixtures/skill_load/feature-1/src/features/products/models/product-filters.ts: export const emptyProductFilters: ProductFilters = {
+tests/fixtures/skill_load/feature-4/src/features/products/products-grid.tsx: const PRICE_FORMAT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+names: 14 of 17 runs name a literal const in CONSTANT_CASE and any other const in camelCase
 tests/fixtures/skill_load/feature-2/src/features/products/use-filter-draft.ts
 tests/fixtures/skill_load/feature-3/src/shared/hooks/use-filter-draft.ts
 own folder: 3 of 5 feature runs keep the panel's hook out of the feature root and shared
