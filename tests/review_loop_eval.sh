@@ -9,8 +9,8 @@
 # count, sent the review of the tests other than once next to the last pass,
 # or sent one with no last pass, sent the review of the architecture other
 # than once before round 2, ran no security review after its last read of the
-# whole branch, ran /security-review in the session and not in a subagent,
-# did not invoke the skill, or ended on a report that names no
+# whole branch, ran /security-review in the session or in no subagent, did
+# not invoke the skill, or ended on a report that names no
 # docs, no review of the tests or no review of the architecture. It calls the
 # model, so it costs tokens and is not part of `make check`: run it by hand
 # after a change to skills/review-loop or to its section in rules.md.
@@ -97,7 +97,8 @@ wait
 # kind rules.md sends to count payloads and sweep docs, is a review round or a
 # part of the security review. The security review is a prompt that says
 # "security review" or "/security-review": the skill sends one subagent that
-# runs the command. A Skill call of security-review is the command run in the
+# runs the command, and a run fails when no subagent makes a Skill call of
+# security-review. A top-level one is the command run in the
 # session, where its prompt can end the turn on its report (#183), so the run
 # fails. There the command sends one subagent to find defects, and one with
 # the "HARD EXCLUSIONS" of /security-review for each finding. A round after the
@@ -148,6 +149,9 @@ for log in "$logs"/run-*.jsonl; do
   last=$(grep -n W <<<"$kinds" | tail -n 1 | cut -d: -f1)
   security=$(tail -n +"$((${last:-0} + 1))" <<<"$kinds" | grep -c S || true)
   inline=$(grep -c 'Skill: /security-review' <<<"$prompts" || true)
+  nested=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id != null)
+    | .message.content[] | select(.type == "tool_use" and .name == "Skill")
+    | .input.skill' "$log" | grep -cx 'security-review' || true)
   long=$(tr -d '\n' <<<"$kinds" | grep -oE '^WCCC|[WST]CCCC' | grep -c . || true)
   tests=$(grep -c T <<<"$kinds" || true)
   paired=$(tr -d '\n' <<<"$kinds" | grep -cE '(WT|TW)[^W]*$' || true)
@@ -161,9 +165,9 @@ for log in "$logs"/run-*.jsonl; do
   docs=$(grep -ciE 'docs( impact)?:' <<<"$result" || true)
   named=$(grep -ciE '(^|[^a-z])tests?[ -]review|review of the tests|tests-lens' <<<"$result" || true)
   archnamed=$(grep -ciE 'architecture[ -](review|lens)|review of the architecture' <<<"$result" || true)
-  echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $long counts past three rounds, $tests reviews of the tests ($paired next to the last whole-branch read), $arch reviews of the architecture ($early before round 2), $security security review calls after the last whole-branch read ($inline run in the session), review-loop invoked $skill times, $docs docs lines, $named lines on the review of the tests and $archnamed on the review of the architecture in the last report"
+  echo "== $(basename "$log" .jsonl): $rounds rounds, $whole later rounds sent to the whole branch, $long counts past three rounds, $tests reviews of the tests ($paired next to the last whole-branch read), $arch reviews of the architecture ($early before round 2), $security security review calls after the last whole-branch read ($inline run in the session, $nested in a subagent), review-loop invoked $skill times, $docs docs lines, $named lines on the review of the tests and $archnamed on the review of the architecture in the last report"
   cut -c1-300 <<<"${prompts:-no review subagent ran}"
-  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && [ "$tests" -eq "$whole" ] && [ "$paired" -eq "$tests" ] && [ "$arch" -eq 1 ] && [ "$early" -eq 1 ] && [ "$security" -ge 1 ] && [ "$inline" -eq 0 ] && [ "$skill" -ge 1 ] && [ "$docs" -ge 1 ] && [ "$named" -ge 1 ] && [ "$archnamed" -ge 1 ] || failed=1
+  [ "$rounds" -ge 2 ] && [ "$whole" -le 1 ] && [ "$long" -eq 0 ] && [ "$tests" -eq "$whole" ] && [ "$paired" -eq "$tests" ] && [ "$arch" -eq 1 ] && [ "$early" -eq 1 ] && [ "$security" -ge 1 ] && [ "$inline" -eq 0 ] && [ "$nested" -ge 1 ] && [ "$skill" -ge 1 ] && [ "$docs" -ge 1 ] && [ "$named" -ge 1 ] && [ "$archnamed" -ge 1 ] || failed=1
 done
 echo "Logs: $logs"
 exit "$failed"
