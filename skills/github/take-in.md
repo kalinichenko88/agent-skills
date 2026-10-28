@@ -7,11 +7,13 @@ An issue named on its own — `#91`, "take #91", its URL — as the session's fi
 message, or after a talk about which task is next, is the request to take it
 into work; a mention inside other work is not. Check it first: `bash
 <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints `take #91`, or
-each reason why not, one per line.
+each reason why not, one per line. When every reason is your own work on this
+computer, a last line follows them: `continue #91 on <branch>`.
 
 **Then say what the task is.** When the check stops with an error, report it
 and stop (`tracker.md`): no summary is due. The error is any line other than
-`take #91` and the lines that start with `#91`. Otherwise read the issue:
+`take #91`, `continue #91 on <branch>` and the lines that start with `#91`.
+Otherwise read the issue:
 `gh issue view 91 --json title,body`, or with its URL. Before the next step,
 write its number, its title and two or three sentences of your own: what is
 wrong or what is wanted, and what must be true for the work to be done. For an
@@ -23,9 +25,14 @@ words for `collect.sh` below.
 
 Then act on what the check printed:
 
+- `continue #91 on <branch>`: the issue is assigned to you, and its branch,
+  linked or the branch of your open pull request, is a local branch here with
+  the branch's last commit on GitHub. Ask nothing: say in one line that the
+  work continues, and go on with *Continuing the work* below.
 - `closed`, or a line that names someone else: say so and wait. These lines
   win over the lines below.
-- `PR #<n> by you`: the work has a pull request already. Say so and stop.
+- `PR #<n> by you`, with no `continue` line: the work has a pull request
+  already. Say so and stop.
 - Only an `assigned to you` line, `branch` lines, or both: another session of
   yours can work on the issue, on this computer or on another one. Show the
   person what the script printed, and ask one at a time, in this order:
@@ -34,6 +41,46 @@ Then act on what the check printed:
   2. Does the work run somewhere else, or does it continue here? Somewhere
      else: stop. Here: go on with the steps below.
 - An issue of another repository than this checkout's: say so and stop.
+
+**Continuing the work.** The session that worked on the issue can still be
+open, and git does not show it. In Claude Code, look for it first:
+`ListAgents` lists your other open sessions, not this one, and the plugin's
+hook names a session `#91 <the start of its title>` when a message to it was
+the issue alone. When such a session is listed and not `offline`, the work
+runs there: give its name, and stop. A session under another name, as one
+started with "take #91", is not found this way, and a Codex session is not
+listed. So the line that says the work continues comes first: when the person
+then says that a session is open, stop this one.
+
+Read the branch next, from any checkout: `git fetch origin <branch>`, then
+`git log <branch>..origin/<branch>` for commits pushed from somewhere else
+since the check, and `git log origin/<branch>..<branch>` for commits that
+GitHub does not have. Commits from somewhere else: the work runs there too, so
+say so, and stop.
+
+Then run `bash <dir>/scripts/worktree.sh 91 <branch> --local`. When the path
+it prints is not where the session is, move into it: in Claude Code with
+`EnterWorktree`, in Codex as the `workdir` of every command. There,
+`git status --short` shows the changes. Name once the command that opens the
+old session with its context, so that the person can go on there instead: in
+the main checkout, `claude --resume`, which lists the sessions of the
+repository's worktrees too, or `claude --from-pr <PR>` with an open pull
+request; in Codex, `codex resume --all`. Two sessions can carry the name
+`#91`: the old one is the older.
+
+Changes, and commits that GitHub does not have, are work in progress: finish
+it, and it goes through `kalinichenko:review-loop` before any merge question.
+With an open pull request, read also what reached it after its `## Review`:
+`gh pr view <PR> --comments`, and the comments on lines in
+`gh api repos/{owner}/{repo}/pulls/<PR>/comments`. A person's review comments
+go through `kalinichenko:review-loop`. Then go on from the first step that
+`## Review` does not show as run, or, when all ran, from the open questions
+and the merge question. Without a pull request, run *The tracker is read
+next* and *Its duplicates close first*, then go on from "Then read what
+points at it", below, and skip the check of the issue's citations: the first
+take-in did it, and the worktree holds the work. In *Taking neighbours
+along*, an issue that is busy only because it is assigned to you was taken
+along by the first session: give it its verdict, as to a free issue.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can
@@ -67,10 +114,10 @@ branch" — and then they win. Each path assigns the issue to you, because an
 unassigned issue looks free to everyone else: "a branch only" runs
 `worktree.sh` with `--here`, which makes no worktree and works in the current
 checkout, and "stay on this branch" runs `gh issue edit 91 --add-assignee @me`
-and touches no branch. `worktree.sh` does not assign the issue in two cases,
-below: it warns in one and stops in the other. "Stay on this branch" checks
-the case of the warning first, with `gh issue develop --list 91` and the
-issue's assignees. In that check, a branch linked in any repository counts.
+and touches no branch. `worktree.sh` does not assign the issue in four cases,
+below: it warns in two and stops in two. "Stay on this branch" checks the
+cases of the warning first, with `gh issue develop --list 91` and the issue's
+assignees. In that check, a branch linked in any repository counts.
 
 The branch, and the worktree when one is made, carry one name that says what
 the work is: `<type>/<number>-<two to four words>`, the type from *Commits* in
@@ -84,9 +131,11 @@ bash <dir>/scripts/worktree.sh 91 fix/91-electron-binary-in-lanes
 It assigns the issue to you, branches from the remote's default branch, links
 the branch to the issue, and prints the path to work in as its last line. A
 branch linked to the issue in this repository wins over the name you gave. A
-branch already checked out is worked on where it is. A session already in a
-worktree, as one started with `claude --worktree` or `codex --worktree`,
-checks the branch out where it is, and so does `--here`.
+linked branch already checked out is worked on where it is. A session already
+in a worktree, as one started with `claude --worktree` or `codex --worktree`,
+checks the branch out where it is, and so does `--here`. With `--local`, the
+script takes a local branch as it is, with git: it makes and links no branch,
+reads no linked branch, and does not stop on the local branch.
 
 A linked branch in another repository does not win: without `--branch-repo`,
 `gh` would make a new branch with the same name here. When every linked branch
@@ -96,11 +145,30 @@ the person decides. A rerun with another name stops the same way. A rerun goes
 on only when the issue has a linked branch in this repository, or no linked
 branch at all.
 
-A linked branch in this repository, on an issue that nobody is assigned to,
-can be someone else's: the script warns, and does not assign the issue to you.
-Find out whose the branch is before you push to it. When the person said it
-after `take-in-check.sh`, use that answer. Someone else's: say so and wait.
-Yours: run the command the warning gives, which assigns the issue to you.
+A local branch with the name you gave, in a worktree or not, stops the script
+too when the issue has no linked branch: it can be a merged pull request's
+branch that stayed, or commits never pushed. The script stops before it
+assigns or makes anything, names the worktree that holds the branch, if one
+does, and lists the branch's commits that are on no remote. Show them to the
+person and wait. The person decides between three ways:
+
+- Keep the branch, and run the script again with another name.
+- Delete the branch, and run the script again with the same name. When the
+  script names a worktree, remove it first with `git worktree remove <path>`,
+  never with `--force`: git refuses a worktree with changes, and the person
+  decides on them. When it names the main checkout, switch that checkout to
+  the default branch first.
+- When the branch holds this work, run the script again with `--local`. It
+  takes the branch as it is, in the worktree that holds it or in a new one,
+  and assigns the issue as at any take-in.
+
+An issue that someone else is assigned to and you are not is theirs, and so is
+its linked branch. A linked branch in this repository, on an issue that nobody
+is assigned to, can be someone else's too. In both cases the script warns, and
+does not assign the issue to you. Find out whose the work is before you push
+to it. When the person said it after `take-in-check.sh`, use that answer.
+Someone else's: say so and wait. Yours: run the command the warning gives,
+which assigns the issue to you.
 
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree

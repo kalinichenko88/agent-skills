@@ -306,8 +306,9 @@ for change in '.state = "CLOSED"' '.body += "\n## Also: one\n## Also: two\n"'; d
   check "a refused dry run leaves no body ($change)" '' "$(find "$tmp" -maxdepth 1 -name 'body.*')"
 done
 
-# take-in-check.sh
-take() { bash "$scripts/take-in-check.sh" "$@" 2>&1 || echo "exit $?"; }
+# take-in-check.sh, in a checkout of its own: it reads the local branches.
+git init -q "$tmp/repo"
+take() { (cd "$tmp/repo" && bash "$scripts/take-in-check.sh" "$@" 2>&1) || echo "exit $?"; }
 answer . .data.repository.issue take-in-20.json
 check 'take-in-check.sh on a free issue' 'take #20' "$(take 20)"
 answer '.state = "CLOSED" | .assignees.nodes = [{login: "someone"}, {login: "kalinichenko88"}]
@@ -316,12 +317,49 @@ answer '.state = "CLOSED" | .assignees.nodes = [{login: "someone"}, {login: "kal
 check 'take-in-check.sh on an issue someone else has' \
   "$(printf '#20: closed\n#20: assigned to someone\n#20: assigned to you\n#20: PR #9 by someone is open and closes it\n#20: PR #10 by you is open and closes it\nexit 1')" \
   "$(take '#20')"
-# As recorded, #114 is assigned to you and has a linked branch: another
-# session of yours can work on it.
-answer . .data.repository.issue take-in-114.json
-check 'take-in-check.sh on an issue that is yours already' \
-  "$(printf '#114: assigned to you\n#114: branch fix/114-take-in-own-work, 0 commits ahead of main, last commit 2026-10-26T17:05:57Z\nexit 1')" \
-  "$(take 114)"
+# As recorded, #167 is assigned to you and has a linked branch. With no local
+# copy of the branch, the work can run on another computer.
+answer . .data.repository.issue take-in-167.json
+yours167='#167: assigned to you
+#167: branch fix/167-architecture-lens-exit2, 0 commits ahead of main, last commit 2026-10-28T13:08:52Z'
+check 'take-in-check.sh on an issue that is yours, with its branch not on this computer' \
+  "$(printf '%s\nexit 1' "$yours167")" "$(take 167)"
+# A local copy that lacks the remote's last commit: work went on somewhere else.
+git -C "$tmp/repo" -c user.name=t -c user.email=t commit -q --allow-empty -m 'Pushed work'
+pushed=$(git -C "$tmp/repo" rev-parse HEAD)
+git -C "$tmp/repo" -c user.name=t -c user.email=t commit -q --allow-empty -m 'Work not pushed yet'
+git -C "$tmp/repo" branch fix/167-architecture-lens-exit2
+git -C "$tmp/repo" branch fix/153-worktree-branch-owner
+check 'take-in-check.sh on an issue whose local branch lacks the remote commit' \
+  "$(printf '%s\nexit 1' "$yours167")" "$(take 167)"
+# The local copy has the remote's last commit, and more: the work continues here.
+answer ".linkedBranches.nodes[0].ref.target.oid = \"$pushed\"" .data.repository.issue take-in-167.json
+check 'take-in-check.sh continues an issue whose branch is on this computer' \
+  "$(printf '%s\ncontinue #167 on fix/167-architecture-lens-exit2' "$yours167")" "$(take 167)"
+answer ".linkedBranches.nodes[0].ref.target.oid = \"$pushed\" | .assignees.nodes = []" .data.repository.issue take-in-167.json
+check 'take-in-check.sh does not continue an issue that nobody is assigned to' 'exit 1' "$(take 167 | tail -1)"
+answer ".linkedBranches.nodes[0].ref.target.oid = \"$pushed\"
+  | .linkedBranches.nodes[0].ref.repository.nameWithOwner = \"someone/agent-skills\"" .data.repository.issue take-in-167.json
+check 'take-in-check.sh does not continue on a branch of another repository' 'exit 1' "$(take 167 | tail -1)"
+# As recorded, #153 has your open pull request #181 and, so, no linked branch:
+# the pull request's branch is the one the work continues on.
+answer ".closedByPullRequestsReferences.nodes[0].headRefOid = \"$pushed\"" .data.repository.issue take-in-153.json
+check 'take-in-check.sh continues an issue with your open pull request' \
+  "$(printf '#153: assigned to you\n#153: PR #181 by you is open and closes it\ncontinue #153 on fix/153-worktree-branch-owner')" \
+  "$(take 153)"
+answer ".closedByPullRequestsReferences.nodes[0].headRefOid = \"$pushed\"
+  | .assignees.nodes += [{login: \"someone\"}]" .data.repository.issue take-in-153.json
+check 'take-in-check.sh does not continue an issue that someone else is assigned to' 'exit 1' "$(take 153 | tail -1)"
+# Another account can have the login "you": the check compares logins.
+answer ".closedByPullRequestsReferences.nodes[0].headRefOid = \"$pushed\"
+  | .assignees.nodes = [{login: \"you\"}]" .data.repository.issue take-in-153.json
+check 'take-in-check.sh does not continue an issue of the account "you"' 'exit 1' "$(take 153 | tail -1)"
+# Two branches of yours, both here: which one holds the work is not sure.
+answer "$(jq -c .data.repository.issue.linkedBranches "$fixtures/take-in-167.json") as \$linked
+  | .closedByPullRequestsReferences.nodes[0].headRefOid = \"$pushed\"
+  | .linkedBranches = \$linked | .linkedBranches.nodes[0].ref.target.oid = \"$pushed\"" \
+  .data.repository.issue take-in-153.json
+check 'take-in-check.sh does not continue an issue with two branches' 'exit 1' "$(take 153 | tail -1)"
 check 'take-in-check.sh on an issue of another repository' \
   "$(printf '#179 is in octo-org/octo-repo, and this checkout is kalinichenko88/agent-skills: stop\nexit 1')" \
   "$(take https://github.com/octo-org/octo-repo/issues/179)"
@@ -329,7 +367,6 @@ check 'take-in-check.sh on an issue of another repository' \
 # worktree.sh in a main checkout, with DRY_RUN=1. As recorded, #5 has no
 # assignee.
 answer .
-git init -q "$tmp/repo"
 top=$(git -C "$tmp/repo" rev-parse --show-toplevel)
 : >"$tmp/calls"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
@@ -360,6 +397,32 @@ case $out in *warning*) fail 'worktree.sh warns about a linked branch on an issu
 case $out in *'dry run: gh issue edit 5 --add-assignee @me'*) ;;
   *) fail 'worktree.sh assigns an issue that is already yours' "$out" ;;
 esac
+
+# An issue that someone else is assigned to is theirs, with a linked branch or
+# without one: worktree.sh warns, and does not assign the issue to you.
+answer '.assignees.nodes = [{login: "someone"}]'
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *'warning: #5 is assigned to someone'*) ;;
+  *) fail 'worktree.sh warns about an issue with a linked branch that someone else is assigned to' "$out" ;;
+esac
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue with a linked branch that someone else is assigned to' "$out" ;; esac
+mv "$tmp/linked" "$tmp/linked.kept"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *'warning: #5 is assigned to someone'*) ;;
+  *) fail 'worktree.sh warns about an issue that someone else is assigned to' "$out" ;;
+esac
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue that someone else is assigned to' "$out" ;; esac
+mv "$tmp/linked.kept" "$tmp/linked"
+answer '.assignees.nodes = [{login: "someone"}, {login: "kalinichenko88"}]'
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *warning*) fail 'worktree.sh warns about an issue that you are assigned to beside someone else' "$out" ;; esac
+case $out in *'dry run: gh issue edit 5 --add-assignee @me'*) ;;
+  *) fail 'worktree.sh assigns an issue that you are assigned to beside someone else' "$out" ;;
+esac
+out=$(cd "$tmp/repo" && FAKE_FAIL='api user' DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations 2>&1) &&
+  fail 'worktree.sh goes on when it cannot read your login' "$out"
+case $out in *'HTTP 502'*) ;; *) fail 'worktree.sh stops on something else than the failed login read' "$out" ;; esac
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue when it could not read your login' "$out" ;; esac
 
 printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
@@ -394,6 +457,60 @@ out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-cit
 check 'worktree.sh --here assigns and checks the branch out where it is' \
   "$(printf 'dry run: gh issue edit 5 --add-assignee @me\ndry run: gh issue develop 5 --name feat/5-scout-citations --checkout\n%s' "$top")" "$out"
 (cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 b --there >/dev/null 2>&1) && fail 'worktree.sh takes an unknown third argument'
+
+# A local branch of the name that no worktree holds, on an issue with no linked
+# branch, as a merged pull request's branch that stayed: gh would check its old
+# commits out as the work. worktree.sh stops before its first write and names
+# them.
+git -C "$tmp/repo" -c user.name=t -c user.email=t commit -q --allow-empty -m 'Old work'
+git -C "$tmp/repo" branch fix/5-old
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old 2>&1) &&
+  fail 'worktree.sh goes on with an old local branch of the name' "$out"
+case $out in *'local branch fix/5-old'*'Old work'*) ;;
+  *) fail 'worktree.sh names the old local branch and its commits' "$out" ;;
+esac
+case $out in *'dry run:'*) fail 'worktree.sh writes before it stops on an old local branch' "$out" ;; esac
+# A worktree that still holds the branch, as one left after the merge, does
+# not make it the issue's work. The stop names the worktree, to work in or to
+# remove.
+git -C "$tmp/repo" worktree add -q "$tmp/old" fix/5-old
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old 2>&1) &&
+  fail 'worktree.sh goes on with an old local branch that a worktree holds' "$out"
+case $out in *'local branch fix/5-old'*'checked out in '*'/old'*'Old work'*) ;;
+  *) fail 'worktree.sh names the worktree that holds the old local branch' "$out" ;;
+esac
+case $out in *'dry run:'*) fail 'worktree.sh writes before it stops on an old local branch that a worktree holds' "$out" ;; esac
+# --local: the person said that the local branch holds this work, or the issue
+# continues on it. worktree.sh takes it as it is, where it is checked out.
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old --local)
+case $out in *'fix/5-old is checked out already'*'/old') ;;
+  *) fail 'worktree.sh --local works on the local branch in the worktree that holds it' "$out" ;;
+esac
+# Linked to the issue, the local branch is the issue's work: worktree.sh goes
+# on, in the worktree that holds it, or with gh when none does.
+printf 'fix/5-old\thttps://github.com/kalinichenko88/agent-skills/tree/fix/5-old\n' >"$tmp/linked"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old)
+case $out in *'fix/5-old is checked out already'*'/old') ;;
+  *) fail 'worktree.sh works on a linked branch in the worktree that holds it' "$out" ;;
+esac
+git -C "$tmp/repo" worktree remove "$tmp/old"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old) ||
+  fail 'worktree.sh stops on the local branch that is linked to the issue' "$out"
+case $out in *'--name fix/5-old --checkout'*) ;;
+  *) fail 'worktree.sh checks out the local branch that is linked to the issue' "$out" ;;
+esac
+rm "$tmp/linked"
+# With no worktree that holds it, --local makes one with git: gh would make a
+# new remote branch of the name.
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old --local)
+case $out in *"dry run: git worktree add $top/.claude/worktrees/fix/5-old fix/5-old"*) ;;
+  *) fail 'worktree.sh --local makes a worktree for the local branch' "$out" ;;
+esac
+case $out in *'gh issue develop'*) fail 'worktree.sh --local makes or links a branch with gh' "$out" ;; esac
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old --local --here)
+case $out in *'dry run: git switch fix/5-old'*) ;;
+  *) fail 'worktree.sh --local --here checks the local branch out where it is' "$out" ;;
+esac
 
 # keep-open.sh removes the pull request's link to the one issue it is given.
 # keep-open-21.json is PR #21's answer, with its link to #14; the cases add a
