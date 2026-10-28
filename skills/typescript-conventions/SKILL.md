@@ -158,6 +158,39 @@ writing a formatter by hand.
 `Intl` takes locale and time zone as arguments — pass them explicitly rather
 than inheriting whatever the host has.
 
+## A constant's name is CONSTANT_CASE
+
+A constant is a module-level `const` that holds data written out in the code:
+its value is known when the code is written, and no code changes it, as a
+constant of a compiled language. A number, a string, a list of entries, a
+lookup table or a config, as column definitions, can be one.
+
+```ts
+const MAX_RETRIES = 3;
+const FALLBACK_MESSAGE = 'The payment failed. Try another card.';
+```
+
+A `const` that holds a component or a context, or whose name opens a JSX tag,
+is PascalCase, also inside a function: `const Page = () => {…}`,
+`const Button = memo(…)`, `const ThemeContext = createContext(…)`,
+`const Icon = item.icon` before `<Icon />`. JSX reads a lowercase name as an
+HTML tag. This rule wins over CONSTANT_CASE.
+
+Every other `const` is camelCase:
+
+- a function, and an object of functions, as
+  `const formatCents = (cents: number) => {…}` or `const ordersApi = { list() {…} }`;
+- a value that the code makes or reads when it runs, also at module level:
+  `new Intl.NumberFormat(…)`, `Date.now()`, `z.object(…)`, `process.env.API_URL`;
+- an object or an array that the code changes, as a cache;
+- a `const` inside a function, whatever it holds.
+
+A name that a framework reads, as `export const metadata` in Next.js, stays as
+the framework wants it.
+
+Not: `const PRICE_FORMAT = new Intl.NumberFormat(…)`. The formatter is an
+object that the module makes when it loads, not data written in the code.
+
 ## Files are kebab-case, one entity per file
 
 `create-vault.ts`, not `createVault.ts`. Intra-file order: imports → the primary
@@ -202,23 +235,15 @@ export type PercentDiscount = { kind: 'percent'; percent: number };
 export type FixedDiscount = { kind: 'fixed'; amountCents: number };
 ```
 
-A literal is a value that is known when the code is written: a string, a
-number, a boolean, or an array or object of these, of functions and of JSX. A
-function or JSX alone is not a literal. A call, a `new` or a read of the
-environment outside a function body makes a value that is known only when the
-code runs: `{ apiUrl: process.env.API_URL }` and
-`{ money: new Intl.NumberFormat(…) }` are not literals. A literal of more than
-15 lines that no code changes and that reads no variable of a function around
-it — a list of entries, a lookup table, a config such as column definitions
-or filter descriptors — goes to the constants file beside the file that uses
-it, even when only that one file uses it. The lines of the literal count, not
-those of the declaration around it. A folder has one constants file:
-`constants.ts`, or `constants.tsx` when one of its literals holds JSX. It is an
-exception to one entity per file: it holds every long literal of its folder.
-A shorter module-level literal that only this file uses stays in it: below
-the export, or above it when the export reads it while the module loads. A
-file whose primary export is the literal itself, as `locales/en.ts`, keeps
-its literal.
+A constant of more than 15 lines goes to the constants file beside the file
+that uses it, even when only that one file uses it. The lines of its value
+count, not those of the declaration around it. A folder has one constants
+file: `constants.ts`, or `constants.tsx` when one of its constants holds JSX.
+It is an exception to one entity per file: it holds every long constant of
+its folder. A shorter constant that only this file uses stays in it: below the
+export, or above it when the export reads it while the module loads. A file
+whose primary export is the constant itself, as `locales/en.ts`, and a test
+file keep their constants.
 
 ```ts
 // constants.ts
@@ -246,37 +271,6 @@ const OTHER_COUNTRY = 'Another country';
 
 Not: the 30 countries below `shippingCountryName` in its own file, and not
 `OTHER_COUNTRY` in `constants.ts`.
-
-## A constant's name is CONSTANT_CASE
-
-A constant is a module-level `const` whose value is a literal, as the section
-above says, and that no code changes. Its value is known when the code is
-written, as the value of a constant in a compiled language.
-
-```ts
-const MAX_RETRIES = 3;
-const FALLBACK_MESSAGE = 'The payment failed. Try another card.';
-```
-
-A `const` that holds a component or a context, or whose name opens a JSX tag,
-is PascalCase, also inside a function: `const Page = () => {…}`,
-`const Button = memo(…)`, `const ThemeContext = createContext(…)`,
-`const Icon = item.icon` before `<Icon />`. JSX reads a lowercase name as an
-HTML tag. This rule wins over CONSTANT_CASE. Every other `const` is camelCase:
-
-- a value that the code makes when it runs, also at module level:
-  `new Intl.NumberFormat(…)`, as `money` above, `Date.now()`, `z.object(…)`,
-  `new Map([…])`;
-- a function that is not a component, as
-  `const formatCents = (cents: number) => {…}` or `const useTableSort = () => {…}`;
-- an object or an array that the code changes, as a cache;
-- a `const` inside a function, also when its value is a literal.
-
-A name that a framework reads, as `export const metadata` or `revalidate` in
-Next.js, stays as the framework wants it.
-
-Not: `const PRICE_FORMAT = new Intl.NumberFormat(…)`. The formatter is an
-object that the module makes when it loads, not a value written in the code.
 
 ## A shared type is a model in `models/`, a schema is in `schemas/`
 

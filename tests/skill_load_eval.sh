@@ -196,7 +196,7 @@ models() {
 # breaks it: the recorded runs without the rule named the decline table and
 # message in camelCase, and an Intl.NumberFormat PRICE_FORMAT.
 # ponytail: a literal starts with a quote, a backtick, a digit, a minus, `[`,
-# `{`, `true` or `false`: an object with a call in it is one too. A const
+# `{`, `true` or `false`: an object of functions or calls is one too. A const
 # inside a function passes unseen: no recorded run named one in CONSTANT_CASE.
 names() {
   local ok=0 dir found
