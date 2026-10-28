@@ -33,7 +33,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   reviewer for `xhigh` changes in Claude Code, a review of the tests for
   `high` and `xhigh` changes and a change to tests only, a review against
   the project's architecture file and ADRs beside round 1, a security
-  review, and a summary of what was decided and fixed. A change to documents only
+  review, and a summary of what the branch changed and what was decided and
+  fixed. A change to documents only
   gets one round and no security review. In Claude Code, Fable and Codex
   also read a superpowers spec, and one more subagent checks its plan
   against it.

@@ -5,7 +5,8 @@ clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a review against the
 project's architecture file and ADRs beside round 1, a security review last,
-and a summary of what was decided and fixed. A change to documents only gets
+and a summary of what the branch changed and what was decided and fixed. A
+change to documents only gets
 one round and no security review. In Claude Code, Fable and Codex also read a
 superpowers spec, and one more subagent checks its plan against it.
 
@@ -100,15 +101,18 @@ each task stays as that skill sets it. In place of the final review of
   branch. Its fixes get rounds of their own, as the later fixes above. A
   change to documents only gets no security review, unless you ask for one.
 - **A summary.** First a run of the repository's check on the final branch.
-  Then the rounds, the decisions with their reasons, what was fixed, what was
-  declined and why, and the issues filed. Last, the docs the branch changed,
-  or why it changed none. The pull request description carries the summary
-  under `## Review`. In a public repository, an example from a private source
+  Then what the branch changed as a whole, in one to five bullets. Then the
+  rounds, the decisions with their reasons, what was fixed, what was declined
+  and why, and the issues filed. Last, the docs the branch changed, or why it
+  changed none. The pull request description carries the summary under
+  `## Review`, without what the branch changed. In a public repository, an example from a private source
   in that section or in a reply to a review comment keeps no names, numbers,
   titles, paths or code.
 - **Then the pull request.** For an issue taken into work, or when you ask
-  for a pull request, the agent opens it after the summary and asks whether
-  to merge, in the same turn. This needs a passing check and a branch other
+  for a pull request, the agent opens it after the summary, in the same turn.
+  It asks one question: merge and clean up, merge only, or do not merge.
+  Clean up removes the worktree and the local branch after the merge. This
+  needs a passing check and a branch other
   than the default branch. Only the merge and the open questions on business
   logic wait for you.
 - **Two readers of a spec, one of a plan.** In Claude Code, the builder check

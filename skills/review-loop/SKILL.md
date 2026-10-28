@@ -352,8 +352,12 @@ request* when the conditions of that section hold.
 ## The summary
 
 When the review ends, run the repository's own check on the final branch.
-Then report in this order, one line per item:
+Then report in this order. Each item is one line, except **Change:**, which
+is a list:
 
+- **Change:** what the branch changed as a whole, for a person who did not
+  follow the session: one to five bullets, the list that the merge takes as
+  `--body` in *Pull requests* of the `kalinichenko:github` skill.
 - **Rounds:** `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
   last pass, the same way. At `xhigh`, the Codex review: its range and the
@@ -377,7 +381,8 @@ Then report in this order, one line per item:
 - **Docs:** the docs the branch changed, or `docs impact: none` and why, as
   *Docs move with the change* in the global prompt asks.
 
-The pull request description carries the same summary under `## Review`, and
+The pull request description carries the same summary, without **Change:**,
+under `## Review`, and
 each later fix commit adds its lines there. A later review then recognises a
 declined finding instead of arguing it again.
 
@@ -407,8 +412,10 @@ Then:
    through this section again, its conditions first.
 3. When the last push in step 1 succeeded, the pull request is open and no
    question on business logic is open, show the `gh pr merge` command that
-   *Pull requests* in that skill gives, and ask whether to run it. On a yes,
-   run the merge, then do *Finishing* from that skill.
+   *Pull requests* in that skill gives. Ask one question with three answers:
+   merge and clean up, merge only, or do not merge. On either merge, run the
+   merge, then do *Finishing* from that skill. On merge and clean up, do its
+   *Cleanup* after that.
 
 Only the merge and the open questions on business logic wait for the person.
 

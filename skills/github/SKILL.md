@@ -16,11 +16,11 @@ there.
 | --- | --- | --- |
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` | *Commits* below |
 | `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15`: `keep-open.sh` after it; then read what it closes | *Pull requests* below |
-| Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch; then *Finishing* | *Pull requests* below |
+| Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch; then *Finishing*, and *Cleanup* when the person asks for it | *Pull requests* below |
 | Finding something out of scope | In the task's module, clear and smaller than the task: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
 | A rule, a skill or a script of this plugin is wrong | Search `kalinichenko88/agent-skills`; show the person the issue, with nothing from their project; file it only after a yes. In a checkout of `agent-skills`: the row above | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
-| Picking an issue up — `#91` or its URL | `take-in-check.sh`; before the next step, give the issue's number, its title and two or three sentences on what it asks; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code, and assign each one when it joins; after the work, the check and the review, then the PR and the question whether to merge, in the same turn, on the conditions in *The pull request* of `kalinichenko:review-loop` | `take-in.md` |
+| Picking an issue up — `#91` or its URL | `take-in-check.sh`; before the next step, give the issue's number, its title and two or three sentences on what it asks; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code, and assign each one when it joins; after the work, the check and the review, then the PR and the question whether to merge and clean up, in the same turn, on the conditions in *The pull request* of `kalinichenko:review-loop` | `take-in.md` |
 | Writing to a repository — an issue, a comment, a PR, a branch, a commit | `gh repo view <owner/name> --json visibility` on each repository that gets it, and when it fails, take it as `PUBLIC`; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |
 | Editing a workflow | Pin `uses:` to the latest major; runtime ≥ host | *GitHub Actions* below |
 
@@ -139,6 +139,28 @@ the old path of each file the PR renamed. In Claude Code a scout then checks
 the open issues that have an entry in its file: `Job: citations.`, with a
 checkout of the merged code as `Tree:`. Check each citation that moved or is
 gone, and correct it.
+
+**Cleanup**, after *Finishing*, when the person asks for it with the merge.
+In a worktree, `gh pr merge --delete-branch` deletes only the remote branch:
+it prints `skipping local delete`, and the worktree and the local branch
+stay. Remove them from the main checkout, the first line of
+`git worktree list`:
+
+```bash
+git worktree remove <the worktree>
+git branch -D <branch>
+```
+
+`git worktree remove` refuses a tree with changes or untracked files: then
+keep both, and name the files. A squash merge puts no commit of the branch on
+the default branch, so `git branch -d` refuses it. Run `-D` only when
+`git rev-parse <branch>` prints the `headRefOid` of
+`gh pr view <PR> --json headRefOid`. Otherwise keep the branch, and name its
+commits that the pull request does not have. In Claude Code, a session in the
+worktree leaves it first with `ExitWorktree` and `keep`: `remove` does not
+remove a worktree that `EnterWorktree` entered by its path. In Codex, the main
+checkout is the `workdir` of both commands. Then say that nothing waits, and
+that the session can close.
 
 ## Public repositories
 

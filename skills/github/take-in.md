@@ -196,9 +196,9 @@ the diff and the issue stays open: the PR says `Part of #15`, and
 
 Taking an issue in is the request for the whole flow: the work, the review
 and, off the default branch, the pull request and the question whether to
-merge. When the work is done, run the repository's own check, such as
+merge and clean up. When the work is done, run the repository's own check, such as
 `make check`, then invoke the `kalinichenko:review-loop` skill. That skill
 runs the check on the final branch and writes a summary. Then, when the check
 passes and the branch is not the default branch, it opens the pull request
-and asks whether to merge, in the same turn. After the summary, only the
+and asks whether to merge and clean up, in the same turn. After the summary, only the
 merge and the open questions on business logic wait for the person.
