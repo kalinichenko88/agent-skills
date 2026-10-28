@@ -40,7 +40,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   against it.
 - **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
-  over-engineering, filed as at most three `debt` issues a run.
+  over-engineering, filed as at most three `debt` issues a run, and one
+  more for the rules that the instruction files repeat or contradict.
 - **[`kalinichenko:architecture`](skills/architecture/README.md)** — new code
   that grows into the project's structure, not beside it: the problem before
   the code, one way to do one kind of work, a split before a file grows past
@@ -208,6 +209,13 @@ invariant names one too. With `--codex`, Codex reads the six branches with
 the same prompt. Run it after a change to
 `skills/review-loop/architecture-lens.md` or to the parts of
 `skills/architecture/SKILL.md` that it reads.
+`tests/debt_lens_eval.sh` sends the review of the instruction files to a
+monorepo whose `CLAUDE.md` files repeat and contradict its architecture file
+and each other. It checks each repeat, contradiction, redundancy and
+citation of the fixture, that the Environment section, which has no copy,
+gets no finding, and that a symlink and a pair of `CLAUDE.md` and
+`AGENTS.md` of one folder are no repeat. With `--codex`, Codex reads it with
+the same prompt. Run it after a change to `skills/debt/instructions-lens.md`.
 `tests/architecture_eval.sh` gives three tasks to Opus in a shop whose one
 module wraps every HTTP call, in four arms: no architecture file and no
 skill; the file and a link from `CLAUDE.md`; the same and the skill; the same

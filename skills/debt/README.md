@@ -1,15 +1,18 @@
 # kalinichenko:debt
 
 A map of the technical debt: where the code is large and changes often, where
-it breaks the project's own layer rules, where it is copied, and, with
-ponytail, where it is over-engineered. At most three places a run become
-issues labelled `debt`, each with the numbers that put it there.
+it breaks the project's own layer rules, where it is copied, where the
+instruction files repeat or contradict each other, and, with ponytail, where
+it is over-engineered. At most three places a run become issues labelled
+`debt`, each with the numbers that put it there, and one more for the
+instruction files.
 
 ## When it starts
 
 - You ask where the technical debt is, or for a debt map of a path.
-- You ask to find hotspots, layer or import violations, duplicated code, or
-  over-engineering, and file them for refactoring.
+- You ask to find hotspots, layer or import violations, duplicated code,
+  over-engineering, or rules that `CLAUDE.md`, `AGENTS.md` and
+  `docs/ARCHITECTURE.md` repeat or contradict, and file them for refactoring.
 - You ask to re-measure the debt issues that are already open.
 
 ## What you get
@@ -45,9 +48,18 @@ issues labelled `debt`, each with the numbers that put it there.
   dropped. A cut of a few lines is reported as a small cut, not filed. Without
   ponytail the step is skipped; it installs as the
   [review-loop README](../review-loop/README.md#the-ponytail-step) says.
-- **Few issues, and no doubles.** At most three places a run. A place an open
-  debt issue already covers is re-measured: its `## Where` gets this run's
-  numbers. A place closed as not planned is not filed again.
+- **Instruction files that agree.** Two readers, Fable and Codex when it is
+  installed, read every `CLAUDE.md` and `AGENTS.md` and the architecture
+  file, and find a rule that two of them state, two texts that give
+  different rules for one case, and text that no agent needs: a rule that
+  the linter already enforces, or the history of an incident. All of it is
+  one issue, outside the three: it names the fix of each finding, and the
+  files that cite a section that moves.
+- **Few issues, and no doubles.** At most three places a run, and the one of
+  the instruction files. A place an open debt issue already covers is
+  re-measured: its `## Where` gets this run's numbers. The issue of the
+  instruction files is written again from this run's findings. A place
+  closed as not planned is not filed again.
 - **Issues take-in reads.** Each issue is labelled `debt`. The label is created
   once when the repository has none. Take-in in `kalinichenko:github` checks
   every open debt issue in the area of a task.

@@ -11,11 +11,12 @@ one. Make no offer when the project's `CLAUDE.md` says "This project keeps no
 - After a no, do not offer again in that session, and ask whether to add one
   line to the project's `CLAUDE.md`: "This project keeps no
   `docs/ARCHITECTURE.md`." With that line, later sessions do not offer it.
-- A yes in the middle of a feature puts the new file into its own commit on
-  the current branch, with no change of the feature in it. Commits that
-  already exist stay as they are.
+- A yes in the middle of a feature puts the new file and its moves into
+  their own commit on the current branch, with no change of the feature in
+  it. Commits that already exist stay as they are.
 - An existing architecture file with no numbered invariants gets the missing
-  parts added to it, after the person's yes. It stays where it is.
+  parts added to it, and the moves of step 2, after the person's yes. It
+  stays where it is.
 
 ## The five steps
 
@@ -23,7 +24,11 @@ one. Make no offer when the project's `CLAUDE.md` says "This project keeps no
    each area, with `bash <skills>/debt/scripts/measure.sh` to find the areas
    that change most. It loads the conventions skills that the project's
    languages call for, as `kalinichenko:react-conventions` for React, so that
-   step 5 sees where the code differs from them.
+   step 5 sees where the code differs from them. It reads every instruction
+   file whole: each file that
+   `git ls-files -s ':(top,glob)**/CLAUDE.md' ':(top,glob)**/AGENTS.md'`
+   prints. A file of mode `120000` is a symlink, as `AGENTS.md -> CLAUDE.md`:
+   it is the file that it points to, not a copy.
 2. It proposes:
    - the codemap;
    - the modules, and the role of each folder (*Modules and layers*);
@@ -35,14 +40,23 @@ one. Make no offer when the project's `CLAUDE.md` says "This project keeps no
      up. Count with `git grep -I -c -e '' -- <path>`, and leave out the data
      files that `<skills>/debt/scripts/data.ere` matches. So about a tenth of
      them start on the `debt` list; a person who wants a shorter list picks a
-     larger limit.
+     larger limit;
+   - the moves. A passage of an instruction file that holds what a part of
+     the file holds (*The parts of the file*) moves into the draft, and
+     leaves the instruction file: the list and the roles of the modules,
+     the direction of imports, a rule that becomes an invariant. An
+     instruction file keeps how to work, as the commands and the
+     environment, and the nested file of a folder keeps a detail inside
+     that folder, as its own layout: the draft does not repeat it. Where a
+     passage and the code differ, as a list that lacks an item, the draft
+     follows the code, and the move names the difference.
 3. Each proposed invariant has a check that passes on the current tree. Write
    the draft to the file's path, with no commit, and run `invariants.sh`.
    When a check fails now and the person wants the invariant, the paths that
    break it go into its `debt` list, as known debt. They need no issue now:
    the debt map weighs them later. Otherwise the invariant stays out, and the
    report names it as debt.
-4. The person confirms or corrects each item.
+4. The person confirms or corrects each item, each move too.
 5. No ADR for an old decision, except in two cases: when two competing ways
    exist and the person picks one of them; and when a choice that the code
    keeps everywhere differs from a rule of a conventions skill, so that the
@@ -55,6 +69,17 @@ path, as `ARCHITECTURE.md` when it is at the root:
 > Before a spec, a plan or the first edit of a new feature, read
 > `docs/ARCHITECTURE.md`. At the start of a new feature, and for a decision,
 > load `kalinichenko:architecture`.
+
+A confirmed move leaves a `CLAUDE.md` only when the root `CLAUDE.md` or
+`.claude/CLAUDE.md` has this line, and an `AGENTS.md` only when the root
+`AGENTS.md` has it: each host reads the root file of its own name. When the
+person says no to the line, or the project has no such root file,
+the passage stays where it is, beside its copy in the draft: tell the person
+that the rule now lives in two places. The moves leave in the commit that
+adds the architecture file, or its missing parts. A symlink gets no line of
+its own: it is the file that it points to. In the same commit, correct each
+citation of a section that a move removes: `git grep -n -F` for the file's
+name and for the heading, from the root of the repository.
 
 ## The parts of the file
 
