@@ -54,7 +54,7 @@ instruction files.
   different rules for one case, and text that no agent needs: a rule that
   the linter already enforces, or the history of an incident. All of it is
   one issue, outside the three: it names the place that keeps each rule, and
-  the code comments that cite a section that moves.
+  the files that cite a section that moves.
 - **Few issues, and no doubles.** At most three places a run, and the one of
   the instruction files. A place an open
   debt issue already covers is re-measured: its `## Where` gets this run's

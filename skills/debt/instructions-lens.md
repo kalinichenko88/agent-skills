@@ -17,7 +17,9 @@ no file, and run no code of the project.
      and the architecture file, in either direction, or two instruction
      files. It is a repeat only when the other place holds the same fact. A
      nested file that adds a detail of its folder to a rule of the root
-     repeats nothing.
+     repeats nothing. `CLAUDE.md` or `.claude/CLAUDE.md` and `AGENTS.md` of
+     one folder repeat nothing between them: two hosts each read one of
+     them.
    - **Contradiction.** Two texts that give different rules or facts for one
      case: other paths, other exceptions, another way to do one kind of work,
      a list that lacks an item. A claim that one file makes about another,
@@ -36,11 +38,12 @@ no file, and run no code of the project.
    architectural, it is an ADR through `kalinichenko:architecture`.
 5. For each section that the fix moves or removes, find its citations:
    `git -C <tree> grep -n -F` for the file's name and for the heading, in the
-   code, its comments and the project's skills.
+   whole tree.
 
 Return one line per finding,
 `<kind> | <place> | <other place> | the claim | the place that keeps it`,
-where a place is `path § heading`, with no line number. For redundancy, the
+where a place is `path § heading`, or the path alone for text before the
+first heading, with no line number. For redundancy, the
 other place is the config line or the linked document, or `-`. Then one line
 per citation, `citation | path:line | the section it cites`, then a last line
 `count: N`, the number of findings. No finding is a valid answer.

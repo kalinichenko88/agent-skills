@@ -17,8 +17,9 @@ and run no code of the project.
 2. In the tree, read the architecture file and the ADRs, where *The files*
    of that `SKILL.md` finds them. Read every instruction file of the tree
    too, also one that the range does not change: each file that
-   `git -C <tree> ls-files ':(glob)**/CLAUDE.md' ':(glob)**/AGENTS.md'`
-   prints. Read `git -C <tree> diff -M <range>`, and the files that it
+   `git -C <tree> ls-files -s ':(glob)**/CLAUDE.md' ':(glob)**/AGENTS.md'`
+   prints. A file of mode `120000` is a symlink: it is the file that it
+   points to. Read `git -C <tree> diff -M <range>`, and the files that it
    changes.
 3. From the root of the tree, run
    `bash <skills>/architecture/scripts/invariants.sh --new-since <base> <head>`.
@@ -74,7 +75,9 @@ Report:
   that the range adds.
 - **False doc.** A passage of the architecture file or of an instruction
   file that the change made false, also in a file that the range does not
-  change: the change corrects it, so it is no Outside finding.
+  change: the change corrects it, so it is no Outside finding. Code that
+  breaks a rule does not make the rule false: only a change of the fact,
+  or an ADR that amends the rule, does.
 - **Size.** A `new` `debt` hit of a `lines` or `files` check, when its split
   only moves code: *When to split* puts that split into this pull request.
 - **Copy.** A copy of existing code that the three conditions of *Shared code
@@ -89,7 +92,7 @@ Give the evidence for each finding: the existing code with its `path:line`
 for a Second structure or a Copy, the line that `invariants.sh` printed for an
 Invariant or a Size, the statement of the invariant and the code's
 `path:line` for a breach that no `Check:` line finds, and the sentence of the
-ADR or the architecture file for the other kinds. A finding with no
+ADR, the architecture file or the instruction file for the other kinds. A finding with no
 evidence is not a finding.
 
 Return one line per finding, `<kind> | path:line | the claim | the evidence`,

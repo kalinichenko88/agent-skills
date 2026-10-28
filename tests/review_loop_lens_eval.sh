@@ -6,14 +6,15 @@
 # and exits 1 when a report misses the check of its case:
 #
 # - second-client adds axios beside the wrapper: a Second structure finding;
-# - direct-fetch calls fetch in a feature: an Invariant finding that cites I-1;
+# - direct-fetch calls fetch in a feature: an Invariant finding that cites I-1,
+#   and no False doc on AGENTS.md, whose rule the code breaks;
 # - amended is direct-fetch with an ADR that amends I-1 and its Check: line:
 #   no Invariant finding that cites I-1, and a False doc finding on
 #   AGENTS.md, which the range does not touch and which still says that only
 #   the wrapper calls fetch;
 # - legacy adds a feature that uses the wrapper, on a base whose own code
-#   breaks I-1 already: no Invariant finding that cites I-1, and an Outside
-#   finding on that code, src/legacy/ping.ts;
+#   breaks I-1 already: no Invariant finding that cites I-1, an Outside
+#   finding on that code, src/legacy/ping.ts, and no False doc on AGENTS.md;
 # - bad-path adds a folder with no code file to the Check: line of I-2, so
 #   invariants.sh exits 2: a False doc finding that cites I-2, and no Outside
 #   finding that cites I-2;
@@ -307,14 +308,15 @@ for i in $(seq "$runs"); do
     outside=$(found outside 'src/legacy/ping\.ts')
     doc=$(found 'false doc' '')
     doc2=$(found 'false doc' 'I-2([^0-9]|$)')
-    agents=$(found 'false doc' 'AGENTS\.md')
+    # The place of the finding, the field after its kind, is AGENTS.md.
+    agents=$(grep -ciE "${kind}false doc[[:space:]*:]*[|][[:space:]\`]*AGENTS\.md" <<<"$report" || true)
     outside2=$(found outside 'I-2([^0-9]|$)')
     outside3=$(found outside 'I-3([^0-9]|$)')
     if case $kase in
       second-client) [ "$second" -ge 1 ] ;;
-      direct-fetch) [ "$invariant" -ge 1 ] ;;
+      direct-fetch) [ "$invariant" -ge 1 ] && [ "$agents" -eq 0 ] ;;
       amended) [ "$invariant" -eq 0 ] && [ "$agents" -ge 1 ] ;;
-      legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
+      legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] && [ "$agents" -eq 0 ] ;;
       bad-path) [ "$doc2" -ge 1 ] && [ "$outside2" -eq 0 ] ;;
       fixed-path) [ "$doc" -eq 0 ] && [ "$outside3" -ge 1 ] ;;
       *) false ;;

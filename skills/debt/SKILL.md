@@ -165,7 +165,8 @@ start there.
    fails, go on with Fable alone, and say so in the report. In Codex, do the
    job of `instructions-lens.md` yourself. A finding that both readers give
    counts once. Read the two places of each finding, and drop one that they
-   do not bear out. The findings that hold are one place.
+   do not bear out. With a scope, keep a finding only when one of its
+   places is under the scope. The findings that hold are one place.
 
 ## Choose the places
 
@@ -183,7 +184,9 @@ from `measure.sh <file>`.
 
 The findings of step 5 are one place of their own: it has no score, and it
 does not count towards the three below. An open debt issue whose `## Where`
-names the same instruction files covers it.
+names its places as `path § heading` covers it. Its re-measure, below, puts
+this run's findings into its `## Where` and `## The split`, in place of the
+old ones.
 
 A hotspot, a file or a folder from a `debt` hit of a `lines` or `files`
 check included, is a place only when it holds more than one concern, the
@@ -255,9 +258,10 @@ at most 600 words, tables and code blocks not counted:
 The issue of the instruction files has the same parts. Its `## Where` names
 the two places of each finding, by path and heading, in place of the rows of
 `measure.sh`. Its `## The split` names, for each finding, the place that
-keeps the text: the other place drops it, and keeps only the line that points
-to the architecture file. Its `## The order` names the citations that the fix
-corrects, and puts each contradiction that a person must choose into a step
+keeps the text, as the readers give it, and the other place drops it. When
+the text moves into the architecture file, each instruction file at the root
+keeps the line that points to that file. Its `## The order` names the files
+whose citations the fix corrects, and puts each contradiction that a person must choose into a step
 of its own: when the choice is architectural, that step writes an ADR through
 `kalinichenko:architecture`.
 
