@@ -36,10 +36,10 @@ no file, and run no code of the project.
    the code keeps everywhere, the invariants and the limits. An instruction
    file keeps how to work, as the commands and the environment, and the
    nested file of a folder keeps a detail inside that folder, as its own
-   layout. For a contradiction, it is the same place, with the true text,
-   from the code, or a person's choice: when that choice is architectural, it
-   is an ADR through `kalinichenko:architecture`. For a redundancy, it is the
-   removal.
+   layout. For a contradiction, it is the true text in place of the false
+   one: from the code, or a person's choice. When that choice is
+   architectural, it is an ADR through `kalinichenko:architecture`. For a
+   redundancy, it is the removal.
 5. For each section that the fix moves or removes, find its citations:
    `git -C <tree> grep -n -F` for the file's name and for the heading, in the
    whole tree.

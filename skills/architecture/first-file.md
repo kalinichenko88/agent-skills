@@ -73,7 +73,7 @@ path, as `ARCHITECTURE.md` when it is at the root:
 A confirmed move leaves a `CLAUDE.md` only when the root `CLAUDE.md` or
 `.claude/CLAUDE.md` has this line, and an `AGENTS.md` only when the root
 `AGENTS.md` has it: each host reads the root file of its own name. When the
-person says no to the line, or the project has no root file of that name,
+person says no to the line, or the project has no such root file,
 the passage stays where it is, beside its copy in the draft: tell the person
 that the rule now lives in two places. The moves leave in the commit that
 adds the architecture file, or its missing parts. A symlink gets no line of
