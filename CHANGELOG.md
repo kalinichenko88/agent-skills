@@ -5,6 +5,13 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 1.2.1 - 2026-10-28
+
+### Fixed
+
+- (review-loop) run /security-review in a subagent, so its report does not end the turn (#188)
+- (typescript) move a constant of over 15 lines to constants.ts, and name constants CONSTANT_CASE
+
 ## 1.2.0 - 2026-10-28
 
 ### Added
