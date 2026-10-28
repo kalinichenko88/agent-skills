@@ -19,9 +19,10 @@ no file, and run no code of the project.
      nested file that adds a detail of its folder to a rule of the root
      repeats nothing. The root `CLAUDE.md` or `.claude/CLAUDE.md` and the
      root `AGENTS.md`, or the `CLAUDE.md` and the `AGENTS.md` of one folder,
-     repeat nothing between them: two hosts each read one of them. A
-     finding on one of such a pair holds for the other: its place names
-     both.
+     repeat nothing between them: two hosts each read one of them. It is a
+     repeat when the `CLAUDE.md` imports the `AGENTS.md` with `@AGENTS.md`:
+     then one host reads both. When the other file of such a pair holds the
+     same text, a finding on one of them names both.
    - **Contradiction.** Two texts that give different rules or facts for one
      case: other paths, other exceptions, another way to do one kind of work,
      a list that lacks an item. A claim that one file makes about another,
@@ -32,8 +33,8 @@ no file, and run no code of the project.
      that states again a document that it links to.
 4. For each repeat and each contradiction, name the place that keeps the
    text. The architecture file keeps what its parts hold: the codemap, the
-   modules, the layers and the direction of imports, the patterns, the
-   invariants and the limits. An instruction file keeps how to work, as the
+   modules, the layers and the direction of imports, the patterns that the
+   code keeps everywhere, the invariants and the limits. An instruction file keeps how to work, as the
    commands and the environment, and the nested file of a folder keeps a
    detail inside that folder, as its own layout. For a contradiction, also
    name the text that is true, from the code, or say that a person must

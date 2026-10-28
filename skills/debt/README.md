@@ -56,9 +56,10 @@ instruction files.
   one issue, outside the three: it names the place that keeps each rule, and
   the files that cite a section that moves.
 - **Few issues, and no doubles.** At most three places a run, and the one of
-  the instruction files. A place an open
-  debt issue already covers is re-measured: its `## Where` gets this run's
-  numbers. A place closed as not planned is not filed again.
+  the instruction files. A place an open debt issue already covers is
+  re-measured: its `## Where` gets this run's numbers, and the issue of the
+  instruction files gets this run's findings, with the order of the fix
+  kept. A place closed as not planned is not filed again.
 - **Issues take-in reads.** Each issue is labelled `debt`. The label is created
   once when the repository has none. Take-in in `kalinichenko:github` checks
   every open debt issue in the area of a task.

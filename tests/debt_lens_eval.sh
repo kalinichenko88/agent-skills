@@ -177,7 +177,7 @@ found() { grep -ciE "${kind}($1)[[:space:]*:]*[|].*($2)" <<<"$report" || true; }
 # pair <place> <place>: the count of repeats whose first two places are the
 # two, in either order.
 pair() {
-  local f='[|][[:space:]`*]*' r="${kind}repeat[[:space:]*:]*"
+  local f='[|][[:space:]`*]*(\./)?' r="${kind}repeat[[:space:]*:]*"
   grep -ciE "$r$f$1[^|]*$f$2|$r$f$2[^|]*$f$1" <<<"$report" || true
 }
 # want and none <kinds> <text> <name>: the report has such a line, or has
@@ -193,7 +193,7 @@ for i in $(seq "$runs"); do
   want 'repeat' 'CLAUDE\.md § Database' 'Database repeat'
   want 'repeat' '§ Routes' 'Routes'
   want 'contradiction' '§ (Types|Props)' 'Types'
-  want 'contradiction' 'ARCHITECTURE\.md( § Architecture[^|]*)?[[:space:]`*]*[|]' 'the intro'
+  want 'contradiction' 'ARCHITECTURE\.md( § Architecture[^|]*)?[[:space:]`*]*[|][^|]*(CLAUDE|AGENTS)\.md' 'the intro'
   want 'redundancy' 'CLAUDE\.md § Database' 'Database history'
   want 'redundancy' 'CLAUDE\.md § Lint' 'Lint'
   want 'citation' 'packages/ui/src/index\.ts' 'citation'
