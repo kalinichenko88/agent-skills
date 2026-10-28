@@ -30,9 +30,9 @@ and run no code of the project.
    `git show <base>:<path>`, and its tree with `git ls-tree -r <base>`.
    Otherwise it is a False doc finding. Do not run the script at `<base>`:
    it stops at the first cause of the base. Give any other cause in your
-   last lines. Exit 2 stops the checks: read the code against the statement of each invariant that the
-   script did not reach, as for one that is review only, and name those
-   invariants in your last lines.
+   last lines. Exit 2 stops the checks: read the code against the statement
+   of each invariant that the script did not reach, as for one that is
+   review only, and name those invariants in your last lines.
 4. When `npx` or `bunx` is on `PATH`, run
    `bash <skills>/debt/scripts/clones.sh <tree>`, and keep the rows that name
    a file the range changes. With neither, or when it fails, say so in your

@@ -198,8 +198,9 @@ branches of one fixture: a second HTTP client, a `fetch` call that breaks an
 invariant, the same call with an ADR that amends it, a base that breaks it
 already, a new invariant whose `Check:` line names a folder with no code
 file, and a fix of that folder on a base where a second invariant names one
-too. With `--codex`, Codex reads the six branches with the same prompt. Run it after a change to `skills/review-loop/architecture-lens.md`
-or to the parts of `skills/architecture/SKILL.md` that it reads.
+too. With `--codex`, Codex reads the six branches with the same prompt. Run
+it after a change to `skills/review-loop/architecture-lens.md` or to the
+parts of `skills/architecture/SKILL.md` that it reads.
 `tests/architecture_eval.sh` gives three tasks to Opus in a shop whose one
 module wraps every HTTP call, in four arms: no architecture file and no
 skill; the file and a link from `CLAUDE.md`; the same and the skill; the same
