@@ -5,6 +5,14 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 1.3.0 - 2026-10-29
+
+### Added
+
+- (react) give the app root and each route an error boundary (#199)
+- (react) let a project's consistent layout win over the folder and index rules (#198)
+- (architecture, debt, review-loop) keep each rule of the instruction files and ARCHITECTURE.md in one place (#194)
+
 ## 1.2.1 - 2026-10-28
 
 ### Fixed
