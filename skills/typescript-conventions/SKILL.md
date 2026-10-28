@@ -203,15 +203,17 @@ export type FixedDiscount = { kind: 'fixed'; amountCents: number };
 ```
 
 A literal is a value written out in the code: a string, a number, a boolean,
-or an array or object of these, also with functions in it. A literal of more
-than 15 lines — a list of entries, a lookup table, a config such as column
-definitions or filter descriptors — goes to a `constants.ts` beside the file
-that uses it, even when only that one file uses it, or to a `constants.tsx`
-when it holds JSX. The lines of the literal count, not those of the
-declaration around it. A shorter literal that only this file uses stays below
-the export. A file whose primary export is the literal itself, as
-`locales/en.ts`, stays as it is. `constants.ts` is the one exception to one
-entity per file: it holds every long literal of its folder.
+or an array or object written out with `[` or `{`, whatever its values are. A
+literal of more than 15 lines that no code changes — a list of entries, a
+lookup table, a config such as column definitions or filter descriptors —
+goes to the constants file beside the file that uses it, even when only that
+one file uses it. The lines of the literal count, not those of the
+declaration around it. A folder has one constants file: `constants.ts`, or
+`constants.tsx` when one of its literals holds JSX. It is the one exception to
+one entity per file: it holds every long literal of its folder. A shorter
+literal that only this file uses stays in it: below the export, or above it
+when the export reads it while the module loads. A file whose primary export
+is the literal itself, as `locales/en.ts`, keeps its literal.
 
 ```ts
 // constants.ts
@@ -251,9 +253,9 @@ const MAX_RETRIES = 3;
 const FALLBACK_MESSAGE = 'The payment failed. Try another card.';
 ```
 
-A `const` that holds a component is PascalCase, as `memo(…)`, `lazy(…)` or
-`const Icon = item.icon`: JSX reads a lowercase name as an HTML tag. Every
-other `const` is camelCase:
+A `const` that JSX uses as a tag is PascalCase, also inside a function, as
+`const Button = memo(…)` or `const Icon = item.icon` before `<Icon />`: JSX
+reads a lowercase name as an HTML tag. Every other `const` is camelCase:
 
 - a value that the code makes when it runs, also at module level:
   `new Intl.NumberFormat(…)`, as `money` above, `Date.now()`, `z.object(…)`,

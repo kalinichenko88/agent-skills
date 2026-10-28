@@ -32,12 +32,13 @@ agent matches it and says so.
   the project pins.
 - **Files are kebab-case, one entity per file.** A file opens with its
   primary export; its helpers, module-level `const`s and own types go below
-  it, and so do the variants of a tagged union. A literal of more than 15
-  lines goes to a `constants.ts` beside the file, even when only that file
-  uses it.
+  it, and so do the variants of a tagged union. A `const` that the export
+  reads while the module loads goes above it. A literal of more than 15 lines
+  goes to the folder's constants file, `constants.ts` or `constants.tsx`, even
+  when only one file uses it.
 - **A constant's name is CONSTANT_CASE.** A constant is a module-level
   `const` whose value is a literal in the code and that no code changes, as
-  `MAX_RETRIES = 3`. A `const` that holds a component is PascalCase. A value
+  `MAX_RETRIES = 3`. A `const` that JSX uses as a tag is PascalCase. A value
   made when the code runs, as `new Intl.NumberFormat(…)`, and a `const` inside
   a function are camelCase.
 - **A shared type is a model in `models/`, a schema is in `schemas/`.** A type

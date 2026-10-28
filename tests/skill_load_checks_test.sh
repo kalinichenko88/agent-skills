@@ -7,8 +7,8 @@
 # on one hook per job. decline-1, its log and its tree, is a run without the
 # rules on long literals and on the names of constants, and decline-2 is a tree
 # of a run with them. The other runs change them into a case that a check must
-# fail or must pass. order-3,
-# decline-2, decline-3, feature-2 to feature-5 and comments-2 have no log:
+# fail or must pass. order-3, decline-2, decline-3, feature-2 to feature-5 and
+# comments-2 have no log:
 # count reads only the logs, and the other checks read only the trees. In
 # react-1 and react-2, `await fetch(…)` and `await response.json()` are one
 # request that hooks must pass.
