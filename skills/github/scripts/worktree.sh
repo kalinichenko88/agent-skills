@@ -13,10 +13,11 @@
 # not linked there: the first such branch that gh lists. When every linked
 # branch is in another repository, as a fork's, the script stops before it
 # writes. So does a local <branch> on an issue with no linked branch: it can
-# hold other work. A linked branch already checked out somewhere is worked on
-# there. A session already in a worktree, as one started with claude
-# --worktree or codex --worktree, checks the branch out where it is; --here
-# does the same in any checkout, for "a branch only".
+# hold other work, so the script names the worktree that holds it, if one does,
+# and its commits on no remote. A linked branch already checked out somewhere
+# is worked on there. A session already in a worktree, as one started with
+# claude --worktree or codex --worktree, checks the branch out where it is;
+# --here does the same in any checkout, for "a branch only".
 #
 # DRY_RUN=1 prints the commands that would write, and runs none.
 # Needs only bash, gh, git and awk.

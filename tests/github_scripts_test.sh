@@ -443,9 +443,14 @@ case $out in *'local branch fix/5-old'*'checked out in '*'/old'*'Old work'*) ;;
   *) fail 'worktree.sh names the worktree that holds the old local branch' "$out" ;;
 esac
 case $out in *'dry run:'*) fail 'worktree.sh writes before it stops on an old local branch that a worktree holds' "$out" ;; esac
-git -C "$tmp/repo" worktree remove "$tmp/old"
-# Linked to the issue, the local branch is the issue's work: worktree.sh goes on.
+# Linked to the issue, the local branch is the issue's work: worktree.sh goes
+# on, in the worktree that holds it, or with gh when none does.
 printf 'fix/5-old\thttps://github.com/kalinichenko88/agent-skills/tree/fix/5-old\n' >"$tmp/linked"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old)
+case $out in *'fix/5-old is checked out already'*'/old') ;;
+  *) fail 'worktree.sh works on a linked branch in the worktree that holds it' "$out" ;;
+esac
+git -C "$tmp/repo" worktree remove "$tmp/old"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old) ||
   fail 'worktree.sh stops on the local branch that is linked to the issue' "$out"
 case $out in *'--name fix/5-old --checkout'*) ;;
