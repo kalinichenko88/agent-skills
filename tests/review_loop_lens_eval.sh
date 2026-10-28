@@ -12,11 +12,12 @@
 # - legacy adds a feature that uses the wrapper, on a base whose own code
 #   breaks I-1 already: no Invariant finding that cites I-1, and an Outside
 #   finding on that code, src/legacy/ping.ts;
-# - bad-path adds I-2, whose Check: line names a folder with no code file, so
-#   invariants.sh exits 2: a False doc finding that cites I-2;
-# - fixed-path corrects that folder, on a base whose I-3 names a folder with
-#   no code file too: an Outside finding that cites I-3, and no False doc
-#   finding that cites I-3.
+# - wrapped adds a sentence to I-1 with an unindented line, so its Check: line
+#   falls outside the invariant and invariants.sh exits 2 on that line, which
+#   the range does not change: a False doc finding;
+# - fixed-path corrects the folder of I-2, on a base whose I-2 and I-3 name
+#   folders with no code file: an Outside finding that cites I-3, and no
+#   False doc finding.
 #
 # With --codex, Codex reads each case in its place, with the same prompt, in
 # its read-only sandbox and with the person's Codex config, as codex-review.sh
@@ -40,7 +41,7 @@ runs=${1:-1}
 [ "$#" -le 1 ] && [ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [--codex] [runs of each case, at least 1]" >&2; exit 2; }
 [ "$reader" = claude ] || codex login status >/dev/null 2>&1 || { echo "$0: codex is not installed or not logged in" >&2; exit 2; }
 logs=$(mktemp -d)
-cases='second-client direct-fetch amended legacy bad-path fixed-path'
+cases='second-client direct-fetch amended legacy wrapped fixed-path'
 
 commit() {
   git -C "$1" add .
@@ -97,8 +98,8 @@ EOF
 }
 
 # fixture <dir>: main, and a branch for each case. legacy-base is main with
-# a call to fetch outside the wrapper. bad-paths is bad-path with I-3, whose
-# folder has no code file either.
+# a call to fetch outside the wrapper. bad-paths is main with I-2 and I-3,
+# whose folders have no code file.
 fixture() {
   local work=$1
   mkdir -p "$work/src/api" "$work/src/features/orders" "$work/docs"
@@ -229,15 +230,17 @@ export function listReports(): Promise<Report[]> {
 EOF
   commit "$work" "feat: list the reports"
 
-  git -C "$work" checkout -qb bad-path main
+  git -C "$work" checkout -qb wrapped main
+  awk '/^  `request\(\)`, which sets/ { print $0 " After a 5xx"; print "answer, it tries the request again, up to two times."; next } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
+  mv "$work/docs/ARCHITECTURE.md.new" "$work/docs/ARCHITECTURE.md"
+  commit "$work" "docs: say how often a request is tried again"
+
+  git -C "$work" checkout -qb bad-paths main
   add_invariant "$work" '- **I-2.** No feature reads the token from `localStorage`.
   Check: grep `localStorage` in `src/feature`.'
-  commit "$work" "docs: no feature reads the token"
-
-  git -C "$work" checkout -qb bad-paths bad-path
   add_invariant "$work" '- **I-3.** No screen writes to the console.
   Check: grep `console\.` in `src/screens`.'
-  commit "$work" "docs: no screen writes to the console"
+  commit "$work" "docs: no feature reads the token, and no screen writes to the console"
 
   git -C "$work" checkout -qb fixed-path bad-paths
   awk '{ sub(/`src\/feature`/, "`src/features`") } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
@@ -295,19 +298,18 @@ for i in $(seq "$runs"); do
     invariant=$(found invariant 'I-1([^0-9]|$)')
     second=$(found 'second structure' '')
     outside=$(found outside 'src/legacy/ping\.ts')
-    doc2=$(found 'false doc' 'I-2([^0-9]|$)')
-    doc3=$(found 'false doc' 'I-3([^0-9]|$)')
+    doc=$(found 'false doc' '')
     outside3=$(found outside 'I-3([^0-9]|$)')
     if case $kase in
       second-client) [ "$second" -ge 1 ] ;;
       direct-fetch) [ "$invariant" -ge 1 ] ;;
       amended) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
       legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
-      bad-path) [ "$doc2" -ge 1 ] ;;
-      fixed-path) [ "$doc3" -eq 0 ] && [ "$outside3" -ge 1 ] ;;
+      wrapped) [ "$doc" -ge 1 ] ;;
+      fixed-path) [ "$doc" -eq 0 ] && [ "$outside3" -ge 1 ] ;;
       *) false ;;
     esac; then verdict=pass; else verdict=FAIL failed=1; fi
-    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts, $doc2 False doc on I-2, $doc3 False doc on I-3, $outside3 Outside on I-3: $verdict"
+    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts, $doc False doc, $outside3 Outside on I-3: $verdict"
     echo "${report:-no report}"
   done
 done

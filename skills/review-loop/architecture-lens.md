@@ -23,11 +23,13 @@ and run no code of the project.
    *`invariants.sh`* names: read the diff for them. A FAIL whose failing hits
    have no `new` mark was on the base already.
 
-   On exit 2, read its lines on stderr. A cause in the architecture file, or
-   in a path that it names, is a False doc finding when the range changes the
-   invariant or the lines that the cause names, or a file under that path.
-   Otherwise it is an Outside finding. Its line numbers are those of the file
-   at `<head>`. Give any other cause in your last lines. Exit 2 stops the
+   On exit 2, read its lines on stderr. The cause is the line without
+   `at <base>:`, and its line numbers are those of the file at `<head>`. A
+   cause in the architecture file, or in a path that it names, is an Outside
+   finding when the base has the same defect in the same text: read that
+   text in the base's architecture file and tree. Otherwise it is a False doc
+   finding. Do not run the script at `<base>`: it stops at the first cause of
+   the base. Give any other cause in your last lines. Exit 2 stops the
    checks: read the code against the statement of each invariant that the
    script did not reach, as for one that is review only, and name those
    invariants in your last lines.
