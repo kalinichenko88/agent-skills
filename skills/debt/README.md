@@ -53,12 +53,13 @@ instruction files.
   file, and find a rule that two of them state, two texts that give
   different rules for one case, and text that no agent needs: a rule that
   the linter already enforces, or the history of an incident. All of it is
-  one issue, outside the three: it names the place that keeps each rule, and
-  the files that cite a section that moves.
+  one issue, outside the three: it names the fix of each finding, and the
+  files that cite a section that moves.
 - **Few issues, and no doubles.** At most three places a run, and the one of
   the instruction files. A place an open debt issue already covers is
-  re-measured: its `## Where` gets this run's numbers, or, for the issue of
-  the instruction files, this run's findings. A place closed as not planned is not filed again.
+  re-measured: its `## Where` gets this run's numbers. The issue of the
+  instruction files is written again from this run's findings. A place
+  closed as not planned is not filed again.
 - **Issues take-in reads.** Each issue is labelled `debt`. The label is created
   once when the repository has none. Take-in in `kalinichenko:github` checks
   every open debt issue in the area of a task.

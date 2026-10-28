@@ -12,8 +12,8 @@
 #   I-1 and I-2 again;
 # - a repeat on apps/web/CLAUDE.md § Routes, which pattern 1 states again;
 # - a contradiction on § Types or § Props: type against interface;
-# - a contradiction on the intro of docs/ARCHITECTURE.md, which says that the
-#   file repeats no instruction file;
+# - a contradiction on docs/ARCHITECTURE.md § Scope, which says that the file
+#   repeats no instruction file;
 # - a redundancy on CLAUDE.md § Database, its incident history, and on
 #   CLAUDE.md § Lint, which eslint.config.js enforces;
 # - a citation of packages/ui/src/index.ts, whose comment cites § Imports;
@@ -117,6 +117,8 @@ EOF
   cat >"$d/docs/ARCHITECTURE.md" <<'EOF'
 # Architecture
 
+## Scope
+
 This file holds what the code cannot tell. It does not repeat the
 instruction files.
 
@@ -193,8 +195,7 @@ for i in $(seq "$runs"); do
   want 'repeat' 'CLAUDE\.md § Database' 'Database repeat'
   want 'repeat' '§ Routes' 'Routes'
   want 'contradiction' '§ (Types|Props)' 'Types'
-  # The intro has no heading of its own: its place is the file, or its title.
-  want 'contradiction' 'ARCHITECTURE\.md( § Architecture[^|]*)?[[:space:]`*]*[|][^|]*(CLAUDE|AGENTS)\.md|(CLAUDE|AGENTS)\.md[^|]*[|][[:space:]`*]*(docs/)?ARCHITECTURE\.md § Architecture' 'the intro'
+  want 'contradiction' 'ARCHITECTURE\.md § Scope' 'Scope'
   want 'redundancy' 'CLAUDE\.md § Database' 'Database history'
   want 'redundancy' 'CLAUDE\.md § Lint' 'Lint'
   want 'citation' 'packages/ui/src/index\.ts' 'citation'

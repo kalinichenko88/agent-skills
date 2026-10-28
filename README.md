@@ -213,8 +213,8 @@ the same prompt. Run it after a change to
 monorepo whose `CLAUDE.md` files repeat and contradict its architecture file
 and each other. It checks each repeat, contradiction, redundancy and
 citation of the fixture, that the Environment section, which has no copy,
-gets no finding, and that a symlink and a pair of `CLAUDE.md` and `AGENTS.md` of one
-folder are no repeat. With `--codex`, Codex reads it with
+gets no finding, and that a symlink and a pair of `CLAUDE.md` and
+`AGENTS.md` of one folder are no repeat. With `--codex`, Codex reads it with
 the same prompt. Run it after a change to `skills/debt/instructions-lens.md`.
 `tests/architecture_eval.sh` gives three tasks to Opus in a shop whose one
 module wraps every HTTP call, in four arms: no architecture file and no
