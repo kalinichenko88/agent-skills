@@ -5,6 +5,15 @@ description: Use when writing or reviewing React code — adding a feature besid
 
 # React conventions
 
+Before you add a file or an import to a feature, look at how this feature and
+the others do it. When they consistently place files or import each other
+otherwise than the sections below, their way wins: match it, and say so in the
+reply. With files grouped by kind, as `components/` and `hooks/`, a new hook
+goes into `hooks/` and a new component into `components/`. With deep imports
+and no `index.ts`, an import stays a deep import, and no `index.ts` is added.
+The direction does not yield: an upward import, or a second direction between
+two features, is debt, not a precedent.
+
 ## Layers import downward only
 
 Top to bottom: `app → features → shared → ui → core`. A layer imports only the
