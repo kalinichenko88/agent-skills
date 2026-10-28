@@ -5,19 +5,18 @@
 #
 #   worktree.sh <n> <branch> [--here]
 #
-# An issue that someone else is assigned to, or one with a linked branch in
-# this repository and no assignee, gets a warning instead: the issue or the
-# branch can be someone else's.
+# An issue that someone else is assigned to and you are not, or one with a
+# linked branch in this repository and no assignee, gets a warning instead: the
+# issue or the branch can be someone else's.
 #
 # A branch linked to the issue in this repository wins over a <branch> that is
 # not linked there: the first such branch that gh lists. When every linked
 # branch is in another repository, as a fork's, the script stops before it
-# writes. So does a local <branch> that no worktree holds, on an issue with no
-# linked branch: it can hold other work. A branch already checked out
-# somewhere is worked on there. A session
-# already in a worktree, as one started with claude --worktree or codex
-# --worktree, checks the branch out where it is; --here does the same in any
-# checkout, for "a branch only".
+# writes. So does a local <branch> on an issue with no linked branch: it can
+# hold other work. A linked branch already checked out somewhere is worked on
+# there. A session already in a worktree, as one started with claude
+# --worktree or codex --worktree, checks the branch out where it is; --here
+# does the same in any checkout, for "a branch only".
 #
 # DRY_RUN=1 prints the commands that would write, and runs none.
 # Needs only bash, gh, git and awk.
@@ -55,23 +54,22 @@ case $'\n'$linked$'\n' in
     ;;
 esac
 
-# A local branch of the name that no worktree holds, on an issue with no
-# linked branch, can be other work: a merged pull request's branch that stayed,
-# or commits never pushed. gh would check its commits out as this work, and
-# exit 0 when it cannot fast-forward them, so the script stops before it writes.
-path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
-if [ -z "$linked" ] && [ -z "$path" ] && git show-ref -q --verify "refs/heads/$branch"; then
+# A local branch of the name, on an issue with no linked branch, can be other
+# work: a merged pull request's branch that stayed, in its worktree or not, or
+# commits never pushed. gh would check its commits out as this work, and exit 0
+# when it cannot fast-forward them, so the script stops before it writes.
+if [ -z "$linked" ] && git show-ref -q --verify "refs/heads/$branch"; then
   {
     echo "#$n has no linked branch, and the local branch $branch exists: it can hold other work."
     echo "Its commits on no remote:"
-    git log --oneline "$branch" --not --remotes
+    git log --oneline "refs/heads/$branch" --not --remotes
     echo "Keep it and give another name, or delete it if nothing on it is needed."
   } >&2
   exit 1
 fi
 
-# An issue that someone else is assigned to is theirs, and so is its linked
-# branch. GitHub does not say whose a branch is: one that is linked while
+# An issue that someone else is assigned to and you are not is theirs, and so
+# is its linked branch. GitHub does not say whose a branch is: one linked while
 # nobody is assigned can be someone else's too. In both cases you decide, and
 # the script assigns nobody. take-in-check.sh stops on every assignee, so a
 # take-in gets here with someone else's issue only when the person says to go on.
@@ -89,6 +87,7 @@ else
   run gh issue edit "$n" --add-assignee @me
 fi
 
+path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
 if [ -n "$path" ]; then
   echo "$branch is checked out already"
   echo "$path"

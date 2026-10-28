@@ -84,8 +84,8 @@ bash <dir>/scripts/worktree.sh 91 fix/91-electron-binary-in-lanes
 It assigns the issue to you, branches from the remote's default branch, links
 the branch to the issue, and prints the path to work in as its last line. A
 branch linked to the issue in this repository wins over the name you gave. A
-branch already checked out is worked on where it is. A session already in a
-worktree, as one started with `claude --worktree` or `codex --worktree`,
+linked branch already checked out is worked on where it is. A session already
+in a worktree, as one started with `claude --worktree` or `codex --worktree`,
 checks the branch out where it is, and so does `--here`.
 
 A linked branch in another repository does not win: without `--branch-repo`,
@@ -96,16 +96,17 @@ the person decides. A rerun with another name stops the same way. A rerun goes
 on only when the issue has a linked branch in this repository, or no linked
 branch at all.
 
-A local branch with the name you gave, which no worktree holds, stops the
-script too when the issue has no linked branch: it can be a merged pull
-request's branch that stayed, or commits never pushed. The script stops before
-it assigns or makes anything, and lists the branch's commits that are on no
-remote. Show them to the person and wait: the person decides whether to keep
-the branch and give another name, or to delete it.
+A local branch with the name you gave, in a worktree or not, stops the script
+too when the issue has no linked branch: it can be a merged pull request's
+branch that stayed, or commits never pushed. The script stops before it
+assigns or makes anything, and lists the branch's commits that are on no
+remote. Show them to the person and wait. The person decides: keep the branch
+and give another name, delete it, or, when it holds this work, work on it as
+"stay on this branch" does.
 
-An issue that someone else is assigned to is theirs, and so is its linked
-branch. A linked branch in this repository, on an issue that nobody is
-assigned to, can be someone else's too. In both cases the script warns, and
+An issue that someone else is assigned to and you are not is theirs, and so is
+its linked branch. A linked branch in this repository, on an issue that nobody
+is assigned to, can be someone else's too. In both cases the script warns, and
 does not assign the issue to you. Find out whose the work is before you push
 to it. When the person said it after `take-in-check.sh`, use that answer.
 Someone else's: say so and wait. Yours: run the command the warning gives,

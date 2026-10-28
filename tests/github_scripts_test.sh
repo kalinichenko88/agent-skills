@@ -376,6 +376,15 @@ case $out in *'warning: #5 is assigned to someone'*) ;;
 esac
 case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue that someone else is assigned to' "$out" ;; esac
 mv "$tmp/linked.kept" "$tmp/linked"
+answer '.assignees.nodes = [{login: "someone"}, {login: "kalinichenko88"}]'
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *warning*) fail 'worktree.sh warns about an issue that you are assigned to beside someone else' "$out" ;; esac
+case $out in *'dry run: gh issue edit 5 --add-assignee @me'*) ;;
+  *) fail 'worktree.sh assigns an issue that you are assigned to beside someone else' "$out" ;;
+esac
+out=$(cd "$tmp/repo" && FAKE_FAIL='api user' DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations 2>&1) &&
+  fail 'worktree.sh goes on when it cannot read your login' "$out"
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue when it could not read your login' "$out" ;; esac
 
 printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
@@ -423,6 +432,11 @@ case $out in *'local branch fix/5-old'*'Old work'*) ;;
   *) fail 'worktree.sh names the old local branch and its commits' "$out" ;;
 esac
 case $out in *'dry run:'*) fail 'worktree.sh writes before it stops on an old local branch' "$out" ;; esac
+# A worktree that still holds the branch, as one left after the merge, does
+# not make it the issue's work.
+git -C "$tmp/repo" worktree add -q "$tmp/old" fix/5-old
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old 2>&1) &&
+  fail 'worktree.sh goes on with an old local branch that a worktree holds' "$out"
 # Linked to the issue, the local branch is the issue's work: worktree.sh goes on.
 printf 'fix/5-old\thttps://github.com/kalinichenko88/agent-skills/tree/fix/5-old\n' >"$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old) ||
