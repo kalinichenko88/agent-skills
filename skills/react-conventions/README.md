@@ -45,4 +45,5 @@ route. Each rule is one that agents broke in a test without it.
 - **The app root and each route have an error boundary.** A boundary at the
   app level, always, and one inside the layout around each route's content
   when the app has routes. A change to the root, the layout or the routes adds
-  the missing level. The router's own mechanism comes first.
+  the missing level. The router's own mechanism comes first, where the router
+  has one.

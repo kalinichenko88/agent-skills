@@ -244,8 +244,8 @@ routes has the app level only:
 
 ```tsx
 // main.tsx: an app without routes
-createRoot(root).render(
-  <ErrorBoundary fallback={<AppError />}>
+createRoot(document.getElementById('root')!).render(
+  <ErrorBoundary fallback={<AppError />} onError={reportError}>
     <App />
   </ErrorBoundary>,
 );
@@ -274,12 +274,16 @@ export const router = createBrowserRouter([
 ```
 
 Use the router's own mechanism when the project has one: `errorElement` or
-`ErrorBoundary` of a React Router route, `errorComponent` of TanStack Router,
-`error.tsx` per segment and `global-error.tsx` in Next.js. Without one, use
-`react-error-boundary` if the project has it, or one `ErrorBoundary` class:
-React has no boundary as a function component. The fallbacks are generic code
-on a lower layer, and `app` wires both levels. Each boundary reports the error
-that it catches.
+`ErrorBoundary` of a React Router route made with `createBrowserRouter` or in
+framework mode, `errorComponent` of TanStack Router, `error.tsx` under the root
+layout and `global-error.tsx` in Next.js. A `<Route>` inside `<BrowserRouter>`
+ignores `errorElement`. Without such a mechanism, use `react-error-boundary` if
+the project has it, or one `ErrorBoundary` class: React has no boundary as a
+function component. Such a boundary resets only when told, so the route-level
+one gets `key={location.pathname}`. The fallbacks are generic code on a lower
+layer, and `app` wires both levels. Each boundary reports the error that it
+catches.
 
-A boundary does not catch an error in an event handler or in async code. A
-request's error is state, as *A request's state is one union* says.
+A boundary does not catch an error in an event handler or in async code outside
+a transition, as a `setTimeout` callback. A request's error is state, as *A
+request's state is one union* says.
