@@ -147,7 +147,8 @@ decision.
 Consistency first covers the principles of this skill only. A rule of a
 conventions skill keeps its own text: `react-conventions` says that an upward
 import that already exists is debt, not a precedent, and forbids another one
-beside it. Only an accepted ADR of the project overrides a convention.
+beside it. Past what a convention's own text yields to a codebase that
+consistently does otherwise, only an accepted ADR of the project overrides it.
 
 **When the ADR is written.** When the decision is final: in the pull request
 with the code, with the status `accepted`. The review of the pull request is

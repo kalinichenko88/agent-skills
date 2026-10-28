@@ -5,6 +5,10 @@ go, request state as one union, a hook for each of a component's two jobs, and
 no `ref.current` in render. Each rule is one that agents broke in a test
 without it.
 
+A codebase that consistently places files or imports features its own way
+wins: the agent matches it and says so. The direction of imports does not
+yield.
+
 ## When it starts
 
 - Before the first write or edit to a React component or hook in a session.
