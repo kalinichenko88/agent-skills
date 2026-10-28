@@ -168,11 +168,18 @@ for i in $(seq "$runs"); do run "$i" & done
 wait
 
 # A finding is a line whose kind comes before the first |, as the lens
-# returns it, in a list, a table or a code block.
-kind='^[[:space:]`]*[|]?[[:space:]*]*'
+# returns it, in a list, a table or a code block. Only spaces, * or : stand
+# between the kind and the |.
+kind='^[[:space:]]*[|]?[^|]*'
 # found <kinds> <text>: the count of the report's lines of one of the kinds
 # that have the text after the first |.
-found() { grep -ciE "${kind}($1)[[:space:]*]*[|].*($2)" <<<"$report" || true; }
+found() { grep -ciE "${kind}($1)[[:space:]*:]*[|].*($2)" <<<"$report" || true; }
+# pair <place> <place>: the count of repeats whose first two places are the
+# two, in either order.
+pair() {
+  local f='[|][[:space:]`*]*' r="${kind}repeat[[:space:]*:]*"
+  grep -ciE "$r$f$1[^|]*$f$2|$r$f$2[^|]*$f$1" <<<"$report" || true
+}
 # want and none <kinds> <text> <name>: the report has such a line, or has
 # none; else the name joins the misses.
 want() { [ "$(found "$1" "$2")" -ge 1 ] || missed="$missed; $3"; }
@@ -186,12 +193,13 @@ for i in $(seq "$runs"); do
   want 'repeat' 'CLAUDE\.md § Database' 'Database repeat'
   want 'repeat' '§ Routes' 'Routes'
   want 'contradiction' '§ (Types|Props)' 'Types'
-  want 'contradiction' 'ARCHITECTURE\.md § Architecture' 'the intro'
+  want 'contradiction' 'ARCHITECTURE\.md( § Architecture[^|]*)?[[:space:]`*]*[|]' 'the intro'
   want 'redundancy' 'CLAUDE\.md § Database' 'Database history'
   want 'redundancy' 'CLAUDE\.md § Lint' 'Lint'
   want 'citation' 'packages/ui/src/index\.ts' 'citation'
   none 'repeat|contradiction|redundancy' '§ Environment' 'Environment'
-  none 'repeat' 'AGENTS\.md[^|]*[|][^|]*CLAUDE\.md|CLAUDE\.md[^|]*[|][^|]*AGENTS\.md' 'AGENTS.md beside CLAUDE.md'
+  [ "$(pair 'AGENTS\.md' 'CLAUDE\.md')" -eq 0 ] || missed="$missed; the symlink"
+  [ "$(pair 'apps/web/AGENTS\.md' 'apps/web/CLAUDE\.md')" -eq 0 ] || missed="$missed; AGENTS.md beside CLAUDE.md"
   if [ -z "$missed" ]; then verdict=pass; else verdict="FAIL${missed}"; failed=1; fi
   echo "== $i: $verdict"
   echo "${report:-no report}"

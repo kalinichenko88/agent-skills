@@ -49,7 +49,7 @@ checks, and an ADR for each decision that needs one.
   a session to write `docs/ARCHITECTURE.md` from the code as it is, and writes
   nothing without your yes. After a no, one line in `CLAUDE.md` stops the
   offer. What your `CLAUDE.md` and `AGENTS.md` already say about the
-  architecture, as the list of folders or the direction of imports, moves
+  architecture, as the list of modules or the direction of imports, moves
   into the new file, after your yes to each move, so that no rule lives in
   two places.
 - **No code of yours runs.** No step runs a package manager, a script of the

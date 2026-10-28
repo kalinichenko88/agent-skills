@@ -183,10 +183,10 @@ finding — the highest of its files. A file outside the table gets its score
 from `measure.sh <file>`.
 
 The findings of step 5 are one place of their own: it has no score, and it
-does not count towards the three below. An open debt issue whose `## Where`
-names its places as `path § heading` covers it. Its re-measure, below, puts
-this run's findings into its `## Where` and `## The split`, in place of the
-old ones.
+does not count towards the three below. Its issue's title starts with
+`Instruction files:`, and an open debt issue with such a title covers it.
+Its re-measure, below, writes the parts of that issue again from this run's
+findings, and keeps its old findings outside the scope.
 
 A hotspot, a file or a folder from a `debt` hit of a `lines` or `files`
 check included, is a place only when it holds more than one concern, the
@@ -257,13 +257,15 @@ at most 600 words, tables and code blocks not counted:
 
 The issue of the instruction files has the same parts. Its `## Where` names
 the two places of each finding, by path and heading, in place of the rows of
-`measure.sh`. Its `## The split` names, for each finding, the place that
-keeps the text, as the readers give it, and the other place drops it. When
-the text moves into the architecture file, each instruction file at the root
-keeps the line that points to that file. Its `## The order` names the files
-whose citations the fix corrects, and puts each contradiction that a person must choose into a step
-of its own: when the choice is architectural, that step writes an ADR through
-`kalinichenko:architecture`.
+`measure.sh`. Its `## The split` names, for each repeat and contradiction,
+the place that keeps the text, and the other place drops it. When the two
+readers name different places, step 4 of `instructions-lens.md` decides. A
+redundancy leaves its place. When the text moves into the architecture file,
+the root file of each host keeps the line that points to that file, as
+`first-file.md` of `kalinichenko:architecture` says. Its `## The order` names
+the files whose citations the fix corrects, and puts each contradiction that
+a person must choose into a step of its own: when the choice is
+architectural, that step writes an ADR through `kalinichenko:architecture`.
 
 The last line is "Found by `kalinichenko:debt` on <date> at <sha>." Another
 open issue on the same code is named in the body, and its side is corrected

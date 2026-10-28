@@ -17,9 +17,11 @@ no file, and run no code of the project.
      and the architecture file, in either direction, or two instruction
      files. It is a repeat only when the other place holds the same fact. A
      nested file that adds a detail of its folder to a rule of the root
-     repeats nothing. `CLAUDE.md` or `.claude/CLAUDE.md` and `AGENTS.md` of
-     one folder repeat nothing between them: two hosts each read one of
-     them.
+     repeats nothing. The root `CLAUDE.md` or `.claude/CLAUDE.md` and the
+     root `AGENTS.md`, or the `CLAUDE.md` and the `AGENTS.md` of one folder,
+     repeat nothing between them: two hosts each read one of them. A
+     finding on one of such a pair holds for the other: its place names
+     both.
    - **Contradiction.** Two texts that give different rules or facts for one
      case: other paths, other exceptions, another way to do one kind of work,
      a list that lacks an item. A claim that one file makes about another,
@@ -33,9 +35,10 @@ no file, and run no code of the project.
    modules, the layers and the direction of imports, the patterns, the
    invariants and the limits. An instruction file keeps how to work, as the
    commands and the environment, and the nested file of a folder keeps a
-   detail of that folder. For a contradiction, also name the text that is
-   true, from the code, or say that a person must choose. When that choice is
-   architectural, it is an ADR through `kalinichenko:architecture`.
+   detail inside that folder, as its own layout. For a contradiction, also
+   name the text that is true, from the code, or say that a person must
+   choose. When that choice is architectural, it is an ADR through
+   `kalinichenko:architecture`.
 5. For each section that the fix moves or removes, find its citations:
    `git -C <tree> grep -n -F` for the file's name and for the heading, in the
    whole tree.
@@ -43,7 +46,7 @@ no file, and run no code of the project.
 Return one line per finding,
 `<kind> | <place> | <other place> | the claim | the place that keeps it`,
 where a place is `path § heading`, or the path alone for text before the
-first heading, with no line number. For redundancy, the
-other place is the config line or the linked document, or `-`. Then one line
-per citation, `citation | path:line | the section it cites`, then a last line
-`count: N`, the number of findings. No finding is a valid answer.
+first heading, with no line number. For redundancy, the other place is the
+config line or the linked document, or `-`. Then one line per citation,
+`citation | path:line | the section it cites`, then a last line `count: N`,
+the number of findings. No finding is a valid answer.

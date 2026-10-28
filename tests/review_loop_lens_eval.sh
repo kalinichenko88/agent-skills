@@ -308,8 +308,8 @@ for i in $(seq "$runs"); do
     outside=$(found outside 'src/legacy/ping\.ts')
     doc=$(found 'false doc' '')
     doc2=$(found 'false doc' 'I-2([^0-9]|$)')
-    # The place of the finding, the field after its kind, is AGENTS.md.
-    agents=$(grep -ciE "${kind}false doc[[:space:]*:]*[|][[:space:]\`]*AGENTS\.md" <<<"$report" || true)
+    # The place of the finding, the field after its kind, names AGENTS.md.
+    agents=$(grep -ciE "${kind}false doc[[:space:]*:]*[|][^|]*AGENTS\.md" <<<"$report" || true)
     outside2=$(found outside 'I-2([^0-9]|$)')
     outside3=$(found outside 'I-3([^0-9]|$)')
     if case $kase in

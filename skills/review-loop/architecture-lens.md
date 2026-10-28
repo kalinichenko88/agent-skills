@@ -92,8 +92,8 @@ Give the evidence for each finding: the existing code with its `path:line`
 for a Second structure or a Copy, the line that `invariants.sh` printed for an
 Invariant or a Size, the statement of the invariant and the code's
 `path:line` for a breach that no `Check:` line finds, and the sentence of the
-ADR, the architecture file or the instruction file for the other kinds. A finding with no
-evidence is not a finding.
+ADR, the architecture file or the instruction file for the other kinds. A
+finding with no evidence is not a finding.
 
 Return one line per finding, `<kind> | path:line | the claim | the evidence`,
 then one line for each script that did not run, with the reason, then a last

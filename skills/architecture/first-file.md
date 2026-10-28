@@ -27,9 +27,8 @@ one. Make no offer when the project's `CLAUDE.md` says "This project keeps no
    step 5 sees where the code differs from them. It reads every instruction
    file whole: each file that
    `git ls-files -s ':(top,glob)**/CLAUDE.md' ':(top,glob)**/AGENTS.md'`
-   prints. A
-   file of mode `120000` is a symlink, as `AGENTS.md -> CLAUDE.md`: it is the
-   file that it points to, not a copy.
+   prints. A file of mode `120000` is a symlink, as `AGENTS.md -> CLAUDE.md`:
+   it is the file that it points to, not a copy.
 2. It proposes:
    - the codemap;
    - the modules, and the role of each folder (*Modules and layers*);
@@ -48,9 +47,9 @@ one. Make no offer when the project's `CLAUDE.md` says "This project keeps no
      the direction of imports, a rule that becomes an invariant. An
      instruction file keeps how to work, as the commands and the
      environment, and the nested file of a folder keeps a detail inside
-     that folder, as its own layout: the draft does not repeat it. Where a passage and the code
-     differ, as a list that lacks an item, the draft follows the code, and
-     the move names the difference.
+     that folder, as its own layout: the draft does not repeat it. Where a
+     passage and the code differ, as a list that lacks an item, the draft
+     follows the code, and the move names the difference.
 3. Each proposed invariant has a check that passes on the current tree. Write
    the draft to the file's path, with no commit, and run `invariants.sh`.
    When a check fails now and the person wants the invariant, the paths that
@@ -71,13 +70,14 @@ path, as `ARCHITECTURE.md` when it is at the root:
 > `docs/ARCHITECTURE.md`. At the start of a new feature, and for a decision,
 > load `kalinichenko:architecture`.
 
-The confirmed moves leave the instruction files only when each instruction
-file at the root, `CLAUDE.md`, `.claude/CLAUDE.md` or `AGENTS.md`, has this
-line: each session reads the root file of its host. They leave in the commit
-that adds the architecture file, or its missing parts. A symlink gets no
-line of its own: it is the file that it points to. In the same commit,
-correct each citation of a section that a move removes: `git grep -n -F` for
-the file's name and for the heading, in the whole tree.
+A confirmed move leaves a `CLAUDE.md` only when the root `CLAUDE.md` or
+`.claude/CLAUDE.md` has this line, and an `AGENTS.md` only when the root
+`AGENTS.md` has it: each host reads the root file of its own name. The moves
+leave in the commit that adds the architecture file, or its missing parts.
+A symlink gets no line of its own: it is the file that it points to. In the
+same commit, correct each citation of a section that a move removes:
+`git grep -n -F` for the file's name and for the heading, from the root of
+the repository.
 
 ## The parts of the file
 

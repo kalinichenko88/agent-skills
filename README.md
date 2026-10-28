@@ -209,6 +209,12 @@ invariant names one too. With `--codex`, Codex reads the six branches with
 the same prompt. Run it after a change to
 `skills/review-loop/architecture-lens.md` or to the parts of
 `skills/architecture/SKILL.md` that it reads.
+`tests/debt_lens_eval.sh` sends the review of the instruction files to a
+monorepo whose `CLAUDE.md` files repeat and contradict its architecture file
+and each other. It checks each repeat, contradiction, redundancy and
+citation of the fixture, and that a symlink and a pair of `CLAUDE.md` and
+`AGENTS.md` of one folder are no repeat. With `--codex`, Codex reads it with
+the same prompt. Run it after a change to `skills/debt/instructions-lens.md`.
 `tests/architecture_eval.sh` gives three tasks to Opus in a shop whose one
 module wraps every HTTP call, in four arms: no architecture file and no
 skill; the file and a link from `CLAUDE.md`; the same and the skill; the same
