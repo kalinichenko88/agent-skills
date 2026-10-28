@@ -99,10 +99,15 @@ branch at all.
 A local branch with the name you gave, in a worktree or not, stops the script
 too when the issue has no linked branch: it can be a merged pull request's
 branch that stayed, or commits never pushed. The script stops before it
-assigns or makes anything, and lists the branch's commits that are on no
-remote. Show them to the person and wait. The person decides: keep the branch
-and give another name, delete it, or, when it holds this work, work on it as
-"stay on this branch" does.
+assigns or makes anything, names the worktree that holds the branch, if one
+does, and lists the branch's commits that are on no remote. Show them to the
+person and wait. The person decides between three ways:
+
+- Keep the branch, and run the script again with another name.
+- Delete the branch, after its worktree when the script names one.
+- When the branch holds this work, work on it: move into the worktree that the
+  script names, or check the branch out where you are. Then go on as "stay on
+  this branch" does.
 
 An issue that someone else is assigned to and you are not is theirs, and so is
 its linked branch. A linked branch in this repository, on an issue that nobody

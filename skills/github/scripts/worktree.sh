@@ -58,12 +58,13 @@ esac
 # work: a merged pull request's branch that stayed, in its worktree or not, or
 # commits never pushed. gh would check its commits out as this work, and exit 0
 # when it cannot fast-forward them, so the script stops before it writes.
+path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
 if [ -z "$linked" ] && git show-ref -q --verify "refs/heads/$branch"; then
   {
     echo "#$n has no linked branch, and the local branch $branch exists: it can hold other work."
+    [ -z "$path" ] || echo "It is checked out in $path."
     echo "Its commits on no remote:"
     git log --oneline "refs/heads/$branch" --not --remotes
-    echo "Keep it and give another name, or delete it if nothing on it is needed."
   } >&2
   exit 1
 fi
@@ -76,8 +77,8 @@ fi
 assignees=$(gh issue view "$n" --json assignees --jq '[.assignees[].login] | join(" ")')
 me=$(gh api user --jq .login)
 case " $assignees " in
-  *" $me "*) warning='' ;;
   '  ') warning=${linked:+"#$n has a linked branch and nobody is assigned: it can be someone else's."} ;;
+  *" $me "*) warning='' ;;
   *) warning="#$n is assigned to $assignees: it is theirs." ;;
 esac
 if [ -n "$warning" ]; then
@@ -87,7 +88,6 @@ else
   run gh issue edit "$n" --add-assignee @me
 fi
 
-path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
 if [ -n "$path" ]; then
   echo "$branch is checked out already"
   echo "$path"

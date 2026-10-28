@@ -384,6 +384,7 @@ case $out in *'dry run: gh issue edit 5 --add-assignee @me'*) ;;
 esac
 out=$(cd "$tmp/repo" && FAKE_FAIL='api user' DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations 2>&1) &&
   fail 'worktree.sh goes on when it cannot read your login' "$out"
+case $out in *'HTTP 502'*) ;; *) fail 'worktree.sh stops on something else than the failed login read' "$out" ;; esac
 case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue when it could not read your login' "$out" ;; esac
 
 printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"
@@ -433,14 +434,23 @@ case $out in *'local branch fix/5-old'*'Old work'*) ;;
 esac
 case $out in *'dry run:'*) fail 'worktree.sh writes before it stops on an old local branch' "$out" ;; esac
 # A worktree that still holds the branch, as one left after the merge, does
-# not make it the issue's work.
+# not make it the issue's work. The stop names the worktree, to work in or to
+# remove.
 git -C "$tmp/repo" worktree add -q "$tmp/old" fix/5-old
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old 2>&1) &&
   fail 'worktree.sh goes on with an old local branch that a worktree holds' "$out"
+case $out in *'local branch fix/5-old'*'checked out in '*'/old'*'Old work'*) ;;
+  *) fail 'worktree.sh names the worktree that holds the old local branch' "$out" ;;
+esac
+case $out in *'dry run:'*) fail 'worktree.sh writes before it stops on an old local branch that a worktree holds' "$out" ;; esac
+git -C "$tmp/repo" worktree remove "$tmp/old"
 # Linked to the issue, the local branch is the issue's work: worktree.sh goes on.
 printf 'fix/5-old\thttps://github.com/kalinichenko88/agent-skills/tree/fix/5-old\n' >"$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old) ||
   fail 'worktree.sh stops on the local branch that is linked to the issue' "$out"
+case $out in *'--name fix/5-old --checkout'*) ;;
+  *) fail 'worktree.sh checks out the local branch that is linked to the issue' "$out" ;;
+esac
 rm "$tmp/linked"
 
 # keep-open.sh removes the pull request's link to the one issue it is given.
