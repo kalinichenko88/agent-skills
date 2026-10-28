@@ -16,7 +16,7 @@ there.
 | --- | --- | --- |
 | Writing a commit message | `type: one sentence`, at most 5 bullets under it, no `Co-Authored-By:` | *Commits* below |
 | `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15`: `keep-open.sh` after it; then read what it closes | *Pull requests* below |
-| Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch; then *Finishing*, and *Cleanup* when the person asks for it | *Pull requests* below |
+| Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch, run in the branch's worktree; then *Finishing*, and *Cleanup* when the person asks for it | *Pull requests* below |
 | Finding something out of scope | In the task's module, clear and smaller than the task: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
 | A rule, a skill or a script of this plugin is wrong | Search `kalinichenko88/agent-skills`; show the person the issue, with nothing from their project; file it only after a yes. In a checkout of `agent-skills`: the row above | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
@@ -123,6 +123,12 @@ one-commit branch gives that commit's subject instead — so both take the same
 `--body` closes that issue when the commit lands, and `closingIssuesReferences`
 does not show it: write both without one.
 
+Run the merge in the checkout that holds the branch: its linked worktree, when
+`git worktree list` shows the branch in one. There `gh` keeps the worktree and
+the local branch, and *Cleanup* decides on them. In Claude Code, a session that
+did not enter the worktree runs `(cd <path> && gh pr merge …)`. In Codex, the
+worktree is the `workdir`.
+
 **Finishing.** An issue goes stale the moment the code moves under it, and
 GitHub does not notice: nothing corrects its text. So the PR closes the task,
 every ride-along and every issue the change removes; under each problem it
@@ -142,10 +148,14 @@ gone, and correct it.
 
 **Cleanup.** Do it when the person chose merge and clean up, after
 *Finishing*: *Finishing* can use the worktree as its checkout of the merged
-code. In a linked worktree, `gh pr merge --delete-branch` deletes only the
-remote branch: it prints `skipping local delete`, and the worktree and the
-local branch stay. Outside one, `gh` deletes the local branch itself, and
-nothing is left to clean up.
+code. Run in the branch's linked worktree, `gh pr merge --delete-branch`
+deletes only the remote branch: it prints `skipping local delete`, and the
+worktree and the local branch stay. Run in another checkout, `gh` 2.103
+removes that worktree with `git worktree remove` and the local branch with
+`git branch -D`, with none of the checks below, and without a TTY it prints
+nothing. That is why the merge runs in the worktree. When the branch has no
+linked worktree, `gh` deletes the local branch itself, and nothing is left to
+clean up.
 
 First leave the worktree. In Claude Code, a session that `EnterWorktree`
 moved there leaves with `ExitWorktree` and `keep`: `remove` does not remove a

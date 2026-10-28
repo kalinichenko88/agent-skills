@@ -412,13 +412,14 @@ Then:
 3. When the last push in step 1 succeeded, the pull request is open and no
    question on business logic is open, show the `gh pr merge` command that
    *Pull requests* in that skill gives. Ask one question with three answers:
-   merge and clean up, merge only, or do not merge. Outside a linked
-   worktree, where `git rev-parse --git-dir` and `--git-common-dir` print
-   the same path, `gh` deletes the local branch itself: ask only whether to
-   merge, and do no *Cleanup*. On a merge answer, run
-   the merge. When it succeeds, do *Finishing* from that skill, and on merge
-   and clean up, its *Cleanup* after that. When it fails, give the error, and
-   keep the worktree and the branch.
+   merge and clean up, merge only, or do not merge. When `git worktree list`
+   shows the branch on none of its lines after the first, the branch has no
+   linked worktree, and `gh` deletes the local branch itself: ask only
+   whether to merge, and do no *Cleanup*. On a merge answer, run the merge in
+   the checkout that holds the branch, as that section says. When it
+   succeeds, do *Finishing* from that skill, and on merge and clean up, its
+   *Cleanup* after that. When it fails, give the error, and keep the worktree
+   and the branch.
 
 Only the merge and the open questions on business logic wait for the person.
 
