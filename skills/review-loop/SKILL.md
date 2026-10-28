@@ -381,8 +381,7 @@ is a list:
 - **Docs:** the docs the branch changed, or `docs impact: none` and why, as
   *Docs move with the change* in the global prompt asks.
 
-The pull request description carries the same summary, without **Change:**,
-under `## Review`, and
+The pull request description carries the same summary under `## Review`, and
 each later fix commit adds its lines there. A later review then recognises a
 declined finding instead of arguing it again.
 
@@ -413,9 +412,10 @@ Then:
 3. When the last push in step 1 succeeded, the pull request is open and no
    question on business logic is open, show the `gh pr merge` command that
    *Pull requests* in that skill gives. Ask one question with three answers:
-   merge and clean up, merge only, or do not merge. On either merge, run the
-   merge, then do *Finishing* from that skill. On merge and clean up, do its
-   *Cleanup* after that.
+   merge and clean up, merge only, or do not merge. On a merge answer, run
+   the merge. When it succeeds, do *Finishing* from that skill, and on merge
+   and clean up, its *Cleanup* after that. When it fails, give the error, and
+   keep the worktree and the branch.
 
 Only the merge and the open questions on business logic wait for the person.
 

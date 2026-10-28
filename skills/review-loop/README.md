@@ -6,8 +6,8 @@ than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a review against the
 project's architecture file and ADRs beside round 1, a security review last,
 and a summary of what the branch changed and what was decided and fixed. A
-change to documents only gets
-one round and no security review. In Claude Code, Fable and Codex also read a
+change to documents only gets one round and no security review. In Claude
+Code, Fable and Codex also read a
 superpowers spec, and one more subagent checks its plan against it.
 
 ## When it starts
@@ -105,16 +105,16 @@ each task stays as that skill sets it. In place of the final review of
   rounds, the decisions with their reasons, what was fixed, what was declined
   and why, and the issues filed. Last, the docs the branch changed, or why it
   changed none. The pull request description carries the summary under
-  `## Review`, without what the branch changed. In a public repository, an example from a private source
-  in that section or in a reply to a review comment keeps no names, numbers,
+  `## Review`. In a public repository, an example from a private source in
+  that section or in a reply to a review comment keeps no names, numbers,
   titles, paths or code.
 - **Then the pull request.** For an issue taken into work, or when you ask
   for a pull request, the agent opens it after the summary, in the same turn.
   It asks one question: merge and clean up, merge only, or do not merge.
-  Clean up removes the worktree and the local branch after the merge. This
-  needs a passing check and a branch other
-  than the default branch. Only the merge and the open questions on business
-  logic wait for you.
+  Clean up removes the worktree and the local branch after the merge, when
+  nothing in them would be lost. This needs a passing check and a branch
+  other than the default branch. Only the merge and the open questions on
+  business logic wait for you.
 - **Two readers of a spec, one of a plan.** In Claude Code, the builder check
   of a superpowers spec goes to Fable and Codex in parallel, in place of one
   subagent. Without the Codex CLI or its login, or when Codex fails, Fable

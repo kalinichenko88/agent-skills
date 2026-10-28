@@ -40,8 +40,8 @@ time.
   not the default branch, the agent pushes, opens the PR and shows the exact
   merge command, in the same turn. It asks one question: merge and clean up,
   merge only, or do not merge. Clean up removes the worktree and the local
-  branch after the merge. Only the merge and the open questions on business
-  logic wait for you.
+  branch after the merge, when nothing in them would be lost. Only the merge
+  and the open questions on business logic wait for you.
 - **A task finishes with a true tracker.** The PR and every issue it closes
   are assigned to you. A PR that fixes only part of an issue keeps that issue
   open. After the merge, the `path:line` citations in open issues are checked
