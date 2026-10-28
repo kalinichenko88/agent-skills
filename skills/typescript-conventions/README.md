@@ -42,7 +42,8 @@ agent matches it and says so.
   it, and so do the variants of a tagged union. A `const` that the export
   reads while the module loads goes above it. A constant of more than 15
   lines goes to the folder's constants file, `constants.ts` or
-  `constants.tsx`, even when only one file uses it.
+  `constants.tsx`, even when only one file uses it. A test file, and a file
+  whose primary export is the constant, keep theirs.
 - **A shared type is a model in `models/`, a schema is in `schemas/`.** A type
   or an enum that two files or more use goes to the `models/` folder of their
   nearest common folder, one model per file. A model made by an operation on

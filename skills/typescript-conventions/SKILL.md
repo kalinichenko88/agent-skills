@@ -178,10 +178,11 @@ HTML tag. This rule wins over CONSTANT_CASE.
 
 Every other `const` is camelCase:
 
-- a function, and an object of functions, as
+- a function, and an object whose values are all functions, as
   `const formatCents = (cents: number) => {…}` or `const ordersApi = { list() {…} }`;
 - a value that the code makes or reads when it runs, also at module level:
-  `new Intl.NumberFormat(…)`, `Date.now()`, `z.object(…)`, `process.env.API_URL`;
+  `new Intl.NumberFormat(…)`, `new Map([…])`, `new Set([…])`, `Date.now()`,
+  `z.object(…)`, `process.env.API_URL`;
 - an object or an array that the code changes, as a cache;
 - a `const` inside a function, whatever it holds.
 
