@@ -5,6 +5,18 @@ Every release of the kalinichenko plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 1.2.0 - 2026-10-28
+
+### Added
+
+- (github) continue your own work on an issue, and stop taking others' issues or old branches (#181)
+- (review-loop) say what the PR changed, and clean up the worktree and the branch after the merge
+
+### Fixed
+
+- (review-loop) judge an exit 2 of the architecture review by what the range changes (#182)
+- (github) run the merge in the branch's checkout, so gh does not remove its worktree unchecked
+
 ## 1.1.0 - 2026-10-27
 
 ### Added
