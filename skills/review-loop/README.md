@@ -98,7 +98,9 @@ each task stays as that skill sets it. In place of the final review of
   rest by itself. It asks only about a change to business logic: a rule, a
   calculation, a state, a permission, the data the product keeps or deletes.
 - **A security review last.** `/security-review` runs once on the final
-  branch. Its fixes get rounds of their own, as the later fixes above. A
+  branch, in a subagent in Claude Code: its prompt says the reply is the
+  report alone, and in the session that reply ended the turn before the pull
+  request. Its fixes get rounds of their own, as the later fixes above. A
   change to documents only gets no security review, unless you ask for one.
 - **A summary.** First a run of the repository's check on the final branch.
   Then what the branch changed as a whole, in one to five bullets. Then the
