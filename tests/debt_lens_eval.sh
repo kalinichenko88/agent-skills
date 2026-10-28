@@ -193,7 +193,8 @@ for i in $(seq "$runs"); do
   want 'repeat' 'CLAUDE\.md § Database' 'Database repeat'
   want 'repeat' '§ Routes' 'Routes'
   want 'contradiction' '§ (Types|Props)' 'Types'
-  want 'contradiction' 'ARCHITECTURE\.md( § Architecture[^|]*)?[[:space:]`*]*[|][^|]*(CLAUDE|AGENTS)\.md' 'the intro'
+  # The intro has no heading of its own: its place is the file, or its title.
+  want 'contradiction' 'ARCHITECTURE\.md( § Architecture[^|]*)?[[:space:]`*]*[|][^|]*(CLAUDE|AGENTS)\.md|(CLAUDE|AGENTS)\.md[^|]*[|][[:space:]`*]*(docs/)?ARCHITECTURE\.md § Architecture' 'the intro'
   want 'redundancy' 'CLAUDE\.md § Database' 'Database history'
   want 'redundancy' 'CLAUDE\.md § Lint' 'Lint'
   want 'citation' 'packages/ui/src/index\.ts' 'citation'

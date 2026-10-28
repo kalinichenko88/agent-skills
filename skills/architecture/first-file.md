@@ -72,14 +72,13 @@ path, as `ARCHITECTURE.md` when it is at the root:
 
 A confirmed move leaves a `CLAUDE.md` only when the root `CLAUDE.md` or
 `.claude/CLAUDE.md` has this line, and an `AGENTS.md` only when the root
-`AGENTS.md` has it: each host reads the root file of its own name. With no
-root file of that name, the move stays where it is, and step 4 says so. The
-moves leave in the commit that adds the architecture file, or its missing
-parts.
-A symlink gets no line of its own: it is the file that it points to. In the
-same commit, correct each citation of a section that a move removes:
-`git grep -n -F` for the file's name and for the heading, from the root of
-the repository.
+`AGENTS.md` has it: each host reads the root file of its own name.
+Otherwise the passage stays too, and the person is told that it now lives in
+two places. The moves leave in the commit that adds the architecture file,
+or its missing parts. A symlink gets no line of its own: it is the file that
+it points to. In the same commit, correct each citation of a section that a
+move removes: `git grep -n -F` for the file's name and for the heading, from
+the root of the repository.
 
 ## The parts of the file
 

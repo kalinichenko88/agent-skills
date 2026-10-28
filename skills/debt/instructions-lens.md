@@ -19,10 +19,9 @@ no file, and run no code of the project.
      nested file that adds a detail of its folder to a rule of the root
      repeats nothing. The root `CLAUDE.md` or `.claude/CLAUDE.md` and the
      root `AGENTS.md`, or the `CLAUDE.md` and the `AGENTS.md` of one folder,
-     repeat nothing between them: two hosts each read one of them. It is a
-     repeat when the `CLAUDE.md` imports the `AGENTS.md` with `@AGENTS.md`:
-     then one host reads both. When the other file of such a pair holds the
-     same text, a finding on one of them names both.
+     repeat nothing between them: two hosts each read one of them. When the
+     other file of such a pair holds the same text, a finding on one of them
+     names both.
    - **Contradiction.** Two texts that give different rules or facts for one
      case: other paths, other exceptions, another way to do one kind of work,
      a list that lacks an item. A claim that one file makes about another,
@@ -31,21 +30,21 @@ no file, and run no code of the project.
      with its own message: name the line of its config. History, as dates,
      incidents and task ids, next to a rule that stands without it. A section
      that states again a document that it links to.
-4. For each repeat and each contradiction, name the place that keeps the
-   text. The architecture file keeps what its parts hold: the codemap, the
-   modules, the layers and the direction of imports, the patterns that the
-   code keeps everywhere, the invariants and the limits. An instruction file keeps how to work, as the
-   commands and the environment, and the nested file of a folder keeps a
-   detail inside that folder, as its own layout. For a contradiction, also
-   name the text that is true, from the code, or say that a person must
-   choose. When that choice is architectural, it is an ADR through
-   `kalinichenko:architecture`.
+4. Name the fix of each finding. For a repeat, it is the place that keeps
+   the text. The architecture file keeps what its parts hold: the codemap,
+   the modules, the layers and the direction of imports, the patterns that
+   the code keeps everywhere, the invariants and the limits. An instruction
+   file keeps how to work, as the commands and the environment, and the
+   nested file of a folder keeps a detail inside that folder, as its own
+   layout. For a contradiction, it is the true text, from the code, or a
+   person's choice: when that choice is architectural, it is an ADR through
+   `kalinichenko:architecture`. For a redundancy, it is the removal.
 5. For each section that the fix moves or removes, find its citations:
    `git -C <tree> grep -n -F` for the file's name and for the heading, in the
    whole tree.
 
 Return one line per finding,
-`<kind> | <place> | <other place> | the claim | the place that keeps it`,
+`<kind> | <place> | <other place> | the claim | the fix`,
 where a place is `path § heading`, or the path alone for text before the
 first heading, with no line number. For redundancy, the other place is the
 config line or the linked document, or `-`. Then one line per citation,
