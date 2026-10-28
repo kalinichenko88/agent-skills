@@ -5,9 +5,9 @@
 # order-2 and the tree of order-1 are one recorded run, trimmed to what the
 # checks read. comments-1, its log and its tree, is a later run with the rule
 # on one hook per job. decline-1, its log and its tree, is a run without the
-# rules on long literals and on the names of constants, and decline-2 is a
-# tree of a run with them. The other
-# runs change them into a case that a check must fail or must pass. order-3,
+# rules on long literals and on the names of constants, and decline-2 is a tree
+# of a run with them. The other runs change them into a case that a check must
+# fail or must pass. order-3,
 # decline-2, decline-3, feature-2 to feature-5 and comments-2 have no log:
 # count reads only the logs, and the other checks read only the trees. In
 # react-1 and react-2, `await fetch(…)` and `await response.json()` are one
@@ -99,15 +99,15 @@ stub=$(mktemp -d)
 old=$(mktemp -d)
 trap 'rm -rf "$stub" "$old"' EXIT
 
-# The logs of an older eval have no log of a later task, as comments: the
-# checks must still run, and name the log that is not there.
+# The logs of an older eval have no log of a later task, as decline and
+# comments: the checks must still run, and name the logs that are not there.
 cp -R tests/fixtures/skill_load/. "$old"
-rm -r "$old"/comments-*
+rm -r "$old"/decline-* "$old"/comments-*
 code=0
 out=$(tests/skill_load_eval.sh --check "$old" 2>&1) || code=$?
-case $out in *"no log: $old/comments-*.jsonl"*"logs: $old") ;; *) code="$code, no 'no log:' line" ;; esac
+case $out in *"no log: $old/decline-*.jsonl"*"no log: $old/comments-*.jsonl"*"logs: $old") ;; *) code="$code, no 'no log:' line" ;; esac
 [ "$code" = 1 ] || {
-  printf 'FAIL: --check on logs with no comments run exited %s, not 1\n%s\n' "$code" "$out"
+  printf 'FAIL: --check on logs with no decline and comments runs exited %s, not 1\n%s\n' "$code" "$out"
   exit 1
 }
 

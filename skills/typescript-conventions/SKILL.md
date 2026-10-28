@@ -184,10 +184,14 @@ function formatCents(cents: number): string {
 
 Not: `const money` and `formatCents` above `orderSummary`. A `const` below the
 export is safe: the function reads it when it runs, after the module has
-loaded.
+loaded. A `const` that the export reads while the module loads goes above the
+export, as `ORDER_STATUSES` in
+`export const orderSchema = z.object({ status: z.enum(ORDER_STATUSES) })`.
+Below it, the module throws a ReferenceError when it loads.
 
-A tagged union's file opens with the union. Its variants go below it, exported
-or not: the union uses them, and a type can name a type declared below it.
+A file whose primary export is a tagged union opens with the union. Its
+variants go below it, exported or not: the union uses them, and a type can
+name a type declared below it.
 
 ```ts
 // models/discount.ts
@@ -198,11 +202,15 @@ export type PercentDiscount = { kind: 'percent'; percent: number };
 export type FixedDiscount = { kind: 'fixed'; amountCents: number };
 ```
 
-A literal of more than 15 lines — a list of entries, a lookup table, a config
-such as column definitions or filter descriptors — goes to a `constants.ts`
-beside the file that uses it, even when only that one file uses it. The lines
-of the literal count, not those of the declaration around it. A shorter
-literal stays below the export. `constants.ts` is the one exception to one
+A literal is a value written out in the code: a string, a number, a boolean,
+or an array or object of these, also with functions in it. A literal of more
+than 15 lines — a list of entries, a lookup table, a config such as column
+definitions or filter descriptors — goes to a `constants.ts` beside the file
+that uses it, even when only that one file uses it, or to a `constants.tsx`
+when it holds JSX. The lines of the literal count, not those of the
+declaration around it. A shorter literal that only this file uses stays below
+the export. A file whose primary export is the literal itself, as
+`locales/en.ts`, stays as it is. `constants.ts` is the one exception to one
 entity per file: it holds every long literal of its folder.
 
 ```ts
@@ -215,7 +223,7 @@ export const SHIPPING_COUNTRIES = [
 ```
 
 ```ts
-// shipping-country.ts
+// shipping-country-name.ts
 import { SHIPPING_COUNTRIES } from './constants';
 
 export function shippingCountryName(code: string): string {
@@ -234,20 +242,23 @@ Not: the 30 countries below `shippingCountryName` in its own file, and not
 
 ## A constant's name is CONSTANT_CASE
 
-A constant is a module-level `const` whose value is a literal in the code: a
-string, a number, a boolean, or an array or object made only of these. The
-value is fixed when the code is written, as a constant of a compiled language.
+A constant is a module-level `const` whose value is a literal, as the section
+above says, and that no code changes. The value is fixed when the code is
+written, as a constant of a compiled language.
 
 ```ts
 const MAX_RETRIES = 3;
 const FALLBACK_MESSAGE = 'The payment failed. Try another card.';
 ```
 
-Every other `const` is camelCase:
+A `const` that holds a component is PascalCase, as `memo(…)`, `lazy(…)` or
+`const Icon = item.icon`: JSX reads a lowercase name as an HTML tag. Every
+other `const` is camelCase:
 
 - a value that the code makes when it runs, also at module level:
   `new Intl.NumberFormat(…)`, as `money` above, `Date.now()`, `z.object(…)`,
   `new Map([…])`;
+- an object or an array that the code changes, as a cache;
 - a `const` inside a function, also when its value is a literal.
 
 Not: `const PRICE_FORMAT = new Intl.NumberFormat(…)`. The formatter is an

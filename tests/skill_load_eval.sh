@@ -100,7 +100,7 @@ braced() {
 first() {
   local ok=0 dir list file line bad
   for dir; do
-    list=$(find "$dir/src" -name '*.ts')
+    list=$(find "$dir/src" -name '*.ts' 2>/dev/null || true)
     [ -n "$list" ] || { echo "no file written: $dir/src" && continue; }
     bad=0
     while IFS= read -r file; do

@@ -8,8 +8,8 @@ agent matches it and says so.
 - Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
   `.cts`) in a session. `rules.md` asks for it, so a subagent starts it too.
 - You write or review TypeScript: declare an object shape, place a type, an
-  enum or a schema that several files use, name a new file, write a callback,
-  reach for a dependency.
+  enum or a schema that several files use, name a new file or a constant,
+  write a callback, reach for a dependency.
 - You set up lint rules for a new TypeScript project.
 
 ## The rules
@@ -36,7 +36,8 @@ agent matches it and says so.
   lines goes to a `constants.ts` beside the file, even when only that file
   uses it.
 - **A constant's name is CONSTANT_CASE.** A constant is a module-level
-  `const` whose value is a literal in the code, as `MAX_RETRIES = 3`. A value
+  `const` whose value is a literal in the code and that no code changes, as
+  `MAX_RETRIES = 3`. A `const` that holds a component is PascalCase. A value
   made when the code runs, as `new Intl.NumberFormat(…)`, and a `const` inside
   a function are camelCase.
 - **A shared type is a model in `models/`, a schema is in `schemas/`.** A type
