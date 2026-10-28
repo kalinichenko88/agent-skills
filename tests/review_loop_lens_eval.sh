@@ -231,14 +231,14 @@ EOF
   commit "$work" "feat: list the reports"
 
   git -C "$work" checkout -qb tokens main
-  add_invariant "$work" '- **I-2.** No feature reads the token from `localStorage`.
+  add_invariant "$work" '- **I-2.** Only `src/api/` reads the token from `localStorage`.
   Check: grep `localStorage` in `src/features`.'
-  commit "$work" "docs: no feature reads the token"
+  commit "$work" "docs: only the api reads the token"
 
   git -C "$work" checkout -qb bad-path tokens
   awk '{ sub(/in `src\/features`\./, "in `src/features`, `src/lib`.") } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
   mv "$work/docs/ARCHITECTURE.md.new" "$work/docs/ARCHITECTURE.md"
-  commit "$work" "docs: no code in src/lib reads the token either"
+  commit "$work" "docs: check src/lib for the token too"
 
   git -C "$work" checkout -qb bad-paths bad-path
   add_invariant "$work" '- **I-3.** No screen writes to the console.
