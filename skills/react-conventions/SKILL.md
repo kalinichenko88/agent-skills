@@ -284,6 +284,6 @@ one gets `key={location.pathname}`. The fallbacks are generic code on a lower
 layer, and `app` wires both levels. Each boundary reports the error that it
 catches.
 
-A boundary does not catch an error in an event handler or in async code outside
-a transition, as a `setTimeout` callback. A request's error is state, as *A
-request's state is one union* says.
+A boundary catches an error that a render throws, not one in an event handler
+or a `setTimeout` callback. A request's error is state, as *A request's state
+is one union* says.
