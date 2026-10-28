@@ -44,20 +44,29 @@ Then act on what the check printed:
 
 **Continuing the work.** The session that worked on the issue can still be
 open, and git does not show it. In Claude Code, look for it first:
-`ListAgents` lists the sessions open on this computer, and the plugin's hook
-names a session that took an issue in `#91 <the start of its title>`. When
-such a session is listed, the work runs there: give its name, and stop. Codex
-has no such list: go on.
+`ListAgents` lists your open sessions, and the plugin's hook names a session
+whose first message was the issue alone `#91 <the start of its title>`. When
+such a session is listed and not `offline`, the work runs there: give its
+name, and stop. A session with another name, or a Codex session, does not
+show in the list, and Codex has no list: when the person says that one is
+open, stop too.
 
 Then run `bash <dir>/scripts/worktree.sh 91 <branch> --local`, and move into
-the path it prints, as *The work then starts in a worktree* says. Name once
-the command that resumes the old session with its context, `claude --continue`
-or `codex resume` in that worktree: the person can go on there instead. In
-this session, with an open pull request, its `## Review` says which steps of
-`kalinichenko:review-loop` ran: go on from the first one that did not, or from
-the open questions and the merge question. Without one, go on from *The
-tracker is read next*, and skip *The work then starts in a worktree*: the
-worktree is in place.
+the path it prints: in Claude Code with `EnterWorktree`, in Codex as the
+`workdir` of every command. Name once the command that opens the old session
+with its context, so that the person can go on there instead. It runs in the
+main checkout, where the take-in started: `claude --resume`, or
+`claude --from-pr <PR>` with an open pull request, and pick the older `#91`
+session; in Codex, `codex resume`.
+
+In this session, first read what the worktree holds: `git fetch`, then
+`git status -sb`. Changes, and commits ahead of the remote branch, are work in
+progress: finish it, and it goes through the review before any merge question.
+Then, with an open pull request, its `## Review` says which steps of
+`kalinichenko:review-loop` ran: go on from the first one that did not. Without
+one, run *The tracker is read next* and *Its duplicates close first*, then go
+on from "Then read what points at it", below. Check the issue's citations
+against the default branch, not the worktree: the worktree holds the work.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can

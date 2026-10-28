@@ -24,9 +24,10 @@ time.
   duplicates close before the work starts. The work gets a worktree
   named for what it does, as `fix/91-what-it-does`. Every open bug and debt
   issue in the same area is checked, so one PR can close them with the task.
-  Name the issue again, as after you closed the terminal, and the work goes
-  on in its worktree when its branch is here with the last commit on GitHub.
-  In Claude Code, it stops when a session for the issue is still open.
+  Name an issue of yours again, as after you closed the terminal: when the
+  branch it has on GitHub is here with its last commit, the work goes on
+  there, with no question. In Claude Code, the agent first looks for a session
+  still open under the issue's name, and stops when it finds one.
 - **A finding goes to the tracker, not to the chat.** A fix in the task's
   module that needs no decision and is smaller than the task goes into the
   current PR. Anything else joins an open issue on the same code, up to two
