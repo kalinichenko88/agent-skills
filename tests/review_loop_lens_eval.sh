@@ -12,11 +12,12 @@
 # - legacy adds a feature that uses the wrapper, on a base whose own code
 #   breaks I-1 already: no Invariant finding that cites I-1, and an Outside
 #   finding on that code, src/legacy/ping.ts;
-# - bad-path adds I-2, whose Check: line names a folder with no code file, so
-#   invariants.sh exits 2: a False doc finding that cites I-2;
-# - fixed-path corrects that folder, on a base whose I-3 names a folder with
-#   no code file too: an Outside finding that cites I-3, and no False doc
-#   finding.
+# - bad-path adds a folder with no code file to the Check: line of I-2, so
+#   invariants.sh exits 2: a False doc finding that cites I-2, and no Outside
+#   finding that cites I-2;
+# - fixed-path takes that folder out again, on a base whose I-3 names a
+#   folder with no code file too: an Outside finding that cites I-3, and no
+#   False doc finding.
 #
 # With --codex, Codex reads each case in its place, with the same prompt, in
 # its read-only sandbox and with the person's Codex config, as codex-review.sh
@@ -97,8 +98,8 @@ EOF
 }
 
 # fixture <dir>: main, and a branch for each case. legacy-base is main with
-# a call to fetch outside the wrapper. bad-paths is bad-path with I-3, whose
-# folder has no code file either.
+# a call to fetch outside the wrapper. tokens is main with I-2, and
+# bad-paths is bad-path with I-3, whose folder has no code file either.
 fixture() {
   local work=$1
   mkdir -p "$work/src/api" "$work/src/features/orders" "$work/docs"
@@ -229,10 +230,15 @@ export function listReports(): Promise<Report[]> {
 EOF
   commit "$work" "feat: list the reports"
 
-  git -C "$work" checkout -qb bad-path main
+  git -C "$work" checkout -qb tokens main
   add_invariant "$work" '- **I-2.** No feature reads the token from `localStorage`.
-  Check: grep `localStorage` in `src/feature`.'
+  Check: grep `localStorage` in `src/features`.'
   commit "$work" "docs: no feature reads the token"
+
+  git -C "$work" checkout -qb bad-path tokens
+  awk '{ sub(/in `src\/features`\./, "in `src/features`, `src/lib`.") } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
+  mv "$work/docs/ARCHITECTURE.md.new" "$work/docs/ARCHITECTURE.md"
+  commit "$work" "docs: no code in src/lib reads the token either"
 
   git -C "$work" checkout -qb bad-paths bad-path
   add_invariant "$work" '- **I-3.** No screen writes to the console.
@@ -240,9 +246,9 @@ EOF
   commit "$work" "docs: no screen writes to the console"
 
   git -C "$work" checkout -qb fixed-path bad-paths
-  awk '{ sub(/`src\/feature`/, "`src/features`") } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
+  awk '{ sub(/, `src\/lib`\./, ".") } { print }' "$work/docs/ARCHITECTURE.md" >"$work/docs/ARCHITECTURE.md.new"
   mv "$work/docs/ARCHITECTURE.md.new" "$work/docs/ARCHITECTURE.md"
-  commit "$work" "docs: correct the folder of I-2"
+  commit "$work" "docs: take src/lib out of I-2, it has no code yet"
 }
 
 # The installed copy of the plugin is turned off, so the rules come from this
@@ -254,6 +260,7 @@ run() {
   local work=$logs/$1-$2 base=main prompt
   case $1 in
     legacy) base=legacy-base ;;
+    bad-path) base=tokens ;;
     fixed-path) base=bad-paths ;;
   esac
   fixture "$work"
@@ -297,17 +304,18 @@ for i in $(seq "$runs"); do
     outside=$(found outside 'src/legacy/ping\.ts')
     doc=$(found 'false doc' '')
     doc2=$(found 'false doc' 'I-2([^0-9]|$)')
+    outside2=$(found outside 'I-2([^0-9]|$)')
     outside3=$(found outside 'I-3([^0-9]|$)')
     if case $kase in
       second-client) [ "$second" -ge 1 ] ;;
       direct-fetch) [ "$invariant" -ge 1 ] ;;
       amended) [ "$invariant" -eq 0 ] && [ -n "$report" ] ;;
       legacy) [ "$invariant" -eq 0 ] && [ "$outside" -ge 1 ] ;;
-      bad-path) [ "$doc2" -ge 1 ] ;;
+      bad-path) [ "$doc2" -ge 1 ] && [ "$outside2" -eq 0 ] ;;
       fixed-path) [ "$doc" -eq 0 ] && [ "$outside3" -ge 1 ] ;;
       *) false ;;
     esac; then verdict=pass; else verdict=FAIL failed=1; fi
-    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts, $doc False doc ($doc2 on I-2), $outside3 Outside on I-3: $verdict"
+    echo "== $kase-$i: $second Second structure, $invariant Invariant on I-1, $outside Outside on ping.ts, $doc False doc ($doc2 on I-2), $outside2 Outside on I-2, $outside3 Outside on I-3: $verdict"
     echo "${report:-no report}"
   done
 done

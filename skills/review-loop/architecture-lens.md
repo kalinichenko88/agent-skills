@@ -26,8 +26,11 @@ and run no code of the project.
    On exit 2, read its lines on stderr. The cause is the last line, and its
    line numbers are those of the file at `<head>`. A cause in the
    architecture file, or in a path that it names, is an Outside finding when
-   the base has the defect that the cause names: read the base's file with
-   `git show <base>:<path>`, and its tree with `git ls-tree -r <base>`.
+   the base has the same fault in the same place: in the invariant that the
+   cause names, or else in the text that it names. Read the base with
+   `git show <base>:<path>` and `git ls-tree -r <base>`. A code file is a
+   file that the script counts: not data by
+   `<skills>/debt/scripts/data.ere`, and outside the `except` paths.
    Otherwise it is a False doc finding. Do not run the script at `<base>`:
    it stops at the first cause of the base. Give any other cause in your
    last lines. Exit 2 stops the checks: read the code against the statement
