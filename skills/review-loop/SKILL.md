@@ -335,7 +335,7 @@ a real defect on two, in 53 to 204 seconds.
 ## The security review
 
 After the last pass, the Codex review, the review of the tests and their
-rounds, run `/security-review` once, on the final branch. It reads the branch
+rounds, `/security-review` runs once, on the final branch. It reads the branch
 against origin's default branch and takes no target, so it never runs inside
 the loop. A change to documents only gets none, unless the person asks for
 it. Its findings go through *The findings*, and its fixes through
@@ -344,10 +344,21 @@ it. Its findings go through *The findings*, and its fixes through
 injection, authentication, authorization, secrets and data exposure." Where
 there is no `origin` remote, say so in the summary.
 
-The report of `/security-review` does not end the turn, even when its prompt
-says the final reply is the report alone. After the findings of
-`/security-review` and their rounds, go on to *The summary*, then to *The pull
-request* when the conditions of that section hold.
+In Claude Code, send one `general-purpose` subagent with no `model`, with
+this prompt, and do not run `/security-review` in the session:
+
+```
+Run /security-review with the Skill tool, and return its report. Change no file.
+```
+
+After its report and the rounds on its findings, go on to *The summary*, then
+to *The pull request* when the conditions of that section hold.
+
+Why a subagent: the prompt of `/security-review` ends "Your final reply must
+contain the markdown report and nothing else." Run in the session, the agent
+ended its turn on the report, with no push and no pull request: on #61, and
+twice on #167, after #83 added a sentence against it here. In a subagent, that
+line holds for the subagent's reply.
 
 ## The summary
 
