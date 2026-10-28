@@ -1,6 +1,6 @@
 ---
 name: react-conventions
-description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, putting two requests in one component (loading its options and creating an option), reading a value from useRef or writing usePrevious.
+description: Use when writing or reviewing React code — adding a feature beside existing ones, placing a sub-component's hook, helper or constant inside a feature, importing from another feature or layer, letting one feature use another, registering a reducer, route or provider, holding a request's loading, error and data in a component, putting two requests in one component (loading its options and creating an option), reading a value from useRef or writing usePrevious, setting up the app's layout or routes, an error boundary, a white screen after a render error.
 ---
 
 # React conventions
@@ -230,3 +230,69 @@ if (playerRef.current === null) {
   playerRef.current = new Player();
 }
 ```
+
+## The app root and each route have an error boundary
+
+When a render throws and no error boundary catches it, React removes the whole
+tree: the user sees a white page. So each time you write or change the app's
+root (`main.tsx`, `App`), its layout or its routes, check the two levels below,
+and add each one that is missing in the same change, even when the task does
+not name it:
+
+1. **App level**, always: around the layout. Its fallback uses nothing that can
+   fail with the app — no request, no store, no context of a feature — and
+   offers a reload.
+2. **Route level**, when the app has routes: inside the layout, around the
+   content of each route. An error on one page shows its fallback in the
+   content area. The header, the navigation and the other routes keep working,
+   and the boundary resets when the route changes.
+
+In an app with routes, one boundary around the whole app is the failure that
+this rule prevents: one broken page takes every page down. An app without
+routes has the app level only:
+
+```tsx
+// main.tsx: an app without routes
+createRoot(document.getElementById('root')!).render(
+  <ErrorBoundary fallback={<AppError />} onError={reportError}>
+    <App />
+  </ErrorBoundary>,
+);
+```
+
+With routes:
+
+```tsx
+// app/router.tsx
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    errorElement: <AppError />,        // app level: in place of the layout
+    children: [
+      {
+        errorElement: <PageError />,   // route level: in the layout's <Outlet />
+        children: [
+          { index: true, element: <HomePage /> },
+          { path: 'orders', element: <OrdersPage /> },
+        ],
+      },
+    ],
+  },
+]);
+```
+
+Use the router's own mechanism when the project has one: `errorElement` or
+`ErrorBoundary` of a React Router route made with `createBrowserRouter` or in
+framework mode, `errorComponent` of TanStack Router, `error.tsx` under the root
+layout and `global-error.tsx` in Next.js. A `<Route>` inside `<BrowserRouter>`
+ignores `errorElement`. Without such a mechanism, use `react-error-boundary` if
+the project has it, or one `ErrorBoundary` class: React has no boundary as a
+function component. Such a boundary resets only when told, so the route-level
+one gets `key={location.pathname}`. The fallbacks are generic code on a lower
+layer, and `app` wires both levels. Each boundary reports the error that it
+catches.
+
+A boundary catches an error that a render throws, not one in an event handler
+or a `setTimeout` callback. A request's error is state, as *A request's state
+is one union* says.

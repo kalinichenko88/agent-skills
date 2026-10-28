@@ -1,9 +1,9 @@
 # kalinichenko:react-conventions
 
 Layer and feature boundaries in a React app, where a sub-component's own files
-go, request state as one union, a hook for each of a component's two jobs, and
-no `ref.current` in render. Each rule is one that agents broke in a test
-without it.
+go, request state as one union, a hook for each of a component's two jobs, no
+`ref.current` in render, and an error boundary at the app level and at each
+route. Each rule is one that agents broke in a test without it.
 
 A codebase that consistently places files or imports features its own way
 wins: the agent matches it and says so. The direction of imports does not
@@ -22,6 +22,8 @@ yield.
 - One component holds two requests, as loading its options and creating an
   option.
 - You read a value from `useRef`, or write `usePrevious`.
+- You set up the app's layout or routes, or an error boundary, or a render
+  error leaves a white screen.
 
 ## The rules
 
@@ -44,3 +46,8 @@ yield.
   a component with one job can keep its request.
 - **Render reads props, state and context, not refs.** A ref change schedules
   no render. `usePrevious` keeps the previous value in state.
+- **The app root and each route have an error boundary.** A boundary at the
+  app level, always, and one inside the layout around each route's content
+  when the app has routes. A change to the root, the layout or the routes adds
+  the missing level. The router's own mechanism comes first, where the router
+  has one.

@@ -54,7 +54,8 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **[`kalinichenko:react-conventions`](skills/react-conventions/README.md)** —
   layer and feature boundaries in a React app, where a sub-component's own
   files go, request state as one union, a hook for each of a component's two
-  jobs, and no `ref.current` in render.
+  jobs, no `ref.current` in render, and an error boundary at the app level and
+  at each route.
 
 Each skill's README says when it starts and what you get. The github and
 roadmap READMEs show each scenario as a picture.
