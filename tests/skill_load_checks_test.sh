@@ -4,8 +4,10 @@
 # wrote, in the layout an eval run leaves. ts-1, react-1, feature-1, the log of
 # order-2 and the tree of order-1 are one recorded run, trimmed to what the
 # checks read. comments-1, its log and its tree, is a later run with the rule
-# on one hook per job. The other runs change them into a case that a check must
-# fail or must pass. order-3, feature-2 to feature-5 and comments-2 have no log:
+# on one hook per job. decline-1, its log and its tree, is a run without the
+# rule on long literals, and decline-2 is a tree of a run with it. The other
+# runs change them into a case that a check must fail or must pass. order-3,
+# decline-2, decline-3, feature-2 to feature-5 and comments-2 have no log:
 # count reads only the logs, and the other checks read only the trees. In
 # react-1 and react-2, `await fetch(…)` and `await response.json()` are one
 # request that hooks must pass.
@@ -14,7 +16,12 @@
 #   order-1    every file written through Bash, as `cat > <file> <<'EOF'`
 #   order-2    the four models in src/order.ts; order-summary.ts opens with
 #              its Intl constant
-#   order-3    Order and OrderLine in one file in models/
+#   order-3    Order and OrderLine in one file in models/; the recorded
+#              discount.ts of a run without the rule on a union's file, which
+#              exports both variants above the union
+#   decline-1  the 30-line message table below the export of
+#              decline-message.ts
+#   decline-3  decline-2 with the short fallback message moved to constants.ts
 #   feature-2  the panel's hook at the feature root, and no schemas/ folder
 #   feature-3  the panel's hook in src/shared/hooks; a second schema beside
 #              the fetch
@@ -39,16 +46,21 @@ cd "$root"
 # here-document inside $().
 expected() {
   cat <<'EOF'
-typescript-conventions: 7 of 8 subagents invoked it before the first write
+typescript-conventions: 8 of 9 subagents invoked it before the first write
 react-conventions: 3 of 4 subagents invoked it before the first write
 tests/fixtures/skill_load/ts-2/src/cart-total.ts:20:    .filter((item) => item.unitPriceCents > limitCents)
 tests/fixtures/skill_load/react-2/src/search-panel.tsx:68:          {results.map((result) => (
 brace rule: 2 of 4 written files have no implicit arrow return
 tests/fixtures/skill_load/order-2/src/order-summary.ts: const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-export first: 2 of 3 order runs open every file with an export
+export first: 5 of 6 order and decline runs open every file with an export
 tests/fixtures/skill_load/order-2/src/order.ts
 tests/fixtures/skill_load/order-3/src/orders/models/order.ts
 models: 1 of 3 order runs keep each model in a file of its own in models/
+tests/fixtures/skill_load/order-3/src/orders/models/discount.ts: export type PercentDiscount = {
+union first: 2 of 3 order runs declare Discount above its variants
+tests/fixtures/skill_load/decline-1/src/decline-message.ts
+tests/fixtures/skill_load/decline-3/src/constants.ts
+constants: 1 of 3 decline runs keep the table in constants.ts and the fallback beside its use
 tests/fixtures/skill_load/feature-2/src/features/products/use-filter-draft.ts
 tests/fixtures/skill_load/feature-3/src/shared/hooks/use-filter-draft.ts
 own folder: 3 of 5 feature runs keep the panel's hook out of the feature root and shared

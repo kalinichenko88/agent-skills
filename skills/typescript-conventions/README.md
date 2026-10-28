@@ -31,7 +31,10 @@ agent matches it and says so.
   `structuredClone`, `fetch` and `AbortSignal.timeout`, at the version that
   the project pins.
 - **Files are kebab-case, one entity per file.** A file opens with its
-  primary export; its helpers, module constants and own types go below it.
+  primary export; its helpers, short module constants and own types go below
+  it, and so do the variants of a tagged union. A literal of more than 15
+  lines goes to a `constants.ts` beside the file, even when only that file
+  uses it.
 - **A shared type is a model in `models/`, a schema is in `schemas/`.** A type
   or an enum that two files or more use goes to the `models/` folder of their
   nearest common folder, one model per file. A model made by an operation on

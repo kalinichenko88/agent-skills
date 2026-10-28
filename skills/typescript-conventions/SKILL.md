@@ -161,8 +161,8 @@ than inheriting whatever the host has.
 ## Files are kebab-case, one entity per file
 
 `create-vault.ts`, not `createVault.ts`. Intra-file order: imports → the primary
-export → everything it uses below it: private helpers, module constants, and
-the types that only this file uses. A file opens with what it is for.
+export → everything it uses below it: private helpers, short module constants,
+and the types that only this file uses. A file opens with what it is for.
 
 ```ts
 import type { Order } from './models/order';
@@ -185,6 +185,52 @@ function formatCents(cents: number): string {
 Not: `const money` and `formatCents` above `orderSummary`. A `const` below the
 export is safe: the function reads it when it runs, after the module has
 loaded.
+
+A tagged union's file opens with the union. Its variants go below it, exported
+or not: the union uses them, and a type can name a type declared below it.
+
+```ts
+// models/discount.ts
+export type Discount = PercentDiscount | FixedDiscount;
+
+export type PercentDiscount = { kind: 'percent'; percent: number };
+
+export type FixedDiscount = { kind: 'fixed'; amountCents: number };
+```
+
+A literal of more than 15 lines — a list of entries, a lookup table, a config
+such as column definitions or filter descriptors — goes to a `constants.ts`
+beside the file that uses it, even when only that one file uses it. The lines
+of the literal count, not those of the declaration around it. A short
+constant, as `money` above, stays below the export. `constants.ts` is the one
+exception to one entity per file: it holds every long literal of its folder.
+
+```ts
+// constants.ts
+export const shippingCountries = [
+  { code: 'AT', name: 'Austria' },
+  { code: 'BE', name: 'Belgium' },
+  // … 28 more countries, one per line
+];
+```
+
+```ts
+// shipping-country.ts
+import { shippingCountries } from './constants';
+
+export function shippingCountryName(code: string): string {
+  const country = shippingCountries.find((entry) => {
+    return entry.code === code;
+  });
+
+  return country?.name ?? otherCountry;
+}
+
+const otherCountry = 'Another country';
+```
+
+Not: the 30 countries below `shippingCountryName` in its own file, and not
+`otherCountry` in `constants.ts`.
 
 ## A shared type is a model in `models/`, a schema is in `schemas/`
 

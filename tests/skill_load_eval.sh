@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# Gives two TypeScript tasks and three React tasks to Haiku subagents. It
+# Gives three TypeScript tasks and three React tasks to Haiku subagents. It
 # counts the runs that invoke the conventions skills before their first write,
 # and the written files with an implicit return in a method callback. It counts
-# the order runs with a file that does not open with its primary export, and
-# the order runs that put the order, its line, the customer or the discount
-# outside models/, or two of them in one file. It counts the feature runs that
+# the order and decline runs with a file that does not open with its primary
+# export, and the order runs that put the order, its line, the customer or the
+# discount outside models/, or two of them in one file, and the order runs whose
+# discount file opens with its variants, not the union. It counts the decline
+# runs that keep their 30-line table out of constants.ts, or put their short
+# fallback message in it. It counts the feature runs that
 # put a sub-component's own hook at the feature root or in `shared`, and the
 # feature runs with a zod schema outside schemas/. It counts the React runs
 # with a component or a hook that holds two async calls. Its runs call the
@@ -28,6 +31,7 @@ ts_task='Add src/cart-total.ts to this project. A cart item has an id, a name, a
 order_task='Add an order feature to this project, in src/. An order has an id, a customer and a list of lines. A line has a product id, a quantity and a unit price in cents. A customer has an id, a name and a discount, which is either a percent or a fixed amount in cents. Add a function that returns the order total in cents after the customer discount, and a function that returns a text summary of the order, one row per line and the total at the end, each in its own file. Both functions use the same order, line, customer and discount types. Write the files, then reply with the path and the contents of every file you wrote.'
 react_task='Add src/search-panel.tsx to this project: a React component with a text input and a Search button. On submit it fetches /api/search?q=<the text>, which returns a JSON array of { id, title, url }. While the request runs it shows "Loading…", on failure it shows the error message, and on success it shows the results as a list of links. Write the file, then reply with its contents.'
 feature_task='Add a products feature to this project, in src/features/products/. Its page shows a filter panel and a grid of products. The filter panel keeps the values the user is typing in a hook that only the panel uses, and it waits 300 ms after the last keystroke before it applies them: keep that number in a constant. The page loads the products once from GET /api/products, which returns a JSON array of { id, name, price, category }, checks the response with a zod schema, and the grid shows the products that match the applied filters. Write the files, then reply with the path and the contents of every file you wrote.'
+decline_task='Add src/decline-message.ts to this project. Export a function that takes a decline code from the payment provider and returns the message to show the customer. These are the 30 codes and their messages, to use as they are: authentication_required: "The bank asks you to confirm this payment.", approve_with_id: "The bank could not approve this payment.", call_issuer: "Call your bank about this payment.", card_not_supported: "This card does not support this purchase.", card_velocity_exceeded: "This card is over its limit.", currency_not_supported: "This card does not support this currency.", do_not_honor: "Your bank declined this payment.", duplicate_transaction: "This payment was already made.", expired_card: "This card has expired.", fraudulent: "This payment was declined.", generic_decline: "The card was declined.", incorrect_cvc: "The security code is wrong.", incorrect_number: "The card number is wrong.", incorrect_zip: "The postal code is wrong.", insufficient_funds: "The card has too little money on it.", invalid_account: "This card account is not valid.", invalid_amount: "The amount is not valid for this card.", invalid_expiry_month: "The expiry month is wrong.", invalid_expiry_year: "The expiry year is wrong.", issuer_not_available: "Your bank did not answer. Try again.", lost_card: "This card was reported lost.", merchant_blacklist: "This card cannot be used here.", new_account_information_available: "Your bank has new details for this card.", no_action_taken: "Your bank took no action on this payment.", not_permitted: "This payment is not permitted.", pickup_card: "This card cannot be used. Call your bank.", processing_error: "An error occurred. Try again.", reenter_transaction: "Enter the payment again.", stolen_card: "This card was reported stolen.", try_again_later: "Try again later.". For any other code it returns "The payment failed. Try another card.": keep that message in a constant. Write the files, then reply with the path and the contents of every file you wrote.'
 comments_task='Add a comments section to this project, in src/. It is a React component that takes a post id. When it mounts, it loads the comments from GET /api/posts/<the post id>/comments, which returns a JSON array of { id, author, text }, and shows them as a list. Below the list, a form with a text area and a Send button posts a new comment: POST /api/posts/<the post id>/comments with { text } returns the new comment, which joins the end of the list, and the text area is cleared. While the comments load, the section shows "Loading…"; while a comment is being sent, the form is disabled; a failed request shows its error message. Write the files, then reply with the path and the contents of every file you wrote.'
 # One Haiku session that hands the task to one Haiku subagent, as the main
 # model does with routine work. The installed copy of the plugin is turned off,
@@ -98,7 +102,7 @@ braced() {
   [ "$ok" -eq "$#" ] || failed=1
 }
 
-# first <dir>...: the order runs whose every written file opens with an export
+# first <dir>...: the runs whose every written file opens with an export
 # after its imports, as typescript-conventions asks of the primary export. It
 # prints the first line of each file that opens with something else. The
 # recorded runs that broke the rule put a helper or an Intl constant there.
@@ -118,7 +122,30 @@ first() {
     done <<<"$list"
     [ "$bad" -eq 1 ] || ok=$((ok + 1))
   done
-  echo "export first: $ok of $# order runs open every file with an export"
+  echo "export first: $ok of $# order and decline runs open every file with an export"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
+# constants <dir>...: the decline runs that keep the 30-line message table in a
+# constants.ts and the short fallback message out of it, as
+# typescript-conventions asks. It prints each file that breaks it.
+# ponytail: it finds the table by one of its messages and the fallback by its
+# text, as the task gives them. A run that rewords one of them fails as one
+# that wrote neither.
+constants() {
+  local table='Your bank has new details for this card.' fallback='The payment failed. Try another card.'
+  local ok=0 dir found
+  for dir; do
+    if ! grep -rqsF "$table" "$dir/src" || ! grep -rqsF "$fallback" "$dir/src"; then
+      echo "no table or no fallback written: $dir/src" && continue
+    fi
+    found=$({
+      grep -rlF "$table" "$dir/src" | grep -v '/constants\.ts$'
+      grep -rlF "$fallback" "$dir/src" | grep '/constants\.ts$'
+    } || true)
+    if [ -n "$found" ]; then echo "$found"; else ok=$((ok + 1)); fi
+  done
+  echo "constants: $ok of $# decline runs keep the table in constants.ts and the fallback beside its use"
   [ "$ok" -eq "$#" ] || failed=1
 }
 
@@ -174,6 +201,25 @@ models() {
     if [ -n "$bad" ]; then echo "$bad"; else ok=$((ok + 1)); fi
   done
   echo "models: $ok of $# order runs keep each model in a file of its own in models/"
+  [ "$ok" -eq "$#" ] || failed=1
+}
+
+# union <dir>...: the order runs whose Discount file declares the union above
+# its variants, as typescript-conventions asks of a union's file. It prints the
+# first type line of each file that opens with something else. The recorded
+# runs without the rule exported both variants above the union.
+# ponytail: it reads the first file with `export type Discount =` or `export
+# type Discount ` at a line's start, and in it the first line that starts with
+# `type` or `export type`.
+union() {
+  local ok=0 dir file line
+  for dir; do
+    file=$(grep -rlE '^export type Discount( |=)' "$dir/src" | head -n 1)
+    [ -n "$file" ] || { echo "no Discount written: $dir/src" && continue; }
+    line=$(grep -m 1 -E '^(export )?type ' "$file")
+    case $line in "export type Discount "* | "export type Discount="*) ok=$((ok + 1)) ;; *) echo "$file: $line" ;; esac
+  done
+  echo "union first: $ok of $# order runs declare Discount above its variants"
   [ "$ok" -eq "$#" ] || failed=1
 }
 
@@ -250,6 +296,7 @@ else
     run "$ts_task" "$logs/ts-$i.jsonl" &
     run "$react_task" "$logs/react-$i.jsonl" &
     run "$order_task" "$logs/order-$i.jsonl" &
+    run "$decline_task" "$logs/decline-$i.jsonl" &
     run "$feature_task" "$logs/feature-$i.jsonl" '"zod":"^4.6.0"' &
     run "$comments_task" "$logs/comments-$i.jsonl" &
   done
@@ -257,7 +304,7 @@ else
 fi
 
 failed=0
-count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl "$logs"/order-*.jsonl "$logs"/feature-*.jsonl "$logs"/comments-*.jsonl
+count typescript-conventions "$logs"/ts-*.jsonl "$logs"/react-*.jsonl "$logs"/order-*.jsonl "$logs"/decline-*.jsonl "$logs"/feature-*.jsonl "$logs"/comments-*.jsonl
 count react-conventions "$logs"/react-*.jsonl "$logs"/feature-*.jsonl "$logs"/comments-*.jsonl
 # A run's folder ends in its number, as order-1. Its log, order-1.jsonl, does
 # not.
@@ -265,8 +312,10 @@ files=()
 for dir in "$logs"/ts-*[0-9]; do files+=("$dir/src/cart-total.ts"); done
 for dir in "$logs"/react-*[0-9]; do files+=("$dir/src/search-panel.tsx"); done
 braced "${files[@]}"
-first "$logs"/order-*[0-9]
+first "$logs"/order-*[0-9] "$logs"/decline-*[0-9]
 models "$logs"/order-*[0-9]
+union "$logs"/order-*[0-9]
+constants "$logs"/decline-*[0-9]
 nested "$logs"/feature-*[0-9]
 schemas "$logs"/feature-*[0-9]
 hooks "$logs"/react-*[0-9] "$logs"/feature-*[0-9] "$logs"/comments-*[0-9]

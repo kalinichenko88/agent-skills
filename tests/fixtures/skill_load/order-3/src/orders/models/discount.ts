@@ -1,13 +1,11 @@
-// Customer discount: a percent of the subtotal, or a fixed amount in cents.
-
-export type Discount = PercentDiscount | FixedDiscount;
-
-type PercentDiscount = {
+export type PercentDiscount = {
   kind: 'percent';
   percent: number;
 };
 
-type FixedDiscount = {
+export type FixedDiscount = {
   kind: 'fixed';
   amountCents: number;
 };
+
+export type Discount = PercentDiscount | FixedDiscount;
