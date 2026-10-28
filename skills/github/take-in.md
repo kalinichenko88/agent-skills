@@ -67,10 +67,10 @@ branch" — and then they win. Each path assigns the issue to you, because an
 unassigned issue looks free to everyone else: "a branch only" runs
 `worktree.sh` with `--here`, which makes no worktree and works in the current
 checkout, and "stay on this branch" runs `gh issue edit 91 --add-assignee @me`
-and touches no branch. `worktree.sh` does not assign the issue in two cases,
-below: it warns in one and stops in the other. "Stay on this branch" checks
-the case of the warning first, with `gh issue develop --list 91` and the
-issue's assignees. In that check, a branch linked in any repository counts.
+and touches no branch. `worktree.sh` does not assign the issue in four cases,
+below: it warns in two and stops in two. "Stay on this branch" checks the
+cases of the warning first, with `gh issue develop --list 91` and the issue's
+assignees. In that check, a branch linked in any repository counts.
 
 The branch, and the worktree when one is made, carry one name that says what
 the work is: `<type>/<number>-<two to four words>`, the type from *Commits* in
@@ -96,11 +96,20 @@ the person decides. A rerun with another name stops the same way. A rerun goes
 on only when the issue has a linked branch in this repository, or no linked
 branch at all.
 
-A linked branch in this repository, on an issue that nobody is assigned to,
-can be someone else's: the script warns, and does not assign the issue to you.
-Find out whose the branch is before you push to it. When the person said it
-after `take-in-check.sh`, use that answer. Someone else's: say so and wait.
-Yours: run the command the warning gives, which assigns the issue to you.
+A local branch with the name you gave, which no worktree holds, stops the
+script too when the issue has no linked branch: it can be a merged pull
+request's branch that stayed, or commits never pushed. The script stops before
+it assigns or makes anything, and lists the branch's commits that are on no
+remote. Show them to the person and wait: the person decides whether to keep
+the branch and give another name, or to delete it.
+
+An issue that someone else is assigned to is theirs, and so is its linked
+branch. A linked branch in this repository, on an issue that nobody is
+assigned to, can be someone else's too. In both cases the script warns, and
+does not assign the issue to you. Find out whose the work is before you push
+to it. When the person said it after `take-in-check.sh`, use that answer.
+Someone else's: say so and wait. Yours: run the command the warning gives,
+which assigns the issue to you.
 
 Then move into the worktree, when the script made one or found the branch in
 one. Claude Code: `EnterWorktree` with the path it printed. Codex cannot move a running session: every command takes the worktree

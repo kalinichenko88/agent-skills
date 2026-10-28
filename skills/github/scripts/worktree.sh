@@ -5,13 +5,16 @@
 #
 #   worktree.sh <n> <branch> [--here]
 #
-# An issue with a linked branch in this repository and no assignee gets a
-# warning instead: the branch can be someone else's.
+# An issue that someone else is assigned to, or one with a linked branch in
+# this repository and no assignee, gets a warning instead: the issue or the
+# branch can be someone else's.
 #
 # A branch linked to the issue in this repository wins over a <branch> that is
 # not linked there: the first such branch that gh lists. When every linked
 # branch is in another repository, as a fork's, the script stops before it
-# writes. A branch already checked out somewhere is worked on there. A session
+# writes. So does a local <branch> that no worktree holds, on an issue with no
+# linked branch: it can hold other work. A branch already checked out
+# somewhere is worked on there. A session
 # already in a worktree, as one started with claude --worktree or codex
 # --worktree, checks the branch out where it is; --here does the same in any
 # checkout, for "a branch only".
@@ -44,23 +47,6 @@ if [ -n "$list" ]; then
     exit 1
   fi
 fi
-
-# When the issue has an assignee, its linked branch counts as yours:
-# take-in-check.sh stops on every assignee, and the take-in goes on only when
-# the only assignee is you and the person says that the work continues here.
-# GitHub does not say whose a branch is: one that is linked while nobody is
-# assigned can be someone else's, so you decide.
-# Read outside the if, so that a failed read stops the script.
-assignees=1
-if [ -n "$linked" ]; then
-  assignees=$(gh issue view "$n" --json assignees --jq '.assignees | length')
-fi
-if [ "$assignees" = 0 ]; then
-  echo "warning: #$n has a linked branch and nobody is assigned: it can be someone else's."
-  echo "It is not assigned to you. If the branch is yours: gh issue edit $n --add-assignee @me"
-else
-  run gh issue edit "$n" --add-assignee @me
-fi
 case $'\n'$linked$'\n' in
   *$'\n'"$branch"$'\n'* | $'\n\n') ;;
   *)
@@ -69,7 +55,40 @@ case $'\n'$linked$'\n' in
     ;;
 esac
 
+# A local branch of the name that no worktree holds, on an issue with no
+# linked branch, can be other work: a merged pull request's branch that stayed,
+# or commits never pushed. gh would check its commits out as this work, and
+# exit 0 when it cannot fast-forward them, so the script stops before it writes.
 path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$branch")
+if [ -z "$linked" ] && [ -z "$path" ] && git show-ref -q --verify "refs/heads/$branch"; then
+  {
+    echo "#$n has no linked branch, and the local branch $branch exists: it can hold other work."
+    echo "Its commits on no remote:"
+    git log --oneline "$branch" --not --remotes
+    echo "Keep it and give another name, or delete it if nothing on it is needed."
+  } >&2
+  exit 1
+fi
+
+# An issue that someone else is assigned to is theirs, and so is its linked
+# branch. GitHub does not say whose a branch is: one that is linked while
+# nobody is assigned can be someone else's too. In both cases you decide, and
+# the script assigns nobody. take-in-check.sh stops on every assignee, so a
+# take-in gets here with someone else's issue only when the person says to go on.
+assignees=$(gh issue view "$n" --json assignees --jq '[.assignees[].login] | join(" ")')
+me=$(gh api user --jq .login)
+case " $assignees " in
+  *" $me "*) warning='' ;;
+  '  ') warning=${linked:+"#$n has a linked branch and nobody is assigned: it can be someone else's."} ;;
+  *) warning="#$n is assigned to $assignees: it is theirs." ;;
+esac
+if [ -n "$warning" ]; then
+  echo "warning: $warning"
+  echo "It is not assigned to you. If the work is yours: gh issue edit $n --add-assignee @me"
+else
+  run gh issue edit "$n" --add-assignee @me
+fi
+
 if [ -n "$path" ]; then
   echo "$branch is checked out already"
   echo "$path"

@@ -361,6 +361,22 @@ case $out in *'dry run: gh issue edit 5 --add-assignee @me'*) ;;
   *) fail 'worktree.sh assigns an issue that is already yours' "$out" ;;
 esac
 
+# An issue that someone else is assigned to is theirs, with a linked branch or
+# without one: worktree.sh warns, and does not assign the issue to you.
+answer '.assignees.nodes = [{login: "someone"}]'
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *'warning: #5 is assigned to someone'*) ;;
+  *) fail 'worktree.sh warns about an issue with a linked branch that someone else is assigned to' "$out" ;;
+esac
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue with a linked branch that someone else is assigned to' "$out" ;; esac
+mv "$tmp/linked" "$tmp/linked.kept"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
+case $out in *'warning: #5 is assigned to someone'*) ;;
+  *) fail 'worktree.sh warns about an issue that someone else is assigned to' "$out" ;;
+esac
+case $out in *'dry run: gh issue edit'*) fail 'worktree.sh assigns an issue that someone else is assigned to' "$out" ;; esac
+mv "$tmp/linked.kept" "$tmp/linked"
+
 printf 'feat/5-scout-citations\thttps://github.com/kalinichenko88/agent-skills/tree/feat/5-scout-citations\n' >>"$tmp/linked"
 out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-citations)
 case $out in *'using it'*) fail 'worktree.sh leaves a linked branch it was given' "$out" ;; esac
@@ -394,6 +410,24 @@ out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 feat/5-scout-cit
 check 'worktree.sh --here assigns and checks the branch out where it is' \
   "$(printf 'dry run: gh issue edit 5 --add-assignee @me\ndry run: gh issue develop 5 --name feat/5-scout-citations --checkout\n%s' "$top")" "$out"
 (cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 b --there >/dev/null 2>&1) && fail 'worktree.sh takes an unknown third argument'
+
+# A local branch of the name that no worktree holds, on an issue with no linked
+# branch, as a merged pull request's branch that stayed: gh would check its old
+# commits out as the work. worktree.sh stops before its first write and names
+# them.
+git -C "$tmp/repo" -c user.name=t -c user.email=t commit -q --allow-empty -m 'Old work'
+git -C "$tmp/repo" branch fix/5-old
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old 2>&1) &&
+  fail 'worktree.sh goes on with an old local branch of the name' "$out"
+case $out in *'local branch fix/5-old'*'Old work'*) ;;
+  *) fail 'worktree.sh names the old local branch and its commits' "$out" ;;
+esac
+case $out in *'dry run:'*) fail 'worktree.sh writes before it stops on an old local branch' "$out" ;; esac
+# Linked to the issue, the local branch is the issue's work: worktree.sh goes on.
+printf 'fix/5-old\thttps://github.com/kalinichenko88/agent-skills/tree/fix/5-old\n' >"$tmp/linked"
+out=$(cd "$tmp/repo" && DRY_RUN=1 bash "$scripts/worktree.sh" 5 fix/5-old) ||
+  fail 'worktree.sh stops on the local branch that is linked to the issue' "$out"
+rm "$tmp/linked"
 
 # keep-open.sh removes the pull request's link to the one issue it is given.
 # keep-open-21.json is PR #21's answer, with its link to #14; the cases add a

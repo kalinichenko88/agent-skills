@@ -14,9 +14,10 @@ commands and runs none.
 A script can stop with an error, from `gh` or from its own usage check. Then
 its step is not done: report the error and stop at that step. Do not do the
 step by hand with `gh`: that skips the checks the script makes. Some stops are
-not errors: a refusal from `take-in-check.sh` or `add-finding.sh`, and the stop
-of `worktree.sh` when every branch linked to the issue is in another
-repository. `take-in.md` and `filing.md` say what to do then.
+not errors: a refusal from `take-in-check.sh` or `add-finding.sh`, and the two
+stops of `worktree.sh`: when every branch linked to the issue is in another
+repository, and when an old local branch has the name you gave. `take-in.md`
+and `filing.md` say what to do then.
 
 ## Reading the tracker
 
