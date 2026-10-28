@@ -74,4 +74,5 @@ An open issue's `status:` is `free`, or it names who works on it: `assigned to
 <login>`, `branch <name>`, `PR #<n> by <login>`, with `you` for your own
 account. Any entry makes the issue **busy**, and an entry with `you` counts
 too: another session of yours, on this computer or on another one, can work on
-the issue. `take-in-check.sh` stops on your own entries for the same reason.
+the issue. `take-in-check.sh` stops on your own entries for the same reason,
+unless they show that the work continues on this computer.

@@ -7,11 +7,13 @@ An issue named on its own — `#91`, "take #91", its URL — as the session's fi
 message, or after a talk about which task is next, is the request to take it
 into work; a mention inside other work is not. Check it first: `bash
 <dir>/scripts/take-in-check.sh 91`, or with its URL. It prints `take #91`, or
-each reason why not, one per line.
+each reason why not, one per line. When every reason is your own work on this
+computer, a last line follows them: `continue #91 on <branch>`.
 
 **Then say what the task is.** When the check stops with an error, report it
 and stop (`tracker.md`): no summary is due. The error is any line other than
-`take #91` and the lines that start with `#91`. Otherwise read the issue:
+`take #91`, `continue #91 on <branch>` and the lines that start with `#91`.
+Otherwise read the issue:
 `gh issue view 91 --json title,body`, or with its URL. Before the next step,
 write its number, its title and two or three sentences of your own: what is
 wrong or what is wanted, and what must be true for the work to be done. For an
@@ -23,9 +25,14 @@ words for `collect.sh` below.
 
 Then act on what the check printed:
 
+- `continue #91 on <branch>`: the issue is assigned to you, and its branch,
+  linked or the branch of your open pull request, is a local branch here with
+  the branch's last commit on GitHub. Ask nothing: say in one line that the
+  work continues, and go on with *Continuing the work* below.
 - `closed`, or a line that names someone else: say so and wait. These lines
   win over the lines below.
-- `PR #<n> by you`: the work has a pull request already. Say so and stop.
+- `PR #<n> by you`, with no `continue` line: the work has a pull request
+  already. Say so and stop.
 - Only an `assigned to you` line, `branch` lines, or both: another session of
   yours can work on the issue, on this computer or on another one. Show the
   person what the script printed, and ask one at a time, in this order:
@@ -34,6 +41,23 @@ Then act on what the check printed:
   2. Does the work run somewhere else, or does it continue here? Somewhere
      else: stop. Here: go on with the steps below.
 - An issue of another repository than this checkout's: say so and stop.
+
+**Continuing the work.** The session that worked on the issue can still be
+open, and git does not show it. In Claude Code, look for it first:
+`ListAgents` lists the sessions open on this computer, and the plugin's hook
+names a session that took an issue in `#91 <the start of its title>`. When
+such a session is listed, the work runs there: give its name, and stop. Codex
+has no such list: go on.
+
+Then run `bash <dir>/scripts/worktree.sh 91 <branch> --local`, and move into
+the path it prints, as *The work then starts in a worktree* says. Name once
+the command that resumes the old session with its context, `claude --continue`
+or `codex resume` in that worktree: the person can go on there instead. In
+this session, with an open pull request, its `## Review` says which steps of
+`kalinichenko:review-loop` ran: go on from the first one that did not, or from
+the open questions and the merge question. Without one, go on from *The
+tracker is read next*, and skip *The work then starts in a worktree*: the
+worktree is in place.
 
 **The tracker is read next.** Run `collect.sh take-in` (`tracker.md`) with the
 issue's number and the names it gives. While a subagent reads the file, you can
@@ -86,7 +110,9 @@ the branch to the issue, and prints the path to work in as its last line. A
 branch linked to the issue in this repository wins over the name you gave. A
 linked branch already checked out is worked on where it is. A session already
 in a worktree, as one started with `claude --worktree` or `codex --worktree`,
-checks the branch out where it is, and so does `--here`.
+checks the branch out where it is, and so does `--here`. With `--local`, the
+script takes a local branch as it is, with git: it makes and links no branch,
+reads no linked branch, and does not stop on the local branch.
 
 A linked branch in another repository does not win: without `--branch-repo`,
 `gh` would make a new branch with the same name here. When every linked branch
@@ -104,10 +130,14 @@ does, and lists the branch's commits that are on no remote. Show them to the
 person and wait. The person decides between three ways:
 
 - Keep the branch, and run the script again with another name.
-- Delete the branch, after its worktree when the script names one.
-- When the branch holds this work, work on it: move into the worktree that the
-  script names, or check the branch out where you are. Then go on as "stay on
-  this branch" does.
+- Delete the branch, and run the script again with the same name. When the
+  script names a worktree, remove it first with `git worktree remove <path>`,
+  never with `--force`: git refuses a worktree with changes, and the person
+  decides on them. When it names the main checkout, switch that checkout to
+  the default branch first.
+- When the branch holds this work, run the script again with `--local`. It
+  takes the branch as it is, in the worktree that holds it or in a new one,
+  and assigns the issue as at any take-in.
 
 An issue that someone else is assigned to and you are not is theirs, and so is
 its linked branch. A linked branch in this repository, on an issue that nobody

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Says whether an issue can be taken into work: prints "take #<n>" and exits 0,
-# or prints each reason why not and exits 1. It only reads.
+# or prints each reason why not and exits 1, unless the reasons show that the
+# work continues on this computer (below). It only reads.
 #
 #   take-in-check.sh <n or URL>
 #
@@ -9,7 +10,12 @@
 # issue. Your own login prints as "you": another session of yours, on this
 # computer or on another one, can work on the issue.
 #
-# Needs only bash and gh: every filter is gh's own --jq.
+# When every reason is your own work on this computer, it prints them, then
+# "continue #<n> on <branch>", and exits 0. That is: the issue is assigned to
+# you, and its one branch, linked or the branch of your open pull request, is a
+# local branch here that has the branch's last commit on GitHub.
+#
+# Needs only bash, gh and git: every filter is gh's own --jq.
 
 set -euo pipefail
 
@@ -39,36 +45,68 @@ case $n in '' | *[!0-9]*)
   ;;
 esac
 
+# Each line is a reason, a tab, and whose it is: "you", "other", or, for a
+# branch of yours in this repository, "branch", its name and its last commit on
+# GitHub. When a pull request opens, GitHub moves the branch's link to it, so
+# the branch of your open pull request counts as the issue's branch.
 # shellcheck disable=SC2016 # GraphQL and jq, not shell
 reasons=$(gh api graphql -f owner="${repo%/*}" -f name="${repo#*/}" -F n="$n" -f query='
   query($owner: String!, $name: String!, $n: Int!) {
     viewer { login }
     repository(owner: $owner, name: $name) {
+      nameWithOwner
       defaultBranchRef { name }
       issue(number: $n) {
         state
         assignees(first: 10) { nodes { login } }
         linkedBranches(first: 10) { nodes { ref {
           name
-          target { ... on Commit { committedDate } }
+          repository { nameWithOwner }
+          target { oid ... on Commit { committedDate } }
           compare(headRef: "HEAD") { behindBy }
         } } }
-        closedByPullRequestsReferences(first: 10) { nodes { number state author { login } } }
+        closedByPullRequestsReferences(first: 10) { nodes {
+          number state author { login }
+          headRefName headRefOid headRepository { nameWithOwner }
+        } }
       }
     }
-  }' --jq '.data.viewer.login as $me | .data.repository.defaultBranchRef.name as $main
+  }' --jq '.data.viewer.login as $me | .data.repository.nameWithOwner as $repo
+    | .data.repository.defaultBranchRef.name as $main
     | def who: if . == $me then "you" else . // "ghost" end;
     .data.repository.issue
-    | (select(.state != "OPEN") | "closed"),
-      (.assignees.nodes[] | "assigned to \(.login | who)"),
+    | (select(.state != "OPEN") | "closed\tother"),
+      (.assignees.nodes[] | "assigned to \(.login | who)\t\(if .login == $me then "you" else "other" end)"),
       (.linkedBranches.nodes[].ref
-        | "branch \(.name), \(.compare.behindBy) commits ahead of \($main), last commit \(.target.committedDate)"),
+        | "branch \(.name), \(.compare.behindBy) commits ahead of \($main), last commit \(.target.committedDate)\t"
+          + (if .repository.nameWithOwner == $repo then "branch\t\(.name)\t\(.target.oid)" else "other" end)),
       (.closedByPullRequestsReferences.nodes[] | select(.state == "OPEN")
-        | "PR #\(.number) by \(.author.login | who) is open and closes it")')
+        | "PR #\(.number) by \(.author.login | who) is open and closes it\t"
+          + (if .author.login == $me and .headRepository.nameWithOwner == $repo
+            then "branch\t\(.headRefName)\t\(.headRefOid)" else "other" end))')
 
 if [ -z "$reasons" ]; then
   echo "take #$n"
   exit 0
 fi
-while IFS= read -r reason; do echo "#$n: $reason"; done <<<"$reasons"
+# The work continues on this computer when every reason is yours, the issue is
+# assigned to you, and they name one branch whose local copy has its last
+# commit on GitHub: no other session pushed to it since.
+yours='' branch='' here=1
+while IFS=$'\t' read -r reason whose name oid; do
+  echo "#$n: $reason"
+  case $whose in
+    you) yours=1 ;;
+    branch)
+      [ -z "$branch" ] || [ "$branch" = "$name" ] || here=''
+      branch=$name
+      git merge-base --is-ancestor "$oid" "refs/heads/$name" 2>/dev/null || here=''
+      ;;
+    *) here='' ;;
+  esac
+done <<<"$reasons"
+if [ -n "$yours" ] && [ -n "$branch" ] && [ -n "$here" ]; then
+  echo "continue #$n on $branch"
+  exit 0
+fi
 exit 1
