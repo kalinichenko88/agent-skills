@@ -1,6 +1,6 @@
 ---
 name: typescript-conventions
-description: Use when writing or reviewing TypeScript — declaring an object shape, placing a type, an enum or a schema that several files use, naming a new file, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
+description: Use when writing or reviewing TypeScript — declaring an object shape, placing a type, an enum or a schema that several files use, naming a new file or a constant, writing a callback, reaching for a dependency — or when setting up lint rules for a new TypeScript project.
 ---
 
 # TypeScript conventions
@@ -87,7 +87,7 @@ return name;
 
 A `return` that is the only statement in its block takes no blank line.
 
-## Render conditions are named constants
+## Render conditions get a name
 
 ```tsx
 const settings = config.data?.settings;
@@ -158,11 +158,45 @@ writing a formatter by hand.
 `Intl` takes locale and time zone as arguments — pass them explicitly rather
 than inheriting whatever the host has.
 
+## A constant's name is CONSTANT_CASE
+
+A constant is a module-level `const` that holds data written out in the code:
+its value is known when the code is written, and no code changes it, as a
+constant of a compiled language. A number, a string, a list of entries, a
+lookup table or a config, as column definitions, can be one.
+
+```ts
+const MAX_RETRIES = 3;
+const FALLBACK_MESSAGE = 'The payment failed. Try another card.';
+```
+
+A `const` that holds a component or a context, or whose name opens a JSX tag,
+is PascalCase, also inside a function: `const Page = () => {…}`,
+`const Button = memo(…)`, `const ThemeContext = createContext(…)`,
+`const Icon = item.icon` before `<Icon />`. JSX reads a lowercase name as an
+HTML tag. This rule wins over CONSTANT_CASE.
+
+Every other `const` is camelCase:
+
+- a function, and an object whose values are all functions, as
+  `const formatCents = (cents: number) => {…}` or `const ordersApi = { list() {…} }`;
+- a value that the code makes or reads when it runs, also at module level:
+  `new Intl.NumberFormat(…)`, `new Map([…])`, `new Set([…])`, `Date.now()`,
+  `z.object(…)`, `process.env.API_URL`;
+- an object or an array that the code changes, as a cache;
+- a `const` inside a function, whatever it holds.
+
+A name that a framework reads, as `export const metadata` in Next.js, stays as
+the framework wants it.
+
+Not: `const PRICE_FORMAT = new Intl.NumberFormat(…)`. The formatter is an
+object that the module makes when it loads, not data written in the code.
+
 ## Files are kebab-case, one entity per file
 
 `create-vault.ts`, not `createVault.ts`. Intra-file order: imports → the primary
-export → everything it uses below it: private helpers, module constants, and
-the types that only this file uses. A file opens with what it is for.
+export → everything it uses below it: private helpers, module-level `const`s,
+and the types that only this file uses. A file opens with what it is for.
 
 ```ts
 import type { Order } from './models/order';
@@ -184,7 +218,60 @@ function formatCents(cents: number): string {
 
 Not: `const money` and `formatCents` above `orderSummary`. A `const` below the
 export is safe: the function reads it when it runs, after the module has
-loaded.
+loaded. A `const` that the export reads while the module loads goes above the
+export, as `ORDER_STATUSES` in
+`export const orderSchema = z.object({ status: z.enum(ORDER_STATUSES) })`.
+Below it, the module throws a ReferenceError when it loads.
+
+A file whose primary export is a tagged union opens with the union. Its
+variants go below it, exported or not: the union uses them, and a type can
+name a type declared below it.
+
+```ts
+// models/discount.ts
+export type Discount = PercentDiscount | FixedDiscount;
+
+export type PercentDiscount = { kind: 'percent'; percent: number };
+
+export type FixedDiscount = { kind: 'fixed'; amountCents: number };
+```
+
+A constant of more than 15 lines goes to the constants file beside the file
+that uses it, even when only that one file uses it. The lines of its value
+count, not those of the declaration around it. A folder has one constants
+file: `constants.ts`, or `constants.tsx` when one of its constants holds JSX.
+It is an exception to one entity per file: it holds every long constant of
+its folder. A shorter constant that only this file uses stays in it: below the
+export, or above it when the export reads it while the module loads. A file
+whose primary export is the constant itself, as `locales/en.ts`, and a test
+file keep their constants.
+
+```ts
+// constants.ts
+export const SHIPPING_COUNTRIES = [
+  { code: 'AT', name: 'Austria' },
+  { code: 'BE', name: 'Belgium' },
+  // … 28 more countries, one per line
+];
+```
+
+```ts
+// shipping-country-name.ts
+import { SHIPPING_COUNTRIES } from './constants';
+
+export function shippingCountryName(code: string): string {
+  const country = SHIPPING_COUNTRIES.find((entry) => {
+    return entry.code === code;
+  });
+
+  return country?.name ?? OTHER_COUNTRY;
+}
+
+const OTHER_COUNTRY = 'Another country';
+```
+
+Not: the 30 countries below `shippingCountryName` in its own file, and not
+`OTHER_COUNTRY` in `constants.ts`.
 
 ## A shared type is a model in `models/`, a schema is in `schemas/`
 

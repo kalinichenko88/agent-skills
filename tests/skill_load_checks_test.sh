@@ -4,8 +4,11 @@
 # wrote, in the layout an eval run leaves. ts-1, react-1, feature-1, the log of
 # order-2 and the tree of order-1 are one recorded run, trimmed to what the
 # checks read. comments-1, its log and its tree, is a later run with the rule
-# on one hook per job. The other runs change them into a case that a check must
-# fail or must pass. order-3, feature-2 to feature-5 and comments-2 have no log:
+# on one hook per job. decline-1, its log and its tree, is a run without the
+# rules on long literals and on the names of constants, and decline-2 is a tree
+# of a run with them. The other runs change them into a case that a check must
+# fail or must pass. order-3, decline-2, decline-3, feature-2 to feature-5 and
+# comments-2 have no log:
 # count reads only the logs, and the other checks read only the trees. In
 # react-1 and react-2, `await fetch(…)` and `await response.json()` are one
 # request that hooks must pass.
@@ -14,13 +17,20 @@
 #   order-1    every file written through Bash, as `cat > <file> <<'EOF'`
 #   order-2    the four models in src/order.ts; order-summary.ts opens with
 #              its Intl constant
-#   order-3    Order and OrderLine in one file in models/
+#   order-3    Order and OrderLine in one file in models/; the recorded
+#              discount.ts of a run without the rule on a union's file, which
+#              exports both variants above the union
+#   decline-1  the 30-line message table below the export of
+#              decline-message.ts; the table and the fallback named in
+#              camelCase
+#   decline-3  decline-2 with the short fallback message moved to constants.ts
 #   feature-2  the panel's hook at the feature root, and no schemas/ folder
 #   feature-3  the panel's hook in src/shared/hooks; a second schema beside
 #              the fetch
 #   feature-4  what nested must pass: src/shared/reuse-cache.ts, a
 #              src/shared/use-cases/ folder, a hook in a shared/ folder inside
-#              the feature
+#              the feature; the recorded products-grid.tsx of a run with the
+#              rule on names, which calls its Intl.NumberFormat PRICE_FORMAT
 #   feature-5  what nested must pass: the page's own use-products.ts at the
 #              feature root, which products-page.tsx imports
 #   comments-2 a run without the rule: the comments load in an effect and a
@@ -39,16 +49,26 @@ cd "$root"
 # here-document inside $().
 expected() {
   cat <<'EOF'
-typescript-conventions: 7 of 8 subagents invoked it before the first write
+typescript-conventions: 8 of 9 subagents invoked it before the first write
 react-conventions: 3 of 4 subagents invoked it before the first write
 tests/fixtures/skill_load/ts-2/src/cart-total.ts:20:    .filter((item) => item.unitPriceCents > limitCents)
 tests/fixtures/skill_load/react-2/src/search-panel.tsx:68:          {results.map((result) => (
 brace rule: 2 of 4 written files have no implicit arrow return
 tests/fixtures/skill_load/order-2/src/order-summary.ts: const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-export first: 2 of 3 order runs open every file with an export
+export first: 5 of 6 order and decline runs open every file with an export
 tests/fixtures/skill_load/order-2/src/order.ts
 tests/fixtures/skill_load/order-3/src/orders/models/order.ts
 models: 1 of 3 order runs keep each model in a file of its own in models/
+tests/fixtures/skill_load/order-3/src/orders/models/discount.ts: export type PercentDiscount = {
+union first: 2 of 3 order runs declare Discount above its variants
+tests/fixtures/skill_load/decline-1/src/decline-message.ts
+tests/fixtures/skill_load/decline-3/src/constants.ts
+constants: 1 of 3 decline runs keep the table in constants.ts and the fallback beside its use
+tests/fixtures/skill_load/decline-1/src/decline-message.ts: const fallbackDeclineMessage = 'The payment failed. Try another card.';
+tests/fixtures/skill_load/decline-1/src/decline-message.ts: const declineMessages: Readonly<Record<string, string>> = {
+tests/fixtures/skill_load/feature-1/src/features/products/models/product-filters.ts: export const emptyProductFilters: ProductFilters = {
+tests/fixtures/skill_load/feature-4/src/features/products/products-grid.tsx: const PRICE_FORMAT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+names: 14 of 17 runs name a literal const in CONSTANT_CASE and any other const in camelCase
 tests/fixtures/skill_load/feature-2/src/features/products/use-filter-draft.ts
 tests/fixtures/skill_load/feature-3/src/shared/hooks/use-filter-draft.ts
 own folder: 3 of 5 feature runs keep the panel's hook out of the feature root and shared
@@ -79,15 +99,15 @@ stub=$(mktemp -d)
 old=$(mktemp -d)
 trap 'rm -rf "$stub" "$old"' EXIT
 
-# The logs of an older eval have no log of a later task, as comments: the
-# checks must still run, and name the log that is not there.
+# The logs of an older eval have no log of a later task, as decline and
+# comments: the checks must still run, and name the logs that are not there.
 cp -R tests/fixtures/skill_load/. "$old"
-rm -r "$old"/comments-*
+rm -r "$old"/decline-* "$old"/comments-*
 code=0
 out=$(tests/skill_load_eval.sh --check "$old" 2>&1) || code=$?
-case $out in *"no log: $old/comments-*.jsonl"*"logs: $old") ;; *) code="$code, no 'no log:' line" ;; esac
+case $out in *"no log: $old/decline-*.jsonl"*"no log: $old/comments-*.jsonl"*"logs: $old") ;; *) code="$code, no 'no log:' line" ;; esac
 [ "$code" = 1 ] || {
-  printf 'FAIL: --check on logs with no comments run exited %s, not 1\n%s\n' "$code" "$out"
+  printf 'FAIL: --check on logs with no decline and comments runs exited %s, not 1\n%s\n' "$code" "$out"
   exit 1
 }
 

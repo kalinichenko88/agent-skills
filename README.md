@@ -175,8 +175,13 @@ To try an edit in Claude Code without installing: `claude --plugin-dir .`.
 `tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
 skills, the files they write with an implicit return in a method callback, as
 `.map((x) => (`, the runs with a file that opens with a helper or a constant
-instead of its primary export, and the runs that put the order, its line, the
-customer or the discount outside `models/` or two of them in one file. In a
+instead of its primary export, the runs that put the order, its line, the
+customer or the discount outside `models/` or two of them in one file, and the
+runs whose discount file opens with its variants instead of the union. It
+counts the runs that keep a 30-line table of decline messages out of
+`constants.ts`, or put their short fallback message in it. In every task, it
+counts the runs that name a module-level `const` with a literal value in
+camelCase, or any other `const` in CONSTANT_CASE. In a
 React feature, it counts the runs that put a sub-component's own hook at the
 feature root or in `shared`, and the runs with a zod schema outside
 `schemas/`. In the three React tasks, it counts the runs with a component or a
@@ -184,7 +189,7 @@ hook that holds two requests or more: a comments section loads and sends
 comments, and the other two tasks have one request each. With
 `--check <logs folder>` it runs only these checks, on the logs that an earlier
 run printed. `tests/skill_load_checks_test.sh` runs them so in `make check`,
-on `tests/fixtures/skill_load`: two recorded runs and a case that fails each
+on `tests/fixtures/skill_load`: four recorded runs and a case that fails each
 check. A change to a check updates the output that the test expects.
 `tests/review_loop_eval.sh` counts the review rounds and what each one reads.
 It checks that no count of rounds goes past three, that the review of the
