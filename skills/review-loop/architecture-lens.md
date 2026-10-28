@@ -29,10 +29,10 @@ and run no code of the project.
    the base has the same fault in the same place: in the invariant that the
    cause names, or, when it names none, in the text that it names. Read the
    base's architecture file with `git show <base>:<file>`, and the files
-   under a path with `git ls-tree -r --name-only <base> -- <path>`. When the
-   base does not have the fault, the cause is a False doc finding. Do not
-   run the script at `<base>`: it stops at the first cause of the base. Give
-   any other cause in your last lines. Exit 2 stops the checks: read the
+   under a path with `git ls-tree -r --name-only <base> -- <path>`.
+   Otherwise it is a False doc finding. Do not run the script at `<base>`:
+   it stops at the first cause of the base. Give any other cause in your
+   last lines. Exit 2 stops the checks: read the
    code against the statement of each invariant that the script did not
    reach, as for one that is review only, and name those invariants in your
    last lines.
