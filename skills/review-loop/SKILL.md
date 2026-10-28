@@ -357,7 +357,7 @@ to *The pull request* when the conditions of that section hold.
 Why a subagent: the prompt of `/security-review` ends "Your final reply must
 contain the markdown report and nothing else." Run in the session, the agent
 ended its turn on the report, with no push and no pull request: on #61, and
-twice on #167, after a sentence against it was added here. In a subagent, that
+twice on #167, after #83 added a sentence against it here. In a subagent, that
 line holds for the subagent's reply.
 
 ## The summary

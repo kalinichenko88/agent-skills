@@ -190,9 +190,10 @@ check. A change to a check updates the output that the test expects.
 It checks that no count of rounds goes past three, that the review of the
 tests runs once next to the last pass and never without one, that the
 review of the architecture runs once before round 2, and that a security
-review follows the last pass. Its fixture has a local `origin` and an
-architecture file, and its task says that no one can answer questions. Run
-it after a change to `skills/review-loop` or to its section in `rules.md`.
+review follows the last pass, in a subagent and not in the session. Its
+fixture has a local `origin` and an architecture file, and its task says
+that no one can answer questions. Run it after a change to
+`skills/review-loop` or to its section in `rules.md`.
 `tests/review_loop_lens_eval.sh` sends the review of the architecture to six
 branches of one fixture: a second HTTP client, a `fetch` call that breaks an
 invariant, the same call with an ADR that amends it, a base that breaks it
