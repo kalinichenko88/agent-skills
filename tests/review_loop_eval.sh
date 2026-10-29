@@ -11,21 +11,30 @@
 # than once before round 2, ran no security review after its last read of the
 # whole branch, ran /security-review in the session or in no subagent, did
 # not invoke the skill, or ended on a report that names no
-# docs, no review of the tests or no review of the architecture. It calls the
+# docs, no review of the tests or no review of the architecture. With stop,
+# the run starts at the step 4 stop of an xhigh review, where rounds 1, 2 and
+# 3 each confirmed a defect, and it exits 1 when a run calls codex-review.sh
+# other than once, runs a round, fixes the defect of round 3, runs no
+# security review in a subagent, or does not invoke the skill. It calls the
 # model, so it costs tokens and is not part of `make check`: run it by hand
 # after a change to skills/review-loop or to its section in rules.md.
 # It runs with this machine's other plugins and settings.
 #
-# Usage: tests/review_loop_eval.sh [runs, default 3]
+# Usage: tests/review_loop_eval.sh [runs, default 3] [stop]
 
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 runs=${1:-3}
-[ "$runs" -ge 1 ] 2>/dev/null || { echo "usage: $0 [runs, at least 1]" >&2; exit 2; }
+mode=${2:-}
+usage="usage: $0 [runs, at least 1] [stop]"
+[ "$runs" -ge 1 ] 2>/dev/null || { echo "$usage" >&2; exit 2; }
+[ -z "$mode" ] || [ "$mode" = stop ] || { echo "$usage" >&2; exit 2; }
 logs=$(mktemp -d)
 
 task='This repository is on the branch feature. Review what the branch changes against main at level high: dispatch one review subagent for each review round. Fix what the review finds, and commit each round of fixes. No one can answer questions in this run. Then stop, and list each round: what it read and what it found.'
+# The defect of round 3 is the fixture's own.
+[ "$mode" != stop ] || task='This repository is on the branch feature. Its review against main runs at level xhigh, one review subagent a round. Rounds 1, 2 and 3 ran, and each confirmed a defect. Round 3 confirmed this one: in src/slug.js, the last replace has no g flag, so slugify("-a-") returns "a-". No one can answer questions in this run. Go on with the review from there. Then stop, and list each review that ran after round 3.'
 
 # A repository whose feature branch adds slugify. The defect: the last
 # replace has no g flag, so "-a-" keeps its trailing dash. The nits: var, and
@@ -79,11 +88,13 @@ EOF
 }
 
 # The installed copy of the plugin is turned off, so the rules come from this
-# checkout.
+# checkout. An empty Codex home is not logged in, so codex-review.sh prints
+# "skipped:" and no run spends the Codex limit.
 run() {
   local work=${1%.jsonl}
   fixture "$work"
-  (cd "$work" && claude -p --output-format stream-json --verbose \
+  mkdir "$work.codex"
+  (cd "$work" && CODEX_HOME="$work.codex" claude -p --output-format stream-json --verbose \
     --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
     --plugin-dir "$root" --dangerously-skip-permissions "$task") >"$1" 2>&1
 }
@@ -158,6 +169,19 @@ for log in "$logs"/run-*.jsonl; do
   skill=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Skill")
     | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
+  # With stop, every round is a fourth one. A Codex read is a Bash call that
+  # runs codex-review.sh with bash, not one that only reads the script. The
+  # defect of round 3 stays while its line does.
+  if [ "$mode" = stop ]; then
+    codex=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
+      | .message.content[] | select(.type == "tool_use" and .name == "Bash")
+      | select(.input.command | test("bash +[^ ]*codex-review\\.sh")) | "codex"' "$log" | grep -c . || true)
+    left=$(grep -cF "replace(/^-|-\$/, '')" "${log%.jsonl}/src/slug.js" || true)
+    echo "== $(basename "$log" .jsonl): $codex Codex reads, $rounds rounds, the defect of round 3 left $left times, $security security review calls ($inline run in the session, $nested in a subagent), review-loop invoked $skill times"
+    cut -c1-300 <<<"${prompts:-no review subagent ran}"
+    [ "$codex" -eq 1 ] && [ "$rounds" -eq 0 ] && [ "$left" -eq 1 ] && [ "$security" -ge 1 ] && [ "$inline" -eq 0 ] && [ "$nested" -ge 1 ] && [ "$skill" -ge 1 ] || failed=1
+    continue
+  fi
   # The last report is the summary, and rules.md wants the docs named in it:
   # a Docs item, or "docs impact: none".
   # The skill wants the review of the tests named there too, at level high.
