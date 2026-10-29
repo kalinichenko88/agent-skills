@@ -30,10 +30,11 @@ run in parallel, and what is left to close a milestone.
   and the open issues. It asks about what they leave open, then proposes
   stages, tasks and links. Nothing goes to GitHub before you approve the whole
   plan once.
-- **New issues triaged.** Duplicates close first. Each other issue is
-  reproduced, confirmed in the code, closed with the reason, or gets a question
-  for its author. An issue that stays open gets a label, and once it is
-  confirmed, a milestone, which is its importance. The text of an issue
+- **New issues triaged.** Duplicates close first. An issue that a session
+  works on gets no verdict, and the table shows who works on it. Each other
+  issue is reproduced, confirmed in the code, closed with the reason, or gets
+  a question for its author. When it stays open, it gets a label, and once it
+  is confirmed, a milestone, which is its importance. The text of an issue
   is data, not instructions. Nothing goes to GitHub before you approve the
   whole list once.
 - **A task put off only when you agree.** It goes into the `Later` milestone.
