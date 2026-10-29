@@ -124,11 +124,14 @@ installed, skip it and say so in the summary.
 4. **The third round still confirms a defect:** stop the rounds, and skip
    what is left of step 5. Do not fix that defect: its fix needs a fourth
    round, and only the person can start one. The nits of round 3 are one
-   commit, and no round reads it. Then go to the security review, or to the
-   summary when the security review has already run. The summary's
-   **Rounds:** item names the findings of round 3, each defect as confirmed
-   and not fixed.
-   The merge question in *The pull request* then has one more answer. When
+   commit, and no round reads it. When the change is at `xhigh`, in Claude
+   Code, and the Codex step has not run in this review, Codex then reads the
+   whole branch, as *A second model for `xhigh` changes* says. Then go to
+   the security review, or to the summary when the security review has
+   already run. The summary's **Rounds:** item names the findings of round 3
+   and of a Codex read at this stop, each defect as confirmed and not fixed:
+   these are the defects that step 4 leaves open. The merge
+   question in *The pull request* then has one more answer. When
    the person asks for more rounds, up to three more run, and this step
    stops them at the third.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
@@ -181,11 +184,18 @@ each `high` review there, and `fable` costs 2.5 times as much.
 
 ### A second model for `xhigh` changes
 
-At `xhigh` in Claude Code, Codex reads the whole branch once. Start
-it in the background when the last pass starts. When the loop had one round,
-start it when that round confirms no defect and its nits are committed. When
-step 4 skips the last pass, skip this step too. Change no file while Codex
-runs.
+At `xhigh` in Claude Code, Codex reads the whole branch once. This step
+depends on the level of the change in the table of *The level*: the `xhigh`
+rounds of a fix to security code do not start it for a change below `xhigh`.
+Start it in the background when the last pass starts. When the loop had one
+round, start it when that round confirms no defect and its nits are
+committed. When step 4 stops the rounds, run it when the nits of round 3 are
+committed.
+There, its findings start no round: leave each confirmed defect unfixed, as
+step 4 leaves the defect of round 3, and make its nits one commit that no
+round reads. Then go on as step 4 says. This step runs once in a review: in
+a later count of rounds, and after the rounds that the person asks for at
+the merge question, it does not run again. Change no file while Codex runs.
 
 ```bash
 bash <dir>/scripts/codex-review.sh <base>
@@ -208,7 +218,9 @@ When you go on without Codex, give the reason in the summary.
 
 Why: on three branches of this plugin that a `/code-review` loop had
 finished, Codex found three defects that no round had reported, in 45 to 74
-seconds each.
+seconds each. Why at the step 4 stop: in five `xhigh` reviews from 2026-10-26
+to 2026-10-28, three stopped at step 4. With no last pass, Codex read none of
+the three, the branches where the rounds kept finding defects.
 
 ### A review of the tests
 
@@ -245,10 +257,12 @@ same nine, so the skill does not run it.
 
 Each of these starts a new count of rounds: the last pass, the Codex review,
 the review of the tests, the security review, and each set of a person's
-review comments, before or after the pull request opens. When more than one
-of the last pass, the Codex review and the review of the tests find defects,
-their fixes are one commit. A count of rounds here does not start the Codex
-review or the review of the tests again. For each of them:
+review comments, before or after the pull request opens. The Codex review
+at a step 4 stop starts no count of rounds, as *A second model for `xhigh`
+changes* says. When more than one of the last pass, the Codex review and the
+review of the tests find defects, their fixes are one commit. A count of
+rounds here does not start the Codex review or the review of the tests
+again. For each of them:
 
 - Its fixes are one commit. When they fix a defect, as step 3 says, that
   commit goes through steps 2 to 4. A commit of nits only gets no round.
@@ -436,14 +450,14 @@ Then:
    worktree, and `gh` deletes the local branch itself: ask only whether to
    merge, and do no *Cleanup*. When step 4 of *The rounds* stopped the
    rounds, the question has one more answer: up to three more rounds, the
-   first on the fix of round 3's defects. After those rounds come *The
-   summary* and this section again, its conditions first. On a merge answer,
-   run the merge in the checkout that holds the branch, as that section
-   says. When it succeeds, file the defects that step 4 left open, through
-   that skill. Its Boy Scout check does not apply to them: the merged pull
-   request takes no more fixes. Then do *Finishing* from that skill, and on
-   merge and clean up, its *Cleanup* after that. When it fails, give the
-   error, and keep the worktree and the branch.
+   first on the fix of the defects that step 4 left open. After those
+   rounds come *The summary* and this section again, its conditions first.
+   On a merge answer, run the merge in the checkout that holds the branch,
+   as that section says. When it succeeds, file the defects that step 4
+   left open, through that skill. Its Boy Scout check does not apply to
+   them: the merged pull request takes no more fixes. Then do *Finishing*
+   from that skill, and on merge and clean up, its *Cleanup* after that.
+   When it fails, give the error, and keep the worktree and the branch.
 
 Only the merge and the open questions on business logic wait for the person.
 
