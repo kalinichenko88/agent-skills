@@ -13,8 +13,9 @@
 # not invoke the skill, or ended on a report that names no
 # docs, no review of the tests or no review of the architecture. With stop,
 # the run starts at the step 4 stop of an xhigh review, where rounds 1, 2 and
-# 3 each confirmed a defect, and it exits 1 when a run calls codex-review.sh
-# other than once, runs a round, fixes the defect of round 3, runs no
+# 3 each confirmed a defect, and it exits 1 when a run has Codex read the
+# branch other than once, runs a round, fixes the defect of round 3 or the
+# one that Codex returns, runs no
 # security review, runs /security-review in the session or in no subagent,
 # or does not invoke the skill. It calls the model, so it costs tokens and is
 # not part of `make check`: run it by hand after a change to
@@ -29,7 +30,7 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 runs=${1:-3}
 mode=${2:-}
 usage="usage: $0 [runs, at least 1] [stop]"
-[ "$runs" -ge 1 ] 2>/dev/null || { echo "$usage" >&2; exit 2; }
+[ $# -le 2 ] && [ "$runs" -ge 1 ] 2>/dev/null || { echo "$usage" >&2; exit 2; }
 [ -z "$mode" ] || [ "$mode" = stop ] || { echo "$usage" >&2; exit 2; }
 logs=$(mktemp -d)
 
@@ -89,13 +90,32 @@ EOF
 }
 
 # The installed copy of the plugin is turned off, so the rules come from this
-# checkout. An empty Codex home is not logged in, so codex-review.sh prints
-# "skipped:" and no run spends the Codex limit.
+# checkout. A fake codex comes first on PATH. It is logged in, and each exec
+# with the prompt of codex-review.sh logs one read and returns one defect
+# that no round reported: the class drops each letter outside ASCII. An
+# empty Codex home makes a real codex that the shell profile puts first print
+# "skipped:", so no run spends the Codex limit, and that run logs no read.
 run() {
   local work=${1%.jsonl}
   fixture "$work"
-  mkdir "$work.codex"
-  (cd "$work" && CODEX_HOME="$work.codex" claude -p --output-format stream-json --verbose \
+  mkdir "$work.codex" "$work.bin"
+  cat >"$work.bin/codex" <<'EOF'
+#!/usr/bin/env bash
+[ "$1" != login ] || exit 0
+out= last=
+while [ $# -gt 0 ]; do
+  [ "$1" != -o ] || out=$2
+  last=$1
+  shift
+done
+case $last in "You review a change in this git repository"*) ;; *) exit 1 ;; esac
+echo exec >>"$(dirname "$0")/reads"
+cat >"$out" <<'JSON'
+{"findings": [{"file": "src/slug.js", "line": 4, "summary": "The class [^a-z0-9] drops each letter outside ASCII, so slugify('Café') returns 'caf'.", "failure_scenario": "A post titled 'Café' gets the slug 'caf', the same slug as a post titled 'Caf'."}]}
+JSON
+EOF
+  chmod +x "$work.bin/codex"
+  (cd "$work" && PATH="$work.bin:$PATH" CODEX_HOME="$work.codex" claude -p --output-format stream-json --verbose \
     --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
     --plugin-dir "$root" --dangerously-skip-permissions "$task") >"$1" 2>&1
 }
@@ -170,17 +190,15 @@ for log in "$logs"/run-*.jsonl; do
   skill=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Skill")
     | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
-  # With stop, every round is a fourth one. A Codex read is a Bash call that
-  # runs codex-review.sh with bash, not one that only reads the script. The
-  # defect of round 3 stays while its line does.
+  # With stop, every round is a fourth one. A Codex read is a line that the
+  # fake codex logged. The defects of round 3 and of Codex stay while
+  # slugify returns "a-" for "-a-" and "caf" for "Café".
   if [ "$mode" = stop ]; then
-    codex=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
-      | .message.content[] | select(.type == "tool_use" and .name == "Bash")
-      | select(.input.command | test("bash +[^ ]*codex-review\\.sh")) | "codex"' "$log" | grep -c . || true)
-    left=$(grep -cF "replace(/^-|-\$/, '')" "${log%.jsonl}/src/slug.js" || true)
-    echo "== $(basename "$log" .jsonl): $codex Codex reads, $rounds rounds, the defect of round 3 left $left times, $security security review calls ($inline run in the session, $nested in a subagent), review-loop invoked $skill times"
+    codex=$(cat "${log%.jsonl}.bin/reads" 2>/dev/null | grep -c . || true)
+    left=$(cd "${log%.jsonl}" && node --input-type=module -e "import { slugify } from './src/slug.js'; console.log(slugify('-a-') + ' ' + slugify('Café'))" 2>/dev/null || true)
+    echo "== $(basename "$log" .jsonl): $codex Codex reads, $rounds rounds, slugify gives \"$left\" (\"a- caf\" with both defects left), $security security review calls ($inline run in the session, $nested in a subagent), review-loop invoked $skill times"
     cut -c1-300 <<<"${prompts:-no review subagent ran}"
-    [ "$codex" -eq 1 ] && [ "$rounds" -eq 0 ] && [ "$left" -eq 1 ] && [ "$security" -ge 1 ] && [ "$inline" -eq 0 ] && [ "$nested" -ge 1 ] && [ "$skill" -ge 1 ] || failed=1
+    [ "$codex" -eq 1 ] && [ "$rounds" -eq 0 ] && [ "$left" = 'a- caf' ] && [ "$security" -ge 1 ] && [ "$inline" -eq 0 ] && [ "$nested" -ge 1 ] && [ "$skill" -ge 1 ] || failed=1
     continue
   fi
   # The last report is the summary, and rules.md wants the docs named in it:

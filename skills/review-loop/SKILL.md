@@ -124,12 +124,13 @@ installed, skip it and say so in the summary.
 4. **The third round still confirms a defect:** stop the rounds, and skip
    what is left of step 5. Do not fix that defect: its fix needs a fourth
    round, and only the person can start one. The nits of round 3 are one
-   commit, and no round reads it. At `xhigh` in Claude Code, when the Codex
-   step has not run in this review, Codex then reads the whole branch, as
-   *A second model for `xhigh` changes* says. Then go to the security
-   review, or to the summary when the security review has already run. The
-   summary's **Rounds:** item names the findings of round 3 and of a Codex
-   read at this stop, each defect as confirmed and not fixed. The merge
+   commit, and no round reads it. When the change is at `xhigh`, in Claude
+   Code, and the Codex step has not run in this review, Codex then reads the
+   whole branch, as *A second model for `xhigh` changes* says. Then go to
+   the security review, or to the summary when the security review has
+   already run. The summary's **Rounds:** item names the findings of round 3
+   and of a Codex read at this stop, each defect as confirmed and not fixed:
+   these are the defects that step 4 leaves open. The merge
    question in *The pull request* then has one more answer. When
    the person asks for more rounds, up to three more run, and this step
    stops them at the third.
@@ -183,7 +184,9 @@ each `high` review there, and `fable` costs 2.5 times as much.
 
 ### A second model for `xhigh` changes
 
-At `xhigh` in Claude Code, Codex reads the whole branch once. Start
+At `xhigh` in Claude Code, Codex reads the whole branch once. This step
+depends on the level of the change in the table of *The level*: a fix to
+security code whose rounds run at `xhigh` does not start it. Start
 it in the background when the last pass starts. When the loop had one round,
 start it when that round confirms no defect and its nits are committed. When
 step 4 stops the rounds, run it when the nits of round 3 are committed.

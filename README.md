@@ -201,10 +201,10 @@ review follows the last pass, in a subagent and not in the session. Its
 fixture has a local `origin` and an architecture file, and its task says
 that no one can answer questions. With `stop` after the count of runs, as
 `tests/review_loop_eval.sh 3 stop`, a run starts at the stop after round 3
-of an `xhigh` review: the eval checks one call of `codex-review.sh`, no
-fourth round, the defect of round 3 left unfixed, and a security review in
-a subagent. In its runs Codex is not logged in, so `codex-review.sh` prints
-`skipped:` and spends no Codex limit. Run it after a change to
+of an `xhigh` review: the eval checks one Codex read, no fourth round, the
+defects of round 3 and of Codex left unfixed, and a security review in a
+subagent. A fake `codex` first on `PATH` returns that one defect, so no run
+spends the Codex limit. Run it after a change to
 `skills/review-loop` or to its section in `rules.md`.
 `tests/review_loop_lens_eval.sh` sends the review of the architecture to six
 branches of one fixture: a second HTTP client, a `fetch` call that breaks an
