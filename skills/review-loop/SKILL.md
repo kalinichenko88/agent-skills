@@ -185,11 +185,12 @@ each `high` review there, and `fable` costs 2.5 times as much.
 ### A second model for `xhigh` changes
 
 At `xhigh` in Claude Code, Codex reads the whole branch once. This step
-depends on the level of the change in the table of *The level*: a fix to
-security code whose rounds run at `xhigh` does not start it. Start
-it in the background when the last pass starts. When the loop had one round,
-start it when that round confirms no defect and its nits are committed. When
-step 4 stops the rounds, run it when the nits of round 3 are committed.
+depends on the level of the change in the table of *The level*: the `xhigh`
+rounds of a fix to security code do not start it for a change below `xhigh`.
+Start it in the background when the last pass starts. When the loop had one
+round, start it when that round confirms no defect and its nits are
+committed. When step 4 stops the rounds, run it when the nits of round 3 are
+committed.
 There, its findings start no round: leave each confirmed defect unfixed, as
 step 4 leaves the defect of round 3, and make its nits one commit that no
 round reads. Then go on as step 4 says. This step runs once in a review: in
