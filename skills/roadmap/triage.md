@@ -150,8 +150,9 @@ account `gh` is logged in as filed gets no reply. Every comment is public:
 apply *Public repositories* in `<github>/SKILL.md` to each one, so nothing
 from the conversation or from a private source goes in.
 
-After the approval, read the `status:` line of each issue again. A row whose
-issue has an entry now writes nothing: say so. Write each other row:
+After the approval, read the `status:` line of each issue again. When one has
+an entry now, give its row and each row that names it again by the rules
+above, and ask for the approval of those rows again. Then write each row:
 
 - first, when a row's label is `debt` and the repository has no debt label,
   create `debt` with the `gh label create` command of `<github>/filing.md`;
