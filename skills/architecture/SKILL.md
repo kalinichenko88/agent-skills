@@ -400,7 +400,7 @@ tell code from data.
 | Step | Who |
 | --- | --- |
 | The start of a feature, the decision and its options | the main session: it has the context of the brainstorming and the spec |
-| Find the code that already does this kind of work | an `Explore` subagent, `model: "sonnet"`: the file contents stay out of the main context |
+| Find the code that already does this kind of work | an `Explore` subagent, `model: "haiku"`: the file contents stay out of the main context. In 5 runs each, `haiku` found the same code as `sonnet`, at a fifteenth of the cost |
 | The second reader for a decision that needs an ADR (step 8) | one subagent that does not see the conversation, `model: "fable"`, `effort: "xhigh"` |
 | A first architecture file | one subagent, `model: "fable"`, `effort: "xhigh"` |
 

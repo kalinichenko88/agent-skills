@@ -523,7 +523,7 @@ Decided with the person.
 | Step | Who | Why |
 | --- | --- | --- |
 | The start of a feature, the decision and its options | the main session | It has the context of the brainstorming and the spec. A subagent decides with less context. |
-| Find the code that already does this kind of work | an `Explore` subagent, `model: "sonnet"` | Reading. The file contents stay out of the main context. #99 checks `haiku`. |
+| Find the code that already does this kind of work | an `Explore` subagent, `model: "haiku"` | Reading. The file contents stay out of the main context. In #99, `haiku` found the same code as `sonnet` in 5 runs of 5, at $0.012 an answer against $0.18. The fixture has four source files: when the eval gets one where the code is not where its name says, run the search again. |
 | The second reader for a decision that needs an ADR (step 8) | one subagent that does not see the conversation, `model: "fable"`, `effort: "xhigh"` | Rare, and costly to undo by definition. A reader that does not see the conversation does not take the main session's bias. |
 | A first `docs/ARCHITECTURE.md` | one subagent, `model: "fable"`, `effort: "xhigh"` | Once per project. Every later decision reads this file. |
 | The review lens (#97) | one subagent that does not see the conversation, `model: "opus"`, effort of the review's level, at least `high` | It runs at each `high` and `xhigh` review, and at each review that touches the architecture file or an ADR; `fable` costs 2.5 times as much. |
