@@ -124,9 +124,10 @@ installed, skip it and say so in the summary.
 4. **The third round still confirms a defect:** stop the rounds, and skip
    what is left of step 5. Do not fix that defect: its fix needs a fourth
    round, and only the person can start one. The nits of round 3 are one
-   commit, and no round reads it. Then go to the security review, or to the summary when the
-   security review has already run. The summary names the findings of round
-   3, each defect as confirmed and not fixed.
+   commit, and no round reads it. Then go to the security review, or to the
+   summary when the security review has already run. The summary's
+   **Rounds:** item names the findings of round 3, each defect as confirmed
+   and not fixed.
    The merge question in *The pull request* then has one more answer. When
    the person asks for more rounds, up to three more run, and this step
    stops them at the third.
@@ -435,12 +436,14 @@ Then:
    worktree, and `gh` deletes the local branch itself: ask only whether to
    merge, and do no *Cleanup*. When step 4 of *The rounds* stopped the
    rounds, the question has one more answer: up to three more rounds, the
-   first on the fix of round 3's defects. On a merge answer, run the merge in
-   the checkout that holds the branch, as that section says. When it
-   succeeds, file the defects that step 4 left open, through that skill.
-   Then do *Finishing* from that skill, and on merge and clean
-   up, its *Cleanup* after that. When it fails, give the error, and keep the
-   worktree and the branch.
+   first on the fix of round 3's defects. After those rounds come *The
+   summary* and this section again, its conditions first. On a merge answer,
+   run the merge in the checkout that holds the branch, as that section
+   says. When it succeeds, file the defects that step 4 left open, through
+   that skill. Its Boy Scout check does not apply to them: the merged pull
+   request takes no more fixes. Then do *Finishing* from that skill, and on
+   merge and clean up, its *Cleanup* after that. When it fails, give the
+   error, and keep the worktree and the branch.
 
 Only the merge and the open questions on business logic wait for the person.
 

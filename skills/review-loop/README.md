@@ -116,7 +116,7 @@ each task stays as that skill sets it. In place of the final review of
 - **Then the pull request.** For an issue taken into work, or when you ask
   for a pull request, the agent opens it after the summary, in the same turn.
   In a worktree, it asks one question: merge and clean up, merge only, or do
-  not merge.
+  not merge. After a stop at round 3, more rounds is one more answer.
   Clean up removes the worktree and the local branch after the merge, when
   nothing in them would be lost. This needs a passing check and a branch
   other than the default branch. Only the merge and the open questions on

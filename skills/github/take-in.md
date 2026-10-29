@@ -263,9 +263,10 @@ the diff and the issue stays open: the PR says `Part of #15`, and
 ## After the work
 
 Taking an issue in is the request for the whole flow: the work, the review
-and, off the default branch, the pull request and the merge question, with
-its three answers. When the work is done, run the repository's own check,
-such as `make check`, then invoke the `kalinichenko:review-loop` skill. That
+and, off the default branch, the pull request and the merge question that
+`kalinichenko:review-loop` sets. When the work is done, run the repository's
+own check, such as `make check`, then invoke the `kalinichenko:review-loop`
+skill. That
 skill runs the check on the final branch and writes a summary. Then, when the
 check passes and the branch is not the default branch, it opens the pull
 request and asks the merge question, in the same turn. After the summary,
