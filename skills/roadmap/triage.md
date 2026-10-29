@@ -71,16 +71,16 @@ survivor is the one with such an entry, else the older one. The verdict of the
 other one is `duplicate of #<n>`, with what it adds to carry into a comment on
 the survivor. When its milestone comes before the survivor's, in the order of
 `roadmap.sh`, or the survivor has none, the survivor takes it. When the
-survivor is in the list too, the duplicate's row gives it no milestone: its
-own row carries the earlier of the two, unless its verdict gives it none. When
+survivor is in the list too, with no entry in its `status:` line, the
+duplicate's row gives it no milestone: its own row carries the earlier of the
+two, unless its verdict gives it none. When
 both have such an entry, neither closes as a duplicate: each one in the list
 counts as not a duplicate, and goes on to *Verdict* below.
 
 ## Verdict
 
 An issue with an entry in its `status:` line, yours too, gets no verdict: a
-session can work on it now. Its row gives that status, and nothing is written
-for it.
+session can work on it now. Its row gives that status, and writes nothing.
 
 Read each other issue in full, with its author and every comment:
 `gh issue view <n> --json author,title,body,comments`. On a pipe, as in an
@@ -150,7 +150,8 @@ account `gh` is logged in as filed gets no reply. Every comment is public:
 apply *Public repositories* in `<github>/SKILL.md` to each one, so nothing
 from the conversation or from a private source goes in.
 
-After the approval, write each row:
+After the approval, read the `status:` line of each issue again. A row whose
+issue has an entry now writes nothing: say so. Write each other row:
 
 - first, when a row's label is `debt` and the repository has no debt label,
   create `debt` with the `gh label create` command of `<github>/filing.md`;
