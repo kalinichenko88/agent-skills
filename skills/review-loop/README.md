@@ -67,9 +67,8 @@ each task stays as that skill sets it. In place of the final review of
   whole branch once: beside the last pass, after round 1 when the loop
   needed only one round, or after the stop at round 3. Its findings go
   through the same checks. After that stop, its defects stay unfixed, as
-  round 3's do, and the summary names them. Without the
-  Codex CLI or its login, or when Codex fails, the step is skipped, and the
-  summary says so.
+  round 3's do, and the summary names them. Without the Codex CLI or its
+  login, or when Codex fails, the step is skipped, and the summary says so.
 - **A review of the tests.** For `high` and `xhigh` changes, and a change to
   tests only, one review subagent, or `/review` in Codex, reads the tests of
   the whole branch once:
