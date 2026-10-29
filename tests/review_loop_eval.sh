@@ -14,11 +14,11 @@
 # docs, no review of the tests or no review of the architecture. With stop,
 # the run starts at the step 4 stop of an xhigh review, where rounds 1, 2 and
 # 3 each confirmed a defect, and it exits 1 when a run calls codex-review.sh
-# other than once, runs a round, fixes the defect of round 3, runs
-# /security-review in the session or in no subagent, or does not invoke the
-# skill. It calls the model, so it costs tokens and is not part of
-# `make check`: run it by hand after a change to skills/review-loop or to its
-# section in rules.md.
+# other than once, runs a round, fixes the defect of round 3, runs no
+# security review, runs /security-review in the session or in no subagent,
+# or does not invoke the skill. It calls the model, so it costs tokens and is
+# not part of `make check`: run it by hand after a change to
+# skills/review-loop or to its section in rules.md.
 # It runs with this machine's other plugins and settings.
 #
 # Usage: tests/review_loop_eval.sh [runs, default 3] [stop]

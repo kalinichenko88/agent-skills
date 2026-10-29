@@ -128,9 +128,9 @@ installed, skip it and say so in the summary.
    step has not run in this review, Codex then reads the whole branch, as
    *A second model for `xhigh` changes* says. Then go to the security
    review, or to the summary when the security review has already run. The
-   summary's **Rounds:** item names the findings of round 3 and of that
-   Codex read, each defect as confirmed and not fixed.
-   The merge question in *The pull request* then has one more answer. When
+   summary's **Rounds:** item names the findings of round 3 and of a Codex
+   read at this stop, each defect as confirmed and not fixed. The merge
+   question in *The pull request* then has one more answer. When
    the person asks for more rounds, up to three more run, and this step
    stops them at the third.
 5. **The last pass reads the whole branch once**, as in step 1, at the same
@@ -254,11 +254,11 @@ same nine, so the skill does not run it.
 Each of these starts a new count of rounds: the last pass, the Codex review,
 the review of the tests, the security review, and each set of a person's
 review comments, before or after the pull request opens. The Codex review
-at a step 4 stop starts none, as *A second model for `xhigh` changes* says.
-When more than one of the last pass, the Codex review and the review of the
-tests find defects, their fixes are one commit. A count of rounds here does
-not start the Codex review or the review of the tests again. For each of
-them:
+at a step 4 stop starts no count of rounds, as *A second model for `xhigh`
+changes* says. When more than one of the last pass, the Codex review and the
+review of the tests find defects, their fixes are one commit. A count of
+rounds here does not start the Codex review or the review of the tests
+again. For each of them:
 
 - Its fixes are one commit. When they fix a defect, as step 3 says, that
   commit goes through steps 2 to 4. A commit of nits only gets no round.
