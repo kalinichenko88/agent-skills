@@ -37,8 +37,9 @@ each task stays as that skill sets it. In place of the final review of
   subagent in place of `/code-review`. When a skill's or a prompt's text comes
   with code, `/code-review` takes the level of the code, and the subagent
   reviews the text.
-- **Rounds that read less.** The first round reads the whole branch. Each round
-  of fixes is one commit, and the next round reads only that commit.
+- **Rounds that read less.** The first round reads the whole branch, with the
+  docs that the change made false already fixed. Each round of fixes is one
+  commit, and the next round reads only that commit.
 - **A stop.** The loop ends at the first round that confirms no defect. A
   round that read no file of its range does not count: it runs again, one
   level up when its level skipped the files. A defect is a wrong result, a
@@ -47,8 +48,10 @@ each task stays as that skill sets it. In place of the final review of
   comment, a name or wording is a nit, applied without another round. A
   finding that needs a particular input is counted first in a sample of real
   data: a count of zero declines it, unless it is data loss or a security
-  hole. After the third round with a defect, the rounds stop. Ask for more,
-  and up to three more run.
+  hole. After the third round with a defect, the rounds stop, and that
+  defect stays unfixed: its fix would need a round of its own. The merge
+  question then offers up to three more rounds; on a merge, the open
+  defects are filed as issues.
 - **One round for documents.** A change to documents only gets one round of
   the review subagent, and no round reads its fixes. In Claude Code, Codex
   then reads the whole branch once, with the fixes in place, when the branch
@@ -113,7 +116,7 @@ each task stays as that skill sets it. In place of the final review of
 - **Then the pull request.** For an issue taken into work, or when you ask
   for a pull request, the agent opens it after the summary, in the same turn.
   In a worktree, it asks one question: merge and clean up, merge only, or do
-  not merge.
+  not merge. After a stop at round 3, more rounds is one more answer.
   Clean up removes the worktree and the local branch after the merge, when
   nothing in them would be lost. This needs a passing check and a branch
   other than the default branch. Only the merge and the open questions on
