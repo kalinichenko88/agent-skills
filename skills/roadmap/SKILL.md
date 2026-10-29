@@ -23,7 +23,7 @@ say so and stop.
 | An agent needs the roadmap as context | `roadmap.sh` | *The roadmap* below |
 | Start a roadmap | read `docs/`, propose, one approval, then write | `planning.md` |
 | A milestone has no open issues left, or the person asks to re-plan | the same, from that milestone | `planning.md`, *Re-planning* |
-| Open issues have no label or no milestone, or the person asks to triage | duplicates first; a verdict for each, then its label and milestone, or its close; one approval, then write | `triage.md` |
+| Open issues have no label or no milestone, or the person asks to triage | duplicates first; a verdict for each with no entry in its `status:` line, then its label and milestone, or its close; one approval, then write | `triage.md` |
 | The person wants the board | `board.sh`; pass on the two settings it prints | *The board* below |
 
 A file in the last column sits next to this one, in this skill's base

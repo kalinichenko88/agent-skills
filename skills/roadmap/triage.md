@@ -42,6 +42,9 @@ gh issue list --state open --limit 100000 --json number,title,labels \
   --jq '.[] | select((.labels | length == 0) or any(.labels[]; .name == "question")) | "#\(.number) \(.title)"'
 ```
 
+Read the `status:` line of each issue in the list:
+`bash <github>/scripts/collect.sh status <n>`.
+
 When no open milestone exists outside `Later`, the milestones wait for a
 roadmap. Then the list is only the issues of this command, and the milestone
 column below stays empty. After the triage, offer to start a roadmap
@@ -71,14 +74,18 @@ the survivor. When its milestone comes before the survivor's, in the order of
 survivor is in the list too, the duplicate's row gives it no milestone: its
 own row carries the earlier of the two, unless its verdict gives it none. When
 both have such an entry, neither closes as a duplicate: each one in the list
-counts as not a duplicate, and gets its verdict below.
+counts as not a duplicate, and goes on to *Verdict* below.
 
 ## Verdict
 
-Read each issue in full, with its author and every comment:
+An issue with an entry in its `status:` line, yours too, gets no verdict: a
+session can work on it now. Its row gives that status, and nothing is written
+for it.
+
+Read each other issue in full, with its author and every comment:
 `gh issue view <n> --json author,title,body,comments`. On a pipe, as in an
 agent's shell, `gh issue view --comments` prints the comments only.
-Give each issue that is not a duplicate one verdict:
+Give each one that is not a duplicate one verdict:
 
 - **Reproduced** — with the steps you ran and what they showed. When **Fixed
   before** names a fix for the same report, the verdict says
