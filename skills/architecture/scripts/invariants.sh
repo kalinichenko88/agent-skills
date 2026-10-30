@@ -111,13 +111,13 @@ if [ -n "$base" ]; then
 fi
 
 # For the awk programs below: under(p, e) is true when the path p is the entry
-# e or inside it, and under_any(p, list) gives the index of the first entry of
-# a \037 list that holds p, or 0.
+# e or inside it, and with exact only when p is e. under_any(p, list) gives the
+# index of the first entry of a \037 list that holds p, or 0.
 lib='
-  function under(p, e) { sub(/\/+$/, "", e); return e == "." || p == e || index(p, e "/") == 1 }
-  function under_any(p, list,   n, i, a) {
+  function under(p, e, exact) { sub(/\/+$/, "", e); return exact ? p == e : e == "." || p == e || index(p, e "/") == 1 }
+  function under_any(p, list, exact,   n, i, a) {
     n = split(list, a, "\037")
-    for (i = 1; i <= n; i++) if (under(p, a[i])) return i
+    for (i = 1; i <= n; i++) if (under(p, a[i], exact)) return i
     return 0
   }
 '
@@ -182,21 +182,22 @@ base_hits() {
 # when a hit is not under a debt entry.
 report() {
   ID=$id KIND=$kind DEBT=$debt_ BDEBT=$bdebt SINCE=$base awk -F'\t' "$lib"'
-    BEGIN { nd = split(ENVIRON["DEBT"], entry, "\037"); grep = ENVIRON["KIND"] == "grep" }
+    # In a files check, a debt entry is one folder, not its subfolders.
+    BEGIN { nd = split(ENVIRON["DEBT"], entry, "\037"); grep = ENVIRON["KIND"] == "grep"; exact = ENVIRON["KIND"] == "files" }
     $0 == "\035" { part++; next }
     !NF { next }
     { t = $0; sub(/^[^\t]*\t[^\t]*\t/, "", t) }
     part == 0 { was[$1] = $2; next }
     # A hit at the base is keyed by its status there, debt or fail, and its path.
     part == 1 {
-      p = (under_any($1, ENVIRON["BDEBT"]) ? "debt" : "fail") "\t" $1
+      p = (under_any($1, ENVIRON["BDEBT"], exact) ? "debt" : "fail") "\t" $1
       if (grep) seen[p "\t" t]++; else size[p] = $2 + 0
       next
     }
     {
       h = grep ? $1 ":" $2 ":" t : $1 " " $2
       known = 0
-      for (i = 1; i <= nd; i++) if (under($1, entry[i])) known = held[i] = 1
+      for (i = 1; i <= nd; i++) if (under($1, entry[i], exact)) known = held[i] = 1
       # p: the key of the hit at the base. A folder keeps its path.
       p = $1
       if (ENVIRON["KIND"] != "files" && ($1 in was)) p = was[$1]

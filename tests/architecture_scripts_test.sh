@@ -200,8 +200,9 @@ check 'no checks.awk beside it' '2 invariants.sh: checks.awk is not beside this 
 
 # The lines and files checks, and debt lists: a file and a folder past their
 # limits, a file and a folder that are known debt, a debt path that no longer
-# breaks its check, a document past the limit that is not code, and a
-# subfolder whose files do not count for the folder above it.
+# breaks its check, a document past the limit that is not code, a subfolder
+# whose files do not count for the folder above it, and then a subfolder of a
+# debt folder past the limit.
 repo2=$tmp/repo2
 new_repo "$repo2"
 mkdir -p "$repo2/src/feature" "$repo2/src/legacy" "$repo2/src/many/sub" "$repo2/docs"
@@ -220,7 +221,7 @@ cat >"$repo2/docs/ARCHITECTURE.md" <<'EOF'
 - **I-3.** The same, with the folder as debt.
   Check: files 3 in `src/many/` debt `src/many/`.
 - **I-4.** No `fetch` outside the API client.
-  Check: grep `fetch\(` in `src/` debt `src/legacy/report.ts`.
+  Check: grep `fetch\(` in `src/` debt `src/legacy/`.
 EOF
 commit "$repo2" 'add the tree'
 run "$repo2"
@@ -228,6 +229,17 @@ check 'lines, files and debt' "1 $(printf '%s\n' 'I-1 FAIL' '  src/feature/big.t
   '  debt src/legacy/report.ts 12' '  no longer debt src/legacy/old.ts' \
   'I-2 FAIL' '  src/many 4' \
   'I-3 PASS' '  debt src/many 4' \
+  'I-4 PASS' '  debt src/legacy/report.ts:12:fetch(x);')" "$code $out"
+
+# In a files check, a debt folder is that folder only: a subfolder of it past
+# the limit fails, and does not keep the folder on the list.
+rm "$repo2/src/many/m4.ts"
+for f in s3 s4; do echo 1 >"$repo2/src/many/sub/$f.ts"; done
+run "$repo2"
+check 'a subfolder of a debt folder' "1 $(printf '%s\n' 'I-1 FAIL' '  src/feature/big.ts 11' \
+  '  debt src/legacy/report.ts 12' '  no longer debt src/legacy/old.ts' \
+  'I-2 FAIL' '  src/many/sub 4' \
+  'I-3 FAIL' '  src/many/sub 4' '  no longer debt src/many' \
   'I-4 PASS' '  debt src/legacy/report.ts:12:fetch(x);')" "$code $out"
 
 run "$repo" nosuchref

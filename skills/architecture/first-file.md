@@ -163,7 +163,9 @@ a check.
   path each.
 - A path is literal, from the root of the repository: a file or a folder,
   with or without a trailing `/`. A path P is under an entry E when P is E,
-  or P starts with E and `/`.
+  or P starts with E and `/`. In a `files` check, a folder is under a
+  `debt` entry only when it is that entry: a subfolder of the entry past the
+  limit fails, and joins the list only by its own path.
 - `except` paths are out of the check, by design: a hit under one is never
   printed. `debt` paths are known debt: a hit under one is printed, and does
   not fail the check.

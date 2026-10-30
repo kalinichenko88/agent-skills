@@ -2,7 +2,8 @@
 # Runs the architecture skill's invariants.sh --new-since on a repository it
 # builds, commit by commit: a base with no architecture file, a branch that
 # renames and adds hits under rules it keeps, a branch that changes its rules,
-# and a base file that the script cannot read.
+# and a base file that the script cannot read. A second repository holds a
+# subfolder of a debt folder in a files check.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -175,5 +176,19 @@ check 'a base debt line with no indent' "0 $(printf '%s\n' 'I-1 PASS' \
   '  new debt src/feature/a.ts:2:fetch(u);' '  new debt src/feature/a.ts:3:fetch(u);')" "$code $out"
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
+
+# In a files check, a debt folder is that folder only, at the base too: a
+# subfolder of it past the limit fails at the base and stays old, and one
+# that the branch adds is new.
+repo4=$tmp/repo4
+new_repo "$repo4"
+mkdir -p "$repo4/src/a/old" "$repo4/src/a/new" "$repo4/docs"
+for f in a1 a2 a3 a4 old/o1 old/o2 old/o3 old/o4; do echo 1 >"$repo4/src/a/$f.ts"; done
+printf '%s\n' '- **I-1.** No folder holds more than 3 code files.' '  Check: files 3 in `src` debt `src/a`' >"$repo4/docs/ARCHITECTURE.md"
+commit "$repo4" 'add the tree'
+for f in n1 n2 n3 n4; do echo 1 >"$repo4/src/a/new/$f.ts"; done
+run "$repo4" --new-since HEAD
+check 'a subfolder of a debt folder' "1 $(printf '%s\n' 'I-1 FAIL' \
+  '  new src/a/new 4' '  src/a/old 4' '  debt src/a 4')" "$code $out"
 
 echo 'architecture_since_test: ok'
