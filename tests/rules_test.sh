@@ -107,6 +107,8 @@ done
 # - A zero count stops a fix, but an attacker can make the input of data loss
 #   or a security hole: the rule for a person's report, in rules.md, and the
 #   rule for a review finding, in review-loop, each name that exception (#151).
+#   A project with no real source to sample can only count zero, so both
+#   rules also say that such a count stops nothing (#161).
 # - Run from another checkout, gh 2.103 removes the branch's linked worktree
 #   and its local branch at the merge, with no check of Cleanup. The merge
 #   runs in the checkout that holds the branch, and review-loop asks that
@@ -134,6 +136,8 @@ rules.md|**A defect in this plugin goes to its tracker, after the person says ye
 rules.md|Unlike the rule above, ask the person first: show the text that the github skill's `filing.md` writes.
 rules.md|For a report of data loss or a security hole, a zero count does not stop the fix. An attacker can make the input, so the test of that fix uses the input of the report.
 skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss or a security hole: an attacker can make the input, and the test of its fix uses the input of the finding.
+rules.md|With no real source to sample, the count stops nothing.
+skills/review-loop/SKILL.md|With no real source to sample, the count declines nothing.
 skills/github/SKILL.md|Run the merge in the checkout that holds the branch, whatever directory the session is in: `(cd <path> && gh pr merge …)`, where `<path>` is what `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints.
 skills/review-loop/SKILL.md|When `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints nothing or the first path of `git worktree list`, the branch has no linked worktree
 EOF

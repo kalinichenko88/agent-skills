@@ -29,7 +29,7 @@ that is the finding. Then write the case against a recorded payload — whitespa
 pretty-printing and all — not a string typed to make the assertion pass. For a
 report of data loss or a security hole, a zero count does not stop the fix. An
 attacker can make the input, so the test of that fix uses the input of the
-report.
+report. With no real source to sample, the count stops nothing.
 
 In Claude Code, a Haiku subagent does the counting: one `Agent` call with
 `subagent_type: "Explore"` and `model: "haiku"`, given the source, the sample
