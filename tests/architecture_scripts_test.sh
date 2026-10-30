@@ -232,13 +232,14 @@ check 'lines, files and debt' "1 $(printf '%s\n' 'I-1 FAIL' '  src/feature/big.t
   'I-4 PASS' '  debt src/legacy/report.ts:12:fetch(x);')" "$code $out"
 
 # In a files check, a debt folder is that folder only: a subfolder of it past
-# the limit fails.
+# the limit fails, and does not keep the folder on the list.
+rm "$repo2/src/many/m4.ts"
 for f in s3 s4; do echo 1 >"$repo2/src/many/sub/$f.ts"; done
 run "$repo2"
 check 'a subfolder of a debt folder' "1 $(printf '%s\n' 'I-1 FAIL' '  src/feature/big.ts 11' \
   '  debt src/legacy/report.ts 12' '  no longer debt src/legacy/old.ts' \
-  'I-2 FAIL' '  src/many 4' '  src/many/sub 4' \
-  'I-3 FAIL' '  src/many/sub 4' '  debt src/many 4' \
+  'I-2 FAIL' '  src/many/sub 4' \
+  'I-3 FAIL' '  src/many/sub 4' '  no longer debt src/many' \
   'I-4 PASS' '  debt src/legacy/report.ts:12:fetch(x);')" "$code $out"
 
 run "$repo" nosuchref

@@ -220,10 +220,10 @@ wins in that project, and it names the convention that it replaces.
 - **The `debt` list.** The files and folders already past a limit are in the
   check's `debt` list, so the check passes now. Outside the five steps of
   `first-file.md`, a path joins the list only in a pull request that also
-  files its debt issue, by *When to split*. In a `files` check, an entry
-  holds only its own folder: a subfolder past the limit joins by its own
-  path. A path that drops below the limit leaves the list. A new number for
-  the limit needs an ADR.
+  files its debt issue, by *When to split*. In a `files` check, a folder is
+  under an entry only when it is that entry: a subfolder past the limit
+  fails, and joins the list only by its own path. A path that is no longer
+  past the limit leaves the list. A new number for the limit needs an ADR.
 - **At the decision**, when the change goes into a file or a module past its
   limit, or into a file that does more than one job, name the split before
   the edit: the new files, what goes into each, and by which role.
