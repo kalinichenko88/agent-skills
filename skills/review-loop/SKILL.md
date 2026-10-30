@@ -336,7 +336,7 @@ a real defect on two, in 53 to 204 seconds.
    count does not decline a finding of data loss or a security hole: an
    attacker can make the input, and the test of its fix uses the input of
    the finding. With no real source to sample, the count declines nothing,
-   and the test of its fix uses the input of the finding.
+   and the test of the fix uses the input of the finding.
 2. **Fix every obvious one now, without asking:** real bugs, dead code,
    accessibility and contrast failures, code that contradicts its own
    documentation, wrong numbers in documents.
