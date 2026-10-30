@@ -376,7 +376,10 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   close, an indented code fence with a closing line 1 to 3 columns past its
   opening line, a path with no code file outside its `except` paths, a
   pattern that git rejects, two invariants with one number, no `checks.awk`
-  beside the script, or no debt skill beside this one. Correct the call,
+  beside the script, or no debt skill beside this one. A path with no code
+  file and a pattern that git rejects stop only their own invariant: it
+  gets no line, and the other checks run. Each other cause stops the run
+  before the first check. Correct the call,
   the line in the architecture file, or the install. In the base's file, or
   in a check that cannot run at the base, these causes give no exit 2: see
   the cases above.

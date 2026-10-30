@@ -128,6 +128,14 @@ check 'a line it cannot read' '2 invariants.sh: I-1: cannot read: Check: grep fe
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
+# A check that cannot run stops only its own invariant: the run names each
+# cause, runs the other checks, and exits 2.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `lib/`.' '- **I-2.** No fetch.' '  Check: grep `fetch(` in `src/`.' \
+  '- **I-3.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' '- **I-4.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'each cause, past the first' "2 $(printf '%s\n' 'invariants.sh: I-1: no code file under lib/' 'invariants.sh: I-2: git grep failed' \
+  'invariants.sh: I-3: no code file under srcx/' 'I-4 FAIL' '  src/a.ts:1:fetch(u);')" "$code $(grep '^invariants' <<<"$err")
+$out"
 
 # A debt line belongs to the Check: line of its invariant wherever it stands
 # in the block after it. A line that the script would drop changes what a

@@ -21,8 +21,11 @@
 # arguments, after -e and --, as literal pathspecs. Documents and other data
 # are not code and are left out, by the debt skill's data rule.
 #
-# Exit 0 when no invariant fails, 1 when one fails, and 2 for a wrong call or a
-# check that cannot run.
+# Exit 0 when no invariant fails, 1 when one fails, and 2 for a wrong call, a
+# file that it cannot read, or a check that cannot run. Each of the first two
+# stops the run before the first check. A check that cannot run stops only its
+# invariant: it gets no line, its cause goes to stderr, the other checks run,
+# and the exit is 2 at the end.
 #
 # Needs only bash, git and awk, and the debt skill's data.ere beside this skill.
 
@@ -218,6 +221,7 @@ report() {
 }
 
 status=0
+broken=0
 while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   [ -n "$id" ] || continue
   if [ "$kind" = review ]; then
@@ -229,7 +233,10 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   # A path with no code file outside the except paths is a typo, an empty
   # folder or an except path too wide: a check that reads nothing would pass
   # forever.
-  files=$(listing) || exit 2
+  files=$(listing) || {
+    broken=1
+    continue
+  }
   missing=$(printf '%s\n' "$files" | IN=$in_ EXCEPT=$except_ awk -F'\t' "$lib"'
     NF && !under_any($1, ENVIRON["EXCEPT"]) { code[$1] = 1 }
     END {
@@ -240,10 +247,17 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
         if (!found) { print a[i]; exit }
       }
     }')
-  [ -z "$missing" ] || die "$id: no code file under $missing"
+  if [ -n "$missing" ]; then
+    echo "invariants.sh: $id: no code file under $missing" >&2
+    broken=1
+    continue
+  fi
 
   if [ "$kind" = grep ]; then
-    hits=$(grep_hits) || exit 2
+    hits=$(grep_hits) || {
+      broken=1
+      continue
+    }
   else
     hits=$(printf '%s\n' "$files" | size_hits)
   fi
@@ -264,4 +278,5 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
     printf '%s\n' "$hits" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2n
   } | report || status=1
 done <<<"$records"
+[ "$broken" = 0 ] || exit 2
 exit "$status"
