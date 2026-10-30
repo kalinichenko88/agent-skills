@@ -21,11 +21,12 @@
 # arguments, after -e and --, as literal pathspecs. Documents and other data
 # are not code and are left out, by the debt skill's data rule.
 #
-# Exit 0 when no invariant fails, 1 when one fails, and 2 for a wrong call, a
-# file that it cannot read, or a check that cannot run. Each of the first two
-# stops the run before the first check. A check that cannot run stops only its
-# invariant: it gets no line, its cause goes to stderr, the other checks run,
-# and the exit is 2 at the end.
+# Exit 0 when no invariant fails, 1 when one fails, and 2 when a check cannot
+# run, also when an invariant fails. A check that cannot run stops only its
+# invariant: it gets no line, its cause goes to stderr, and the other checks
+# run. A line of the file that the script cannot read stops the checks of the
+# invariant that holds it and of each one below it. Any other cause, as a
+# wrong call or a missing checks.awk, stops the run before the first check.
 #
 # Needs only bash, git and awk, and the debt skill's data.ere beside this skill.
 
@@ -91,7 +92,10 @@ else
   echo 'No architecture file in the working tree.'
   exit 0
 fi
-records=$(printf '%s\n' "$text" | AT='' awk "$checks") || exit 2
+# A file that checks.awk cannot read past a line gives the records of the
+# invariants that it read whole before it: their checks run.
+broken=0
+records=$(printf '%s\n' "$text" | AT='' awk "$checks") || broken=1
 # olds: the records of the base's own architecture file. A base file that
 # cannot be read gives the records of the invariants that checks.awk read
 # whole before it stopped: the branch can be the one that corrects the file.
@@ -221,7 +225,6 @@ report() {
 }
 
 status=0
-broken=0
 while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   [ -n "$id" ] || continue
   if [ "$kind" = review ]; then

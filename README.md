@@ -147,7 +147,7 @@ hook runs on prompts recorded from Claude Code and Codex, in
 `tests/fixtures/hooks/`, against a fake `gh`. The architecture skill's
 `invariants.sh` runs on repositories the tests build: each kind of check, the
 `debt` lists, `--new-since` over renamed files, changed checks and a base
-file that it cannot read, and the calls that must stop with exit 2.
+file that it cannot read, and the calls that must exit 2.
 
 `make check` runs every `tests/<name>_test.sh`. A test passes only when it
 exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
