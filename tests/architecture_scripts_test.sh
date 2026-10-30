@@ -5,8 +5,8 @@
 # dash; a pattern that looks like a shell command; an invariant with no Check:
 # line, and one in a fenced example. Then the same file with CRLF line ends, at
 # the root, from a subdirectory, with an untracked file and at a ref, and the
-# calls that must stop with exit 2. A second repository holds the lines and
-# files checks and the debt lists.
+# calls that must exit 2. A second repository holds the lines and files checks
+# and the debt lists.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -121,13 +121,33 @@ run "$empty" HEAD
 check 'no file at a ref' '0 No architecture file at HEAD.' "$code $out"
 
 mkdir "$empty/docs"
-printf '%s\n' '- **I-1.** No fetch.' '  Check: grep fetch in src/' >"$empty/docs/ARCHITECTURE.md"
+# A line that the script cannot read stops every check, also of the whole
+# invariants above it.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' \
+  '- **I-3.** No fetch.' '  Check: grep fetch in src/' >"$empty/docs/ARCHITECTURE.md"
 # An AT of the person's environment does not reach the message.
 AT='leak: ' run "$empty"
-check 'a line it cannot read' '2 invariants.sh: I-1: cannot read: Check: grep fetch in src/' "$code $err"
+check 'a line it cannot read' '2 invariants.sh: I-3: cannot read: Check: grep fetch in src/' "$code $err$out"
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
+# A check that cannot run stops only its own invariant: the run names the
+# causes that it finds, runs the other checks, and exits 2. Git rejects a path
+# in the listing and a pattern in the grep.
+for c in 'grep `fetch\(` in `../x/`' 'grep `fetch(` in `src/`'; do
+  printf '%s\n' '- **I-1.** No fetch.' "  Check: $c." '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+  run "$empty"
+  check "git rejects: $c" "2 $(printf '%s\n' 'invariants.sh: I-1: git grep failed' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" \
+    "$code $(grep '^invariants' <<<"$err")
+$out"
+done
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `lib/` `srcx/`.' '- **I-2.** No fetch.' '  Check: grep `fetch(` in `lib/`.' \
+  '- **I-3.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'each cause, past the first' "2 $(printf '%s\n' 'invariants.sh: I-1: no code file under lib/' 'invariants.sh: I-1: no code file under srcx/' \
+  'invariants.sh: I-2: no code file under lib/' 'invariants.sh: I-2: git grep failed' 'I-3 FAIL' '  src/a.ts:1:fetch(u);')" \
+  "$code $(grep '^invariants' <<<"$err")
+$out"
 
 # A debt line belongs to the Check: line of its invariant wherever it stands
 # in the block after it. A line that the script would drop changes what a

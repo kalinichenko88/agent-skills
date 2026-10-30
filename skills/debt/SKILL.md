@@ -83,9 +83,9 @@ start there.
    - an invariant that the script prints as `review only` has no `Check:`
      line: name it in the report, as a rule that a grep cannot test.
 
-   When the script exits with 2, it stopped at the cause that it gives on
-   stderr, and each invariant that it did not print did not run. Give the
-   message, and name those invariants in the report as not checked.
+   When the script exits with 2, it gives the causes on stderr, and each
+   invariant that it did not print did not run. Give the messages, and name
+   those invariants in the report as not checked.
 
    The architecture file can also name the one way to do a kind of work, as
    the one HTTP client. A second way competes with it when it does the same
@@ -297,7 +297,7 @@ and linked so far.
 The issues filed, re-measured and named, with their numbers; *next*, with
 scores; the borderline hits; the invariants with no `Check:` line; the
 invariants that an exit 2 of `invariants.sh` left unchecked, with its
-message; the copies kept on purpose; the small cuts, one line each with the score of
+messages; the copies kept on purpose; the small cuts, one line each with the score of
 the file it names, or of its highest file; the ponytail findings dropped, with
 the rule; the lines the kept findings would save, marked as your estimate,
 not ponytail's own `net:`; the findings of step 5 that their places did not

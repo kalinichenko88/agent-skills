@@ -370,16 +370,21 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   the paragraphs above tell which hits are the branch's. An ADR never excuses
   a FAIL: an ADR that amends an invariant changes its `Check:` line in the
   same commit.
-- **Exit 2:** a check did not run. The lines on stderr name the cause: a
+- **Exit 2:** a check did not run. The lines on stderr name the causes: a
   wrong call, no git repository, a line that the script cannot read, a
   `Check:` or `debt` line outside an invariant, a code fence that does not
   close, an indented code fence with a closing line 1 to 3 columns past its
   opening line, a path with no code file outside its `except` paths, a
-  pattern that git rejects, two invariants with one number, no `checks.awk`
-  beside the script, or no debt skill beside this one. Correct the call,
-  the line in the architecture file, or the install. In the base's file, or
-  in a check that cannot run at the base, these causes give no exit 2: see
-  the cases above.
+  pattern or a path that git rejects, two invariants with one number, no
+  `checks.awk` beside the script, or no debt skill beside this one. Correct
+  the call, the line in the architecture file, or the install. A path with
+  no code file, or a pattern or a path that git rejects, stops only the
+  check of its own invariant: that invariant gets no line on stdout, and
+  the other checks run. Each other cause stops the run before the first
+  check. The lines of the invariants that ran count as for exit 0 and 1: a
+  hit of the change under a FAIL is a defect. In the base's file, or in a
+  check that cannot run at the base, these causes give no exit 2: see the
+  cases above.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to
