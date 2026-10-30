@@ -131,9 +131,9 @@ check 'a line it cannot read' '2 invariants.sh: I-3: cannot read: Check: grep fe
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
-# A check that cannot run stops only its own invariant: the run names each
-# cause, runs the other checks, and exits 2. Git rejects a path in the listing
-# and a pattern in the grep.
+# A check that cannot run stops only its own invariant: the run names the
+# causes that it finds, runs the other checks, and exits 2. Git rejects a path
+# in the listing and a pattern in the grep.
 for c in 'grep `fetch\(` in `../x/`' 'grep `fetch(` in `src/`'; do
   printf '%s\n' '- **I-1.** No fetch.' "  Check: $c." '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
   run "$empty"

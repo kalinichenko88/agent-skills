@@ -23,8 +23,8 @@
 #
 # Exit 0 when no invariant fails, 1 when one fails, and 2 when a check of the
 # ref or the working tree cannot run, also when an invariant fails. A check
-# that cannot run stops only its invariant: it gets no line, each of its
-# causes goes to stderr, and the other checks run. Any other cause, as a wrong
+# that cannot run stops only its invariant: it gets no line, the causes that
+# it finds go to stderr, and the other checks run. Any other cause, as a wrong
 # call or a line that the script cannot read in the file it checks, stops the
 # run before the first check, with exit 2.
 #
@@ -254,14 +254,14 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
     broken=1
   fi
 
-  # The grep runs also after a missing path, so that it names a pattern that
-  # git rejects; its hits do not count then.
+  # The script also does the grep after a missing path, so that it names a
+  # pattern that git rejects. Its hits do not count then.
   if [ "$kind" = grep ]; then
     hits=$(grep_hits) || {
       broken=1
       continue
     }
-  else
+  elif [ -z "$missing" ]; then
     hits=$(printf '%s\n' "$files" | size_hits)
   fi
   [ -z "$missing" ] || continue
