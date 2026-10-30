@@ -90,10 +90,9 @@ EOF
 }
 
 # The installed copy of the plugin is turned off, so the rules come from this
-# checkout. The language is English, as the checks of the last report read
-# English words: with this machine's language, the summary is in that one. A
-# fake codex comes first on PATH. It is logged in, and each exec
-# with the prompt of codex-review.sh logs one read and returns one defect
+# checkout. The language is English: the checks of the last report read
+# English words. A fake codex comes first on PATH. It is logged in, and each
+# exec with the prompt of codex-review.sh logs one read and returns one defect
 # that no round reported: the class drops each letter outside ASCII. An
 # empty Codex home makes a real codex that the shell profile puts first print
 # "skipped:", so no run spends the Codex limit, and that run logs no read.
