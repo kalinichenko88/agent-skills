@@ -174,7 +174,6 @@ printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' '  
 run "$repo3" --new-since HEAD
 check 'a base debt line with no indent' "0 $(printf '%s\n' 'I-1 PASS' \
   '  new debt src/feature/a.ts:2:fetch(u);' '  new debt src/feature/a.ts:3:fetch(u);')" "$code $out"
-
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 
