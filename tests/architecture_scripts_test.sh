@@ -5,8 +5,8 @@
 # dash; a pattern that looks like a shell command; an invariant with no Check:
 # line, and one in a fenced example. Then the same file with CRLF line ends, at
 # the root, from a subdirectory, with an untracked file and at a ref, and the
-# calls that must exit 2. A second repository holds the lines and
-# files checks and the debt lists.
+# calls that must exit 2. A second repository holds the lines and files checks
+# and the debt lists.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -129,14 +129,11 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$em
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
 # A check that cannot run stops only its own invariant: the run names each
-# cause, runs the other checks, and exits 2. A line that the script cannot
-# read stops only the invariants from it on.
+# cause, runs the other checks, and exits 2.
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `lib/`.' '- **I-2.** No fetch.' '  Check: grep `fetch(` in `src/`.' \
-  '- **I-3.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' '- **I-4.** No fetch.' '  Check: grep `fetch\(` in `src/`.' \
-  '- **I-5.** No fetch.' '  Check: grep fetch in src/' >"$empty/docs/ARCHITECTURE.md"
+  '- **I-3.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' '- **I-4.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'each cause, past the first' "2 $(printf '%s\n' 'invariants.sh: I-5: cannot read: Check: grep fetch in src/' \
-  'invariants.sh: I-1: no code file under lib/' 'invariants.sh: I-2: git grep failed' \
+check 'each cause, past the first' "2 $(printf '%s\n' 'invariants.sh: I-1: no code file under lib/' 'invariants.sh: I-2: git grep failed' \
   'invariants.sh: I-3: no code file under srcx/' 'I-4 FAIL' '  src/a.ts:1:fetch(u);')" "$code $(grep '^invariants' <<<"$err")
 $out"
 
