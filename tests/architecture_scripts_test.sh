@@ -221,7 +221,7 @@ cat >"$repo2/docs/ARCHITECTURE.md" <<'EOF'
 - **I-3.** The same, with the folder as debt.
   Check: files 3 in `src/many/` debt `src/many/`.
 - **I-4.** No `fetch` outside the API client.
-  Check: grep `fetch\(` in `src/` debt `src/legacy/report.ts`.
+  Check: grep `fetch\(` in `src/` debt `src/legacy/`.
 EOF
 commit "$repo2" 'add the tree'
 run "$repo2"
