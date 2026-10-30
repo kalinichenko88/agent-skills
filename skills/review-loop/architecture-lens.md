@@ -39,9 +39,10 @@ and run no code of the project.
    `<base>`: at a fault in the base's file, as a line that it cannot read,
    it stops before the first check. Give any other cause in your last
    lines. An invariant with no line on stdout did not run: its own check
-   has a cause, or a cause outside the checks stopped every check. Read the
-   code against the statement of each such invariant, as for one that is
-   review only, and name those invariants in your last lines.
+   has a cause, `no code file` or `git grep failed`, or another cause
+   stopped every check. Read the code against the statement of each such
+   invariant, as for one that is review only, and name those invariants in
+   your last lines.
 4. When `npx` or `bunx` is on `PATH`, run
    `bash <skills>/debt/scripts/clones.sh <tree>`, and keep the rows that name
    a file the range changes. With neither, or when it fails, say so in your

@@ -21,11 +21,12 @@
 # arguments, after -e and --, as literal pathspecs. Documents and other data
 # are not code and are left out, by the debt skill's data rule.
 #
-# Exit 0 when no invariant fails, 1 when one fails, and 2 when a check cannot
-# run, also when an invariant fails. A check that cannot run stops only its
-# invariant: it gets no line, its cause goes to stderr, and the other checks
-# run. Any other cause, as a wrong call or a line that the script cannot read
-# in the file it checks, stops the run before the first check.
+# Exit 0 when no invariant fails, 1 when one fails, and 2 when a check of the
+# ref or the working tree cannot run, also when an invariant fails. A check
+# that cannot run stops only its invariant: it gets no line, each of its
+# causes goes to stderr, and the other checks run. Any other cause, as a wrong
+# call or a line that the script cannot read in the file it checks, stops the
+# run before the first check, with exit 2.
 #
 # Needs only bash, git and awk, and the debt skill's data.ere beside this skill.
 
@@ -93,8 +94,9 @@ else
 fi
 records=$(printf '%s\n' "$text" | AT='' awk "$checks") || exit 2
 # olds: the records of the base's own architecture file. A base file that
-# cannot be read gives the records of the invariants that checks.awk read
-# whole before it stopped: the branch can be the one that corrects the file.
+# cannot be read gives the records that checks.awk printed before it stopped,
+# the last one maybe cut off (see its header): the branch can be the one that
+# corrects the file.
 olds=
 if [ -n "$base" ]; then
   if ! text=$(file_at "$base"); then
@@ -237,22 +239,23 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
     broken=1
     continue
   }
-  missing=$(printf '%s\n' "$files" | IN=$in_ EXCEPT=$except_ awk -F'\t' "$lib"'
+  missing=$(printf '%s\n' "$files" | ID=$id IN=$in_ EXCEPT=$except_ awk -F'\t' "$lib"'
     NF && !under_any($1, ENVIRON["EXCEPT"]) { code[$1] = 1 }
     END {
       n = split(ENVIRON["IN"], a, "\037")
       for (i = 1; i <= n; i++) {
         found = 0
         for (f in code) if (under(f, a[i])) { found = 1; break }
-        if (!found) { print a[i]; exit }
+        if (!found) print "invariants.sh: " ENVIRON["ID"] ": no code file under " a[i]
       }
     }')
   if [ -n "$missing" ]; then
-    echo "invariants.sh: $id: no code file under $missing" >&2
+    printf '%s\n' "$missing" >&2
     broken=1
-    continue
   fi
 
+  # The grep runs also after a missing path, so that it names a pattern that
+  # git rejects; its hits do not count then.
   if [ "$kind" = grep ]; then
     hits=$(grep_hits) || {
       broken=1
@@ -261,6 +264,7 @@ while IFS=$'\036' read -r id kind arg in_ except_ debt_; do
   else
     hits=$(printf '%s\n' "$files" | size_hits)
   fi
+  [ -z "$missing" ] || continue
   # The same invariant at the base: its id, with a check of the same kind.
   old=
   bdebt=
