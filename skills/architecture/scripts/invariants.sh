@@ -24,8 +24,8 @@
 # Exit 0 when no invariant fails, 1 when one fails, and 2 when a check cannot
 # run, also when an invariant fails. A check that cannot run stops only its
 # invariant: it gets no line, its cause goes to stderr, and the other checks
-# run. Any other cause, as a wrong call or a line of the file that the script
-# cannot read, stops the run before the first check.
+# run. Any other cause, as a wrong call or a line that the script cannot read
+# in the file it checks, stops the run before the first check.
 #
 # Needs only bash, git and awk, and the debt skill's data.ere beside this skill.
 

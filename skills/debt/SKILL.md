@@ -83,7 +83,7 @@ start there.
    - an invariant that the script prints as `review only` has no `Check:`
      line: name it in the report, as a rule that a grep cannot test.
 
-   When the script exits with 2, it gives each cause on stderr, and each
+   When the script exits with 2, it gives the causes on stderr, and each
    invariant that it did not print did not run. Give the messages, and name
    those invariants in the report as not checked.
 

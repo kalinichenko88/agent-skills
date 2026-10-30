@@ -2,7 +2,8 @@
 # separated by \036 and the items of a list by \037: id, kind (grep, lines,
 # files or review), arg, in, except, debt. On a line that it cannot read, it
 # prints the cause on stderr, after the text of AT when it is set, and exits 2.
-# Each record that it printed before is whole.
+# Each record that it printed before is whole, except one that a Check: or
+# debt line with no indent ended: it holds only the lines before that line.
 #
 #   AT=<where> awk -f checks.awk
 

@@ -125,6 +125,11 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep fetch in src/' >"$empty/docs
 # An AT of the person's environment does not reach the message.
 AT='leak: ' run "$empty"
 check 'a line it cannot read' '2 invariants.sh: I-1: cannot read: Check: grep fetch in src/' "$code $err"
+# A debt line with no indent cuts off the invariant above it, so a cause in
+# the file stops every check, also of the invariants above it.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' 'debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a cause in the file' '2 invariants.sh: a debt line outside an invariant: debt `src/a.ts`.' "$code $err$out"
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
