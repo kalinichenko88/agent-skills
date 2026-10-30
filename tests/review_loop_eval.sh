@@ -20,7 +20,7 @@
 # or does not invoke the skill. It calls the model, so it costs tokens and is
 # not part of `make check`: run it by hand after a change to
 # skills/review-loop or to its section in rules.md.
-# It runs with this machine's other plugins and settings.
+# It runs with this machine's other plugins and settings, but in English.
 #
 # Usage: tests/review_loop_eval.sh [runs, default 3] [stop]
 
@@ -90,8 +90,9 @@ EOF
 }
 
 # The installed copy of the plugin is turned off, so the rules come from this
-# checkout. A fake codex comes first on PATH. It is logged in, and each exec
-# with the prompt of codex-review.sh logs one read and returns one defect
+# checkout. The language is English: the checks of the last report read
+# English words. A fake codex comes first on PATH. It is logged in, and each
+# exec with the prompt of codex-review.sh logs one read and returns one defect
 # that no round reported: the class drops each letter outside ASCII. An
 # empty Codex home makes a real codex that the shell profile puts first print
 # "skipped:", so no run spends the Codex limit, and that run logs no read.
@@ -116,7 +117,7 @@ JSON
 EOF
   chmod +x "$work.bin/codex"
   (cd "$work" && PATH="$work.bin:$PATH" CODEX_HOME="$work.codex" claude -p --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
+    --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false},"language":"English"}' \
     --plugin-dir "$root" --dangerously-skip-permissions "$task") >"$1" 2>&1
 }
 
