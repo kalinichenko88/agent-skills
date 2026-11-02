@@ -1,89 +1,132 @@
-# agent-skills
+# craft-skills
 
-One plugin, `kalinichenko`, for both Claude Code and Codex: an always-on base
-prompt of engineering rules, plus the skills those rules lean on.
+> The plugin was `kalinichenko`, and this repository was `agent-skills`. If
+> you installed it under the old name, [move to `craft`](docs/migrating-from-kalinichenko.md).
 
-- **`rules.md`** — the base prompt: run the repository's own check before
-  calling work done, ship every bug fix with its test, use the platform before
-  a dependency, keep code and commits in English, write prose in Simplified
-  Technical English, move docs with the change, verify review findings before
-  acting on them and load the review loop in place of superpowers' review
-  skills before the first review of a change and, in Claude Code, in place
-  of the builder check of a superpowers spec and after the self-review of its
-  plan, load the product skill before the first edit of a feature and at a
-  fork in brainstorming,
-  load the TypeScript conventions before the first write to a TypeScript file
-  and the React conventions before the first write to a React component or
-  hook. Outside this repository, report a defect in this plugin to its
-  tracker only after the person says yes. In Claude Code a Haiku subagent
-  does the reading for two of them: it counts the real payloads before a bug
-  fix, and finds the docs a change made false. A plugin has no slot for a
-  `CLAUDE.md` or `AGENTS.md`, so `hooks/rules.sh` injects it at the start of
-  every session and every subagent.
-- **[`craft:github`](skills/github/README.md)** — commits, pull
-  requests, issues and Actions.
+`craft` is a plugin for Claude Code and Codex. It gives the agent a set of
+working rules and skills, so that it works on your project as a careful
+engineer does: it reads the code before it writes, ships each fix with its
+test, reviews its own change, and keeps the issue tracker true.
+
+It is for a solo developer or a small team that keeps its work on GitHub.
+
+## What it does
+
+**The rules.** [`rules.md`](rules.md) loads at the start of every session and
+every subagent. It tells the agent to run the project's own check before it
+calls work done, to ship each bug fix with its test, to use the platform
+before a new dependency, to move the docs with the change, and to load the
+right skill at the right moment.
+
+**The skills.** Each one loads when its moment comes. Its README says when it
+starts and what you get.
+
+- [`craft:github`](skills/github/README.md) — take an issue into work, file
+  what you find outside the task, write commits and pull requests, keep the
+  issues true after a merge.
 
   ![The GitHub skill: start a task, find something outside it, finish it](docs/github/00-overview.webp)
-- **[`craft:roadmap`](skills/roadmap/README.md)** — a project manager on
-  top of GitHub.
+- [`craft:roadmap`](skills/roadmap/README.md) — a project manager on top of
+  GitHub: milestones, the next task, what can run in parallel, triage.
 
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
-- **[`craft:review-loop`](skills/review-loop/README.md)** — a review
-  that ends: rounds that read only the last fixes, one last pass over the
-  whole branch when the loop needed more than one round, Codex as a second
-  reviewer for `xhigh` changes in Claude Code, a review of the tests for
-  `high` and `xhigh` changes and a change to tests only, a review against
-  the project's architecture file and ADRs beside round 1, a security
-  review, and a summary of what the branch changed and what was decided and
-  fixed. A change to documents only gets one round and no security review.
-  In Claude Code, Fable and Codex
-  also read a superpowers spec, and one more subagent checks its plan
-  against it.
-- **[`craft:debt`](skills/debt/README.md)** — a map of the technical
-  debt: hotspots, broken layer rules, copies and, with ponytail,
-  over-engineering, filed as at most three `debt` issues a run, and one
-  more for the rules that the instruction files repeat or contradict.
-- **[`craft:architecture`](skills/architecture/README.md)** — new code
-  that grows into the project's structure, not beside it: the problem before
-  the code, one way to do one kind of work, a split before a file grows past
-  its limit, and numbered invariants in `docs/ARCHITECTURE.md` that a script
-  checks.
-- **[`craft:product`](skills/product/README.md)** — a skeptical
-  analyst before the work: whether a task is worth doing, from who gains,
-  the money, the direction, the law and the client, with Fable and Codex
-  searching the web for a new feature, someone else's branch, or a decision
-  about the whole project. Another way,
-  a deferral or a close is a good answer, and you decide. Product decisions
-  go into `docs/PRODUCT.md` and `docs/pdr/`, and an accepted one is checked
-  again when a task touches it.
-- **[`craft:docker`](skills/docker/README.md)** — the newest stable
-  image, pinned exactly, on the smallest base that runs the app.
-- **[`craft:typescript-conventions`](skills/typescript-conventions/README.md)**
-  — house TypeScript style.
-- **[`craft:react-conventions`](skills/react-conventions/README.md)** —
-  layer and feature boundaries in a React app, where a sub-component's own
-  files go, request state as one union, a hook for each of a component's two
-  jobs, no `ref.current` in render, and an error boundary at the app level and
-  at each route.
+- [`craft:review-loop`](skills/review-loop/README.md) — a review that ends:
+  rounds that read only the last fixes, a second model for risky changes, a
+  security review, and a summary of what was decided and fixed.
+- [`craft:product`](skills/product/README.md) — a skeptical analyst before
+  the work: is the task worth doing, and is there a simpler way.
+- [`craft:architecture`](skills/architecture/README.md) — new code grows into
+  the project's structure, not beside it, and decisions go into ADRs.
+- [`craft:debt`](skills/debt/README.md) — a map of the technical debt, filed
+  as a few issues a run.
+- [`craft:docker`](skills/docker/README.md) — the newest stable image, pinned
+  exactly, on the smallest base that runs the app.
+- [`craft:typescript-conventions`](skills/typescript-conventions/README.md) —
+  house TypeScript style.
+- [`craft:react-conventions`](skills/react-conventions/README.md) — layers and
+  feature borders in a React app, request state, hooks and error boundaries.
 
-Each skill's README says when it starts and what you get. The github and
-roadmap READMEs show each scenario as a picture.
+## Use cases
 
-The repository is its own marketplace for both tools.
+**Take an issue into work.** Type the issue alone: `#91`. The agent checks
+that nobody works on it, tells you in two or three sentences what it asks,
+makes a branch and a worktree, and reads the open issues on the same code.
+It does the work, runs the project's check and the review loop, opens the
+pull request, and asks you whether to merge. Skills: github, review-loop.
+
+**Review a branch before the pull request.** Ask for a review, or run
+`/code-review`. The agent picks the level by the weight of the change and
+says why. Each round reads only the fixes of the round before. The loop
+stops at the first clean round, or after round 3. A security review and a
+summary follow. Skill: review-loop.
+
+**Plan a milestone.** Ask the agent to plan the roadmap. It reads the open
+issues, proposes milestones, the order of the tasks and the links between
+them, and writes them to GitHub after one yes from you. Later, ask what to
+take next: you get one free task and the reason. Skill: roadmap.
+
+## What it works with
+
+- **GitHub**: issues, pull requests, milestones, Projects and Actions.
+- **TypeScript and React**: the conventions skills.
+- **Docker**: Dockerfiles, compose files and image pins.
+- **Any repository with git**: the debt and architecture skills read the
+  code of any language.
+
+## Integrations
+
+- **[superpowers](https://github.com/obra/superpowers)**: the rules send its
+  review steps through `craft:review-loop`, and `craft:product` joins its
+  brainstorming at a fork.
+- **ponytail**: `craft:review-loop` runs its over-engineering review before
+  the first round, and `craft:debt` adds its audit to the debt map.
+- **Codex**: a host of its own for the plugin, and in Claude Code a second
+  reviewer: it reads risky changes, specs and the text of skills.
+
+## Dependencies
+
+### Required
+
+- **bash**: the hooks and every script. Without it, the rules do not load.
+- **git** and **awk**: the scripts of the github, roadmap, debt and
+  architecture skills.
+- **`gh`**, logged in: the github and roadmap skills. Without it, the github
+  skill skips each step on GitHub, and the roadmap skill stops. Both say so.
+
+### Optional
+
+- **The `project` scope on the `gh` token**: the board of the roadmap
+  skill. Run once on each machine: `gh auth refresh -s project`. Without it,
+  the roadmap has no board.
+- **`npx` or `bunx`**: the copies in the debt map (`clones.sh`), with a
+  `TMPDIR` that other users cannot write, or none: then it uses `~/.cache`.
+  Without them, the debt map has no copies, and the report says so.
+- **The Codex CLI**, logged in: the second reviewer of the review loop.
+  Without it, the review goes on without Codex, and the summary says why.
+- **The ponytail plugin**: the over-engineering review and audit. Without
+  it, those steps are skipped, and the summary says so.
+- **The superpowers plugin**: brainstorming, specs and plans. The rules work
+  without it.
+- **Git for Windows**, on native Windows: Claude Code runs the hooks in Git
+  Bash. Without it, Claude Code runs them in PowerShell, and the rules do not
+  load. Codex on native Windows is not tested: run it in WSL. `clones.sh` is
+  not tested on native Windows with either tool.
 
 ## Install
+
+The repository is its own marketplace for both tools.
 
 Claude Code:
 
 ```sh
-claude plugin marketplace add kalinichenko88/agent-skills
+claude plugin marketplace add kalinichenko88/craft-skills
 claude plugin install craft@kalinichenko
 ```
 
 Codex:
 
 ```sh
-codex plugin marketplace add kalinichenko88/agent-skills
+codex plugin marketplace add kalinichenko88/craft-skills
 codex plugin add craft@kalinichenko
 ```
 
@@ -94,24 +137,7 @@ does.
 
 The hooks are plain bash. The two that inject the rules have no other
 dependency. The third names a Claude Code session after an issue: it calls
-`gh`, and in Codex it does nothing. The github and roadmap
-skills' scripts are bash too, and they also need `gh`, git and awk. The
-debt skill's `measure.sh` needs only bash, git and awk; its `clones.sh`
-also needs `npx` or `bunx`,
-and a `TMPDIR` that other users cannot write, or none: then it uses
-`~/.cache`. The architecture skill's `invariants.sh` needs only bash, git and
-awk. On native Windows, Claude Code runs
-them in Git Bash, so install [Git for Windows](https://git-scm.com/downloads/win):
-without it, Claude Code runs the hook in PowerShell, and the rules do not load.
-Codex on native Windows is not tested: run it in WSL. The debt skill's
-`clones.sh` is not tested on native Windows with either tool.
-
-The roadmap skill's board needs the `project` scope on the `gh` token. Run
-once on each machine:
-
-```sh
-gh auth refresh -s project
-```
+`gh`, and in Codex it does nothing.
 
 ## Update
 
@@ -131,147 +157,7 @@ the background at startup; to upgrade now:
 codex plugin marketplace upgrade kalinichenko
 ```
 
-## Develop
+## Contributing
 
-`make check` validates the manifests, runs shellcheck, checks the invariants of
-`docs/ARCHITECTURE.md` with the architecture skill's `invariants.sh`, and
-replays `rules.md` through the hook to prove the JSON it prints carries the file
-byte for byte and stays within Claude Code's 10,000-character cap on hook
-context. It checks that a checkout with `core.autocrlf=true`, the Git for
-Windows default, keeps every text file in LF, that the hook still gives the
-rules from a CRLF `rules.md`, that every script starts with
-`#!/usr/bin/env bash`, and that every `- ` line of `CHANGELOG.md` starts with
-its scope in parentheses. It also runs the github and roadmap skills' scripts
-against a fake `gh` that answers from payloads recorded
-in `tests/fixtures/github/` and `tests/fixtures/roadmap/`, all from public
-repositories, the debt skill's `measure.sh` on a repository the test builds,
-and its `clones.sh` against a fake `npx` that answers with a report recorded
-from `jscpd` for the tree in `tests/fixtures/debt/`, and with a fake `bunx`
-when `bun` is installed. Without `node`, the test skips `clones.sh` and says
-so. One case runs `clones.sh` with no `TMPDIR`, so it makes and removes a
-directory in your `~/.cache`. The review-loop skill's `codex-review.sh` runs
-against a fake `codex` that answers with findings recorded from `codex exec`
-on this repository, in `tests/fixtures/review_loop/`. The session-title
-hook runs on prompts recorded from Claude Code and Codex, in
-`tests/fixtures/hooks/`, against a fake `gh`. The architecture skill's
-`invariants.sh` runs on repositories the tests build: each kind of check, the
-`debt` lists, `--new-since` over renamed files, changed checks and a base
-file that it cannot read, and the calls that must exit 2.
-
-`make check` runs every `tests/<name>_test.sh`. A test passes only when it
-exits 0 and its last non-empty line on stdout is `<name>_test: ok`: under bash
-3.2, a script that `set -u` stops exits 0 when it has an EXIT trap.
-`tests/makefile_test.sh` checks this rule. A new test script ends with its `ok`
-line.
-
-GitHub Actions runs `make check` on each pull request and each push to `main`
-(`.github/workflows/check.yml`). It runs on Ubuntu 26.04, with its ShellCheck
-0.11.0 and with `mawk` as `awk`; `make check` on macOS runs BWK awk. A second
-job runs gitleaks on the new commits. The eval scripts below call the model, so
-they do not run there.
-
-A skill script that sets an EXIT trap under `set -u` empties `finished` before
-the trap and sets `finished=1` at each end that succeeds. Its trap turns an exit
-status of 0 without that flag into 1: bash 3.2 runs the trap with `$?` at 0 when
-`set -u` stops the script. `clean` in `skills/github/scripts/collect.sh` shows
-the shape.
-
-To try a script that writes on a real tracker without writing to it, set
-`DRY_RUN=1`. `GH_REPO=<owner/repo>` points `collect.sh`, `take-in-check.sh`,
-`add-finding.sh` and the roadmap scripts at another repository than the
-checkout's.
-
-To try an edit in Claude Code without installing: `claude --plugin-dir .`.
-
-`tests/skill_load_eval.sh` counts the Haiku subagents that load the conventions
-skills, the files they write with an implicit return in a method callback, as
-`.map((x) => (`, the runs with a file that opens with a helper or a constant
-instead of its primary export, the runs that put the order, its line, the
-customer or the discount outside `models/` or two of them in one file, and the
-runs whose discount file opens with its variants instead of the union. It
-counts the runs that keep a 30-line table of decline messages out of
-`constants.ts`, or put their short fallback message in it. In every task, it
-counts the runs that name a module-level `const` with a literal value in
-camelCase, or any other `const` in CONSTANT_CASE. In a
-React feature, it counts the runs that put a sub-component's own hook at the
-feature root or in `shared`, and the runs with a zod schema outside
-`schemas/`. In the three React tasks, it counts the runs with a component or a
-hook that holds two requests or more: a comments section loads and sends
-comments, and the other two tasks have one request each. With
-`--check <logs folder>` it runs only these checks, on the logs that an earlier
-run printed. `tests/skill_load_checks_test.sh` runs them so in `make check`,
-on `tests/fixtures/skill_load`: four recorded runs and a case that fails each
-check. A change to a check updates the output that the test expects.
-`tests/review_loop_eval.sh` counts the review rounds and what each one reads.
-It checks that no count of rounds goes past three, that the review of the
-tests runs once next to the last pass and never without one, that the
-review of the architecture runs once before round 2, and that a security
-review follows the last pass, in a subagent and not in the session. Its
-fixture has a local `origin` and an architecture file, and its task says
-that no one can answer questions. With `stop` after the count of runs, as
-`tests/review_loop_eval.sh 3 stop`, a run starts at the stop after round 3
-of an `xhigh` review: the eval checks one Codex read, no fourth round, the
-defects of round 3 and of Codex left unfixed, and a security review in a
-subagent. A fake `codex` first on `PATH` returns the defect of Codex, and an
-empty Codex home keeps a real `codex` from a read, so no run spends the
-Codex limit. Run it after a change to
-`skills/review-loop` or to its section in `rules.md`.
-`tests/review_loop_lens_eval.sh` sends the review of the architecture to six
-branches of one fixture: a second HTTP client, a `fetch` call that breaks an
-invariant, the same call with an ADR that amends it, a base that breaks it
-already, a folder with no code file added to the `Check:` line of an
-invariant, and that folder taken out again on a base where a second
-invariant names one too. With `--codex`, Codex reads the six branches with
-the same prompt. Run it after a change to
-`skills/review-loop/architecture-lens.md` or to the parts of
-`skills/architecture/SKILL.md` that it reads.
-`tests/debt_lens_eval.sh` sends the review of the instruction files to a
-monorepo whose `CLAUDE.md` files repeat and contradict its architecture file
-and each other. It checks each repeat, contradiction, redundancy and
-citation of the fixture, that the Environment section, which has no copy,
-gets no finding, and that a symlink and a pair of `CLAUDE.md` and
-`AGENTS.md` of one folder are no repeat. With `--codex`, Codex reads it with
-the same prompt. Run it after a change to `skills/debt/instructions-lens.md`.
-`tests/architecture_eval.sh` gives three tasks to Opus in a shop whose one
-module wraps every HTTP call, in four arms: no architecture file and no
-skill; the file and a link from `CLAUDE.md`; the same and the skill; the same
-and the `CLAUDE.md` line. It counts the runs that use the wrapper, write the
-block of *The start of a feature*, write one ADR for a new data store, split
-a file past its limit in a commit before the feature, and load the skill
-before the first write. It also counts how often `haiku` and `sonnet` find
-the code that a task can use. Run it after a change to the description of
-`craft:architecture`. `tests/architecture_checks_test.sh` runs its
-checks in `make check`, on `tests/fixtures/architecture`: one recorded run,
-and a case for each verdict that the run does not show. It also runs the eval
-once with a stub `claude` in the place of the model.
-`tests/product_eval.sh` runs Opus on a site of 1000 brands, where a branch
-redirects 7 of them to an icon that the page's CSP blocks. It counts the
-runs that check the worth before a review, a feature, a fork in brainstorming
-and a teammate's branch, and the runs that check it again after a review
-finds that the feature shows nothing; it prints those texts, to count by hand
-the runs that rebuild the feature. Three more shapes count the runs that do
-not check it: a bug fix, a branch with a report, and a question that asks the
-person to describe. One counts the answers that record a decision in a
-project's own decisions file. The feature's shape needs a Codex login. Run it
-after a change to `skills/product`, to the start of a feature in
-`craft:architecture` or to *Worth first* of review-loop.
-`tests/product_checks_test.sh` runs its checks in `make check`, on recorded
-logs in `tests/fixtures/product/logs`.
-`tests/review_loop_lens_checks_test.sh` checks that the lens eval refuses a
-wrong call before it starts a paid run.
-The `_eval.sh` scripts call the model, so their runs are not part of
-`make check`.
-
-The pictures in `docs/` are drawn by Codex from the brief next to them, as
-`docs/github/brief.md`. To change a picture, change its brief and run
-`/infographic` in Claude Code from this repository. Like `/release`, it lives
-in `.claude/skills/` and does not ship with the plugin.
-
-## Release
-
-Pull requests leave `version` alone. Once the work is on `main`, run `/release`
-in Claude Code from this repository, or `/release minor` to pick the level. It
-bumps `.codex-plugin/plugin.json`, writes the `CHANGELOG.md` section, tags
-`vX.Y.Z`, pushes both and publishes a GitHub release with that section as its
-notes. The skill lives in `.claude/skills/`, not `skills/`, so it does not ship
-with the plugin.
+To work on the plugin itself — the checks, the tests and the release — see
+[CONTRIBUTING.md](CONTRIBUTING.md).

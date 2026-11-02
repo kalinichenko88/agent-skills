@@ -49,6 +49,8 @@ it: an invariant on it is review only.
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
 - `docs/migrating-from-kalinichenko.md` — the steps for those who installed
   the plugin under its old name.
+- `CONTRIBUTING.md` — how to work on the plugin: the checks, the tests and
+  the release.
 - `.claude/skills/` — `release` and `infographic`: skills of this
   repository, not of the plugin.
 - `.claude/CLAUDE.md`, `AGENTS.md` — the instructions for an agent that
