@@ -1,6 +1,7 @@
 # kalinichenko:review-loop
 
-A review that ends: rounds that read only the last fixes, a stop at the first
+A review that ends: a check of a capability's worth before any round, rounds
+that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a review against the

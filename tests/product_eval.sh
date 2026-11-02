@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Measures what kalinichenko:product changes, for #200. Its fixture,
 # tests/fixtures/product, is a site that lists 1000 brands, each with a logo
-# through /logo, which redirects to an icon service. The page's CSP allows only
-# that service. 69 brands have only the service's placeholder, and 7 more have
-# an icon of their own. The branch feature redirects a placeholder brand to the
-# icon of its own site, with a HEAD call to the service on each request: the
-# CSP blocks every icon that it finds.
+# through /logo, which redirects to an icon service. The page's CSP allows
+# images only from itself and that service. 76 brands have only the service's
+# placeholder, and 7 of them have an icon of their own. The branch feature
+# redirects a placeholder brand to the icon of its own site, with a HEAD call
+# to the service on each request: the CSP blocks every icon that it finds.
 #
 # The shapes. A narrated run asks the session what an agent would do, with the
 # tools Read, Grep, Glob, Skill and Bash; a real run does the task.
