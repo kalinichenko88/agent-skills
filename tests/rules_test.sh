@@ -153,8 +153,10 @@ skills/github/SKILL.md|Run the merge in the checkout that holds the branch, what
 skills/review-loop/SKILL.md|When `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints nothing or the first path of `git worktree list`, the branch has no linked worktree
 skills/github/SKILL.md|and a number that it changed, as a count or a size that an issue can quote.
 skills/github/SKILL.md|Count again each number that the merged code holds: a description can be older than the last fix. When a check sets its limit, count it as that check counts it.
-skills/github/SKILL.md|For each changed file with a size limit of its own, as a cap on its characters that a test sets, or on the `debt` list of a size check, add a decision with its new size and its limit, also when the description does not give them.
-skills/github/SKILL.md|*Finishing* reads the merged code in a new checkout: after `git fetch origin`, run `git worktree add --detach <a new directory> origin/<default branch>`, with the directory from `mktemp -d`, outside every checkout
+skills/github/SKILL.md|For each changed file with a size limit of its own, as a cap on its characters that a test sets, or on the `debt` list of a size check, add a decision with its new size and the check's limit, also when the description does not give them.
+skills/github/SKILL.md|*Finishing* reads the merged code in a new checkout, outside every checkout. The branch's worktree is not the merged code when the default branch moved after the branch's last push.
+skills/github/SKILL.md|git worktree add --detach <the mktemp path> origin/<the default branch>
+skills/github/SKILL.md|Remove it when *Finishing* ends or stops, with `git worktree remove --force <the mktemp path>`.
 skills/github/SKILL.md|A problem marked `Done in #<PR>.` needs no other correction, and an issue with a problem left in it stays open.
 skills/github/scout.md|Then read the title and the whole body of each issue against them, the sentences with no citation too.
 EOF
