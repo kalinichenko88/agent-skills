@@ -7,27 +7,27 @@ description: Use when a change is reviewed, before or after its pull request ope
 
 A review runs in rounds. Before them, `kalinichenko:product` checks whether a
 capability that the branch adds is worth it: on someone else's branch that
-changes code always, on the person's own when no report exists for it. An
-over-engineering review comes next, when its skill is installed. The first
-round reads the whole branch. Each later round reads only the fixes of the
-round before. The loop stops at the first round that confirms no defect, and
-at the latest after round 3. A defect is a wrong result that real use reaches,
-or data loss or a security hole on any input, also in a fix of the loop; a
-test, a comment or wording is a nit, fixed with no round. A finding that needs
-a particular input is counted against real data first, and a count of zero
-declines it, except for data loss or a security hole. When the loop had more
-than one round, one last pass reads the whole branch again, once. At `xhigh`
-in Claude Code, Codex reads the whole branch once too. At `high` and `xhigh`,
-and for a change to tests only, one review reads the tests of the whole branch
-once. In a project with an architecture file or ADRs, one review reads the
-branch against them once, beside round 1, at `high` and `xhigh` and for a
-change to that file or an ADR. A security review comes last. A change to
-documents only gets one round and no security review. In Claude Code, Codex
-reads it once when it changes the text of a skill, a prompt or a spec. The
-agent fixes and decides by itself, except for a change to business logic, and
-writes a summary. When the task is an issue taken into work, or the person
-asked for a pull request, the push and the pull request follow in the same
-turn, on the conditions in *The pull request*.
+changes code or behaviour, always; on the person's own when no report exists
+for it. An over-engineering review comes next, when its skill is installed.
+The first round reads the whole branch. Each later round reads only the fixes
+of the round before. The loop stops at the first round that confirms no
+defect, and at the latest after round 3. A defect is a wrong result that real
+use reaches, or data loss or a security hole on any input, also in a fix of
+the loop; a test, a comment or wording is a nit, fixed with no round. A
+finding that needs a particular input is counted against real data first, and
+a count of zero declines it, except for data loss or a security hole. When the
+loop had more than one round, one last pass reads the whole branch again,
+once. At `xhigh` in Claude Code, Codex reads the whole branch once too. At
+`high` and `xhigh`, and for a change to tests only, one review reads the tests
+of the whole branch once. In a project with an architecture file or ADRs, one
+review reads the branch against them once, beside round 1, at `high` and
+`xhigh` and for a change to that file or an ADR. A security review comes last.
+A change to documents only gets one round and no security review. In Claude
+Code, Codex reads it once when it changes the text of a skill, a prompt or a
+spec. The agent fixes and decides by itself, except for a change to business
+logic, and writes a summary. When the task is an issue taken into work, or the
+person asked for a pull request, the push and the pull request follow in the
+same turn, on the conditions in *The pull request*.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the

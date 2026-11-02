@@ -1,6 +1,6 @@
 ---
 name: product
-description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's that changes code, or one's own that adds a capability or changes what the product does, with no report of its worth), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
+description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's that changes code or behaviour, or one's own that adds a capability or changes what the product does, with no report of its worth), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
 ---
 
 # Product
@@ -23,7 +23,7 @@ whether to build it, and what.
 | A decision about the whole project: the licence, open source or not, distribution, pricing, the money model, the hosting | full | *The run* |
 | A project with no store, or the person asks for one | the offer | `store.md` |
 
-One's own bug fix that changes no business logic gets no run, and nor does
+One's own bug fix that changes no business logic gets no run, nor does
 someone else's change of documents only, a dependency bump or a move that a
 script or a test proves unchanged. `reader.md` and
 `store.md` sit next to this file, in this skill's base directory `<dir>`.

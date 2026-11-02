@@ -126,7 +126,8 @@ the self-review of `superpowers:writing-plans`.
 
 Before the first edit of a feature — a new capability, or a change of what the
 product does for its users — and at a fork in brainstorming, invoke the
-`kalinichenko:product` skill. Not in a subagent, nor when its report exists.
+`kalinichenko:product` skill. Not in a subagent, nor before the edit when the
+feature's report exists.
 
 ## The Boy Scout Rule (always)
 

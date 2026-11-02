@@ -181,7 +181,7 @@ These are the person's decisions, in the conversation of 2026-10-29 to
 | --- | --- |
 | The start of a feature: a new capability, or a change of what the product does | full |
 | A bug fix | none; light when the fix changes business logic |
-| A review of someone else's branch or pull request | full |
+| A review of someone else's branch or pull request that changes code or behaviour | full |
 | A review of the person's own branch | none when a report for it exists; else as at the start of a feature |
 | A fork in brainstorming: a question that chooses between ways | light; full when the fork is at the project level |
 | A new project with no store, or the person asks | builds `PRODUCT.md` and `docs/pdr/`, after a yes |
@@ -190,7 +190,8 @@ These are the person's decisions, in the conversation of 2026-10-29 to
 the work, the pull request's description, the issue, or a PDR that the branch
 adds holds the report's `**Verdict:**` line. The test is the trace, not the
 author: a branch of the person's with no report at its start gets one at the
-review. A review of someone else's work always runs, and it reads their spec
+review. A review of someone else's work that changes code or behaviour always
+runs, and it reads their spec
 and their description as the decisions to check. Someone else's work is a
 pull request whose author is not the account that `gh` is logged in as, or,
 with no pull request, a branch whose commits have another author's email
