@@ -14,9 +14,9 @@
 # - #179 cites docs/ARCHITECTURE.md:186, which #217 moved to :189. No decision
 #   makes a sentence of it false.
 #
-# It prints each report, and exits 1 when a report does not give the sentence
-# of #117 with 337 as false by a decision, gives a false sentence of #179, or
-# does not give :186 of #179 as moved to :189.
+# It prints each report, and exits 1 when a report does not give the body's
+# sentence "has 337 left" of #117 as false by a decision, gives a false
+# sentence of #179, or does not give :186 of #179 as moved to :189.
 #
 # It calls the model, so it costs tokens and is not part of `make check`: run
 # it by hand after a change to the citations job of scout.md or to *Finishing*.
@@ -62,9 +62,12 @@ git -C "$tree" commit -qm "feat(product): add a skeptic that asks whether a task
 
 # The installed copy of the plugin is turned off, so the rules come from this
 # checkout. run <run>: the report goes to <run>.txt. The Decision lines are
-# the ones *Finishing* takes from the description of #217.
+# the ones *Finishing* takes from the description of #217, with the number of
+# Decision 4 counted again in the merged code. Each run gets its own copy of
+# the file, because the collector's bodies adds to the file that it gets.
 run() {
   local prompt
+  cp "$logs/collect.txt" "$logs/$1.collect.txt"
   prompt="Read $root/skills/github/scout.md and do what it says.
 Job: citations.
 Tree: $tree
@@ -73,7 +76,7 @@ Decision 2: The start of a feature in the architecture skill keeps Problem and T
 Decision 3: review-loop checks the worth before round 1 (Worth first), and a finding that shows a capability gives nothing goes to the person, not to a rebuild.
 Decision 4: rules.md gets the section \"Worth before work\", and now has 9,925 of the 10,000 characters that tests/rules_test.sh allows.
 Decision 5: tests/review_loop_eval.sh marks the product skill's reader as a prompt of kind P.
-File: $logs/collect.txt
+File: $logs/$1.collect.txt
 Collector: bash $root/skills/github/scripts/collect.sh"
   (cd "$tree" && claude -p --model haiku --output-format json \
     --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false}}' \
@@ -101,9 +104,9 @@ failed=0
 for i in $(seq "$runs"); do
   report=$(cat "$logs/$i.txt" 2>/dev/null || true)
   missed=
-  falsified 117 337 >/dev/null || missed="$missed; no false sentence of #117 with 337"
+  falsified 117 'has 337 left' >/dev/null || missed="$missed; no false sentence of #117 with 337"
   ! falsified 179 >/dev/null || missed="$missed; a false sentence of #179"
-  block 179 | grep -q ':186.*:189' || missed="$missed; :186 of #179 not moved to :189"
+  block 179 | grep -q ':186[^:]*moved to [^ ]*:189' || missed="$missed; :186 of #179 not moved to :189"
   if [ -z "$missed" ]; then verdict=pass; else verdict="FAIL${missed}"; failed=1; fi
   echo "== $i: $verdict"
   echo "${report:-no report}"

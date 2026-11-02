@@ -126,9 +126,9 @@ entry: the one under `== The issue`, or the one that starts `==> #<n>`.
 A citation is a path with a line or a range, as `src/server/log.ts:12-14`, or
 a line alone, as `:18`, after a path that its sentence names, or the line that
 opens its list. Check each one in the body; the comments are its history, and
-the agent corrects only the body. Do not check a citation that names a commit,
-as `at 3f2a1c9` or a link with a commit's hash, or one in a code block or a
-log: it tells where the code was then. Give it as `skipped`.
+the agent corrects only the title and the body. Do not check a citation that
+names a commit, as `at 3f2a1c9` or a link with a commit's hash, or one in a
+code block or a log: it tells where the code was then. Give it as `skipped`.
 
 1. Find the file in `Tree:`: the path as given, or, for a path without its
    directories, the files of that name: `git -C <tree> ls-files '*/log.ts'
@@ -144,8 +144,8 @@ adds. They only read. Run no other `git` command, and nothing else.
 
 After a merge, the prompt also gives one `Decision <n>: <one line>` for each
 thing that the merged pull request decided. Then read the title and the whole
-body of each issue against them, the sentences with no citation too. A sentence is false
-when one of these is true:
+body of each issue against them, the sentences with no citation too. A
+sentence is false when one of these is true:
 
 - It waits on a choice or a question, and a decision made that choice or
   answered it.
@@ -226,8 +226,8 @@ and each false sentence once:
   it.
 - `skipped` gives the reason: a commit, a code block or a log.
 - `false by decision <n>:` gives each false sentence once, quoted from the
-  title or the body, with the number of a decision that made it false. A false sentence
-  with a citation gets this line too.
+  title or the body, with the number of a decision that made it false. A
+  false sentence with a citation gets this line too.
 
 Write `none` under an empty group, or alone when no issue has a citation or a
 false sentence. End with one line: every `== end` line you read, and the
