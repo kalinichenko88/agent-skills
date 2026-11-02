@@ -1,4 +1,4 @@
-# kalinichenko:docker
+# craft:docker
 
 Every image that a Dockerfile or a compose file names is the newest stable
 release, pinned exactly, on the smallest base that runs the app.

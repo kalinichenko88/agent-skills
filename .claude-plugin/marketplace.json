@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "kalinichenko",
+      "name": "craft",
       "source": "./",
       "description": "Engineering rules as an always-on base prompt, plus the github, roadmap, review-loop, debt, architecture, product, docker, typescript-conventions and react-conventions skills."
     }

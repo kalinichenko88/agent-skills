@@ -5,7 +5,7 @@ description: Use when a change is reviewed, before or after its pull request ope
 
 # Review loop
 
-A review runs in rounds. Before them, `kalinichenko:product` checks whether a
+A review runs in rounds. Before them, `craft:product` checks whether a
 capability that the branch adds is worth it: on someone else's branch that
 changes code or behaviour, always; on the person's own when no report exists
 for it. An over-engineering review comes next, when its skill is installed.
@@ -79,14 +79,14 @@ A review subagent and Codex's `/review` have no levels.
 
 ## Worth first
 
-Before the over-engineering review and round 1, load `kalinichenko:product`:
+Before the over-engineering review and round 1, load `craft:product`:
 
 - on someone else's branch or pull request that changes code or behaviour,
   always, at the full depth. Their spec and description are the decisions to
   check;
 - on the person's own branch that adds a capability for the product's users,
   or changes what the product does for them, when no report exists for it.
-  *The trace* of `kalinichenko:product` says where a report is found.
+  *The trace* of `craft:product` says where a report is found.
 
 Skip it for documents only, for a dependency bump, and for a move that a
 script or a test proves unchanged. The text of a skill or a prompt that the
@@ -99,7 +99,7 @@ A capability that is not worth it gets no review. A verdict other than
 waits for the answer. With no person, the review goes on, and the question
 stays open in the summary, and on the person's own branch in the pull
 request's description. The report
-goes where *The trace* of `kalinichenko:product` says, so that a later review
+goes where *The trace* of `craft:product` says, so that a later review
 finds it.
 
 ## Over-engineering first
@@ -170,7 +170,7 @@ installed, skip it and say so in the summary.
 ### A review of the architecture
 
 This step needs an architecture file or an ADR folder on the branch, where
-`kalinichenko:architecture` finds them: `docs/ARCHITECTURE.md` or
+`craft:architecture` finds them: `docs/ARCHITECTURE.md` or
 `ARCHITECTURE.md` at the root, and `docs/adr/`, `doc/adr/` or
 `docs/decisions/`. Then one review subagent reads the range of round 1 once,
 beside round 1: at `high` or `xhigh`, and for any change whose range touches
@@ -200,7 +200,7 @@ Tree: <the working tree of the branch>
 In Codex: `/review` with the same three lines as its custom instructions.
 
 With no architecture file and no ADR folder, the step does not run. Then the
-summary says once per pull request that `kalinichenko:architecture` can
+summary says once per pull request that `craft:architecture` can
 write the first file, unless the project's `CLAUDE.md` says "This project
 keeps no `docs/ARCHITECTURE.md`."
 
@@ -376,12 +376,12 @@ a real defect on two, in 53 to 204 seconds.
    with no person, the question stays open in the summary. A finding that
    shows that the capability gives its users nothing, as a policy that blocks
    every result the feature finds, is such a question, not a defect to fix:
-   do not rebuild the feature. Run `kalinichenko:product` at the light depth,
+   do not rebuild the feature. Run `craft:product` at the light depth,
    with the finding as its new proof, and ask with its options.
 5. **Fix at the root.** When the same defect is in sibling call sites or in a
    shared token, fix it there, and count the places.
 6. **A finding outside the task is an issue**, through the
-   `kalinichenko:github` skill, unless the Boy Scout Rule takes it into this
+   `craft:github` skill, unless the Boy Scout Rule takes it into this
    change.
 
 ## The security review
@@ -416,13 +416,13 @@ line holds for the subagent's reply.
 
 When the review ends, run the repository's own check on the final branch.
 Then report in this order. Each item is one line, except **Change:**, which
-is a list. With no person and a verdict of `kalinichenko:product` other than
+is a list. With no person and a verdict of `craft:product` other than
 `do it`, its report comes first in the summary, before **Change:**. When the
 summary is not the turn's last message, the report starts that message too.
 
 - **Change:** what the branch changed as a whole, for a person who did not
   follow the session: one to five bullets, the list that the merge takes as
-  `--body` in *Pull requests* of the `kalinichenko:github` skill.
+  `--body` in *Pull requests* of the `craft:github` skill.
 - **Rounds:** the verdict of *Worth first*, or why it did not run.
   `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
@@ -431,7 +431,7 @@ summary is not the turn's last message, the report starts that message too.
   `xhigh`, and for a change to tests only, the review of the tests, the same
   way. The review of the architecture, the same way. With no architecture
   file and no ADR folder, once per pull request, the line that
-  `kalinichenko:architecture` can write the first file, unless the project
+  `craft:architecture` can write the first file, unless the project
   keeps none. The security review's
   result. The check's result. For a change to documents only: round 1; the
   review of the architecture, when it ran; the Codex read and the count of
@@ -454,7 +454,7 @@ declined finding instead of arguing it again.
 In a public repository, the `## Review` section and each reply to a review
 comment are public. An example from a private source goes in without its
 names, numbers, titles, paths or code: *Public repositories* in the
-`kalinichenko:github` skill says what a private source is and what to write
+`craft:github` skill says what a private source is and what to write
 instead.
 
 ## The pull request
@@ -470,7 +470,7 @@ Then:
 1. Push the branch. When the push succeeds and the branch has an open pull
    request, add the summary's lines to its `## Review`. When the push
    succeeds and the branch has none, open the pull request through the
-   `kalinichenko:github` skill, with the summary under `## Review`.
+   `craft:github` skill, with the summary under `## Review`.
 2. When questions on business logic are still open, ask them. An answer that
    needs no fix goes into `## Review`. The fix for an answer, when it needs
    one, goes through *Fixes from other places* and *The summary*, and then

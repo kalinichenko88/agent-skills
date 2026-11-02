@@ -1,4 +1,4 @@
-# kalinichenko:product
+# craft:product
 
 A skeptical analyst. Before the work, it asks whether a task is worth doing,
 and in which form: who gains and how many, the money, the direction of the

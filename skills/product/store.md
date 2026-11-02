@@ -2,7 +2,7 @@
 
 The store holds the project's product decisions: what the users see, pay or
 get, and what the company owes by law, tax or contract. The code's
-decisions are ADRs, in `kalinichenko:architecture`.
+decisions are ADRs, in `craft:architecture`.
 
 ```
 docs/

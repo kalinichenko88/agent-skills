@@ -38,7 +38,7 @@ no file, and run no code of the project.
    nested file of a folder keeps a detail inside that folder, as its own
    layout. For a contradiction, it is the true text in place of the false
    one: from the code, or a person's choice. When that choice is
-   architectural, it is an ADR through `kalinichenko:architecture`. For a
+   architectural, it is an ADR through `craft:architecture`. For a
    redundancy, it is the removal.
 5. For each section that the fix moves or removes, find its citations:
    `git -C <tree> grep -n -F` for the file's name and for the heading, in the

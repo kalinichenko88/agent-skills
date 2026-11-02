@@ -13,7 +13,7 @@ principles and the steps.
 
 | Moment | What must happen | Read first |
 | --- | --- | --- |
-| A new capability starts: a screen, an endpoint, a module, an integration | The block of two answers and the report of `kalinichenko:product`, in a message before the spec or the first edit; then the decision of where its code goes | *The start of a feature* |
+| A new capability starts: a screen, an endpoint, a module, an integration | The block of two answers and the report of `craft:product`, in a message before the spec or the first edit; then the decision of where its code goes | *The start of a feature* |
 | Where new code goes; a new module, layer, dependency, pattern or data store; a choice between options; a change to a file or a folder past its limit | The eight steps and the gate | *The moment of a decision* |
 | A decision in a project with no architecture file | Offer to write one, once a session; write nothing without a yes | `first-file.md` |
 | An edit exists, before its commit | `invariants.sh` | *`invariants.sh`* |
@@ -39,7 +39,7 @@ It starts at a new capability: a screen, an endpoint, a module, an
 integration. Not at a bug fix, and not at a small change to existing
 behaviour. It names the problem and the code that it touches. Whether the
 problem needs solving, and the simplest way to solve it, are for
-`kalinichenko:product`. It decides no structure: the structure waits for the
+`craft:product`. It decides no structure: the structure waits for the
 moment of a decision, when there is more context.
 
 Answer the two questions yourself first, from the code and the data. Ask the
@@ -52,7 +52,7 @@ person only what you cannot find.
    with `path:line`, and the modules it touches. Where the new code goes is
    for the moment of a decision.
 
-Then, in the main session, load `kalinichenko:product`. Its report says
+Then, in the main session, load `craft:product`. Its report says
 whether the problem needs solving, and gives the simplest way first. It comes
 in the same message as the block. A subagent does not load it: the report of
 the main session, the spec, the plan or the brief stands. With none, the
@@ -126,7 +126,7 @@ offer and the gate has no invariant to check; the other steps are the same.
    does not see the conversation (see *Models*) gets the area of the
    architecture file, its ADRs, the code that step 2 found, the options and
    the gate, and the block of *The start of a feature* with the report of
-   `kalinichenko:product` when there is one. It checks whether the search
+   `craft:product` when there is one. It checks whether the search
    missed existing code, whether the reason for a new structure holds,
    whether the gate is right, and what the next likely change will cost.
    Its answer is advice: answer each point, and a point on which the two of
@@ -137,7 +137,7 @@ and layers* everywhere, as components that all call `fetch` with no service
 layer, the first option follows the project's own way: one way is better than
 two. Name the breach. The second option brings the principle in: an ADR that
 sets it, and a parent issue with the steps of the migration, through
-`kalinichenko:github` and `kalinichenko:roadmap`. The principle comes into the
+`craft:github` and `craft:roadmap`. The principle comes into the
 project as a whole, not one file at a time. The person chooses at the
 decision.
 
@@ -156,9 +156,9 @@ plan names the ADR that the work will add, by its title, and does not write
 it.
 
 A finding outside the task, such as two competing ways that the task does not
-touch, becomes an issue through `kalinichenko:github`. When the decision is
+touch, becomes an issue through `craft:github`. When the decision is
 about a part that a milestone already plans, `roadmap.sh` of
-`kalinichenko:roadmap` gives that milestone as context.
+`craft:roadmap` gives that milestone as context.
 
 ## Modules and layers
 
@@ -229,7 +229,7 @@ wins in that project, and it names the convention that it replaces.
   feature: make the change easy, then make the easy change (Kent Beck). A
   split that needs decisions of its own: the change goes in as it is, the
   file joins the `debt` list or stays on it, and the split becomes a debt
-  issue through `kalinichenko:github`, in the same pull request.
+  issue through `craft:github`, in the same pull request.
 - **Shared code or a copy**, as in Go: "A little copying is better than a
   little dependency." Extract the shared code only when all three hold:
   1. the copies do one job for one reason, and would change together;
@@ -391,7 +391,7 @@ tell code from data.
 
 | Thought | Reality |
 | --- | --- |
-| "The request is clear; I will start with the code" | A new capability gets the block and the report of `kalinichenko:product` first, in a message before the first edit. The block is two lines. |
+| "The request is clear; I will start with the code" | A new capability gets the block and the report of `craft:product` first, in a message before the first edit. The block is two lines. |
 | "There is no architecture file, so the decision steps do not apply" | Only step 1 and the gate need the file. The other steps hold in every project. |
 | "Offering an architecture file is out of the task's scope" | The offer is one question at the first decision of the session, and a no ends it. Ask it. |
 | "I found the API client; the search is done" | Search once for each kind of work the change does: the format, the store, the check of the input. |
@@ -413,9 +413,9 @@ gives to a subagent.
 
 ## Other skills
 
-This skill uses them and changes none: `kalinichenko:product` at the start
+This skill uses them and changes none: `craft:product` at the start
 of a feature, for whether the problem needs solving and the simplest way;
-`kalinichenko:github` for each issue
-and each ADR's pull request, `kalinichenko:roadmap` for the roadmap and the
-steps of a migration, and `measure.sh` and `clones.sh` of `kalinichenko:debt`
+`craft:github` for each issue
+and each ADR's pull request, `craft:roadmap` for the roadmap and the
+steps of a migration, and `measure.sh` and `clones.sh` of `craft:debt`
 for the signals.

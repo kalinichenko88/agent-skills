@@ -4,7 +4,7 @@
 # answer its questions. It prints, for each run, the counts, then each review
 # subagent's prompt after its kind: W reads the whole branch, C one commit, T
 # is the review of the tests, A the review of the architecture, P a reader of
-# kalinichenko:product's worth check, S the security review. It exits 1 when a run has fewer than two rounds, read the whole
+# craft:product's worth check, S the security review. It exits 1 when a run has fewer than two rounds, read the whole
 # branch more than once after round 1, ran more than three rounds in one
 # count, sent the review of the tests other than once next to the last pass,
 # or sent one with no last pass, sent the review of the architecture other
@@ -117,7 +117,7 @@ JSON
 EOF
   chmod +x "$work.bin/codex"
   (cd "$work" && PATH="$work.bin:$PATH" CODEX_HOME="$work.codex" claude -p --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false},"language":"English"}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false},"language":"English"}' \
     --plugin-dir "$root" --dangerously-skip-permissions "$task") >"$1" 2>&1
 }
 
@@ -148,7 +148,7 @@ wait
 # either. The skill sends it once, beside round 1, so before the first round
 # that reads one commit. A round whose prompt names that file too is still a
 # round, so a run that folds the review into round 1 has none. A reader of the
-# worth check of kalinichenko:product is an Agent call whose prompt holds its
+# worth check of craft:product is an Agent call whose prompt holds its
 # reader.md: its heading "Product reader", or its path. It is not a round.
 # Round 1, the last pass, the review of the tests and the security review each
 # start a count of rounds. Step 4 stops a count at its third round when no one
@@ -194,7 +194,7 @@ for log in "$logs"/run-*.jsonl; do
   paired=$(tr -d '\n' <<<"$kinds" | grep -cE '(WT|TW)[^W]*$' || true)
   skill=$(jq -rR 'fromjson? | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use" and .name == "Skill")
-    | .input.skill' "$log" | grep -cx 'kalinichenko:review-loop' || true)
+    | .input.skill' "$log" | grep -cx 'craft:review-loop' || true)
   # With stop, every round is a fourth one. A Codex read is a line that the
   # fake codex logged. The defects of round 3 and of Codex stay while
   # slugify returns "a-" for "-a-" and "caf" for "Café".

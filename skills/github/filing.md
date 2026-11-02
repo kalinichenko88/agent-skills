@@ -121,7 +121,7 @@ one-line comment only: its body stays as it is.
 
 The global prompt says when a defect in this plugin becomes an issue; this
 section says how. The plugin is the global prompt, the hooks, the
-`kalinichenko:` skills and their scripts. The global prompt is `rules.md` and
+`craft:` skills and their scripts. The global prompt is `rules.md` and
 the hooks are in `hooks/`, at the plugin root: two directories above this
 skill's base directory. Its tracker is
 `github.com/kalinichenko88/agent-skills`. Every `gh` call below names it with

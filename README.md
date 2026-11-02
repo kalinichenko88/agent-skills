@@ -20,15 +20,15 @@ prompt of engineering rules, plus the skills those rules lean on.
   fix, and finds the docs a change made false. A plugin has no slot for a
   `CLAUDE.md` or `AGENTS.md`, so `hooks/rules.sh` injects it at the start of
   every session and every subagent.
-- **[`kalinichenko:github`](skills/github/README.md)** — commits, pull
+- **[`craft:github`](skills/github/README.md)** — commits, pull
   requests, issues and Actions.
 
   ![The GitHub skill: start a task, find something outside it, finish it](docs/github/00-overview.webp)
-- **[`kalinichenko:roadmap`](skills/roadmap/README.md)** — a project manager on
+- **[`craft:roadmap`](skills/roadmap/README.md)** — a project manager on
   top of GitHub.
 
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
-- **[`kalinichenko:review-loop`](skills/review-loop/README.md)** — a review
+- **[`craft:review-loop`](skills/review-loop/README.md)** — a review
   that ends: rounds that read only the last fixes, one last pass over the
   whole branch when the loop needed more than one round, Codex as a second
   reviewer for `xhigh` changes in Claude Code, a review of the tests for
@@ -39,16 +39,16 @@ prompt of engineering rules, plus the skills those rules lean on.
   In Claude Code, Fable and Codex
   also read a superpowers spec, and one more subagent checks its plan
   against it.
-- **[`kalinichenko:debt`](skills/debt/README.md)** — a map of the technical
+- **[`craft:debt`](skills/debt/README.md)** — a map of the technical
   debt: hotspots, broken layer rules, copies and, with ponytail,
   over-engineering, filed as at most three `debt` issues a run, and one
   more for the rules that the instruction files repeat or contradict.
-- **[`kalinichenko:architecture`](skills/architecture/README.md)** — new code
+- **[`craft:architecture`](skills/architecture/README.md)** — new code
   that grows into the project's structure, not beside it: the problem before
   the code, one way to do one kind of work, a split before a file grows past
   its limit, and numbered invariants in `docs/ARCHITECTURE.md` that a script
   checks.
-- **[`kalinichenko:product`](skills/product/README.md)** — a skeptical
+- **[`craft:product`](skills/product/README.md)** — a skeptical
   analyst before the work: whether a task is worth doing, from who gains,
   the money, the direction, the law and the client, with Fable and Codex
   searching the web for a new feature, someone else's branch, or a decision
@@ -56,11 +56,11 @@ prompt of engineering rules, plus the skills those rules lean on.
   a deferral or a close is a good answer, and you decide. Product decisions
   go into `docs/PRODUCT.md` and `docs/pdr/`, and an accepted one is checked
   again when a task touches it.
-- **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
+- **[`craft:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
-- **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
+- **[`craft:typescript-conventions`](skills/typescript-conventions/README.md)**
   — house TypeScript style.
-- **[`kalinichenko:react-conventions`](skills/react-conventions/README.md)** —
+- **[`craft:react-conventions`](skills/react-conventions/README.md)** —
   layer and feature boundaries in a React app, where a sub-component's own
   files go, request state as one union, a hook for each of a component's two
   jobs, no `ref.current` in render, and an error boundary at the app level and
@@ -77,14 +77,14 @@ Claude Code:
 
 ```sh
 claude plugin marketplace add kalinichenko88/agent-skills
-claude plugin install kalinichenko@kalinichenko
+claude plugin install craft@kalinichenko
 ```
 
 Codex:
 
 ```sh
 codex plugin marketplace add kalinichenko88/agent-skills
-codex plugin add kalinichenko@kalinichenko
+codex plugin add craft@kalinichenko
 ```
 
 Then run `codex`, open `/hooks` and trust the plugin's three hooks. Codex skips
@@ -120,7 +120,7 @@ new one. Background auto-update is off for third-party marketplaces; turn it on
 under `/plugin` → Marketplaces → `kalinichenko`, or update by hand:
 
 ```sh
-claude plugin update kalinichenko@kalinichenko
+claude plugin update craft@kalinichenko
 ```
 
 Codex installs the plugin under the `version` in `.codex-plugin/plugin.json` and
@@ -240,7 +240,7 @@ block of *The start of a feature*, write one ADR for a new data store, split
 a file past its limit in a commit before the feature, and load the skill
 before the first write. It also counts how often `haiku` and `sonnet` find
 the code that a task can use. Run it after a change to the description of
-`kalinichenko:architecture`. `tests/architecture_checks_test.sh` runs its
+`craft:architecture`. `tests/architecture_checks_test.sh` runs its
 checks in `make check`, on `tests/fixtures/architecture`: one recorded run,
 and a case for each verdict that the run does not show. It also runs the eval
 once with a stub `claude` in the place of the model.
@@ -254,7 +254,7 @@ not check it: a bug fix, a branch with a report, and a question that asks the
 person to describe. One counts the answers that record a decision in a
 project's own decisions file. The feature's shape needs a Codex login. Run it
 after a change to `skills/product`, to the start of a feature in
-`kalinichenko:architecture` or to *Worth first* of review-loop.
+`craft:architecture` or to *Worth first* of review-loop.
 `tests/product_checks_test.sh` runs its checks in `make check`, on recorded
 logs in `tests/fixtures/product/logs`.
 `tests/review_loop_lens_checks_test.sh` checks that the lens eval refuses a

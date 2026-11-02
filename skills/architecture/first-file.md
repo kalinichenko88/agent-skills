@@ -23,7 +23,7 @@ one. Make no offer when the project's `CLAUDE.md` says "This project keeps no
 1. One subagent (see *Models* in `SKILL.md`) reads a few typical files of
    each area, with `bash <skills>/debt/scripts/measure.sh` to find the areas
    that change most. It loads the conventions skills that the project's
-   languages call for, as `kalinichenko:react-conventions` for React, so that
+   languages call for, as `craft:react-conventions` for React, so that
    step 5 sees where the code differs from them. It reads every instruction
    file whole: each file that
    `git ls-files -s ':(top,glob)**/CLAUDE.md' ':(top,glob)**/AGENTS.md'`
@@ -68,7 +68,7 @@ path, as `ARCHITECTURE.md` when it is at the root:
 
 > Before a spec, a plan or the first edit of a new feature, read
 > `docs/ARCHITECTURE.md`. At the start of a new feature, and for a decision,
-> load `kalinichenko:architecture`.
+> load `craft:architecture`.
 
 A confirmed move leaves a `CLAUDE.md` only when the root `CLAUDE.md` or
 `.claude/CLAUDE.md` has this line, and an `AGENTS.md` only when the root

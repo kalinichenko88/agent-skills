@@ -3,11 +3,11 @@
 This file holds what the code cannot tell: the modules, the layers, the
 patterns of the scripts and the tests, and the invariants that
 `skills/architecture/scripts/invariants.sh` checks in `make check`. The
-principles are in `kalinichenko:architecture`. The ADRs go in `docs/adr/`.
+principles are in `craft:architecture`. The ADRs go in `docs/adr/`.
 
 ## Bird's-eye view
 
-The repository is one plugin, `kalinichenko`, for Claude Code and Codex. Its
+The repository is one plugin, `craft`, for Claude Code and Codex. Its
 product is text that a model reads: `rules.md`, the base prompt, and one
 `SKILL.md` per skill. The bash scripts next to a skill do the steps that
 have one correct result: read the tracker, write the plan, measure the code,
@@ -75,7 +75,7 @@ Each skill is a module, by the area of work it serves.
 **Public API.** A skill's API is its `SKILL.md`, whose `description` is the
 trigger, the header of each script in `scripts/`, and each file or section
 that another module names. One skill uses another by its name,
-`kalinichenko:<name>`, by a path to one of its files, as
+`craft:<name>`, by a path to one of its files, as
 `<skills>/github/tracker.md`, or by a script's header. So before a rename of
 a file or a section, grep the whole repository for the words of its name,
 and for a section also for its anchor, as `#the-ponytail-step`.
@@ -211,7 +211,7 @@ hold 10. A new number needs an ADR.
   the plugin installs as a copy of the repository.
 - **Safety.** No step of the debt and architecture skills runs the code of
   the project it reads. Nothing from a private source goes into a public
-  repository (`kalinichenko:github`).
+  repository (`craft:github`).
 - **Release.** `/release` alone moves `version` in
   `.codex-plugin/plugin.json` and writes `CHANGELOG.md`.
   `.claude-plugin/plugin.json` carries no `version`.

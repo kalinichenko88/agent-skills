@@ -1,4 +1,4 @@
-# kalinichenko:debt
+# craft:debt
 
 A map of the technical debt: where the code is large and changes often, where
 it breaks the project's own layer rules, where it is copied, where the
@@ -61,11 +61,11 @@ instruction files.
   instruction files is written again from this run's findings. A place
   closed as not planned is not filed again.
 - **Issues take-in reads.** Each issue is labelled `debt`. The label is created
-  once when the repository has none. Take-in in `kalinichenko:github` checks
+  once when the repository has none. Take-in in `craft:github` checks
   every open debt issue in the area of a task.
 - **Steps in order.** A place larger than one pull request is a parent with a
   sub-issue per step, linked with the roadmap skill's `plan.sh`, so
-  `kalinichenko:roadmap` offers them in order.
+  `craft:roadmap` offers them in order.
 - **The default branch, and no edits.** Every count comes from `origin/HEAD`,
   not from your local changes; in a clone without it, from `HEAD`, and the
   report says so. The later steps read a checkout of that commit outside the

@@ -1,4 +1,4 @@
-# kalinichenko:typescript-conventions
+# craft:typescript-conventions
 
 House TypeScript style. A codebase that consistently does otherwise wins: the
 agent matches it and says so.

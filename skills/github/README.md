@@ -1,4 +1,4 @@
-# kalinichenko:github
+# craft:github
 
 Commits, pull requests, issues and GitHub Actions, done the same way every
 time.

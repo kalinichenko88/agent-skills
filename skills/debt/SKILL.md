@@ -9,10 +9,10 @@ The map measures where the structural debt sits — hotspots, broken layer
 rules, copies, the repeats and contradictions of the instruction files and,
 with ponytail installed, over-engineering — and files at most three places a
 run as issues labelled `debt`, and one more for the instruction files.
-Take-in in the `kalinichenko:github` skill then checks those issues whenever a
+Take-in in the `craft:github` skill then checks those issues whenever a
 task touches their area, so one pull request can remove the debt next to the
 task. A place larger than one pull request becomes steps that the
-`kalinichenko:roadmap` skill offers in order.
+`craft:roadmap` skill offers in order.
 
 First check that the project has no debt skill of its own: a skill named
 `debt` in your skill list other than this one, or a file that
@@ -95,7 +95,7 @@ start there.
    `git grep -n` over the scope, as for a rule above. It is a place of its
    own, or it joins the place of the invariant that covers it. The issue of
    that place says that the fix writes an ADR through
-   `kalinichenko:architecture`, and that the other hits move to the way that
+   `craft:architecture`, and that the other hits move to the way that
    the ADR keeps. A place whose hits are only direct calls where the named
    way already serves, as one module that calls `fetch`, has no second way:
    its issue asks for no ADR.
@@ -145,7 +145,7 @@ start there.
 5. **Instruction files.** With no `CLAUDE.md` and no `AGENTS.md` in `<tree>`,
    skip this step and say so. Otherwise send two readers right after you
    make `<tree>`, beside the subagent of step 3, as for a spec in
-   `kalinichenko:review-loop`: in one message, an `Agent` call with
+   `craft:review-loop`: in one message, an `Agent` call with
    `model: "fable"`, and Codex in the background from the root of `<tree>`.
    Both get this prompt:
 
@@ -198,7 +198,7 @@ that changes often, a large file of one concern, or a file that a rule keeps
 whole goes into *next*, with the rule quoted.
 
 Then read what already covers each place. `collect.sh filing` from the
-`kalinichenko:github` skill (`<skills>/github/tracker.md`), with the place's
+`craft:github` skill (`<skills>/github/tracker.md`), with the place's
 files and symbols, finds every issue that names them, closed ones too. When
 the scout asks for `path:line`, give paths only: a debt issue names no line.
 Sort the hits as `filing.md` does — *Already decided*, as a closed issue that
@@ -264,13 +264,13 @@ gives the fix that the readers name for each finding, by step 4 of
 from a host: Claude Code reads the `CLAUDE.md` files, and Codex the
 `AGENTS.md` files. So the text stays in a file that the host reads, or the
 root file of the host gets the line that points to the architecture file, as
-`first-file.md` of `kalinichenko:architecture` gives it. Its `## The order`
+`first-file.md` of `craft:architecture` gives it. Its `## The order`
 names the files whose citations the fix corrects, and puts each
 contradiction that a person must choose into a step of its own: when the
 choice is architectural, that step writes an ADR through
-`kalinichenko:architecture`.
+`craft:architecture`.
 
-The last line is "Found by `kalinichenko:debt` on <date> at <sha>." Another
+The last line is "Found by `craft:debt` on <date> at <sha>." Another
 open issue on the same code is named in the body, and its side is corrected
 as `filing.md` says under *Filing one next to an existing issue*. A closed
 issue on the same code that does not settle the place is named as history.

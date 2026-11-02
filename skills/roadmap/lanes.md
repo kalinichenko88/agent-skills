@@ -6,7 +6,7 @@ task will change, and where two of them meet. Read the file and the code with
 your file tool. You run two commands, `git ls-files` and `git grep`, both with
 `-C <tree>`. Run nothing else.
 
-This file is all you need from the `kalinichenko:roadmap` skill. The base
+This file is all you need from the `craft:roadmap` skill. The base
 prompt tells an agent to load the github skill before its first `gh` call, and
 to file what it finds; those rules are for agents that write. You write
 nothing, so do not load a skill and do not file anything.

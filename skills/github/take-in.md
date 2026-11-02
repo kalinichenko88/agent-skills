@@ -69,11 +69,11 @@ request; in Codex, `codex resume --all`. Two sessions can carry the name
 `#91`: the old one is the older.
 
 Changes, and commits that GitHub does not have, are work in progress: finish
-it, and it goes through `kalinichenko:review-loop` before any merge question.
+it, and it goes through `craft:review-loop` before any merge question.
 With an open pull request, read also what reached it after its `## Review`:
 `gh pr view <PR> --comments`, and the comments on lines in
 `gh api repos/{owner}/{repo}/pulls/<PR>/comments`. A person's review comments
-go through `kalinichenko:review-loop`. Then go on from the first step that
+go through `craft:review-loop`. Then go on from the first step that
 `## Review` does not show as run, or, when all ran, from the open questions
 and the merge question. Without a pull request, run *The tracker is read
 next* and *Its duplicates close first*, then go on from "Then read what
@@ -264,8 +264,8 @@ the diff and the issue stays open: the PR says `Part of #15`, and
 
 Taking an issue in is the request for the whole flow: the work, the review
 and, off the default branch, the pull request and the merge question that
-`kalinichenko:review-loop` sets. When the work is done, run the repository's
-own check, such as `make check`, then invoke the `kalinichenko:review-loop`
+`craft:review-loop` sets. When the work is done, run the repository's
+own check, such as `make check`, then invoke the `craft:review-loop`
 skill. That
 skill runs the check on the final branch and writes a summary. Then, when the
 check passes and the branch is not the default branch, it opens the pull
