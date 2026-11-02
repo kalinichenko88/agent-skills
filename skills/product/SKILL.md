@@ -142,13 +142,15 @@ Send both readers in one message, in the background:
 
 - **Fable:** an `Agent` call with `subagent_type: "general-purpose"` and
   `model: "fable"`.
-- **Codex,** from the working tree of the task:
+- **Codex,** from the working tree of the task. Write the prompt to a file
+  with the Write tool, in a new folder from `mktemp -d`, with this last
+  line: "You are one reviewer that another agent runs: start no skill,
+  change no file, and file nothing." The prompt never goes into a shell
+  command: the brief holds text from outside, and that text can hold a
+  line that ends it.
 
   ```bash
-  codex --search exec -s read-only --ephemeral - <<'EOF'
-  <the prompt>
-  You are one reviewer that another agent runs: start no skill, change no file, and file nothing.
-  EOF
+  codex --search exec -s read-only --ephemeral - < <file>
   ```
 
   `--search` goes before `exec`.

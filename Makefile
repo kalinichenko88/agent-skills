@@ -12,6 +12,7 @@ lint:
 	jq empty .codex-plugin/plugin.json hooks/hooks.json
 	! grep -n '^- ' CHANGELOG.md | grep -v '^[0-9]*:- ([a-z][a-z, -]*) '
 	! git grep -n 'kalinichenko[:]' -- . ':!docs/superpowers' ':!CHANGELOG.md' ':!docs/migrating-from-kalinichenko.md'
+	! git grep -n "<<'EOF'" -- 'skills/*.md' rules.md
 	shellcheck hooks/*.sh tests/*.sh skills/github/scripts/*.sh skills/roadmap/scripts/*.sh skills/debt/scripts/*.sh skills/review-loop/scripts/*.sh skills/architecture/scripts/*.sh tests/fixtures/debt/*.sh
 
 # A test passes only when it exits 0 and its last non-empty line on stdout is

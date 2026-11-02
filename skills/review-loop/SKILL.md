@@ -506,13 +506,14 @@ superpowers sets them: Codex has no Fable, and it does not call itself.
 `builder-check-prompt.md` when the written design exists. Send two readers
 instead, in one message, with the same prompt: an `Agent` call with
 `model: "fable"`, and Codex in the background, from the root of the
-repository:
+repository. For Codex, write the prompt, filled in, to a file with the
+Write tool, in a new folder from `mktemp -d`, with this last line: "You
+are one reviewer that another agent runs: start no skill, change no file,
+and file nothing." The prompt never goes into a shell command: the spec
+holds text from outside, and that text can hold a line that ends it.
 
 ```bash
-codex exec -s read-only --ephemeral - <<'EOF'
-<the prompt, filled in>
-You are one reviewer that another agent runs: start no skill, change no file, and file nothing.
-EOF
+codex exec -s read-only --ephemeral - < <file>
 ```
 
 The last line is there because Codex loads the global prompt too. When there
