@@ -329,6 +329,7 @@ Expected: `gh release view v2.0.0` shows the link.
 - [ ] **Step 2: Correct the open issues.** For each of #215, #196, #185, #171, #213 and #87:
 
 ```bash
+f=$(mktemp)
 gh issue view <n> --json body --jq .body >"$f"
 perl -pe 's/kalinichenko:/craft:/g; s{kalinichenko88/agent-skills}{kalinichenko88/craft-skills}g; s/`agent-skills`/`craft-skills`/g' "$f" >"$f.new"
 diff "$f" "$f.new"; gh issue edit <n> --body-file "$f.new"
