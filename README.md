@@ -89,7 +89,8 @@ take next: you get one free task and the reason. Skill: roadmap.
 ### Required
 
 - **bash**: the hooks and every script. Without it, the rules do not load.
-- **git**: the scripts of the github, debt and architecture skills.
+- **git**: the scripts of the github, review-loop, debt and architecture
+  skills.
 - **awk**: the scripts of the github, roadmap, debt and architecture skills.
 - **`gh`**, logged in: every step on GitHub, in the github, roadmap, debt
   and product skills. Without it, the github skill skips each such step, and

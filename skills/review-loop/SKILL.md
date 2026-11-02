@@ -506,7 +506,7 @@ superpowers sets them: Codex has no Fable, and it does not call itself.
 `builder-check-prompt.md` when the written design exists. Send two readers
 instead, in one message, with the same prompt: an `Agent` call with
 `model: "fable"`, and Codex in the background, from the root of the
-repository. For Codex, write the prompt, filled in, to a file with the
+repository. For Codex, write the prompt, filled in, to a new file with the
 Write tool, in the session's scratchpad directory, or in a new folder from
 `mktemp -d` when there is none, with this last line: "You
 are one reviewer that another agent runs: start no skill, change no file,

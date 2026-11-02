@@ -37,13 +37,15 @@ skills load, but the rules do not.
 ## Your own files
 
 Your instruction files, skills, hooks and memory can call a skill by its old
-name. This command lists them, in `~/.claude`, `~/.codex` and `~/.agents`,
-and in the folder where you run it. It follows links, and it skips the
-installed plugins, the worktrees and `.git`. Run it in each project where you
+name. This command lists the text files among them (`.md`, `.toml`,
+`settings*.json` and `.sh`), in `~/.claude`, `~/.codex` and `~/.agents`, and
+in the folder where you run it. It follows links, and it skips the installed
+plugins, the worktrees and `.git`. A hook in another language you check by
+hand. Run it in each project where you
 use the plugin, or once in the folder that holds them all:
 
 ```sh
-find -L ~/.claude ~/.codex ~/.agents . \( -path "$HOME/.claude/plugins" -o -path "$HOME/.codex/plugins" -o -path "$HOME/.codex/.tmp" -o -name .git -o -name node_modules -o -name worktrees \) -prune -o -type f \( -name '*.md' -o -name '*.toml' -o -name 'settings*.json' -o -name '*.sh' \) -print0 2>/dev/null | xargs -0 grep -lE '(^|[^@])kalinichenko:' 2>/dev/null
+find -L ~/.claude ~/.codex ~/.agents . \( -path '*/.claude/plugins' -o -path '*/.codex/plugins' -o -path '*/.codex/.tmp' -o -name .git -o -name node_modules -o -name worktrees \) -prune -o -type f \( -name '*.md' -o -name '*.toml' -o -name 'settings*.json' -o -name '*.sh' \) -print0 2>/dev/null | xargs -0 grep -lE '(^|[^@])kalinichenko:' 2>/dev/null
 ```
 
 Read each file that it lists. A record of past work, as an old plan, can keep
@@ -51,11 +53,18 @@ the old name. In each other file, replace the name. The command edits the
 file that a link points to, so a file from a dotfiles repository stays a link:
 
 ```sh
-perl -pi -e 's/(^|[^@])kalinichenko:/$1craft:/g' "$(realpath <file>)"
+perl -pi -e 's/(?<!@)kalinichenko:/craft:/g' "$(realpath <file>)"
 ```
 
-A project that turns the plugin on in its own `.claude/settings.json` has
-`"kalinichenko@kalinichenko": true` there. Change it to
+A project can turn the plugin on in its own `.claude/settings.json` or
+`.claude/settings.local.json`. This command finds such a file in the project
+where you run it:
+
+```sh
+grep -l '"kalinichenko@kalinichenko"' .claude/settings*.json 2>/dev/null
+```
+
+In each file that it lists, change `"kalinichenko@kalinichenko": true` to
 `"craft@kalinichenko": true`.
 
 ## Optional: the new URL
@@ -82,6 +91,8 @@ codex plugin marketplace remove kalinichenko
 codex plugin marketplace add kalinichenko88/craft-skills
 codex plugin add craft@kalinichenko
 ```
+
+Then trust the three hooks of `craft` in `/hooks`, as above.
 
 ## Last
 

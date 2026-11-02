@@ -155,7 +155,7 @@ start there.
    You are one reviewer that another agent runs: start no skill, change no file, and file nothing.
    ```
 
-   For Codex, write the prompt to a file with the Write tool, in the
+   For Codex, write the prompt to a new file with the Write tool, in the
    session's scratchpad directory, or in a new folder from `mktemp -d` when
    there is none, and give Codex the file. The prompt never goes
    into a shell command: text from outside can hold a line that ends it.
