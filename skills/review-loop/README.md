@@ -1,7 +1,8 @@
 # craft:review-loop
 
-A review that ends: a check of a capability's worth before any round, rounds
-that read only the last fixes, a stop at the first
+A review that ends: a check of a capability's worth before any round, a walk
+through a changed screen in the app, rounds that read only the last fixes, a
+stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a review against the
@@ -39,6 +40,13 @@ each task stays as that skill sets it. In place of the final review of
   [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed,
   its `ponytail-review` runs once before the first round, and its cuts are one
   commit. Without ponytail the step is skipped, and the summary says so.
+- **A walk by eye.** For a change to a screen, before the first round, the
+  agent starts the app, walks the flow of the task, and looks at a
+  screenshot of each screen: what moved, what overlaps, what is cut, and
+  what did not load. It reads the console errors and the failed requests
+  too, and looks again with long data and with nothing to show. Its fixes
+  are one commit, so the first round reads them. Without a browser tool the
+  step is skipped, and the summary says why: see *The browser step* below.
 - **A level with a reason.** `low` to `xhigh` by the weight of the change, and
   one sentence that says why. `ultra` only when you ask for it. A change to a
   test file is never `low`: `/code-review low` skips test files. A change to
@@ -157,6 +165,24 @@ codex plugin add ponytail@ponytail
 It is not a dependency of this plugin. Codex plugins cannot declare one. In
 Claude Code a dependency would also turn on ponytail's always-on mode, a hook
 that needs `node`, for everyone who installs `craft`.
+
+## The browser step
+
+The walk needs one tool that shows the app. In Claude Code, any of these:
+
+- The Playwright MCP, for a web app:
+  `claude plugin install playwright@claude-plugins-official`. It needs
+  `npx`.
+- Claude in Chrome, for a web app: the Chrome extension, and a session
+  started with `claude --chrome`. See
+  [Claude Code's docs](https://code.claude.com/docs/en/chrome).
+- The `run` skill that Claude Code ships, for a desktop app as Electron, or
+  an app whose start is not clear. It needs no install.
+
+Codex: `codex mcp add playwright -- npx @playwright/mcp@latest`.
+
+The walk does not write an e2e test in place of a browser tool, and installs
+nothing.
 
 ## The Codex step
 
