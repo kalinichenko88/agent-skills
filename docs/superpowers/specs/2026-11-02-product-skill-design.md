@@ -515,12 +515,15 @@ After the change, the same shapes, 5 runs each, and:
   that has a report. Passes when the skill runs at the full depth anyway.
 
 **worth** and **stop** stay narrated, in the third person, so that their
-numbers compare with the baseline. **start**, **fork** and **foreign** are
-real runs, as `tests/architecture_eval.sh` runs them, with
-`--output-format stream-json`: they measure whether the skill loads, and
-what comes before the first write, which a narration cannot show. (The
-agent's call.) **start** and **fork** run first without the line of
-`rules.md`, then with it when they fail (*Changes in other skills*).
+numbers compare with the baseline. **fork** and **foreign** are narrated
+too: one `claude -p` turn cannot reach a fork of brainstorming, and a real
+review of the branch would run every round before the check. **start** is a
+real run, as `tests/architecture_eval.sh` runs it: it measures what comes
+before the first write, which a narration cannot show. Every run writes
+`--output-format stream-json`, so that the skills a narration loads show as
+Skill calls. (The agent's call.) **start** and **fork** run first without
+the line of `rules.md`, then with it when they fail (*Changes in other
+skills*).
 
 **Done when**, on the text that the pull request merges: worth, start, fork
 and foreign pass in at least 4 of 5 runs each, and no stop run rebuilds the
