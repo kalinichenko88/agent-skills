@@ -36,7 +36,8 @@ The first user is the author.
   `rules.md` loads through a hook. Codex runs plugin hooks only after the
   person trusts them.
 - **Money:** the plugin is free and earns nothing. Its cost is the user's
-  tokens: the panel, the second reviewer and the evals call models.
+  tokens: the panel, the second reviewer, the walk of a screen and the evals
+  call models.
 - **The client:** none. No contract binds the project.
 
 ## Open questions
@@ -50,3 +51,4 @@ The first user is the author.
 
 - [0001 GitHub only, until a project on another host needs more](pdr/0001-github-only.md) — accepted; revisit when: a real project on GitLab or Bitbucket needs the plugin
 - [0002 A correction of a plugin step goes to the tracker at Finishing, with no tool of its own](pdr/0002-corrections-at-finishing.md) — accepted; revisit when: a session reaches Finishing with a correction and shows no draft, or a host lets a plugin tool's description always load
+- [0003 A change to a screen is walked by eye once, before round 1](pdr/0003-ui-walk-by-eye.md) — accepted; revisit when: the first 5 reviews with the walk show 0 findings from it in total

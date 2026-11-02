@@ -31,8 +31,9 @@ starts and what you get.
 
   ![The roadmap skill: plan the roadmap, pick the next task, close a milestone](docs/roadmap/00-overview.webp)
 - [`craft:review-loop`](skills/review-loop/README.md) — a review that ends:
-  rounds that read only the last fixes, a second model for risky changes, a
-  security review, and a summary of what was decided and fixed.
+  a walk through a changed screen in the app, rounds that read only the last
+  fixes, a second model for risky changes, a security review, and a summary
+  of what was decided and fixed.
 - [`craft:product`](skills/product/README.md) — a skeptical analyst before
   the work: is the task worth doing, and is there a simpler way.
 - [`craft:architecture`](skills/architecture/README.md) — new code grows into
@@ -56,10 +57,11 @@ pull request, and asks you whether to merge. Skills: github, review-loop.
 
 **Review a branch before the pull request.** Ask for a review, or run
 `/code-review`. The agent picks the level by the weight of the change and
-says why. The first round reads the whole branch, and each later round reads
-only the fixes of the round before. The loop stops at the first clean round,
-or after round 3. A change to code then gets a security review, and every
-change gets a summary. Skill: review-loop.
+says why. Before the first round, a change to a screen is walked in the app,
+and the agent looks at each screen. The first round reads the whole branch,
+and each later round reads only the fixes of the round before. The loop
+stops at the first clean round, or after round 3. A change to code then gets
+a security review, and every change gets a summary. Skill: review-loop.
 
 **Plan a milestone.** Ask the agent to plan the roadmap. It reads the open
 issues, proposes milestones, the order of the tasks and the links between
@@ -83,6 +85,8 @@ take next: you get one free task and the reason. Skill: roadmap.
   the first round, and `craft:debt` adds its audit to the debt map.
 - **Codex**: a host of its own for the plugin, and in Claude Code a second
   reviewer: it reads risky changes, specs and the text of skills.
+- **Playwright and Claude in Chrome**: `craft:review-loop` walks a changed
+  screen with them before the first round.
 
 ## Dependencies
 
@@ -111,6 +115,11 @@ take next: you get one free task and the reason. Skill: roadmap.
   it, those steps are skipped, and the summary says so.
 - **The superpowers plugin**: brainstorming, specs and plans. The rules work
   without it.
+- **A browser tool**: the Playwright MCP or Claude in Chrome, for the walk of
+  the review loop. For a desktop app, or with neither of them, the `run`
+  skill that Claude Code ships takes their place. Without a tool, the walk is
+  skipped, and the summary says so. The [review-loop README](skills/review-loop/README.md#the-browser-step)
+  says how to install them.
 - **Git for Windows**, on native Windows: Claude Code runs the hooks in Git
   Bash. Without it, Claude Code runs them in PowerShell, and the rules do not
   load. Codex on native Windows is not tested: run it in WSL. `clones.sh` is
