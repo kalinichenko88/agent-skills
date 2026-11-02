@@ -1,6 +1,6 @@
 ---
 name: product
-description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's, or one's own with no worth check at its start), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
+description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's, or one's own that adds a capability and had no worth check at its start), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
 ---
 
 # Product
@@ -14,15 +14,16 @@ whether to build it, and what.
 
 | Moment | Depth | Read first |
 | --- | --- | --- |
-| A feature starts: a new capability, or a change of what the product does for its users | full | *The run* |
+| A feature starts: a new capability, or a change of what the product does for its users | full; none when a report for it exists (*The trace*) | *The run* |
 | A bug fix that changes business logic: a rule, a calculation, a state, a permission, the data | light | *The run* |
 | A review of someone else's branch or pull request | full, always | *The trace* |
-| A review of one's own branch | none when a report for it exists; else as a feature | *The trace* |
+| A review of one's own branch that adds a capability or changes what the product does | none when a report for it exists; else the depth of its start | *The trace* |
+| A review finding that shows the capability gives its users nothing | light, with the finding as its proof | *The run* |
 | A question in brainstorming that chooses between ways | light; full for a decision about the whole project | *In brainstorming* |
 | A decision about the whole project: the licence, open source or not, distribution, pricing, the money model, the hosting | full | *The run* |
 | A project with no store, or the person asks for one | the offer | `store.md` |
 
-A bug fix that changes no business logic gets no run. `reader.md` and
+One's own bug fix that changes no business logic gets no run. `reader.md` and
 `store.md` sit next to this file, in this skill's base directory `<dir>`.
 Read `reader.md` before the first run: it holds the criteria, the checks and
 the shape of the report, for the readers of the panel and for the light
@@ -37,11 +38,11 @@ search, and neither sees the other's answer. The main session merges them.
 
 ## The trace
 
-The person's own branch gets no second report: a report exists when the spec
-of the work, the pull request's description, the issue, or a PDR that the
-branch adds holds a `**Verdict:**` line. The test is the trace, not the
-author: the person's branch with no report at its start gets one at the
-review.
+The person's own work gets no second report: a report exists when a message
+of this session, the spec of the work, the pull request's description or the
+issue holds a `**Verdict:**` line, or when the branch adds a PDR for this
+work. The test is the trace, not the author: the person's branch with no
+report at its start gets one at the review.
 
 Someone else's work gets the full depth always, with a report or without
 one, and their spec and description are the decisions to check. Someone
@@ -49,14 +50,16 @@ else's work is a pull request whose author is not the account that `gh` is
 logged in as, or, with no pull request, a branch whose commits have another
 author's email than `git config user.email`.
 
-A report at a review goes into the pull request's description, so that the
-next review finds it.
+A report with no spec, or at a review of one's own branch, goes into the pull
+request's description when it opens, so that the next review finds it. On
+someone else's pull request, it goes in a comment.
 
 ## In brainstorming
 
-The skill runs only at a fork: a question that chooses between ways, as
-"fetch it on each request, or download it once". Never at a question that
-asks the person to describe. `superpowers:brainstorming` keeps its order: its
+Besides the start of a feature, whose report comes where *The start of a
+feature* of `kalinichenko:architecture` says, the skill runs only at a fork: a
+question that chooses between ways, as "fetch it on each request, or download
+it once". Never at a question that asks the person to describe. `superpowers:brainstorming` keeps its order: its
 first message is the opt-out line and one question, so the report never
 comes before that question.
 
@@ -67,9 +70,11 @@ The answer stays the person's.
 
 ## The run
 
-1. **Find the store** (`store.md`). With none, make the offer of `store.md`
-   once a session, and go on without a store. At the full depth, send the
-   panel now (*The panel*), and wait for both readers before step 7.
+1. **Find the store** (`store.md`), and the PDRs that its index shows the
+   task touches. With no store, go on without one, and make the offer of
+   `store.md` once a session; in brainstorming, after the person answers the
+   fork. At the full depth, send the panel now (*The panel*), and wait for
+   its readers before step 7.
 2. **Understand the task:** who has the problem, how many of them by real
    data, and how others solve it. At the full depth, with a web search.
 3. **Collect the three sides:** the client (what they ask, and the goal
@@ -84,7 +89,7 @@ The answer stays the person's.
 
 The report goes in a message before the work that it judges: with a spec, at
 the spec's start, after the block of *The start of a feature*; at a review,
-before round 1 and in the pull request's description.
+before round 1, and then where *The trace* says.
 
 ## Accepted decisions
 
@@ -110,7 +115,7 @@ With no person, as in a run that a script starts or with "do not ask
 questions", the work goes on as it was asked. Then the last message of the
 turn starts with the report, its `**Verdict:**` line first, and its
 questions marked `open`. The pull request's description holds the same
-report.
+report, when there is one.
 
 After the answer:
 
@@ -120,7 +125,8 @@ After the answer:
   `plan.sh later` of `kalinichenko:roadmap`, and the condition goes into the
   issue's text.
 - `close`: after a yes, the issue closes as not planned through
-  `kalinichenko:github`, with the report in its comment.
+  `kalinichenko:github` (`gh issue close <n> --reason "not planned"`), with
+  the report in its comment.
 
 ## The panel
 
@@ -141,9 +147,10 @@ Send both readers in one message, in the background:
 
 The prompt of each is the text of `<dir>/reader.md`, then the brief:
 
-- the task: the issue, the spec or the pull request, with its text;
+- the task: the issue, the spec or the pull request, with its text; at a
+  review, also the branch and its range `<base>..HEAD`;
 - `PRODUCT.md`, or "no store";
-- the PDRs that the task touches;
+- the PDRs that the index of `PRODUCT.md` shows the task touches;
 - the **Touches:** line of the block of *The start of a feature*, when there
   is one;
 - for someone else's work, their spec and description, as the decisions to
@@ -152,13 +159,15 @@ The prompt of each is the text of `<dir>/reader.md`, then the brief:
 Not the conversation: a reader that sees it argues from it.
 
 **The merge**, in the main session. Join the points that say the same thing,
-and drop none. A point that goes against what the conversation agreed goes
+and drop none, except a risk with no number and no source. A point that goes against what the conversation agreed goes
 to the person as it is: the main session sees the task through the
 conversation, and this rule guards against that. Where the readers disagree,
 the **Readers disagree:** line says so, with each reader's side.
 
 **Fallbacks.** With no `codex` command, when `codex login status` fails, or
-when the run fails: Fable alone, and the report says so. When Codex returns
+when the run fails: Fable alone, and the report says so. When the Fable call
+fails: Codex alone; with neither reader, the main session alone, with its
+own web search. The report says so. When Codex returns
 no source URL, it had no search: the report says that its points rest on no
 web search. Codex as the host has no subagent with a model and does not call
 itself: the main session does the full depth alone, with its own web search,

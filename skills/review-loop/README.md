@@ -27,9 +27,9 @@ each task stays as that skill sets it. In place of the final review of
 
 ## What you get
 
-- **Worth first.** Before any round, a branch that adds a capability gets the
-  verdict of [`kalinichenko:product`](../product/README.md): someone else's
-  branch always, yours when it had none at its start. A capability that is
+- **Worth first.** Before any round, [`kalinichenko:product`](../product/README.md)
+  gives its verdict: on someone else's branch always, on yours when it adds a
+  capability and had no verdict at its start. A capability that is
   not worth it gets no review until you decide. A finding that shows the
   capability gives nothing comes to you too, not as a rebuild.
 - **Less code first.** When the

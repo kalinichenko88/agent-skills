@@ -71,10 +71,10 @@ to its steps.
 With `superpowers:brainstorming` in the session, its order holds: its first
 message is the opt-out line and one question, and it reads the code only
 after the person says yes to its offer to look. So the block and the report
-come first in the message that reports what that look found, and again at the
-start of the spec. With no such look, it comes only at the start of the spec, or in the
-conversation before the first edit when there is no spec. Never before its
-first question.
+come first in the message that reports what that look found, and the spec
+copies them at its start. With no such look, they come only at the start of
+the spec, or in the conversation before the first edit when there is no
+spec. Never before its first question.
 
 ## The moment of a decision
 
@@ -125,8 +125,9 @@ offer and the gate has no invariant to check; the other steps are the same.
    the gate, and the block of *The start of a feature* with the report of
    `kalinichenko:product` when there is one. It checks whether the search
    missed existing code, whether the reason for a new structure holds,
-   whether the gate is right, and what the next likely change will cost. Its answer is advice: answer each point, and a point on
-   which the two of you do not agree goes to the person.
+   whether the gate is right, and what the next likely change will cost.
+   Its answer is advice: answer each point, and a point on which the two of
+   you do not agree goes to the person.
 
 **Consistency first.** When the project's code breaks a principle of *Modules
 and layers* everywhere, as components that all call `fetch` with no service

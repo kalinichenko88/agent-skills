@@ -413,7 +413,8 @@ line holds for the subagent's reply.
 
 When the review ends, run the repository's own check on the final branch.
 Then report in this order. Each item is one line, except **Change:**, which
-is a list:
+is a list. With no person and a verdict of *Worth first* other than `do it`,
+its report comes first, before **Change:**.
 
 - **Change:** what the branch changed as a whole, for a person who did not
   follow the session: one to five bullets, the list that the merge takes as

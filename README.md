@@ -51,7 +51,8 @@ prompt of engineering rules, plus the skills those rules lean on.
 - **[`kalinichenko:product`](skills/product/README.md)** — a skeptical
   analyst before the work: whether a task is worth doing, from who gains,
   the money, the direction, the law and the client, with Fable and Codex
-  searching the web for a new feature or someone else's branch. Another way,
+  searching the web for a new feature, someone else's branch, or a decision
+  about the whole project. Another way,
   a deferral or a close is a good answer, and you decide. Product decisions
   go into `docs/PRODUCT.md` and `docs/pdr/`, and an accepted one is checked
   again when a task touches it.
@@ -246,10 +247,12 @@ once with a stub `claude` in the place of the model.
 `tests/product_eval.sh` runs Opus on a site of 1000 brands, where a branch
 redirects 7 of them to an icon that the page's CSP blocks. It counts the
 runs that check the worth before a review, a feature, a fork in brainstorming
-and a teammate's branch, and the runs that stop a rebuild after a review
-finds that the feature shows nothing. Four more shapes count the runs that
-do not check it: a bug fix, a branch with a report, a question that asks the
-person to describe, and a project with its own decisions file. Run it after a
+and a teammate's branch, and the runs that check it again after a review
+finds that the feature shows nothing; it prints those texts, to count by hand
+the runs that rebuild the feature. Three more shapes count the runs that do
+not check it: a bug fix, a branch with a report, and a question that asks the
+person to describe. One counts the runs that write into a project's own
+decisions file. The feature's shape needs a Codex login. Run it after a
 change to `skills/product`, to the start of a feature in
 `kalinichenko:architecture` or to *Worth first* of review-loop.
 `tests/product_checks_test.sh` runs its checks in `make check`, on recorded

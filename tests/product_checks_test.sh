@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # Runs the checks of tests/product_eval.sh, without the model, on
 # tests/fixtures/product/logs: the sessions' tool calls and last texts, in the
-# layout an eval run leaves. Each shape has two logs, start three. The runs
+# layout an eval run leaves. Each shape has two logs, start four. The runs
 # numbered 1 pass and are recorded runs with the skill. The others fail: worth,
 # stop, fork, foreign and start are recorded runs with no skill, or with a
 # skill that wrote before its panel; bug, traced, plain and store are recorded
 # runs of another shape that a check must fail:
 #   start-2    loaded no skill before its first write
 #   start-3    no Codex login: the skill and Fable, and no codex exec
+#   start-4    start-1 with a brief that Bash and Write put in /tmp before the
+#              panel: no write of the work, so it passes
 #   bug-2      a start run: Fable and Codex before the first write
 #   traced-2   a worth run: a verdict of "do it another way"
 #   plain-2    a fork run: a verdict line
@@ -35,7 +37,7 @@ fork: 1 of 2 runs pass
   fail fork-2
 foreign: 1 of 2 runs pass
   fail foreign-2
-start: 1 of 3 runs pass
+start: 2 of 4 runs pass
   fail start-2
   fail start-3
 bug: 1 of 2 runs pass

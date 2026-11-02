@@ -23,7 +23,9 @@
 #                      sends Codex at xhigh
 #   start    real      the feature, before any code: the skill, a Fable
 #                      subagent and a codex exec call before the first write,
-#                      and a verdict line that is not "do it"
+#                      and a verdict line that is not "do it". It needs a
+#                      Codex login: with none, the skill runs Fable alone, as
+#                      it should, and the check fails on Codex
 #   bug      real      a bug fix with no business logic: no Fable or Codex
 #                      before the first write
 #   traced   narrated  the review of the person's own branch whose spec holds
@@ -139,19 +141,25 @@ run() {
 
 # events <log>: the tool calls of the session and its subagents in order, one
 # a line: the skill's name for a Skill call, Fable for a Fable subagent, Codex
-# for a codex exec call, Write for a write, and the tool's name for the rest.
+# for a codex exec call, Write for a write into the run's folder, Scratch for
+# a Write or Edit call outside it, and the tool's name for the rest. A write
+# into the run's folder has a relative path, or a path with the folder's name,
+# as /<shape>-<n>/: a file in /tmp, as a brief for the panel or a script to
+# try, is no write of the work.
 # ponytail: a Bash call is a write when its first line has `>`, `tee` or
-# `tee -a`, then spaces or none, then a path with a dot and letters, as
+# `tee -a`, then spaces or none, then such a path with a dot and letters, as
 # `cat > a.js <<'EOF'`. The lines after the first are a heredoc's text, as a
 # brief that quotes `> src/a.js`. `cp`, `mv` and `sed -i` are not writes.
 events() {
-  jq -rR 'fromjson? | select(.type == "assistant") | .message.content[]
+  jq -rR --arg dir "/$(basename "$1" .jsonl)/" 'def ours: (test("^[/~$]") | not) or contains($dir);
+    fromjson? | select(.type == "assistant") | .message.content[]
     | select(.type == "tool_use")
     | if .name == "Skill" then .input.skill
       elif (.name == "Agent" or .name == "Task") and ((.input.model // "") | test("fable")) then "Fable"
       elif .name == "Bash" and (.input.command | test("\\bcodex\\b.*\\bexec\\b")) then "Codex"
-      elif (.name | test("^(Write|Edit|MultiEdit|NotebookEdit)$"))
-        or (.name == "Bash" and (.input.command | split("\n")[0] | test("(>|\\btee( -a)?) *[^ ;&|<>]*\\.[a-z]+\\b"))) then "Write"
+      elif .name | test("^(Write|Edit|MultiEdit|NotebookEdit)$") then
+        if (.input.file_path // .input.notebook_path // "") | ours then "Write" else "Scratch" end
+      elif .name == "Bash" and ([.input.command | split("\n")[0] | scan("(?:>|\\btee(?: -a)?) *([^ ;&|<>]*\\.[a-z]+)\\b") | .[0]] | any(ours)) then "Write"
       else .name end' "$1"
 }
 

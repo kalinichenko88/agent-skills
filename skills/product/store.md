@@ -46,7 +46,7 @@ The skill reads it at each run. Its sections:
 ## Open questions
 
 ### Q-3 <the question>
-- Answers: lawyer | client | owner
+- Answers: lawyer | client | person
 - Blocks: #45, PDR 0012
 - Since: 2026-10-01
 
@@ -55,8 +55,9 @@ The skill reads it at each run. Its sections:
 - [0012 Three plans, monthly billing](pdr/0012-three-plans.md) — accepted; revisit when: payment failures pass 5 %
 ```
 
-A question that gets its answer becomes a PDR, and its entry leaves the
-list.
+A link in the index is relative to `PRODUCT.md`: `pdr/…` from `docs/`,
+`docs/pdr/…` from the root. A question that gets its answer becomes a PDR,
+and its entry leaves the list.
 
 ## A PDR
 
