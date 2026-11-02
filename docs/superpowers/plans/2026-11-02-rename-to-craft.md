@@ -27,7 +27,7 @@
 1. A Codex user who moves: Codex takes the hooks of `craft` as new hooks and skips them until the person trusts them in `/hooks`. The guide has that step (Task 4).
 2. A person who adds the marketplace again by the new URL: the help of `claude plugin marketplace remove` does not say what happens to the plugins of that marketplace. So the guide puts the optional new add in place of the update, before the install: then nothing is installed from the marketplace while it is away.
 3. An open branch or an issue text written before the rename brings `kalinichenko:` back. The lint line of Task 2 fails `make check` on it.
-4. An eval run on the owner's machine before the move: `"craft@kalinichenko": false` does not turn off the installed `kalinichenko@kalinichenko`, so the skill loads twice. Run the evals only after Task 9.
+4. An eval run on a machine that still has the old plugin: both keys, `"craft@kalinichenko": false` and `"kalinichenko@kalinichenko": false`, are in the `--settings` of every eval, so only the branch loads (fixed in review round 1).
 5. A link to the old README: `#install` and `#update` keep working (Constraints), and the old *Develop* and *Release* anchors have no link in the tree (checked: `git grep -n '#develop\|#release'` prints nothing).
 
 ---
@@ -331,8 +331,14 @@ Expected: `gh release view v2.0.0` shows the link.
 ```bash
 f=$(mktemp)
 gh issue view <n> --json body --jq .body >"$f"
-perl -pe 's/kalinichenko:/craft:/g; s{kalinichenko88/agent-skills}{kalinichenko88/craft-skills}g; s/`agent-skills`/`craft-skills`/g' "$f" >"$f.new"
-diff "$f" "$f.new"; gh issue edit <n> --body-file "$f.new"
+perl -pe 's/(?<![\w@-])kalinichenko:/craft:/g; s{kalinichenko88/agent-skills}{kalinichenko88/craft-skills}g; s/`agent-skills`/`craft-skills`/g' "$f" >"$f.new"
+diff "$f" "$f.new"
+```
+
+Read the diff. Then:
+
+```bash
+gh issue edit <n> --body-file "$f.new"
 ```
 
 Read each diff before the edit. #87 is assigned to the owner, and the owner said on 2026-11-02 that no session works on it, so its body changes too. Then its comment, with the same change: `gh api repos/kalinichenko88/craft-skills/issues/comments/6443347351 --jq .body`, the same `perl`, then `gh api -X PATCH repos/kalinichenko88/craft-skills/issues/comments/6443347351 -F body=@"$f.new"`. #212 gets a one-line comment: the README now has the section of external dependencies, and #212 adds its browser tools there. Closed issues and merged PRs stay.
