@@ -5,8 +5,10 @@ description: Use when a change is reviewed, before or after its pull request ope
 
 # Review loop
 
-A review runs in rounds. An over-engineering review comes first, when its
-skill is installed. The first round reads the whole branch. Each later round
+A review runs in rounds. Before them, `kalinichenko:product` checks whether
+a capability that the branch adds is worth it: on someone else's branch
+always, on the person's own when no report exists for it. An over-engineering
+review comes next, when its skill is installed. The first round reads the whole branch. Each later round
 reads only the fixes of the round before. The loop stops at the first round
 that confirms no defect, and at the latest after round 3. A defect is a wrong
 result that real use reaches, or data loss or a security hole on any input,
@@ -75,6 +77,27 @@ when neither review does. Other documents next to code stay with the code
 review, with no subagent.
 
 A review subagent and Codex's `/review` have no levels.
+
+## Worth first
+
+Before the over-engineering review and round 1, load `kalinichenko:product`:
+
+- on someone else's branch or pull request, always, at the full depth. Their
+  spec and description are the decisions to check;
+- on the person's own branch that adds a capability for the product's users,
+  or changes what the product does for them, when no report exists for it.
+  *The trace* of `kalinichenko:product` says where a report is found.
+
+On the person's own branch, skip it for documents only, for a bug fix that
+changes no business logic, and for a move that a script or a test proves
+unchanged.
+
+A capability that is not worth it gets no review. A verdict other than
+`do it` goes to the person before round 1, with its options, and the review
+waits for the answer. With no person, the review goes on, and the question
+stays open in the summary and in the pull request's description. The report
+goes into the pull request's description too, so that a later review finds
+it.
 
 ## Over-engineering first
 
@@ -347,7 +370,11 @@ a real defect on two, in 53 to 204 seconds.
    its users — a rule, a calculation, a state, a permission, the data it keeps
    or deletes. Give the options and a recommendation, and keep the rest of the
    round going while the person answers. When nobody can answer, as in a run
-   with no person, the question stays open in the summary.
+   with no person, the question stays open in the summary. A finding that
+   shows that the capability gives its users nothing, as a policy that blocks
+   every result the feature finds, is such a question, not a defect to fix:
+   do not rebuild the feature. Run `kalinichenko:product` at the light depth,
+   with the finding as its new proof, and ask with its options.
 5. **Fix at the root.** When the same defect is in sibling call sites or in a
    shared token, fix it there, and count the places.
 6. **A finding outside the task is an issue**, through the
@@ -391,7 +418,8 @@ is a list:
 - **Change:** what the branch changed as a whole, for a person who did not
   follow the session: one to five bullets, the list that the merge takes as
   `--body` in *Pull requests* of the `kalinichenko:github` skill.
-- **Rounds:** `ponytail-review`'s lines saved, or why it did not run. Each
+- **Rounds:** the verdict of *Worth first*, or why it did not run.
+  `ponytail-review`'s lines saved, or why it did not run. Each
   round, its level and range, and the count of findings it confirmed. The
   last pass, the same way. At `xhigh`, the Codex review: its range and the
   count of findings it confirmed, or why it did not run. At `high` and

@@ -3,8 +3,8 @@
 # review and fix at level high, one review subagent a round, with no one to
 # answer its questions. It prints, for each run, the counts, then each review
 # subagent's prompt after its kind: W reads the whole branch, C one commit, T
-# is the review of the tests, A the review of the architecture, S the security
-# review. It exits 1 when a run has fewer than two rounds, read the whole
+# is the review of the tests, A the review of the architecture, P a reader of
+# kalinichenko:product's worth check, S the security review. It exits 1 when a run has fewer than two rounds, read the whole
 # branch more than once after round 1, ran more than three rounds in one
 # count, sent the review of the tests other than once next to the last pass,
 # or sent one with no last pass, sent the review of the architecture other
@@ -147,7 +147,9 @@ wait
 # model opus whose prompt names architecture-lens.md. It is not a round
 # either. The skill sends it once, beside round 1, so before the first round
 # that reads one commit. A round whose prompt names that file too is still a
-# round, so a run that folds the review into round 1 has none.
+# round, so a run that folds the review into round 1 has none. A reader of the
+# worth check of kalinichenko:product is an Agent call whose prompt holds its
+# reader.md: its heading "Product reader", or its path. It is not a round.
 # Round 1, the last pass, the review of the tests and the security review each
 # start a count of rounds. Step 4 stops a count at its third round when no one
 # can answer: round 1 and two more, or three after the others.
@@ -165,18 +167,20 @@ secrev='security[ -]review|hard exclusions'
 failed=0
 for log in "$logs"/run-*.jsonl; do
   # One line a prompt: W when it reads the whole branch, C one commit, T the
-  # review of the tests, S the security review, then a tab and the prompt.
+  # review of the tests, P a reader of the worth check, S the security review,
+  # then a tab and the prompt.
   prompts=$(jq -rR --arg commit "$commit" --arg secrev "$secrev" 'fromjson?
     | select(.type == "assistant" and .parent_tool_use_id == null)
     | .message.content[] | select(.type == "tool_use")
     | if .name == "Skill" and .input.skill == "security-review" then "S\tSkill: /security-review"
       elif .name == "Agent" and (.input.subagent_type != "Explore" or (.input.prompt | test("(tests|architecture)-lens\\.md"))) then (.input.model // "") as $model | .input.prompt | gsub("\n"; " ")
-        | (if test("tests-lens\\.md") then "T" elif test("architecture-lens\\.md") and $model == "opus" then "A" elif test($secrev; "i") then "S" elif test($commit) then "C" else "W" end) + "\t" + .
+        | (if test("Product reader|product/reader\\.md") then "P" elif test("tests-lens\\.md") then "T" elif test("architecture-lens\\.md") and $model == "opus" then "A" elif test($secrev; "i") then "S" elif test($commit) then "C" else "W" end) + "\t" + .
       else empty end' "$log")
   arch=$(cut -f1 <<<"$prompts" | grep -c A || true)
   early=$(cut -f1 <<<"$prompts" | tr -d '\n' | grep -cE '^[^C]*A' || true)
-  # The counts of rounds below leave the review of the architecture out.
-  kinds=$(cut -f1 <<<"$prompts" | grep -v A || true)
+  # The counts of rounds below leave the review of the architecture and the
+  # readers of the worth check out.
+  kinds=$(cut -f1 <<<"$prompts" | grep -v '[AP]' || true)
   rounds=$(grep -c '[CW]' <<<"$kinds" || true)
   whole=$(grep '[CW]' <<<"$kinds" | tail -n +2 | grep -c W || true)
   last=$(grep -n W <<<"$kinds" | tail -n 1 | cut -d: -f1)
