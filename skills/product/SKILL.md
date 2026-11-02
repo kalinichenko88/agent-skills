@@ -18,7 +18,7 @@ whether to build it, and what.
 | A bug fix that changes business logic: a rule, a calculation, a state, a permission, the data | light | *The run* |
 | A review of someone else's branch or pull request | full, always | *The trace* |
 | A review of one's own branch that adds a capability or changes what the product does | none when a report for it exists; else the depth of its start | *The trace* |
-| A review finding that shows the capability gives its users nothing | light, with the finding as its proof | *The run* |
+| A review finding that shows the capability gives its users nothing | light, with the finding as its proof, also when a report exists | *The run* |
 | A question in brainstorming that chooses between ways | light; full for a decision about the whole project | *In brainstorming* |
 | A decision about the whole project: the licence, open source or not, distribution, pricing, the money model, the hosting | full | *The run* |
 | A project with no store, or the person asks for one | the offer | `store.md` |
@@ -41,7 +41,8 @@ search, and neither sees the other's answer. The main session merges them.
 The person's own work gets no second report: a report exists when a message
 of this session, the spec of the work, the pull request's description or the
 issue holds a `**Verdict:**` line, or when the branch adds a PDR for this
-work. The test is the trace, not the author: the person's branch with no
+work. The light report of a fork in brainstorming is no report of the
+feature. The test is the trace, not the author: the person's branch with no
 report at its start gets one at the review.
 
 Someone else's work gets the full depth always, with a report or without
@@ -51,17 +52,19 @@ logged in as, or, with no pull request, a branch whose commits have another
 author's email than `git config user.email`.
 
 A report with no spec, or at a review of one's own branch, goes into the pull
-request's description when it opens, so that the next review finds it. On
-someone else's pull request, it goes in a comment.
+request's description, or into it when it opens, so that the next review
+finds it. On someone else's pull request, it goes in a comment through
+`kalinichenko:github`, after the person's yes.
 
 ## In brainstorming
 
 Besides the start of a feature, whose report comes where *The start of a
 feature* of `kalinichenko:architecture` says, the skill runs only at a fork: a
 question that chooses between ways, as "fetch it on each request, or download
-it once". Never at a question that asks the person to describe. `superpowers:brainstorming` keeps its order: its
-first message is the opt-out line and one question, so the report never
-comes before that question.
+it once". Never at a question that asks the person to describe.
+`superpowers:brainstorming` keeps its order: its first message is the
+opt-out line and one question, so the report never comes before that
+question.
 
 At a fork, the report comes in the message that asks the question, before
 its options, and its options become the options of the question. It may show
@@ -134,7 +137,7 @@ Send both readers in one message, in the background:
 
 - **Fable:** an `Agent` call with `subagent_type: "general-purpose"` and
   `model: "fable"`.
-- **Codex,** from the root of the repository:
+- **Codex,** from the working tree of the task:
 
   ```bash
   codex --search exec -s read-only --ephemeral - <<'EOF'
@@ -149,8 +152,9 @@ The prompt of each is the text of `<dir>/reader.md`, then the brief:
 
 - the task: the issue, the spec or the pull request, with its text; at a
   review, also the branch and its range `<base>..HEAD`;
-- `PRODUCT.md`, or "no store";
-- the PDRs that the index of `PRODUCT.md` shows the task touches;
+- the store: `PRODUCT.md`, or the project's own decisions file, or "no
+  store";
+- the decisions that its index shows the task touches;
 - the **Touches:** line of the block of *The start of a feature*, when there
   is one;
 - for someone else's work, their spec and description, as the decisions to
@@ -159,9 +163,10 @@ The prompt of each is the text of `<dir>/reader.md`, then the brief:
 Not the conversation: a reader that sees it argues from it.
 
 **The merge**, in the main session. Join the points that say the same thing,
-and drop none, except a risk with no number and no source. A point that goes against what the conversation agreed goes
-to the person as it is: the main session sees the task through the
-conversation, and this rule guards against that. Where the readers disagree,
+and drop none, except a risk with no number and no source. A point that goes
+against what the conversation agreed goes to the person as it is: the main
+session sees the task through the conversation, and this rule guards against
+that. Where the readers disagree,
 the **Readers disagree:** line says so, with each reader's side.
 
 **Fallbacks.** With no `codex` command, when `codex login status` fails, or

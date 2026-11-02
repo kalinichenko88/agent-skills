@@ -52,9 +52,10 @@ person only what you cannot find.
    with `path:line`, and the modules it touches. Where the new code goes is
    for the moment of a decision.
 
-Then load `kalinichenko:product`. Its report says whether the problem needs
-solving, and gives the simplest way first. It comes in the same message as
-the block.
+Then, in the main session, load `kalinichenko:product`. Its report says
+whether the problem needs solving, and gives the simplest way first. It comes
+in the same message as the block. In a subagent, the report of the spec or of
+the brief stands.
 
 The result is this block and that report. They are required: no edit of the
 feature comes before a message that holds them, at the start of the spec, or

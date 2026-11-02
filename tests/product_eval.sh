@@ -145,21 +145,25 @@ run() {
 # a Write or Edit call outside it, and the tool's name for the rest. A write
 # into the run's folder has a relative path, or a path with the folder's name,
 # as /<shape>-<n>/: a file in /tmp, as a brief for the panel or a script to
-# try, is no write of the work.
-# ponytail: a Bash call is a write when its first line has `>`, `tee` or
-# `tee -a`, then spaces or none, then such a path with a dot and letters, as
-# `cat > a.js <<'EOF'`. The lines after the first are a heredoc's text, as a
+# try, is no write of the work. A relative path after a `cd` out of the folder,
+# as `cd /tmp && cat > a.mjs`, is in /tmp too.
+# ponytail: a Bash call is a write when its first line has `>` (not `=>` or
+# `->`), `tee` or `tee -a`, then spaces, a quote or none, then such a path
+# with a dot and letters, as `cat > a.js <<'EOF'`. The lines after the first are a heredoc's text, as a
 # brief that quotes `> src/a.js`. `cp`, `mv` and `sed -i` are not writes.
 events() {
-  jq -rR --arg dir "/$(basename "$1" .jsonl)/" 'def ours: (test("^[/~$]") | not) or contains($dir);
+  jq -rR --arg name "$(basename "$1" .jsonl)" 'def here: test("/" + $name + "([/ \"'\'';&|)]|$)");
+    def ours($away): if test("^[/~$]") then here else $away | not end;
     fromjson? | select(.type == "assistant") | .message.content[]
     | select(.type == "tool_use")
     | if .name == "Skill" then .input.skill
       elif (.name == "Agent" or .name == "Task") and ((.input.model // "") | test("fable")) then "Fable"
       elif .name == "Bash" and (.input.command | test("\\bcodex\\b.*\\bexec\\b")) then "Codex"
       elif .name | test("^(Write|Edit|MultiEdit|NotebookEdit)$") then
-        if (.input.file_path // .input.notebook_path // "") | ours then "Write" else "Scratch" end
-      elif .name == "Bash" and ([.input.command | split("\n")[0] | scan("(?:>|\\btee(?: -a)?) *([^ ;&|<>]*\\.[a-z]+)\\b") | .[0]] | any(ours)) then "Write"
+        if (.input.file_path // .input.notebook_path // "") | ours(false) then "Write" else "Scratch" end
+      elif .name == "Bash" and (.input.command | split("\n")[0]
+        | (test("\\bcd +[\"'\'']?[/~$]") and (here | not)) as $away
+        | [scan("(?:(?<![=-])>|\\btee(?: -a)?) *[\"'\'']?([^ ;&|<>\"'\'']*\\.[a-z]+)\\b") | .[0]] | any(ours($away))) then "Write"
       else .name end' "$1"
 }
 
@@ -253,6 +257,9 @@ else
   # shellcheck disable=SC2086 # the list of shapes splits into words
   [ "$#" -gt 0 ] || set -- $shapes
   command -v claude >/dev/null || { echo "$0: no claude command" >&2; exit 2; }
+  case " $* " in
+    *" start "*) codex login status >/dev/null 2>&1 || echo "$0: codex is not logged in, so start fails on Codex" >&2 ;;
+  esac
   logs=$(mktemp -d)
   for i in $(seq "$runs"); do
     for s; do run "$s" "$i" & done

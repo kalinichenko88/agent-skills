@@ -14,9 +14,9 @@ else's work, their spec and description, as decisions to check. It does not
 give the conversation with the person, on purpose: judge the task, not the
 agreement around it.
 
-The main session also reads this file, for a light check with no web
-search. Then the criteria, the checks and the report below hold for it, and
-the web search is left out.
+The main session also reads this file: for a light check, with no web
+search, and for the full depth when it is the only reader. Then the
+criteria, the checks and the report below hold for it.
 
 ## The work
 

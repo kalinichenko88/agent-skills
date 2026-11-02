@@ -29,8 +29,8 @@ each task stays as that skill sets it. In place of the final review of
 
 - **Worth first.** Before any round, [`kalinichenko:product`](../product/README.md)
   gives its verdict: on someone else's branch always, on yours when it adds a
-  capability and had no verdict at its start. A capability that is
-  not worth it gets no review until you decide. A finding that shows the
+  capability or changes what the product does, and had no verdict at its
+  start. A capability that is not worth it gets no review until you decide. A finding that shows the
   capability gives nothing comes to you too, not as a rebuild.
 - **Less code first.** When the
   [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed,
