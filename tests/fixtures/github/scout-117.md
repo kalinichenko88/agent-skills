@@ -27,3 +27,27 @@ Related to #174: the end of the work after the merge — a list of what the PR c
 
 
 
+
+-- comment by kalinichenko88
+
+The room under the rules.md cap that this issue needs is now tracked in #151. After #101, 49 characters are left, not about 120.
+
+-- comment by kalinichenko88
+
+After #163, `rules.md` has 436 characters left under the cap, not 49; the proposal now says so.
+
+-- comment by kalinichenko88
+
+Related to #174, which adds the step after the merge that removes the worktree and the branch; the body now says so.
+
+-- comment by kalinichenko88
+
+After #175, *The pull request* asks one merge question with three answers in a worktree, and *Cleanup* removes the worktree and the branch; the body now says so.
+
+-- comment by kalinichenko88
+
+Related: #205 asks how to split rules.md, which would free the room under the 10,000-character cap that this issue needs.
+
+-- comment by kalinichenko88
+
+After #208, `rules.md` has 337 characters left under the cap, not 436; the proposal now says so.

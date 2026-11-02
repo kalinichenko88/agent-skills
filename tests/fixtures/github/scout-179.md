@@ -12,3 +12,7 @@
 Related to #131: the same rule on `tests/architecture_scripts_test.sh`.
 
 
+
+-- comment by kalinichenko88
+
+#181 merged: the file has 551 lines on main now; the title and the first line say so.

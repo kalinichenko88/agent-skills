@@ -41,8 +41,9 @@ it: an invariant on it is review only.
   `tests/fixtures/<area>/` — recorded payloads and trees, for the tests
   that read them: `tests/<area>_<kind>_test.sh`, where `<kind>` is the
   last word before `_test.sh`, for example `scripts`, `checks` or
-  `fences`, and `tests/<area>_eval.sh`. So
-  `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`.
+  `fences`, and `tests/<area>_eval.sh` or `tests/<area>_<kind>_eval.sh`. So
+  `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`,
+  and `tests/github_scout_eval.sh` reads `tests/fixtures/github/`.
   A folder takes the underscores of the test's name, never the hyphen of
   a skill's name. An area whose tests read no recorded data has no folder.
 - `docs/<skill>/` — the pictures that a README links, and the brief they

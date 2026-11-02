@@ -143,8 +143,8 @@ log: it tells where the code was then. Give it as `skipped`.
 adds. They only read. Run no other `git` command, and nothing else.
 
 After a merge, the prompt also gives one `Decision <n>: <one line>` for each
-thing that the merged pull request decided. Then read the whole body of each
-issue against them, the sentences with no citation too. A sentence is false
+thing that the merged pull request decided. Then read the title and the whole
+body of each issue against them, the sentences with no citation too. A sentence is false
 when one of these is true:
 
 - It waits on a choice or a question, and a decision made that choice or
@@ -206,7 +206,8 @@ Each group under its name, then one entry per issue or pull request:
   only.
 - A pull request's first line is `PR #42 <title> open|merged|closed`.
 
-A block of **citations** gives each citation once, and one of four results:
+A block of **citations** gives each citation once, with one of four results,
+and each false sentence once:
 
 ```
 #41 The server's log grows without bound [enhancement] open
@@ -225,7 +226,7 @@ A block of **citations** gives each citation once, and one of four results:
   it.
 - `skipped` gives the reason: a commit, a code block or a log.
 - `false by decision <n>:` gives each false sentence once, quoted from the
-  body, with the number of a decision that made it false. A false sentence
+  title or the body, with the number of a decision that made it false. A false sentence
   with a citation gets this line too.
 
 Write `none` under an empty group, or alone when no issue has a citation or a
