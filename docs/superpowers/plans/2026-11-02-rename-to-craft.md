@@ -326,7 +326,7 @@ Expected: `gh release view v2.0.0` shows the link.
 ### Task 9: The owner's move, and the open issues
 
 - [ ] **Step 1: Move the owner's install by the guide**, in Claude Code and in Codex, step by step, by the main path: the owner's marketplaces were added by the old URL, so the first command of each tool is the spec's check that a marketplace added by the old URL updates. Each command that does not do what the guide says is a fix of the guide, in a new PR. Expected: `claude plugin marketplace update kalinichenko` and `codex plugin marketplace upgrade kalinichenko` exit 0; `claude plugin list` lists `craft@kalinichenko` and no `kalinichenko@kalinichenko`; a Codex session lists `craft:github`.
-- [ ] **Step 2: Correct the open issues.** For each of #215, #196, #185, #171 and #213:
+- [ ] **Step 2: Correct the open issues.** For each of #215, #196, #185, #171, #213 and #87:
 
 ```bash
 gh issue view <n> --json body --jq .body >"$f"
@@ -334,5 +334,5 @@ perl -pe 's/kalinichenko:/craft:/g; s{kalinichenko88/agent-skills}{kalinichenko8
 diff "$f" "$f.new"; gh issue edit <n> --body-file "$f.new"
 ```
 
-Read each diff before the edit. #87 is busy: it is assigned, so another session can work on it. It gets only a one-line comment that names the rename; its body and its old comment stay (the rule for a busy issue in `skills/github/filing.md`). #212 gets a one-line comment: the README now has the section of external dependencies, and #212 adds its browser tools there. Closed issues and merged PRs stay.
+Read each diff before the edit. #87 is assigned to the owner, and the owner said on 2026-11-02 that no session works on it, so its body changes too. Then its comment, with the same change: `gh api repos/kalinichenko88/craft-skills/issues/comments/6443347351 --jq .body`, the same `perl`, then `gh api -X PATCH repos/kalinichenko88/craft-skills/issues/comments/6443347351 -F body=@"$f.new"`. #212 gets a one-line comment: the README now has the section of external dependencies, and #212 adds its browser tools there. Closed issues and merged PRs stay.
 - [ ] **Step 3: Finishing** of the github skill: `collect.sh filing` with the files of `gh pr diff <PR> --name-only`, and a citations scout. Correct each citation that moved.
