@@ -38,7 +38,12 @@ time.
   the steps that show it again, with neutral names. In a checkout of
   `craft-skills`, the defect is an ordinary finding. Anywhere else, the agent
   shows you the issue and files it only after you say yes. Nothing from your
-  project goes in.
+  project goes in. When you have to point out a step of the plugin that the
+  agent skipped, it does the step and asks nothing. After the merge, the
+  agent looks back over the session for such corrections and for failed
+  scripts of the plugin, in Claude Code through a Haiku subagent, and shows
+  you all the drafts in one question. They go to this tracker, not to Claude
+  Code's `/feedback`.
 - **A task runs to its pull request.** After the review, the agent runs the
   repository's check on the final branch. When it passes and the branch is
   not the default branch, the agent pushes, opens the PR and shows the exact
@@ -46,7 +51,8 @@ time.
   and clean up, merge only, or do not merge. After a stop at round 3, more
   rounds is one more answer. Clean up removes the worktree
   and the local branch after the merge, when nothing in them would be lost.
-  Only the merge and the open questions on business logic wait for you.
+  Only the merge and the open questions on business logic wait for you, and
+  after the merge, the drafts for the plugin's tracker.
 - **A task finishes with a true tracker.** The PR and every issue it closes
   are assigned to you. A PR that fixes only part of an issue keeps that issue
   open. After the merge, the `path:line` citations in open issues are checked
