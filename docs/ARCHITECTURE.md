@@ -47,6 +47,8 @@ it: an invariant on it is review only.
   a skill's name. An area whose tests read no recorded data has no folder.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
+- `docs/migrating-from-kalinichenko.md` — the steps for those who installed
+  the plugin under its old name.
 - `.claude/skills/` — `release` and `infographic`: skills of this
   repository, not of the plugin.
 - `.claude/CLAUDE.md`, `AGENTS.md` — the instructions for an agent that
