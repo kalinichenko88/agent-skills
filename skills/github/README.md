@@ -34,9 +34,9 @@ time.
   added findings per issue. Only when no issue can take it is a new one filed.
 - **A defect in the plugin reaches its tracker.** When the agent finds that
   a rule, a skill or a script of this plugin is wrong, it writes an issue for
-  `kalinichenko88/agent-skills`: the plugin version, the file and line, and
+  `kalinichenko88/craft-skills`: the plugin version, the file and line, and
   the steps that show it again, with neutral names. In a checkout of
-  `agent-skills`, the defect is an ordinary finding. Anywhere else, the agent
+  `craft-skills`, the defect is an ordinary finding. Anywhere else, the agent
   shows you the issue and files it only after you say yes. Nothing from your
   project goes in.
 - **A task runs to its pull request.** After the review, the agent runs the

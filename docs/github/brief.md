@@ -15,7 +15,7 @@ Audience: a developer who has never heard of this skill. Someone shows them one 
 - Type sizes at 1024 px width: title about 65 px, scene titles about 40 px, captions about 28 px (never less than half a scene title), footer about 16 px. Wrap lines only at spaces; no hyphenation.
 - Text: render every quoted string verbatim, and nothing more: no extra labels, invented words, invented ticket numbers, fake UI text or lorem ipsum. A ticket or card with no quoted text stays blank; a few grey lines on it are allowed. No command flags, script names or file paths, except the quoted strings.
 - No logos, no GitHub Octocat, no trademarks, no watermark.
-- Footer left on every image: "kalinichenko/agent-skills · craft:github skill". Footer right: "Drawn with Codex".
+- Footer left on every image: "kalinichenko88/craft-skills · craft:github skill". Footer right: "Drawn with Codex".
 </style>
 
 <image file="00-overview.png">
