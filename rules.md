@@ -122,6 +122,12 @@ after the last task, in place of the final review. In Claude Code, invoke it
 also in place of the builder check of `superpowers:brainstorming`, and after
 the self-review of `superpowers:writing-plans`.
 
+## Worth before work (always)
+
+Before the first edit of a feature — a new capability, or a change of what the
+product does for its users — and at a fork in brainstorming, invoke the
+`kalinichenko:product` skill.
+
 ## The Boy Scout Rule (always)
 
 Leave the code you touch cleaner than you found it. The rule is the Scouts'

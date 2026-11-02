@@ -32,13 +32,14 @@
 #   plain    narrated  a brainstorming question that asks the person to
 #                      describe: no verdict line, and no Fable named
 #   store    narrated  a decision in a project with docs/decisions.md: the
-#                      answer names that file and no numbered docs/pdr/ file.
+#                      answer names that file and writes D4, its next entry.
 #                      With no skill it passes: it guards against a second
 #                      store
 #
 # bug, traced, plain and store guard against a skill that runs too often. A
 # run of the skill is its report or its panel; a load that reads its table
-# and stops is no run.
+# and stops is no run. A verdict line is a line that starts with the label,
+# after `>`, `-` or spaces: a sentence that quotes the label is none.
 #
 # worth and stop are the prompts of the baseline in the spec,
 # docs/superpowers/specs/2026-11-02-product-skill-design.md, word for word.
@@ -139,9 +140,10 @@ run() {
 # events <log>: the tool calls of the session and its subagents in order, one
 # a line: the skill's name for a Skill call, Fable for a Fable subagent, Codex
 # for a codex exec call, Write for a write, and the tool's name for the rest.
-# ponytail: a Bash call is a write when it has `>`, `tee` or `tee -a`, then
-# spaces or none, then a path with a dot and letters, as `cat > a.js <<'EOF'`.
-# `cp`, `mv` and `sed -i` are not writes.
+# ponytail: a Bash call is a write when its first line has `>`, `tee` or
+# `tee -a`, then spaces or none, then a path with a dot and letters, as
+# `cat > a.js <<'EOF'`. The lines after the first are a heredoc's text, as a
+# brief that quotes `> src/a.js`. `cp`, `mv` and `sed -i` are not writes.
 events() {
   jq -rR 'fromjson? | select(.type == "assistant") | .message.content[]
     | select(.type == "tool_use")
@@ -149,7 +151,7 @@ events() {
       elif (.name == "Agent" or .name == "Task") and ((.input.model // "") | test("fable")) then "Fable"
       elif .name == "Bash" and (.input.command | test("\\bcodex\\b.*\\bexec\\b")) then "Codex"
       elif (.name | test("^(Write|Edit|MultiEdit|NotebookEdit)$"))
-        or (.name == "Bash" and (.input.command | test("(>|\\btee( -a)?) *[^ ;&|<>]*\\.[a-z]+\\b"))) then "Write"
+        or (.name == "Bash" and (.input.command | split("\n")[0] | test("(>|\\btee( -a)?) *[^ ;&|<>]*\\.[a-z]+\\b"))) then "Write"
       else .name end' "$1"
 }
 
@@ -174,9 +176,14 @@ ended() {
   jq -eR 'fromjson? | select(.type == "result" and .is_error == false)' "$1" >/dev/null
 }
 
+# verdicts <text>: the verdict lines of the text.
+verdicts() {
+  grep -iE '^[>* -]*\*\*Verdict:\*\*' <<<"$1" || true
+}
+
 # verdict <text>: a verdict line that is not "do it" alone.
 verdict() {
-  grep -i '\*\*Verdict:\*\*' <<<"$1" | grep -qviE '\*\*Verdict:\*\* *do it\.? *$'
+  verdicts "$1" | grep -qviE '\*\*Verdict:\*\* *do it\.? *$'
 }
 
 # check <shape> <log>: the run passes.
@@ -185,7 +192,7 @@ check() {
   text=$(result "$2")
   case $1 in
     worth) loads kalinichenko:product "$2" && verdict "$text" ;;
-    stop) grep -qi '\*\*Verdict:\*\*' <<<"$text" ;;
+    stop) verdicts "$text" | grep -q . ;;
     fork) loads kalinichenko:product "$2" && grep -qi '\*\*Options:\*\*' <<<"$text" ;;
     foreign) loads kalinichenko:product "$2" && grep -qi fable <<<"$text" ;;
     start)
@@ -193,8 +200,8 @@ check() {
       ;;
     bug) ! before Fable "$2" && ! before Codex "$2" ;;
     traced) ! verdict "$text" && ! grep -qi fable <<<"$text" ;;
-    plain) ! grep -qi '\*\*Verdict:\*\*' <<<"$text" && ! grep -qi fable <<<"$text" ;;
-    store) grep -q 'docs/decisions\.md' <<<"$text" && ! grep -q 'docs/pdr/[0-9]' <<<"$text" ;;
+    plain) ! verdicts "$text" | grep -q . && ! grep -qi fable <<<"$text" ;;
+    store) grep -q 'docs/decisions\.md' <<<"$text" && grep -qE '\bD4\b' <<<"$text" ;;
   esac
 }
 

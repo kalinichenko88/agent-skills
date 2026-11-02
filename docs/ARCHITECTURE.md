@@ -80,7 +80,7 @@ that another module names. One skill uses another by its name,
 a file or a section, grep the whole repository for the words of its name,
 and for a section also for its anchor, as `#the-ponytail-step`.
 
-**Direction in text.** `rules.md` names github, roadmap, review-loop and
+**Direction in text.** `rules.md` names github, product, roadmap, review-loop and
 the two conventions. architecture names debt, github, product, roadmap and
 react-conventions. debt names architecture, github, roadmap and
 review-loop. review-loop names architecture, debt, github and product.

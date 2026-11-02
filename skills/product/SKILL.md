@@ -68,7 +68,8 @@ The answer stays the person's.
 ## The run
 
 1. **Find the store** (`store.md`). With none, make the offer of `store.md`
-   once a session, and go on without a store.
+   once a session, and go on without a store. At the full depth, send the
+   panel now (*The panel*), and wait for both readers before step 7.
 2. **Understand the task:** who has the problem, how many of them by real
    data, and how others solve it. At the full depth, with a web search.
 3. **Collect the three sides:** the client (what they ask, and the goal
@@ -106,8 +107,10 @@ The skill never refuses or cancels the work. A verdict other than `do it` is
 a question to the person, and the work that it judges waits for the answer.
 
 With no person, as in a run that a script starts or with "do not ask
-questions", the work goes on as it was asked. The report and its question
-stay open in the summary and in the pull request's description.
+questions", the work goes on as it was asked. Then the last message of the
+turn starts with the report, its `**Verdict:**` line first, and its
+questions marked `open`. The pull request's description holds the same
+report.
 
 After the answer:
 
@@ -192,8 +195,9 @@ report says so.
 | "The person asked for it, so it is worth doing" | A request names a solution. Count who gains first, from the real data. |
 | "The benefit is small, but the task is clear, so I build it" | A small benefit is the finding. Give the count and the cheaper way, and ask. |
 | "The architect checked the task" | The architect checks where the code goes, not whether to build it. |
+| "I can check it myself; the panel is too much here" | The table sets the depth. A feature start is full: send both readers, and wait for them. |
 | "I will widen a limit to make it work: a CSP, a quota, a permission" | A limit that blocks the feature is a decision of the product. It goes in the report, and the person decides. |
 | "A general risk is better than none" | A risk with no number and no source for this task is noise. Leave it out. |
 | "The decision is accepted, so it is settled" | An accepted decision is a hypothesis that won once. Check its *Rests on*. |
 | "The verdict is close, so I stop the task" | The person decides. Ask, and wait for the answer. |
-| "No one can answer, so the report can wait" | The report and its question go into the summary and the pull request's description. |
+| "No one can answer, so the report can wait" | The last message of the turn starts with the report, and the pull request's description holds it. |
