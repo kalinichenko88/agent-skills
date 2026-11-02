@@ -5,6 +5,24 @@ Every release of this plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 2.0.0 - 2026-11-02
+
+### Added
+
+- (plugin) rename the plugin to craft and the repository to craft-skills (#220) (breaking)
+- (product) add a skeptic that asks whether a task is worth doing before the work (#217)
+- (review-loop) let Codex read the branch at the step 4 stop of an xhigh review (#202)
+
+### Fixed
+
+- (architecture) let a check that cannot run stop only its own invariant (#210)
+- (architecture) let a debt folder of a files check cover that folder only (#209)
+- (rules) let a zero count stop nothing where there is no real source to sample (#208)
+- (review-loop) run the eval in English, as its last-report checks grep English words (#207)
+- (architecture) give the search for existing code to haiku, which finds the same code at a fifteenth of the cost (#204)
+- (roadmap) give no triage verdict to an issue that a session works on (#203)
+- (review-loop) leave round 3's defect to the person, and fix false docs before round 1 (#201)
+
 ## 1.3.0 - 2026-10-29
 
 ### Added
