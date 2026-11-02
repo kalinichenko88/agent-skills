@@ -151,18 +151,19 @@ the PR decided. That is a rule, a behaviour or a contract that it changed, a
 choice that it made, a way that it rejected, a defect that it removed, and a
 number that it changed, as a count or a size that an issue can quote. Take
 them from the PR description with its `## Review`, and from each ADR or PDR
-that it adds or changes. Count each number again in the merged code, as the
-check that sets its limit counts it: a description can be older than the last
-fix. Check each citation that moved or is gone, and each sentence that the
-scout gives as false. Correct them by *Filing one next to an existing issue*
-in `filing.md`: the body says what was decided and in which PR, and a false
-title is rewritten too. A question that the PR answered is marked answered. A
+that it adds or changes. Count each number again in the merged code: a
+description can be older than the last fix. When a check sets its limit,
+count it as that check counts it. Check each citation that moved or is gone,
+and each sentence that the scout gives as false. Correct them by *Filing one
+next to an existing issue* in `filing.md`: the body says what was decided and
+in which PR, and a false title is rewritten too. A host's title still names
+every problem in it. A question that the PR answered is marked answered. A
 proposal that it ruled out is rewritten. An issue whose premise is gone closes
 with a comment that names the PR. A busy issue gets only the one-line comment
 and stays open, as *Filing one next to an existing issue* says. An issue that
-is busy only because this task assigned it to you, as its own issue or one
-that it took along, is not busy here. A host that holds two added findings
-gets its text corrected too: that limit is for added findings.
+this task took in, took along or removes (`take-in.md`), and whose `status:`
+names only you, is not busy here. The limit of two added findings does not
+stop a correction: it is for added findings.
 
 **Cleanup.** Do it when the person chose merge and clean up, after
 *Finishing*: *Finishing* can use the worktree as its checkout of the merged
