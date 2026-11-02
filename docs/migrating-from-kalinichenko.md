@@ -47,7 +47,7 @@ your home folder: there it reads all of your files, and it lists the files of
 `~/.claude` two times.
 
 ```sh
-find -L ~/.claude ~/.codex ~/.agents . \( -path '*/.claude/plugins' -o -path '*/.codex/plugins' -o -path '*/.codex/.tmp' -o -name .git -o -name node_modules -o -name worktrees -o -name .worktrees \) -prune -o -type f \( -name '*.md' -o -name '*.toml' -o -name 'settings*.json' -o -name '*.sh' \) -print0 2>/dev/null | xargs -0 grep -lE '(^|[^@])kalinichenko:' 2>/dev/null
+find -L ~/.claude ~/.codex ~/.agents . \( -path '*/.claude/plugins' -o -path '*/.codex/plugins' -o -path '*/.codex/.tmp' -o -name .git -o -name node_modules -o -name worktrees -o -name .worktrees \) -prune -o -type f \( -name '*.md' -o -name '*.toml' -o -name 'settings*.json' -o -name '*.sh' \) -print0 2>/dev/null | xargs -0 grep -lE '(^|[^[:alnum:]_@-])kalinichenko:' 2>/dev/null
 ```
 
 Read each file that it lists. A record of past work, as an old plan, can keep
@@ -55,7 +55,7 @@ the old name. In each other file, replace the name. The command edits the
 file that a link points to, so a file from a dotfiles repository stays a link:
 
 ```sh
-perl -pi -e 's/(?<!@)kalinichenko:/craft:/g' "$(realpath <file>)"
+perl -pi -e 's/(?<![\w@-])kalinichenko:/craft:/g' "$(realpath <file>)"
 ```
 
 A project can turn the plugin on in its own `.claude/settings.json` or
