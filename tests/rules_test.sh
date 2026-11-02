@@ -114,6 +114,13 @@ done
 #   and its local branch at the merge, with no check of Cleanup. The merge
 #   runs in the checkout that holds the branch, and review-loop asks that
 #   checkout, not the session's directory, whether there is a worktree (#176).
+# - After a merge, #117, #205 and #213 still quoted the room left in rules.md,
+#   and no citation of theirs showed it. *Finishing* gives the scout a
+#   Decision line for each number that the PR changed, counted again in the
+#   merged code, and the scout reads the title and the body against them
+#   (#211). #220 changed rules.md, and its description gave no count: a
+#   size that a check caps gets a Decision line anyway.
+#   tests/github_scout_eval.sh tests the scout, not these lines.
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
     echo "FAIL: $f: no \"$phrase\""
@@ -141,5 +148,9 @@ rules.md|With no real source to sample, the count stops nothing, and the test us
 skills/review-loop/SKILL.md|With no real source to sample, the count declines nothing, and the test of the fix uses the input of the finding.
 skills/github/SKILL.md|Run the merge in the checkout that holds the branch, whatever directory the session is in: `(cd <path> && gh pr merge …)`, where `<path>` is what `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints.
 skills/review-loop/SKILL.md|When `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints nothing or the first path of `git worktree list`, the branch has no linked worktree
+skills/github/SKILL.md|and a number that it changed, as a count or a size that an issue can quote.
+skills/github/SKILL.md|Count again each number that the merged code holds: a description can be older than the last fix. When a check sets its limit, count it as that check counts it.
+skills/github/SKILL.md|For each changed file with a size limit of its own, as a test that caps its characters, or on the `debt` list of a size check, add a decision with its new size, also when the description does not give it.
+skills/github/scout.md|Then read the title and the whole body of each issue against them, the sentences with no citation too.
 EOF
 echo 'rules_test: ok'

@@ -151,23 +151,34 @@ the PR decided. That is a rule, a behaviour or a contract that it changed, a
 choice that it made, a way that it rejected, a defect that it removed, and a
 number that it changed, as a count or a size that an issue can quote. Take
 them from the PR description with its `## Review`, and from each ADR or PDR
-that it adds or changes. Count each number again in the merged code: a
-description can be older than the last fix. When a check sets its limit,
-count it as that check counts it. Check each citation that moved or is gone,
-and each sentence that the scout gives as false. Correct them by *Filing one
-next to an existing issue* in `filing.md`: the body says what was decided and
-in which PR, and a false title is rewritten too. A host's title still names
-every problem in it. A question that the PR answered is marked answered. A
+that it adds or changes. Count again each number that the merged code holds:
+a description can be older than the last fix. When a check sets its limit,
+count it as that check counts it. For each changed file with a size limit of
+its own, as a test that caps its characters, or on the `debt` list of a size
+check, add a decision with its new size, also when the description does not
+give it.
+
+The checkout of the merged code is a new one: after `git fetch origin`, run
+`git worktree add --detach <a new directory> origin/<default branch>`, and
+`git worktree remove <that directory>` when *Finishing* ends. The branch's
+worktree is not the merged code when the default branch moved after the
+branch's last push.
+
+Check each citation that moved or is gone, and each sentence that the scout
+gives as false. Correct them by *Filing one next to an existing issue* in
+`filing.md`: the body says what was decided and in which PR, and a false title
+is rewritten too. A host's title still names every problem in it. A problem
+marked `Done in #<PR>.` needs no other correction, and an issue with a problem
+left in it stays open. A question that the PR answered is marked answered. A
 proposal that it ruled out is rewritten. An issue whose premise is gone closes
 with a comment that names the PR. A busy issue gets only the one-line comment
 and stays open, as *Filing one next to an existing issue* says. An issue that
 this task took in, took along or removes (`take-in.md`), and whose `status:`
-names only you, is not busy here. The limit of two added findings does not
-stop a correction: it is for added findings.
+has no entry but `assigned to you`, is not busy here. The limit of two added
+findings does not stop a correction: it is for added findings.
 
 **Cleanup.** Do it when the person chose merge and clean up, after
-*Finishing*: *Finishing* can use the worktree as its checkout of the merged
-code. Run in the branch's linked worktree, `gh pr merge --delete-branch`
+*Finishing*. Run in the branch's linked worktree, `gh pr merge --delete-branch`
 deletes only the remote branch: it prints `skipping local delete`, and the
 worktree and the local branch stay. Run in another checkout, `gh` 2.103
 removes that worktree with `git worktree remove` and the local branch with

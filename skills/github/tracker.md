@@ -54,8 +54,8 @@ finding with its `path:line`.
 
 For citations, the `Job:` line is `Job: citations #91.`, or `Job: citations.`
 for the open issues that have an entry in the file, and under it `Tree: <the
-worktree>`. After a merge, the `Decision <n>:` lines of *Finishing* in
-`SKILL.md` come under it too. In
+worktree>`. After a merge, `Tree:` is the checkout of the merged code of
+*Finishing* in `SKILL.md`, and its `Decision <n>:` lines come under it too. In
 Claude Code this job goes to a scout whatever the size of the file: the
 reading it saves is in the code, not in the file.
 

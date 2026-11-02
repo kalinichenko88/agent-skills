@@ -116,7 +116,8 @@ second opinion. When the other side is busy, it gets the one-line comment
 only: it stays open, its body stays as it is, and the final report names it.
 When the other side is a host that holds two added findings, it gets the
 one-line comment only: its body stays as it is. After a merge, *Finishing* in
-`SKILL.md` still corrects its false text, and a false title too.
+`SKILL.md` still corrects the false text and the false title of a full host
+that is not busy.
 
 ## A defect in this plugin
 
