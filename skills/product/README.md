@@ -15,14 +15,16 @@ ADRs.
 - A bug fix changes business logic: a rule, a calculation, a state, a
   permission, the data.
 - A branch is reviewed: someone else's that changes code or behaviour,
-  always; yours when
-  it adds a capability or changes what the product does, and has no report
-  of its worth yet.
+  always; yours when it adds a capability or changes what the product does,
+  and has no report of its worth yet.
 - Brainstorming asks a question that chooses between ways.
 - A decision concerns the whole project: the licence, open source or not,
   distribution, pricing, the money model, the hosting.
 
-Your own bug fix that changes no business logic gets no check.
+Your own bug fix that changes no business logic gets no check, nor does
+someone else's change of documents only, a dependency bump, or a move that
+a test proves unchanged. The text of a skill or a prompt counts as a change
+of behaviour.
 
 ## What you get
 
@@ -43,7 +45,7 @@ Your own bug fix that changes no business logic gets no check.
   got in the way twice comes back to you.
 - **You decide.** The work waits for your answer. With no one to answer, it
   goes on as asked, and the question stays open in the summary, and on your
-  own branch in the pull request's description.
+  own branch in the spec or the pull request's description.
 - **A store, when you want one.** In a project with none, it offers once a
   session to write `PRODUCT.md`, and writes nothing without your yes. A
   project with its own decision file keeps it: new entries go there.

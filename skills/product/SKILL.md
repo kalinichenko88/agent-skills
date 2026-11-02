@@ -23,13 +23,14 @@ whether to build it, and what.
 | A decision about the whole project: the licence, open source or not, distribution, pricing, the money model, the hosting | full | *The run* |
 | A project with no store, or the person asks for one | the offer | `store.md` |
 
-One's own bug fix that changes no business logic gets no run, nor does
-someone else's change of documents only, a dependency bump or a move that a
-script or a test proves unchanged. `reader.md` and
-`store.md` sit next to this file, in this skill's base directory `<dir>`.
-Read `reader.md` before the first run: it holds the criteria, the checks and
-the shape of the report, for the readers of the panel and for the light
-depth. Read `store.md` before the first read or write of the store.
+One's own bug fix that changes no business logic gets no run, nor does someone
+else's change of documents only, a dependency bump or a move that a script or
+a test proves unchanged. The text of a skill or a prompt is no document here:
+it changes behaviour. `reader.md` and `store.md` sit next to this file, in
+this skill's base directory `<dir>`. Read `reader.md` before the first run: it
+holds the criteria, the checks and the shape of the report, for the readers of
+the panel and for the light depth. Read `store.md` before the first read or
+write of the store.
 
 **Light.** The main session alone, with no web search. It reads the index of
 `PRODUCT.md` and the PDRs that the task touches. The report has the verdict
@@ -40,12 +41,12 @@ search, and neither sees the other's answer. The main session merges them.
 
 ## The trace
 
-The person's own work gets no second report: a report exists when a message
-of this session, the spec of the work, the pull request's description or the
-issue holds a `**Verdict:**` line, or when the branch adds a PDR for this
-work. The report of a fork in brainstorming is no report of the feature.
-The test is the trace, not the author: the person's branch with no report at
-its start gets one at the review.
+The person's own work gets no second report: a report exists when a message of
+this session about this work, the spec of the work, the pull request's
+description or the issue holds a `**Verdict:**` line, or when the branch adds
+a PDR for this work. The report of a fork in brainstorming is no report of the
+feature. The test is the trace, not the author: the person's branch with no
+report at its start gets one at the review.
 
 Someone else's work that changes code or behaviour gets the full depth
 always, with a report or without one, and their spec and description are the
