@@ -150,10 +150,8 @@ line>` for each thing the PR decided. That is a rule, a behaviour or a
 contract that it changed, a choice that it made, a way that it rejected, a
 defect that it removed, and a number that it moved, as a count or a size that
 an issue can quote. Take them from the PR description, its `## Review`, and
-each ADR or PDR that it adds. A citation shows only its own lines: an issue
-that waits on the choice the PR made, or quotes the old count, can have no
-citation that moves. Check each citation that moved or is gone, and each
-sentence that the scout gives as false. Correct them by *Filing one next to
+each ADR or PDR that it adds. Check each citation that moved or is gone, and
+each sentence that the scout gives as false. Correct them by *Filing one next to
 an existing issue* in `filing.md`, and the body says what was decided and in
 which PR. A question that the PR answered is marked answered. A proposal that
 it ruled out is rewritten. An issue whose premise is gone closes with a
