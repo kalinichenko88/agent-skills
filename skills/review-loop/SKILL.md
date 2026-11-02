@@ -90,8 +90,8 @@ Before the over-engineering review and round 1, load `kalinichenko:product`:
 
 Skip it for documents only, for a dependency bump, and for a move that a
 script or a test proves unchanged. The text of a skill or a prompt that the
-product ships or sends to a model is no document here: it changes what the
-product does. On the person's own branch, skip it also for a bug fix that
+product ships or sends to a model, as a `SKILL.md`, is no document here: it
+changes behaviour. On the person's own branch, skip it also for a bug fix that
 changes no business logic.
 
 A capability that is not worth it gets no review. A verdict other than
