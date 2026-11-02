@@ -187,19 +187,19 @@ These are the person's decisions, in the conversation of 2026-10-29 to
 | A fork in brainstorming: a question that chooses between ways | light; full when the fork is at the project level |
 | A new project with no store, or the person asks | builds `PRODUCT.md` and `docs/pdr/`, after a yes |
 
-**The trace**, for the person's own branch: a report exists when the spec of
-the work, the pull request's description, the issue, or a PDR that the branch
-adds holds the report's `**Verdict:**` line. The test is the trace, not the
-author: a branch of the person's with no report at its start gets one at the
-review. A review of someone else's work that changes code or behaviour always
-runs, and it reads their spec and their description as the decisions to
-check. Someone else's work is a
-pull request whose author is not the account that `gh` is logged in as, or,
-with no pull request, a branch whose commits have another author's email
-than `git config user.email`, as the github skill's `you`. (The agent's
+**The trace**, for the person's own branch: a report exists when a message of
+the session about this work, the spec of the work, the pull request's
+description, the issue, or a PDR that the branch adds holds the report's
+`**Verdict:**` line. The test is the trace, not the author: a branch of the
+person's with no report at its start gets one at the review. A review of
+someone else's work that changes code or behaviour always runs, and it reads
+their spec and their description as the decisions to check. Someone else's
+work is a pull request whose author is not the account that `gh` is logged in
+as, or, with no pull request, a branch whose commits have another author's
+email than `git config user.email`, as the github skill's `you`. (The agent's
 call.) A report at the review of the person's own branch goes into the pull
-request's description, so that the next review finds it; on someone else's,
-in a comment after the person's yes.
+request's description, so that the next review finds it; on someone else's, in
+a comment after the person's yes.
 
 **In brainstorming**, the skill runs only at a fork, as "which of these two
 ways", never at a question that asks the person to describe. It gives the
