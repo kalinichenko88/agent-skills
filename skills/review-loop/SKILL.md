@@ -155,11 +155,12 @@ and for a move that a script or a test proves unchanged.
    fixes as one commit, so round 1 reads them.
 
 When no tool can show the app, the app does not start, or the walk cannot
-reach the screen, as behind a login with no test account, stop the step and
-give the reason in the summary. Add no dependency and no tool for it: the
-project's own install from its lock file, as `npm ci`, is allowed. When the
-walk needs a package that the project does not have, stop the step and give
-that reason. Write no e2e test in place of the walk.
+reach the screen, as behind a login with no test account, stop the step:
+do step 6, and give the reason in the summary. Add no dependency and no
+tool for it: the project's own install from its lock file, as `npm ci`, is
+allowed. When the walk needs a package that the project does not have, stop
+the step in the same way, and give that reason. Write no e2e test in place
+of the walk.
 
 The walk does not end the turn: go on to round 1.
 
