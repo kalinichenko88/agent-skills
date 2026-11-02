@@ -12,8 +12,8 @@
 # - #117 says that rules.md "has 337 left, so the second option below fits
 #   too". It cites no line of rules.md, and nobody corrected it after the
 #   merge.
-# - #205's title says that rules.md "has 337 characters left under the cap,
-#   and two thirds of it are general habits".
+# - #205's title says that "rules.md has 337 characters left under the cap".
+#   A comment says it too, with backticks around rules.md.
 # - #179 cites docs/ARCHITECTURE.md:186, which #217 moved to :189. No decision
 #   makes a sentence of it false.
 #
@@ -116,10 +116,10 @@ failed=0
 for i in $(seq "$runs"); do
   report=$(cat "$logs/$i.txt" 2>/dev/null || true)
   missed=
-  # The body of #117 and a comment of #205 say "337 characters left": the
-  # text that each check needs is in that issue's body or title only.
+  # The comments say "337 characters left" too: the text that each check
+  # needs is in the body of #117 and the title of #205 only.
   falsified 117 | grep '"' | grep -qF 'has 337 left' || missed="$missed; no false sentence of #117 with 337"
-  falsified 205 | grep '"' | grep -qF 'two thirds' || missed="$missed; the title of #205 not false"
+  falsified 205 | grep '"' | grep -qF 'rules.md has 337 characters left' || missed="$missed; the title of #205 not false"
   ! falsified 179 | grep -q . || missed="$missed; a false sentence of #179"
   block 179 | grep -q ':186[^:]*moved to [^ ]*:189' || missed="$missed; :186 of #179 not moved to :189"
   if [ -z "$missed" ]; then verdict=pass; else verdict="FAIL${missed}"; failed=1; fi

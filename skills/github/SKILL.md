@@ -141,12 +141,18 @@ duplicate still held for the reproduction is closed or commented on, by *Its
 duplicates close first* in `take-in.md`; and the same pass updates every
 open issue on the changed code whose text the change just falsified.
 
+*Finishing* reads the merged code in a new checkout: after `git fetch origin`,
+run `git worktree add --detach <a new directory> origin/<default branch>`, with
+the directory from `mktemp -d`, outside every checkout, and
+`git worktree remove <that directory>` when *Finishing* ends or stops. The
+branch's worktree is not the merged code when the default branch moved after
+the branch's last push.
+
 To find these issues, run `collect.sh filing` (`tracker.md`) with every file
 that `gh pr diff <PR> --name-only` prints, and the old path of each file the
 PR renamed. A scout then checks the open issues that have an entry in the
 file of `collect.sh`. In Codex, the agent does this job itself
-(`tracker.md`). The job is `Job: citations.`, with a checkout of the merged
-code as `Tree:`, and under it one `Decision <n>: <one line>` for each thing
+(`tracker.md`). The job is `Job: citations.`, with that checkout as `Tree:`, and under it one `Decision <n>: <one line>` for each thing
 the PR decided. That is a rule, a behaviour or a contract that it changed, a
 choice that it made, a way that it rejected, a defect that it removed, and a
 number that it changed, as a count or a size that an issue can quote. Take
@@ -154,15 +160,9 @@ them from the PR description with its `## Review`, and from each ADR or PDR
 that it adds or changes. Count again each number that the merged code holds:
 a description can be older than the last fix. When a check sets its limit,
 count it as that check counts it. For each changed file with a size limit of
-its own, as a test that caps its characters, or on the `debt` list of a size
-check, add a decision with its new size, also when the description does not
-give it.
-
-The checkout of the merged code is a new one: after `git fetch origin`, run
-`git worktree add --detach <a new directory> origin/<default branch>`, and
-`git worktree remove <that directory>` when *Finishing* ends. The branch's
-worktree is not the merged code when the default branch moved after the
-branch's last push.
+its own, as a cap on its characters that a test sets, or on the `debt` list
+of a size check, add a decision with its new size and its limit, also when
+the description does not give them.
 
 Check each citation that moved or is gone, and each sentence that the scout
 gives as false. Correct them by *Filing one next to an existing issue* in

@@ -119,7 +119,10 @@ done
 #   Decision line for each number that the PR changed, counted again in the
 #   merged code, and the scout reads the title and the body against them
 #   (#211). #220 changed rules.md, and its description gave no count: a
-#   size that a check caps gets a Decision line anyway.
+#   size that a check caps gets a Decision line anyway. 4 of 20 PRs merged
+#   with the branch behind main, so the scout reads a new checkout of the
+#   default branch, not the branch's worktree. A merge that fixes some
+#   problems of an issue leaves it open.
 #   tests/github_scout_eval.sh tests the scout, not these lines.
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
@@ -150,7 +153,9 @@ skills/github/SKILL.md|Run the merge in the checkout that holds the branch, what
 skills/review-loop/SKILL.md|When `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints nothing or the first path of `git worktree list`, the branch has no linked worktree
 skills/github/SKILL.md|and a number that it changed, as a count or a size that an issue can quote.
 skills/github/SKILL.md|Count again each number that the merged code holds: a description can be older than the last fix. When a check sets its limit, count it as that check counts it.
-skills/github/SKILL.md|For each changed file with a size limit of its own, as a test that caps its characters, or on the `debt` list of a size check, add a decision with its new size, also when the description does not give it.
+skills/github/SKILL.md|For each changed file with a size limit of its own, as a cap on its characters that a test sets, or on the `debt` list of a size check, add a decision with its new size and its limit, also when the description does not give them.
+skills/github/SKILL.md|*Finishing* reads the merged code in a new checkout: after `git fetch origin`, run `git worktree add --detach <a new directory> origin/<default branch>`, with the directory from `mktemp -d`, outside every checkout
+skills/github/SKILL.md|A problem marked `Done in #<PR>.` needs no other correction, and an issue with a problem left in it stays open.
 skills/github/scout.md|Then read the title and the whole body of each issue against them, the sentences with no citation too.
 EOF
 echo 'rules_test: ok'
