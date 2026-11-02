@@ -6,7 +6,7 @@ collector's `bodies`, which adds entries to the file. The citations job also
 runs `git ls-files` and `git grep` (*Citations* below). Read the file with your
 file tool. Run nothing else.
 
-This file is all you need from the `kalinichenko:github` skill. The base prompt
+This file is all you need from the `craft:github` skill. The base prompt
 tells an agent to load that skill before its first `gh` call, and to file what
 it finds; those rules are for agents that write. You write nothing, so do not
 load the skill and do not file anything.

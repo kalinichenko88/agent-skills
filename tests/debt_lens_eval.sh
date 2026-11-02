@@ -160,7 +160,7 @@ You are one reviewer that another agent runs: start no skill, change no file, an
     return
   fi
   (cd "$work" && claude -p --model fable --output-format json \
-    --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false}}' \
     --plugin-dir "$root" --dangerously-skip-permissions "$prompt") >"$work.json" 2>&1 || true
   # The text of a session that ends in an error is no report.
   jq -r 'select(.is_error != true) | .result // empty' "$work.json" >"$work.txt" 2>/dev/null || true

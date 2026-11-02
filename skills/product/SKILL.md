@@ -9,7 +9,7 @@ A task is worth its cost, or it is not. This skill asks that before the work,
 from outside the code: who gains and how many, the money, the direction of
 the project, the law, the client, and what fails when a part fails. Another
 way, a deferral or a close is a good answer. The person decides.
-`kalinichenko:architecture` decides how the code does it; this skill decides
+`craft:architecture` decides how the code does it; this skill decides
 whether to build it, and what.
 
 | Moment | Depth | Read first |
@@ -59,12 +59,12 @@ author's email than `git config user.email`.
 A report with no spec, or at a review of one's own branch, goes into the pull
 request's description, or into it when it opens, so that the next review
 finds it. On someone else's pull request, it goes in a comment through
-`kalinichenko:github`, after the person's yes.
+`craft:github`, after the person's yes.
 
 ## In brainstorming
 
 Besides the start of a feature, whose report comes where *The start of a
-feature* of `kalinichenko:architecture` says, the skill runs only at a fork: a
+feature* of `craft:architecture` says, the skill runs only at a fork: a
 question that chooses between ways, as "fetch it on each request, or download
 it once". Never at a question that asks the person to describe.
 `superpowers:brainstorming` keeps its order: its first message is the
@@ -130,10 +130,10 @@ After the answer:
 - The decision goes into the store, by `store.md`: a new PDR, or a line in
   *Got in the way* or *Checked* of an existing one.
 - `defer until <condition>`: after a yes, the issue goes to Later with
-  `plan.sh later` of `kalinichenko:roadmap`, and the condition goes into the
+  `plan.sh later` of `craft:roadmap`, and the condition goes into the
   issue's text.
 - `close`: after a yes, the issue closes as not planned through
-  `kalinichenko:github` (`gh issue close <n> --reason "not planned"`), with
+  `craft:github` (`gh issue close <n> --reason "not planned"`), with
   the report in its comment.
 
 ## The panel
@@ -142,13 +142,16 @@ Send both readers in one message, in the background:
 
 - **Fable:** an `Agent` call with `subagent_type: "general-purpose"` and
   `model: "fable"`.
-- **Codex,** from the working tree of the task:
+- **Codex,** from the working tree of the task. Write the prompt to a new
+  file with the Write tool, in the session's scratchpad directory, or in a
+  new folder from `mktemp -d` when there is none, with this last line: "You
+  are one reviewer that another agent runs: start no skill, change no file,
+  and file nothing." The prompt never goes into a shell
+  command: the brief holds text from outside, and that text can hold a
+  line that ends it.
 
   ```bash
-  codex --search exec -s read-only --ephemeral - <<'EOF'
-  <the prompt>
-  You are one reviewer that another agent runs: start no skill, change no file, and file nothing.
-  EOF
+  codex --search exec -s read-only --ephemeral - < <file>
   ```
 
   `--search` goes before `exec`.
@@ -185,13 +188,13 @@ and the report says so.
 
 ## Other skills
 
-- `kalinichenko:architecture` sends here at the start of a feature. Its block
+- `craft:architecture` sends here at the start of a feature. Its block
   keeps **Problem:** and **Touches:**; this skill's report answers whether
   the problem needs solving and the simplest way. When a PDR changes, the
   ADRs that name it go to the architect (`store.md`).
-- `kalinichenko:review-loop` sends here before round 1 (*Worth first*), and
+- `craft:review-loop` sends here before round 1 (*Worth first*), and
   at a finding that shows that the capability gives nothing.
-- `kalinichenko:github` closes an issue, and `kalinichenko:roadmap` puts one
+- `craft:github` closes an issue, and `craft:roadmap` puts one
   off to Later.
 
 ## Red flags

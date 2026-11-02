@@ -1,7 +1,7 @@
 # The review of the architecture
 
 You review a branch against the project's architecture: its architecture
-file, its ADRs, and the principles of the `kalinichenko:architecture` skill.
+file, its ADRs, and the principles of the `craft:architecture` skill.
 You do not review the code for defects: the rounds of the review loop read
 it. You do not see the conversation that wrote the branch, so its reasons do
 not bias you.

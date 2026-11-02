@@ -3,11 +3,11 @@
 This file holds what the code cannot tell: the modules, the layers, the
 patterns of the scripts and the tests, and the invariants that
 `skills/architecture/scripts/invariants.sh` checks in `make check`. The
-principles are in `kalinichenko:architecture`. The ADRs go in `docs/adr/`.
+principles are in `craft:architecture`. The ADRs go in `docs/adr/`.
 
 ## Bird's-eye view
 
-The repository is one plugin, `kalinichenko`, for Claude Code and Codex. Its
+The repository is one plugin, `craft`, for Claude Code and Codex. Its
 product is text that a model reads: `rules.md`, the base prompt, and one
 `SKILL.md` per skill. The bash scripts next to a skill do the steps that
 have one correct result: read the tracker, write the plan, measure the code,
@@ -47,6 +47,10 @@ it: an invariant on it is review only.
   a skill's name. An area whose tests read no recorded data has no folder.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
   are drawn from. `docs/superpowers/` — the specs and plans of past work.
+- `docs/migrating-from-kalinichenko.md` — the steps for those who installed
+  the plugin under its old name.
+- `CONTRIBUTING.md` — how to work on the plugin: the checks, the tests and
+  the release.
 - `.claude/skills/` — `release` and `infographic`: skills of this
   repository, not of the plugin.
 - `.claude/CLAUDE.md`, `AGENTS.md` — the instructions for an agent that
@@ -75,7 +79,7 @@ Each skill is a module, by the area of work it serves.
 **Public API.** A skill's API is its `SKILL.md`, whose `description` is the
 trigger, the header of each script in `scripts/`, and each file or section
 that another module names. One skill uses another by its name,
-`kalinichenko:<name>`, by a path to one of its files, as
+`craft:<name>`, by a path to one of its files, as
 `<skills>/github/tracker.md`, or by a script's header. So before a rename of
 a file or a section, grep the whole repository for the words of its name,
 and for a section also for its anchor, as `#the-ponytail-step`.
@@ -109,7 +113,10 @@ Where the split does not fit:
 
 - Most rules of the product are prose in `SKILL.md` and the `.md` files
   beside it, and the model runs them. No `Check:` line sees the prose;
-  `tests/rules_test.sh` checks a few of its sentences.
+  `tests/rules_test.sh` checks a few of its sentences. A form that a set of
+  files may not hold, as a skill name with the old prefix or a heredoc in
+  the text of a skill or of `rules.md`, is a `grep` in the `lint` target
+  of the `Makefile`, as the check of the `CHANGELOG.md` lines is.
 - Inside a script, the roles are parts of the file, not folders. A script
   can take part of a role from a sibling in its folder, as `roadmap.sh`,
   `next.sh` and `plan.sh` take some reads from `read.sh` and the graph
@@ -211,7 +218,7 @@ hold 10. A new number needs an ADR.
   the plugin installs as a copy of the repository.
 - **Safety.** No step of the debt and architecture skills runs the code of
   the project it reads. Nothing from a private source goes into a public
-  repository (`kalinichenko:github`).
+  repository (`craft:github`).
 - **Release.** `/release` alone moves `version` in
   `.codex-plugin/plugin.json` and writes `CHANGELOG.md`.
   `.claude-plugin/plugin.json` carries no `version`.
@@ -223,3 +230,4 @@ hold 10. A new number needs an ADR.
 An accepted ADR goes in `docs/adr/NNNN-title.md` and on this list.
 
 - [0001 Each script prints its usage from its header](adr/0001-usage-from-the-header.md)
+- [0002 The plugin is named craft](adr/0002-plugin-name-craft.md)

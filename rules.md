@@ -108,16 +108,16 @@ ones now say something false.
 
 Before the first review of a change — `/code-review` or `/security-review` in
 Claude Code, `/review` in Codex, a review subagent — and when a person's review
-comments arrive, invoke the `kalinichenko:review-loop` skill. It sets every
+comments arrive, invoke the `craft:review-loop` skill. It sets every
 step, from the level to the pull request. A read-only review subagent does not
 load it. An agent that acts on a finding, with the skill or without it, first
 verifies it against the real code: a confident wrong fix is worse than the
 defect.
 
-`kalinichenko:review-loop` replaces `superpowers:requesting-code-review` and
+`craft:review-loop` replaces `superpowers:requesting-code-review` and
 `superpowers:receiving-code-review`. In
 `superpowers:subagent-driven-development`, the review after each task stays as
-that skill sets it, without `kalinichenko:review-loop`. Invoke review-loop
+that skill sets it, without `craft:review-loop`. Invoke review-loop
 after the last task, in place of the final review. In Claude Code, invoke it
 also in place of the builder check of `superpowers:brainstorming`, and after
 the self-review of `superpowers:writing-plans`.
@@ -126,7 +126,7 @@ the self-review of `superpowers:writing-plans`.
 
 Before the first edit of a feature — a new capability, or a change of what the
 product does for its users — with no report of it yet, and at each fork in
-brainstorming, invoke the `kalinichenko:product` skill. Not in a subagent.
+brainstorming, invoke the `craft:product` skill. Not in a subagent.
 
 ## The Boy Scout Rule (always)
 
@@ -151,14 +151,14 @@ issue. Cleaner than you found it is not the same as rebuilt.
 ## Code conventions (always)
 
 Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
-`.cts`) in a session, invoke the `kalinichenko:typescript-conventions` skill.
+`.cts`) in a session, invoke the `craft:typescript-conventions` skill.
 Before the first write or edit to a React component or hook, invoke
-`kalinichenko:react-conventions` too. A subagent invokes them itself.
+`craft:react-conventions` too. A subagent invokes them itself.
 
 ## GitHub (always)
 
 A commit message, a pull request, an issue, a workflow file — anything that
-touches a repository's GitHub surface goes through the `kalinichenko:github`
+touches a repository's GitHub surface goes through the `craft:github`
 skill. Invoke it before the first `git commit`, `gh` call or workflow edit, not
 after. A read-only subagent, as a review or a Haiku subagent above, files
 nothing, whatever the rules below say. It does not load the skill. It names
@@ -176,9 +176,9 @@ there is no GitHub remote or `gh auth status` fails, name the finding in the
 final report instead of filing it.
 
 **A defect in this plugin goes to its tracker, after the person says yes.**
-These rules, the hooks, a `kalinichenko:` skill and its scripts are the plugin.
-A defect in one of them is an issue for `kalinichenko88/agent-skills`, not for
-the project you work in. In a checkout of `agent-skills`, the rule above
+These rules, the hooks, a `craft:` skill and its scripts are the plugin.
+A defect in one of them is an issue for `kalinichenko88/craft-skills`, not for
+the project you work in. In a checkout of `craft-skills`, the rule above
 applies instead. Do not derail the task. Unlike the rule above, ask the person
 first: show the text that the github skill's `filing.md` writes.
 

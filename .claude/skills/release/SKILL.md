@@ -1,6 +1,6 @@
 ---
 name: release
-description: Use when releasing the kalinichenko plugin from main.
+description: Use when releasing the craft plugin from main.
 disable-model-invocation: true
 argument-hint: "[major|minor|patch]"
 ---

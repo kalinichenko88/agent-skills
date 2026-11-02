@@ -1,4 +1,4 @@
-# kalinichenko:review-loop
+# craft:review-loop
 
 A review that ends: a check of a capability's worth before any round, rounds
 that read only the last fixes, a stop at the first
@@ -28,7 +28,7 @@ each task stays as that skill sets it. In place of the final review of
 ## What you get
 
 - **Worth first.** Before any round,
-  [`kalinichenko:product`](../product/README.md) gives its verdict: on someone
+  [`craft:product`](../product/README.md) gives its verdict: on someone
   else's branch that changes code or behaviour, always (the text of a skill or
   a prompt that the product ships or sends to a model counts as behaviour); on
   yours when it adds a capability or changes what the product does, and has no
@@ -92,14 +92,14 @@ each task stays as that skill sets it. In place of the final review of
   or ADRs, one Opus subagent, or `/review` in Codex, reads the branch against
   them once, beside round 1: for `high` and `xhigh` changes, and for any
   change to that file or an ADR. It runs `invariants.sh --new-since` of
-  `kalinichenko:architecture` and `clones.sh` of `kalinichenko:debt`. It finds
+  `craft:architecture` and `clones.sh` of `craft:debt`. It finds
   a second structure beside an existing one, a module used past its public
   API, a broken invariant cited as `I-n`, a decision with no ADR or against
   one, a passage of the architecture file or of any `CLAUDE.md` or
   `AGENTS.md` that the change made false, also one it does not touch, a file
   grown past its limit, and a copy to extract. Its fixes join those of
   round 1. With no such file, the summary says once that
-  `kalinichenko:architecture` can write the first one, unless the project
+  `craft:architecture` can write the first one, unless the project
   keeps none.
 - **Later fixes are reviewed too.** The fixes from the last pass, the Codex
   review and the review of the tests are one commit. The fixes from the
@@ -156,7 +156,7 @@ codex plugin add ponytail@ponytail
 
 It is not a dependency of this plugin. Codex plugins cannot declare one. In
 Claude Code a dependency would also turn on ponytail's always-on mode, a hook
-that needs `node`, for everyone who installs `kalinichenko`.
+that needs `node`, for everyone who installs `craft`.
 
 ## The Codex step
 

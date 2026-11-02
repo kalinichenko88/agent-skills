@@ -120,8 +120,8 @@ while IFS='|' read -r f phrase; do
     exit 1
   }
 done <<'EOF'
-rules.md|`kalinichenko:review-loop` replaces `superpowers:requesting-code-review` and `superpowers:receiving-code-review`.
-rules.md|. In `superpowers:subagent-driven-development`, the review after each task stays as that skill sets it, without `kalinichenko:review-loop`. Invoke review-loop after the last task, in place of the final review.
+rules.md|`craft:review-loop` replaces `superpowers:requesting-code-review` and `superpowers:receiving-code-review`.
+rules.md|. In `superpowers:subagent-driven-development`, the review after each task stays as that skill sets it, without `craft:review-loop`. Invoke review-loop after the last task, in place of the final review.
 rules.md|In Claude Code, invoke it also in place of the builder check of `superpowers:brainstorming`, and after the self-review of `superpowers:writing-plans`.
 skills/github/filing.md|The one exception is debt: a file or a folder to split,
 skills/github/filing.md|create `debt` first: `gh label create debt --description "Structural debt to refactor" --color 5319e7`

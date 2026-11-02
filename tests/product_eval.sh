@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Measures what kalinichenko:product changes, for #200. Its fixture,
+# Measures what craft:product changes, for #200. Its fixture,
 # tests/fixtures/product, is a site that lists 1000 brands, each with a logo
 # through /logo, which redirects to an icon service. The page's CSP allows
 # images only from itself and that service. 76 brands have only the service's
@@ -70,15 +70,15 @@ shapes='worth stop fork foreign start bug traced plain store'
 usage() { echo "usage: $0 [runs per shape, at least 1] [shape ...] | --check <logs folder>" >&2; exit 2; }
 
 feat="feat: show the brand's own icon when the icon service has only its placeholder"
-ask='An agent works in this repository, on the branch feature. The person asked it: "Review the branch before the pull request, and fix what the review finds." The agent has the kalinichenko plugin.'
+ask='An agent works in this repository, on the branch feature. The person asked it: "Review the branch before the pull request, and fix what the review finds." The agent has the craft plugin.'
 worth="$ask"' Load the skills that the agent would load at this moment, and read the branch. Then say what the agent does, step by step, up to and including the start of its first /code-review round, and give every message that it sends to the person before that round. Do not run a review, and change no file.'
-stop="$ask"' It follows kalinichenko:review-loop. Round 1, /code-review high on the whole branch, returned one finding, and the agent verified it in the code: public/index.html sets the CSP img-src to '"'self'"' and https://icons.example.com, and the new fallback in src/server.js redirects the browser to the brand'"'"'s own site, so the browser blocks every icon that the fallback finds. The fallback never shows an icon to a user. Load the skills that the agent follows at this moment. Then say what the agent does next with this finding, and give every message that it sends to the person before its next review round. Do not run a review, and change no file.'
+stop="$ask"' It follows craft:review-loop. Round 1, /code-review high on the whole branch, returned one finding, and the agent verified it in the code: public/index.html sets the CSP img-src to '"'self'"' and https://icons.example.com, and the new fallback in src/server.js redirects the browser to the brand'"'"'s own site, so the browser blocks every icon that the fallback finds. The fallback never shows an icon to a user. Load the skills that the agent follows at this moment. Then say what the agent does next with this finding, and give every message that it sends to the person before its next review round. Do not run a review, and change no file.'
 foreign=${worth/on the branch feature./on the branch feature, which a teammate wrote.}
-fork='An agent runs superpowers:brainstorming with the person in this repository, on the branch main. The person wants each brand that has only the icon service'"'"'s placeholder to show its own icon. The agent'"'"'s next question chooses between two ways: fetch the brand'"'"'s own icon on each /logo request, or download those icons once into public/. The agent has the kalinichenko plugin. Load the skills that the agent would load at this moment, and read the repository. Then give the message that the agent sends to the person. Change no file.'
+fork='An agent runs superpowers:brainstorming with the person in this repository, on the branch main. The person wants each brand that has only the icon service'"'"'s placeholder to show its own icon. The agent'"'"'s next question chooses between two ways: fetch the brand'"'"'s own icon on each /logo request, or download those icons once into public/. The agent has the craft plugin. Load the skills that the agent would load at this moment, and read the repository. Then give the message that the agent sends to the person. Change no file.'
 start='Add a fallback to /logo in this project: when the icon service has only its placeholder for a brand, redirect to the icon that the brand'"'"'s own site declares in its <link rel="icon">. Do not ask questions: decide yourself. Write the files and commit them with git, then reply with the path of every file you wrote.'
 bug='/logo in src/server.js answers 302 to https://icons.example.com/null.png when the request has no domain parameter. Make it answer 400 instead. Do not ask questions: decide yourself. Write the files and commit them with git, then reply with the path of every file you wrote.'
-plain='An agent runs superpowers:brainstorming with the person in this repository, on the branch main. The person said: "I want the brands with no icon to look better." The agent has the kalinichenko plugin. Its first question asks the person to describe the moment they see such a brand. Load the skills that the agent would load before that question. Then give the message that the agent sends. Change no file.'
-store='An agent works in this repository, on the branch main, with the kalinichenko plugin. At a fork, the person chose to download the 7 brands'"'"' own icons once into public/, instead of a fallback on each request. Load the skills that the agent would load at this moment, and read the repository. Then say where and in which form the agent records this decision, and give the text it writes. Change no file.'
+plain='An agent runs superpowers:brainstorming with the person in this repository, on the branch main. The person said: "I want the brands with no icon to look better." The agent has the craft plugin. Its first question asks the person to describe the moment they see such a brand. Load the skills that the agent would load before that question. Then give the message that the agent sends. Change no file.'
+store='An agent works in this repository, on the branch main, with the craft plugin. At a fork, the person chose to download the 7 brands'"'"' own icons once into public/, instead of a fallback on each request. Load the skills that the agent would load at this moment, and read the repository. Then say where and in which form the agent records this decision, and give the text it writes. Change no file.'
 
 # prompt <shape>
 prompt() {
@@ -134,7 +134,7 @@ run() {
   case $1 in start | bug) ;; *) tools='Read Grep Glob Skill Bash' ;; esac
   # shellcheck disable=SC2086 # $tools is a list of words, or none
   (cd "$work" && claude -p --model opus --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false},"language":"English"}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false},"language":"English"}' \
     --plugin-dir "$plugin" ${tools:+--tools $tools} --dangerously-skip-permissions) \
     >"$work.jsonl" 2>&1 <<<"$(prompt "$1")" || true
 }
@@ -203,12 +203,12 @@ check() {
   local text
   text=$(result "$2")
   case $1 in
-    worth) loads kalinichenko:product "$2" && verdict "$text" ;;
+    worth) loads craft:product "$2" && verdict "$text" ;;
     stop) verdicts "$text" | grep -q . ;;
-    fork) loads kalinichenko:product "$2" && grep -qi '\*\*Options:\*\*' <<<"$text" ;;
-    foreign) loads kalinichenko:product "$2" && grep -qi fable <<<"$text" ;;
+    fork) loads craft:product "$2" && grep -qi '\*\*Options:\*\*' <<<"$text" ;;
+    foreign) loads craft:product "$2" && grep -qi fable <<<"$text" ;;
     start)
-      before kalinichenko:product "$2" && before Fable "$2" && before Codex "$2" && verdict "$text"
+      before craft:product "$2" && before Fable "$2" && before Codex "$2" && verdict "$text"
       ;;
     bug) ! before Fable "$2" && ! before Codex "$2" ;;
     traced) ! verdict "$text" && ! grep -qi fable <<<"$text" ;;

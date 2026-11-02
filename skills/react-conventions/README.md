@@ -1,4 +1,4 @@
-# kalinichenko:react-conventions
+# craft:react-conventions
 
 Layer and feature boundaries in a React app, where a sub-component's own files
 go, request state as one union, a hook for each of a component's two jobs, no

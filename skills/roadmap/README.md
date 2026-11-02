@@ -1,4 +1,4 @@
-# kalinichenko:roadmap
+# craft:roadmap
 
 A project manager on top of GitHub. It tells you what to take next, what can
 run in parallel, and what is left to close a milestone.

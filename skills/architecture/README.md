@@ -1,4 +1,4 @@
-# kalinichenko:architecture
+# craft:architecture
 
 New code grows into the project's existing structure, not beside it: one HTTP
 client, one way to format a price, files that a person can read. The project
@@ -18,7 +18,7 @@ checks, and an ADR for each decision that needs one.
 
 - **The problem before the code.** At the start of a feature, two short
   answers: the problem in one sentence, and the code that already does
-  similar work. Beside them, [`kalinichenko:product`](../product/README.md)
+  similar work. Beside them, [`craft:product`](../product/README.md)
   says whether the problem needs solving, and gives the simplest way first.
   You decide.
 - **One way to do one kind of work.** At a decision, the agent finds the code

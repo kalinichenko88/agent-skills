@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Measures what kalinichenko:architecture changes, for #87. Its fixture,
+# Measures what craft:architecture changes, for #87. Its fixture,
 # tests/fixtures/architecture/repo, is a shop: src/api/client.ts wraps every
 # HTTP call, src/lib/money.ts formats a price, and docs/ARCHITECTURE.md names
 # both and keeps a code file at 40 lines, with src/features/cart/index.ts on
@@ -52,7 +52,7 @@ store_task='Add recently viewed orders to this project: remember the last 10 ord
 split_task='Add discount codes to the cart in src/features/cart/: a code takes a percent off the cart total, and the server checks it at POST /api/discounts/check with { code }, which returns { percent }.'
 ask='Do not ask questions: decide yourself. Write the files and commit them with git, then reply with the path of every file you wrote.'
 link='The architecture of this project: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).'
-line='Before a spec, a plan or the first edit of a new feature, read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). At the start of a new feature, and for a decision, load `kalinichenko:architecture`.'
+line='Before a spec, a plan or the first edit of a new feature, read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). At the start of a new feature, and for a decision, load `craft:architecture`.'
 
 # setup <dir> <arm>: the fixture as a git repository, its first commit tagged
 # base.
@@ -79,7 +79,7 @@ run() {
   case $1 in none | files) plugin=$logs/no-skill ;; esac
   setup "$work" "$1"
   (cd "$work" && claude -p --model opus --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false}}' \
     --plugin-dir "$plugin" --dangerously-skip-permissions "$2 $ask") >"$3" 2>&1 || true
   git -C "$work" log --reverse --format='> %s' --numstat --summary base..HEAD >"$work.commits"
 }
@@ -89,7 +89,7 @@ run() {
 search() {
   setup "${2%.json}" none
   (cd "${2%.json}" && claude -p --model "$1" --output-format json \
-    --settings '{"enabledPlugins":{"kalinichenko@kalinichenko":false}}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false}}' \
     --tools Read Grep Glob --dangerously-skip-permissions) >"$2" 2>&1 <<EOF || true
 Find the code in this project that already does each kind of work that the task below needs, and name each place with path:line. Change no file.
 The task: $call_task
@@ -237,7 +237,7 @@ for arm in $arms; do
   adr "store $arm" "$logs"/store-"$arm"-*.jsonl
   split "split $arm" "$logs"/split-"$arm"-*.jsonl
   case $arm in
-    skill | line) before "skill in $arm" kalinichenko:architecture "$logs"/*-"$arm"-*.jsonl ;;
+    skill | line) before "skill in $arm" craft:architecture "$logs"/*-"$arm"-*.jsonl ;;
   esac
 done
 found haiku "$logs"/search-haiku-*.json

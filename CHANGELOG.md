@@ -1,6 +1,6 @@
 # Changelog
 
-Every release of the kalinichenko plugin, newest first. A line is one commit on
+Every release of this plugin, newest first. A line is one commit on
 `main`: the skill or area it changed in parentheses, its subject without the
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.

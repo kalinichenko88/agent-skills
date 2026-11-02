@@ -121,14 +121,14 @@ one-line comment only: its body stays as it is.
 
 The global prompt says when a defect in this plugin becomes an issue; this
 section says how. The plugin is the global prompt, the hooks, the
-`kalinichenko:` skills and their scripts. The global prompt is `rules.md` and
+`craft:` skills and their scripts. The global prompt is `rules.md` and
 the hooks are in `hooks/`, at the plugin root: two directories above this
 skill's base directory. Its tracker is
-`github.com/kalinichenko88/agent-skills`. Every `gh` call below names it with
+`github.com/kalinichenko88/craft-skills`. Every `gh` call below names it with
 its host, so the project's remote and `GH_HOST` do not matter. Only this
 section and *Public repositories* in `SKILL.md` apply: the sections above,
 `tracker.md` and its scripts work on the checkout's tracker. In a checkout of
-`agent-skills` itself, this section does not apply: the sections above apply.
+`craft-skills` itself, this section does not apply: the sections above apply.
 
 **Make sure the plugin is wrong.** Read the rule or the script again, all of
 it. These are defects:
@@ -151,7 +151,7 @@ sent it asks the person.
 
 ```bash
 gh api --hostname github.com -H "Accept: application/vnd.github.raw" \
-  repos/kalinichenko88/agent-skills/contents/<path>
+  repos/kalinichenko88/craft-skills/contents/<path>
 ```
 
 When `gh` prints `HTTP 404`, `main` has no file at that path. Find the file
@@ -159,7 +159,7 @@ that holds the rule or the script now in this list, and read it there:
 
 ```bash
 gh api --hostname github.com \
-  "repos/kalinichenko88/agent-skills/git/trees/main?recursive=1" \
+  "repos/kalinichenko88/craft-skills/git/trees/main?recursive=1" \
   --jq '.tree[].path'
 ```
 
@@ -170,15 +170,15 @@ and go on to *Write the issue*.
 When `main` does not have the defect, file nothing. Tell the person that `main`
 does not have the defect. Give the file and the line of the defect in the copy
 that runs. Give the link
-`https://github.com/kalinichenko88/agent-skills#update`, and say that it is for
+`https://github.com/kalinichenko88/craft-skills#update`, and say that it is for
 an installed plugin.
 
 **Search**, by the name of the script, the skill or the rule's heading:
 
 ```bash
-gh issue list --repo github.com/kalinichenko88/agent-skills --state all \
+gh issue list --repo github.com/kalinichenko88/craft-skills --state all \
   --limit 200 --search "<name>" --json number,title,state,stateReason
-gh pr list --repo github.com/kalinichenko88/agent-skills --state all \
+gh pr list --repo github.com/kalinichenko88/craft-skills --state all \
   --limit 200 --search "<name>" --json number,title,state
 ```
 
@@ -187,9 +187,9 @@ each issue that can match, with its comments, and the diff of each pull
 request that can match:
 
 ```bash
-gh issue view <n> --repo github.com/kalinichenko88/agent-skills \
+gh issue view <n> --repo github.com/kalinichenko88/craft-skills \
   --json title,body,comments
-gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
+gh pr diff <n> --repo github.com/kalinichenko88/craft-skills
 ```
 
 - An open issue has the same report: file nothing. The same defect can be in
@@ -207,12 +207,12 @@ gh pr diff <n> --repo github.com/kalinichenko88/agent-skills
 
   ```bash
   gh api --hostname github.com graphql -f query='{ repository(owner:
-    "kalinichenko88", name: "agent-skills") { issue(number: <n>) {
+    "kalinichenko88", name: "craft-skills") { issue(number: <n>) {
     duplicateOf { number state stateReason
     repository { nameWithOwner } } } } }'
   ```
 
-  When `nameWithOwner` is not `kalinichenko88/agent-skills`, the report is in
+  When `nameWithOwner` is not `kalinichenko88/craft-skills`, the report is in
   another tracker. File nothing. Give the person that issue's repository and
   number. When `duplicateOf` is `null`, or the call fails, the issue does
   not decide the case: name it in the issue you file.
@@ -249,15 +249,15 @@ the draft in the final report. After the yes, save the body to a file outside
 the checkout and run one of:
 
 ```bash
-gh issue create --repo github.com/kalinichenko88/agent-skills \
+gh issue create --repo github.com/kalinichenko88/craft-skills \
   --title "<title>" --body-file "$body_file"
-gh issue comment <n> --repo github.com/kalinichenko88/agent-skills \
+gh issue comment <n> --repo github.com/kalinichenko88/craft-skills \
   --body-file "$body_file"
 ```
 
 When `gh` is not installed, `gh auth status --hostname github.com` fails or the
 call fails, give the person the draft and the link: for an issue,
-`https://github.com/kalinichenko88/agent-skills/issues/new`; for a comment,
-`https://github.com/kalinichenko88/agent-skills/issues/<n>`.
+`https://github.com/kalinichenko88/craft-skills/issues/new`; for a comment,
+`https://github.com/kalinichenko88/craft-skills/issues/<n>`.
 
 List the issue number in the final report.

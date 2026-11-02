@@ -94,7 +94,7 @@ milestone: the first after the first current one that is not current and not
 Give one task: the first of the main path, else of bugs, else of secondary.
 Give its number, title, track and milestone, and why it is first, as "it is
 in M1 and 2 issues wait on it". Name the top bug as the alternative. When the person
-takes a task, the `kalinichenko:github` skill's take-in starts with its bare
+takes a task, the `craft:github` skill's take-in starts with its bare
 number, as `#21`: it checks the task and assigns it.
 
 ## Parallel work
