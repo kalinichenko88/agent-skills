@@ -134,11 +134,14 @@ logs in `tests/fixtures/product/logs`.
 `tests/review_loop_lens_checks_test.sh` checks that the lens eval refuses a
 wrong call before it starts a paid run.
 `tests/github_scout_eval.sh` sends the citations job of the github skill's
-scout to Haiku, with a decision of a merged pull request, as *Finishing*
-sends it. One issue waits on the choice that the pull request made, and its
-citation holds; the eval checks that the scout gives a sentence of it as
-false, and none of an issue that the decision leaves true. Run it after a
-change to the citations job of `skills/github/scout.md` or to *Finishing*.
+scout to Haiku, with the decisions of #217, as *Finishing* sends it. The
+tree is the merge commit of #217, and the issues are #117 and #179 as they
+were then, recorded in `tests/fixtures/github/`. #117 still says that
+`rules.md` has 337 characters left, and cites no line of it; #179 has a
+citation that moved, and no sentence that a decision made false. The eval
+checks that the scout gives a sentence of #117 as false, and none of #179.
+It needs the history of the checkout down to #217. Run it after a change to
+the citations job of `skills/github/scout.md` or to *Finishing*.
 The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 
