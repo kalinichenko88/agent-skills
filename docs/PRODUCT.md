@@ -49,3 +49,4 @@ The first user is the author.
 ## Decisions
 
 - [0001 GitHub only, until a project on another host needs more](pdr/0001-github-only.md) — accepted; revisit when: a real project on GitLab or Bitbucket needs the plugin
+- [0002 A defect in craft goes to its tracker at Finishing, with no tool of its own](pdr/0002-plugin-defects-filed-at-finishing.md) — accepted; revisit when: a correction of a plugin step ends with no draft for the tracker

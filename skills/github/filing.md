@@ -130,6 +130,10 @@ section and *Public repositories* in `SKILL.md` apply: the sections above,
 `tracker.md` and its scripts work on the checkout's tracker. In a checkout of
 `craft-skills` itself, this section does not apply: the sections above apply.
 
+Claude Code's `SendFeedback` tool and its `/feedback` command send a draft to
+Anthropic, not to this tracker. Make no `SendFeedback` draft for a defect in
+this plugin: it goes here.
+
 **Make sure the plugin is wrong.** Read the rule or the script again, all of
 it. These are defects:
 
@@ -137,10 +141,14 @@ it. These are defects:
 - Two rules say opposite things for the same case.
 - A rule, followed as written, gives a wrong result.
 - A rule names a file, a script, a flag or a command that does not exist.
+- A step of a plugin skill that you skipped or read wrong, and the person had
+  to point out. Do the step at once, and ask nothing: *The session at the
+  end*, below, files it.
 
 These are not defects:
 
-- A step you skipped or read wrong. Go back and do it as written.
+- A step you skipped or read wrong, and found yourself. Go back and do it as
+  written.
 - A bug in the person's project.
 - A bug in another plugin, in Claude Code or in Codex.
 
@@ -261,3 +269,39 @@ call fails, give the person the draft and the link: for an issue,
 `https://github.com/kalinichenko88/craft-skills/issues/<n>`.
 
 List the issue number in the final report.
+
+**The session at the end.** *Finishing* in `SKILL.md` runs this step after the
+merge, outside a checkout of `craft-skills`. It finds the steps that the
+person pointed out during the work, and the scripts of the plugin that failed.
+In Claude Code, send one `Agent` call with `subagent_type: "Explore"`,
+`model: "haiku"` and this prompt, with the plugin root and the value of
+`$CLAUDE_CODE_SESSION_ID` in it:
+
+```
+Read the transcript of a Claude Code session,
+~/.claude/projects/*/<session id>.jsonl, with your file and search tools.
+Change nothing, write no file, not even in /tmp, and file nothing. Return two
+lists:
+
+1. Corrections: each message in which the person says that the agent skipped
+   a step, did it wrong or did it out of order. The person's words are in the
+   records with "type":"user" whose message.content is a string, in the
+   "prompt" of each record with "type":"queued_command" (a message sent
+   while the agent worked), and in the tool results of AskUserQuestion.
+   Search each of the three. A text that starts with <task-notification>,
+   <command-, <local-command- or "This session is being continued" is not
+   the person's.
+2. Failed calls: each tool result with "is_error":true for a command that
+   runs a file under <plugin root>.
+
+For each item: its timestamp, the person's words or the command, and the
+first three lines of the error. Write "none" for an empty list.
+```
+
+Each item is a candidate, not a defect. A correction is a defect only when the
+step is a step of the plugin. A failed call is a defect only by *Make sure the
+plugin is wrong*: a wrong call by the agent, a guard of Claude Code or a bug of
+the project is not. For each defect, go on from *Read the files on `main`*,
+and show all the drafts in one question by *Ask the person*. In Codex, skip
+this step and say so in the final report: Codex keeps its sessions as
+compressed files, and this step does not read them.

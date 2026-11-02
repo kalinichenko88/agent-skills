@@ -38,7 +38,11 @@ time.
   the steps that show it again, with neutral names. In a checkout of
   `craft-skills`, the defect is an ordinary finding. Anywhere else, the agent
   shows you the issue and files it only after you say yes. Nothing from your
-  project goes in.
+  project goes in. When you have to point out a step of a skill that the
+  agent skipped, it does the step and asks nothing. After the merge, in Claude
+  Code, a Haiku subagent reads the session for such corrections and for
+  failed scripts of the plugin, and the agent shows you all the drafts in one
+  question. They go to this tracker, not to Claude Code's `/feedback`.
 - **A task runs to its pull request.** After the review, the agent runs the
   repository's check on the final branch. When it passes and the branch is
   not the default branch, the agent pushes, opens the PR and shows the exact
