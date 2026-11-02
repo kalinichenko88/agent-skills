@@ -8,8 +8,9 @@
 # runs of another shape that a check must fail:
 #   start-2    loaded no skill before its first write
 #   start-3    no Codex login: the skill and Fable, and no codex exec
-#   start-4    start-1 with a brief that Bash and Write put in /tmp before the
-#              panel: no write of the work, so it passes
+#   start-4    start-1 with no writes of the work before the panel: a brief
+#              in /tmp by Bash, with a quote and with `cd /tmp/panel`, a
+#              `=>` arrow, a `$D/` path and a Write in /tmp. It passes
 #   bug-2      a start run: Fable and Codex before the first write
 #   traced-2   a worth run: a verdict of "do it another way"
 #   plain-2    a fork run: a verdict line

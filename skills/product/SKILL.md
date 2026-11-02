@@ -1,6 +1,6 @@
 ---
 name: product
-description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's, or one's own that adds a capability and had no worth check at its start), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
+description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's, or one's own that adds a capability or changes what the product does, with no report of its worth), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
 ---
 
 # Product
@@ -154,7 +154,7 @@ The prompt of each is the text of `<dir>/reader.md`, then the brief:
   review, also the branch and its range `<base>..HEAD`;
 - the store: `PRODUCT.md`, or the project's own decisions file, or "no
   store";
-- the decisions that its index shows the task touches;
+- the decisions that the task touches;
 - the **Touches:** line of the block of *The start of a feature*, when there
   is one;
 - for someone else's work, their spec and description, as the decisions to
@@ -166,8 +166,8 @@ Not the conversation: a reader that sees it argues from it.
 and drop none, except a risk with no number and no source. A point that goes
 against what the conversation agreed goes to the person as it is: the main
 session sees the task through the conversation, and this rule guards against
-that. Where the readers disagree,
-the **Readers disagree:** line says so, with each reader's side.
+that. Where the readers disagree, the **Readers disagree:** line says so, with
+each reader's side.
 
 **Fallbacks.** With no `codex` command, when `codex login status` fails, or
 when the run fails: Fable alone, and the report says so. When the Fable call

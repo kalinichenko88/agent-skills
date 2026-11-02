@@ -9,8 +9,9 @@ A review runs in rounds. Before them, `kalinichenko:product` checks whether
 a capability that the branch adds is worth it: on someone else's branch
 always, on the person's own when no report exists for it. An over-engineering
 review comes next, when its skill is installed. The first round reads the
-whole branch. Each later round reads only the fixes of the round before. The loop stops at the first round
-that confirms no defect, and at the latest after round 3. A defect is a wrong
+whole branch. Each later round reads only the fixes of the round before. The
+loop stops at the first round that confirms no defect, and at the latest
+after round 3. A defect is a wrong
 result that real use reaches, or data loss or a security hole on any input,
 also in a fix of the loop; a test, a comment or wording is a nit, fixed with
 no round. A finding that needs a particular input is counted against real
@@ -414,8 +415,8 @@ line holds for the subagent's reply.
 When the review ends, run the repository's own check on the final branch.
 Then report in this order. Each item is one line, except **Change:**, which
 is a list. With no person and a verdict of `kalinichenko:product` other than
-`do it`, its report comes first in the summary, before **Change:**, and again
-at the start of the turn's last message.
+`do it`, its report comes first in the summary, before **Change:**. When the
+summary is not the turn's last message, the report starts that message too.
 
 - **Change:** what the branch changed as a whole, for a person who did not
   follow the session: one to five bullets, the list that the merge takes as

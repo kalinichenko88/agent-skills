@@ -252,8 +252,8 @@ finds that the feature shows nothing; it prints those texts, to count by hand
 the runs that rebuild the feature. Three more shapes count the runs that do
 not check it: a bug fix, a branch with a report, and a question that asks the
 person to describe. One counts the answers that record a decision in a
-project's own decisions file. The feature's shape needs a Codex login. Run it after a
-change to `skills/product`, to the start of a feature in
+project's own decisions file. The feature's shape needs a Codex login. Run it
+after a change to `skills/product`, to the start of a feature in
 `kalinichenko:architecture` or to *Worth first* of review-loop.
 `tests/product_checks_test.sh` runs its checks in `make check`, on recorded
 logs in `tests/fixtures/product/logs`.
