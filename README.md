@@ -57,11 +57,11 @@ pull request, and asks you whether to merge. Skills: github, review-loop.
 
 **Review a branch before the pull request.** Ask for a review, or run
 `/code-review`. The agent picks the level by the weight of the change and
-says why. A change to a screen is first walked in the app, and the agent
-looks at each screen. The first round reads the whole branch, and each later
-round reads only the fixes of the round before. The loop stops at the first
-clean round, or after round 3. A change to code then gets a security review,
-and every change gets a summary. Skill: review-loop.
+says why. Before the first round, a change to a screen is walked in the app,
+and the agent looks at each screen. The first round reads the whole branch,
+and each later round reads only the fixes of the round before. The loop
+stops at the first clean round, or after round 3. A change to code then gets
+a security review, and every change gets a summary. Skill: review-loop.
 
 **Plan a milestone.** Ask the agent to plan the roadmap. It reads the open
 issues, proposes milestones, the order of the tasks and the links between
@@ -116,9 +116,9 @@ take next: you get one free task and the reason. Skill: roadmap.
 - **The superpowers plugin**: brainstorming, specs and plans. The rules work
   without it.
 - **A browser tool**: the Playwright MCP or Claude in Chrome, for the walk of
-  the review loop. For a desktop app, the `run` skill that Claude Code ships
-  takes their place. Without one, the walk is skipped, and the summary says
-  so. The [review-loop README](skills/review-loop/README.md#the-browser-step)
+  the review loop. For a desktop app, or with neither of them, the `run`
+  skill that Claude Code ships takes their place. Without a tool, the walk is
+  skipped, and the summary says so. The [review-loop README](skills/review-loop/README.md#the-browser-step)
   says how to install them.
 - **Git for Windows**, on native Windows: Claude Code runs the hooks in Git
   Bash. Without it, Claude Code runs them in PowerShell, and the rules do not

@@ -8,11 +8,12 @@
 
 We will walk a change that alters what a user sees or does on a screen once,
 before round 1 of the review loop. The agent starts the app, walks the flow
-of the task in a browser tool, and looks at a screenshot of each screen: what
-moved, what overlaps, what is cut, and what did not load. It reads the
-console errors and the failed requests too. When no tool can show the app,
-the step is skipped, and the summary says why. The agent writes no e2e test
-in place of the walk, and installs nothing.
+of the task with a browser tool, or with the `run` skill of Claude Code for a
+desktop app, and looks at a screenshot of each screen: what moved, what
+overlaps, what is cut, and what did not load. It reads the console errors
+and the failed requests too. When no tool can show the app, the step is
+skipped, and the summary says why. The agent writes no e2e test in place of
+the walk, and adds no dependency to the project.
 
 ## Rests on
 
@@ -35,15 +36,15 @@ in place of the walk, and installs nothing.
 
 ## Revisit when
 
-The summaries of 5 reviews with the walk show 0 findings from it.
+The first 5 reviews with the walk show 0 findings from it in total.
 
 ## Options considered
 
-- A walk by eye, with the platform's tools, and a count in the summary.
-- The step of #212 as written: an e2e test when there is no browser tool,
-  and the error state too. The e2e branch runs on none of the 11 projects.
-- No step: the person asks for a walk by hand. The loop keeps reading only
-  the diff.
+- A walk by eye: the platform's tools, and a count in the summary.
+- The step of #212 as written: an e2e test with no browser tool, which runs
+  on none of the 11 projects.
+- No step: the person asks for a walk by hand, and the loop reads only the
+  diff.
 
 ## Links
 

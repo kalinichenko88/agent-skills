@@ -2,8 +2,7 @@
 
 A review that ends: a check of a capability's worth before any round, a walk
 through a changed screen in the app, rounds that read only the last fixes, a
-stop at the first
-clean round, one last pass over the whole branch when the loop needed more
+stop at the first clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a review against the
 project's architecture file and ADRs beside round 1, a security review last,
@@ -44,9 +43,11 @@ each task stays as that skill sets it. In place of the final review of
   agent starts the app, walks the flow of the task, and looks at a
   screenshot of each screen: what moved, what overlaps, what is cut, and
   what did not load. It reads the console errors and the failed requests
-  too, and looks again with long data and with nothing to show. Its fixes
-  are one commit, so the first round reads them. Without a browser tool the
-  step is skipped, and the summary says why: see *The browser step* below.
+  too, and looks again with long data and with nothing to show. It fixes
+  what it finds while the app runs, looks again, and makes the fixes one
+  commit, so the first round reads them. Without a tool that can show the
+  app, or when the app does not start, the step is skipped, and the summary
+  says why: see *The browser step* below.
 - **A level with a reason.** `low` to `xhigh` by the weight of the change, and
   one sentence that says why. `ultra` only when you ask for it. A change to a
   test file is never `low`: `/code-review low` skips test files. A change to
@@ -173,16 +174,17 @@ The walk needs one tool that shows the app. In Claude Code, any of these:
 - The Playwright MCP, for a web app:
   `claude plugin install playwright@claude-plugins-official`. It needs
   `npx`.
-- Claude in Chrome, for a web app: the Chrome extension, and a session
-  started with `claude --chrome`. See
+- Claude in Chrome, for a web app: the Chrome extension, a claude.ai login,
+  and a session started with `claude --chrome`. See
   [Claude Code's docs](https://code.claude.com/docs/en/chrome).
 - The `run` skill that Claude Code ships, for a desktop app as Electron, or
-  an app whose start is not clear. It needs no install.
+  when neither tool above is there.
 
 Codex: `codex mcp add playwright -- npx @playwright/mcp@latest`.
 
-The walk does not write an e2e test in place of a browser tool, and installs
-nothing.
+The walk does not write an e2e test in place of a browser tool, and adds no
+dependency to the project. When it needs a package that the project does not
+have, it stops and says so.
 
 ## The Codex step
 
