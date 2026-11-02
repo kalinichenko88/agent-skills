@@ -226,7 +226,8 @@ verdict below and stays as it is. Say so.
      file of the screen, window or command the task changes, or a test of that
      screen, window or command.
    - **Stays open** — none of these. If the change moves the code it cites,
-     *Finishing* in `SKILL.md` corrects its text.
+     or decides something that it states, *Finishing* in `SKILL.md` corrects
+     its text.
 4. **Check every other hit.** It rides along only if it passes all four,
    measured against the fix for the issue in hand alone:
    - **Same module** — it changes a file the task already changes, in any

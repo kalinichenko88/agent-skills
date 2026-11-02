@@ -141,12 +141,23 @@ duplicate still held for the reproduction is closed or commented on, by *Its
 duplicates close first* in `take-in.md`; and the same pass updates every
 sibling issue whose text the change just falsified.
 
-To find the citations that the change moved, run `collect.sh filing`
+To find the issues that the change made false, run `collect.sh filing`
 (`tracker.md`) with every file that `gh pr diff <PR> --name-only` prints, and
 the old path of each file the PR renamed. In Claude Code a scout then checks
 the open issues that have an entry in its file: `Job: citations.`, with a
-checkout of the merged code as `Tree:`. Check each citation that moved or is
-gone, and correct it.
+checkout of the merged code as `Tree:`, and under it one `Decision <n>: <one
+line>` for each thing the PR decided. That is a rule, a behaviour or a
+contract that it changed, a choice that it made, a way that it rejected, a
+defect that it removed, and a number that it moved, as a count or a size that
+an issue can quote. Take them from the PR description, its `## Review`, and
+each ADR or PDR that it adds. A citation shows only its own lines: an issue
+that waits on the choice the PR made, or quotes the old count, can have no
+citation that moves. Check each citation that moved or is gone, and each
+sentence that the scout gives as false. Correct them by *Filing one next to
+an existing issue* in `filing.md`, and the body says what was decided and in
+which PR. A question that the PR answered is marked answered. A proposal that
+it ruled out is rewritten. An issue whose premise is gone closes with a
+comment that names the PR.
 
 **Cleanup.** Do it when the person chose merge and clean up, after
 *Finishing*: *Finishing* can use the worktree as its checkout of the merged

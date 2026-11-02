@@ -133,6 +133,12 @@ after a change to `skills/product`, to the start of a feature in
 logs in `tests/fixtures/product/logs`.
 `tests/review_loop_lens_checks_test.sh` checks that the lens eval refuses a
 wrong call before it starts a paid run.
+`tests/github_scout_eval.sh` sends the citations job of the github skill's
+scout to Haiku, with a decision of a merged pull request, as *Finishing*
+sends it. One issue waits on the choice that the pull request made, and its
+citation holds; the eval checks that the scout gives a sentence of it as
+false, and none of an issue that the decision leaves true. Run it after a
+change to the citations job of `skills/github/scout.md` or to *Finishing*.
 The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 
