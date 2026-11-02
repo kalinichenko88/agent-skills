@@ -227,3 +227,4 @@ hold 10. A new number needs an ADR.
 An accepted ADR goes in `docs/adr/NNNN-title.md` and on this list.
 
 - [0001 Each script prints its usage from its header](adr/0001-usage-from-the-header.md)
+- [0002 The plugin is named craft](adr/0002-plugin-name-craft.md)
