@@ -24,15 +24,21 @@
 #   start    real      the feature, before any code: the skill, a Fable
 #                      subagent and a codex exec call before the first write,
 #                      and a verdict line that is not "do it"
-#   bug      real      a bug fix with no business logic: no skill, Fable or
-#                      Codex before the first write
+#   bug      real      a bug fix with no business logic: no Fable or Codex
+#                      before the first write
 #   traced   narrated  the review of the person's own branch whose spec holds
-#                      a report: no skill, and no Fable named
+#                      a report: no new verdict other than "do it", and no
+#                      Fable named
 #   plain    narrated  a brainstorming question that asks the person to
-#                      describe: no skill
+#                      describe: no verdict line, and no Fable named
 #   store    narrated  a decision in a project with docs/decisions.md: the
-#                      answer names that file and no docs/pdr/. With no skill
-#                      it passes: it guards against a second store
+#                      answer names that file and no numbered docs/pdr/ file.
+#                      With no skill it passes: it guards against a second
+#                      store
+#
+# bug, traced, plain and store guard against a skill that runs too often. A
+# run of the skill is its report or its panel; a load that reads its table
+# and stops is no run.
 #
 # worth and stop are the prompts of the baseline in the spec,
 # docs/superpowers/specs/2026-11-02-product-skill-design.md, word for word.
@@ -185,10 +191,10 @@ check() {
     start)
       before kalinichenko:product "$2" && before Fable "$2" && before Codex "$2" && verdict "$text"
       ;;
-    bug) ! before kalinichenko:product "$2" && ! before Fable "$2" && ! before Codex "$2" ;;
-    traced) ! loads kalinichenko:product "$2" && ! grep -qi fable <<<"$text" ;;
-    plain) ! loads kalinichenko:product "$2" ;;
-    store) grep -q 'docs/decisions\.md' <<<"$text" && ! grep -q 'docs/pdr/' <<<"$text" ;;
+    bug) ! before Fable "$2" && ! before Codex "$2" ;;
+    traced) ! verdict "$text" && ! grep -qi fable <<<"$text" ;;
+    plain) ! grep -qi '\*\*Verdict:\*\*' <<<"$text" && ! grep -qi fable <<<"$text" ;;
+    store) grep -q 'docs/decisions\.md' <<<"$text" && ! grep -q 'docs/pdr/[0-9]' <<<"$text" ;;
   esac
 }
 
