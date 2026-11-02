@@ -115,8 +115,8 @@ Where the split does not fit:
   beside it, and the model runs them. No `Check:` line sees the prose;
   `tests/rules_test.sh` checks a few of its sentences. A form that a set of
   files may not hold, as a skill name with the old prefix or a heredoc in
-  the text of a skill, is one `grep` in the `lint` target of the
-  `Makefile`, as the form of a `CHANGELOG.md` line is.
+  the text of a skill or of `rules.md`, is a `grep` in the `lint` target
+  of the `Makefile`, as the check of the `CHANGELOG.md` lines is.
 - Inside a script, the roles are parts of the file, not folders. A script
   can take part of a role from a sibling in its folder, as `roadmap.sh`,
   `next.sh` and `plan.sh` take some reads from `read.sh` and the graph

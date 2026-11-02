@@ -40,12 +40,14 @@ Your instruction files, skills, hooks and memory can call a skill by its old
 name. This command lists the text files among them (`.md`, `.toml`,
 `settings*.json` and `.sh`), in `~/.claude`, `~/.codex` and `~/.agents`, and
 in the folder where you run it. It follows links, and it skips the installed
-plugins, the worktrees and `.git`. A hook in another language you check by
-hand. Run it in each project where you
-use the plugin, or once in the folder that holds them all:
+plugins, the worktrees and `.git`. Check by hand a hook or a script in
+another language. Run the command in each project where you use the plugin,
+or once in the folder that holds your projects, as `~/Dev`. Do not run it in
+your home folder: there it reads all of your files, and it lists the files of
+`~/.claude` two times.
 
 ```sh
-find -L ~/.claude ~/.codex ~/.agents . \( -path '*/.claude/plugins' -o -path '*/.codex/plugins' -o -path '*/.codex/.tmp' -o -name .git -o -name node_modules -o -name worktrees \) -prune -o -type f \( -name '*.md' -o -name '*.toml' -o -name 'settings*.json' -o -name '*.sh' \) -print0 2>/dev/null | xargs -0 grep -lE '(^|[^@])kalinichenko:' 2>/dev/null
+find -L ~/.claude ~/.codex ~/.agents . \( -path '*/.claude/plugins' -o -path '*/.codex/plugins' -o -path '*/.codex/.tmp' -o -name .git -o -name node_modules -o -name worktrees -o -name .worktrees \) -prune -o -type f \( -name '*.md' -o -name '*.toml' -o -name 'settings*.json' -o -name '*.sh' \) -print0 2>/dev/null | xargs -0 grep -lE '(^|[^@])kalinichenko:' 2>/dev/null
 ```
 
 Read each file that it lists. A record of past work, as an old plan, can keep
@@ -57,15 +59,15 @@ perl -pi -e 's/(?<!@)kalinichenko:/craft:/g' "$(realpath <file>)"
 ```
 
 A project can turn the plugin on in its own `.claude/settings.json` or
-`.claude/settings.local.json`. This command finds such a file in the project
-where you run it:
+`.claude/settings.local.json`. This command finds such files, in the same
+folder as the command above:
 
 ```sh
-grep -l '"kalinichenko@kalinichenko"' .claude/settings*.json 2>/dev/null
+find . -path '*/.claude/settings*.json' -not -path '*/node_modules/*' -print0 2>/dev/null | xargs -0 grep -l '"kalinichenko@kalinichenko"' 2>/dev/null
 ```
 
-In each file that it lists, change `"kalinichenko@kalinichenko": true` to
-`"craft@kalinichenko": true`.
+In each file that it lists, change the key `"kalinichenko@kalinichenko"` to
+`"craft@kalinichenko"`, and keep its value.
 
 ## Optional: the new URL
 
@@ -92,7 +94,7 @@ codex plugin marketplace add kalinichenko88/craft-skills
 codex plugin add craft@kalinichenko
 ```
 
-Then trust the three hooks of `craft` in `/hooks`, as above.
+In Codex, then trust the three hooks of `craft` in `/hooks`, as above.
 
 ## Last
 
