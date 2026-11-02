@@ -1,6 +1,6 @@
 ---
 name: product
-description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's, or one's own that adds a capability or changes what the product does, with no report of its worth), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
+description: Use when a feature starts (a new capability, or a change of what the product does for its users), when a bug fix changes business logic, when a branch or pull request is reviewed (someone else's that changes code, or one's own that adds a capability or changes what the product does, with no report of its worth), when brainstorming asks a question that chooses between ways, when a decision concerns the whole project (the licence, open source or not, distribution, pricing, the money model, the hosting), when a task may be deferred or closed for its worth, or when PRODUCT.md or a PDR is written or checked.
 ---
 
 # Product
@@ -16,14 +16,16 @@ whether to build it, and what.
 | --- | --- | --- |
 | A feature starts: a new capability, or a change of what the product does for its users | full; none when a report for it exists (*The trace*) | *The run* |
 | A bug fix that changes business logic: a rule, a calculation, a state, a permission, the data | light | *The run* |
-| A review of someone else's branch or pull request | full, always | *The trace* |
+| A review of someone else's branch or pull request that changes code or behaviour | full, always | *The trace* |
 | A review of one's own branch that adds a capability or changes what the product does | none when a report for it exists; else the depth of its start | *The trace* |
 | A review finding that shows the capability gives its users nothing | light, with the finding as its proof, also when a report exists | *The run* |
 | A question in brainstorming that chooses between ways | light; full for a decision about the whole project | *In brainstorming* |
 | A decision about the whole project: the licence, open source or not, distribution, pricing, the money model, the hosting | full | *The run* |
 | A project with no store, or the person asks for one | the offer | `store.md` |
 
-One's own bug fix that changes no business logic gets no run. `reader.md` and
+One's own bug fix that changes no business logic gets no run, and nor does
+someone else's change of documents only, a dependency bump or a move that a
+script or a test proves unchanged. `reader.md` and
 `store.md` sit next to this file, in this skill's base directory `<dir>`.
 Read `reader.md` before the first run: it holds the criteria, the checks and
 the shape of the report, for the readers of the panel and for the light
@@ -41,12 +43,13 @@ search, and neither sees the other's answer. The main session merges them.
 The person's own work gets no second report: a report exists when a message
 of this session, the spec of the work, the pull request's description or the
 issue holds a `**Verdict:**` line, or when the branch adds a PDR for this
-work. The light report of a fork in brainstorming is no report of the
-feature. The test is the trace, not the author: the person's branch with no
-report at its start gets one at the review.
+work. The report of a fork in brainstorming is no report of the feature.
+The test is the trace, not the author: the person's branch with no report at
+its start gets one at the review.
 
-Someone else's work gets the full depth always, with a report or without
-one, and their spec and description are the decisions to check. Someone
+Someone else's work that changes code or behaviour gets the full depth
+always, with a report or without one, and their spec and description are the
+decisions to check. Someone
 else's work is a pull request whose author is not the account that `gh` is
 logged in as, or, with no pull request, a branch whose commits have another
 author's email than `git config user.email`.
@@ -117,8 +120,8 @@ a question to the person, and the work that it judges waits for the answer.
 With no person, as in a run that a script starts or with "do not ask
 questions", the work goes on as it was asked. Then the last message of the
 turn starts with the report, its `**Verdict:**` line first, and its
-questions marked `open`. The pull request's description holds the same
-report, when there is one.
+questions marked `open`. The report then goes where *The trace* says; on
+someone else's pull request, with no yes, it stays in that message.
 
 After the answer:
 
@@ -201,4 +204,4 @@ and the report says so.
 | "A general risk is better than none" | A risk with no number and no source for this task is noise. Leave it out. |
 | "The decision is accepted, so it is settled" | An accepted decision is a hypothesis that won once. Check its *Rests on*. |
 | "The verdict is close, so I stop the task" | The person decides. Ask, and wait for the answer. |
-| "No one can answer, so the report can wait" | The last message of the turn starts with the report, and the pull request's description holds it. |
+| "No one can answer, so the report can wait" | The last message of the turn starts with the report, and *The trace* says where else it goes. |

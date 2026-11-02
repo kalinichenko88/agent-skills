@@ -28,8 +28,9 @@ each task stays as that skill sets it. In place of the final review of
 ## What you get
 
 - **Worth first.** Before any round, [`kalinichenko:product`](../product/README.md)
-  gives its verdict: on someone else's branch always, on yours when it adds a
-  capability or changes what the product does, and has no report yet. A
+  gives its verdict: on someone else's branch that changes code, always; on
+  yours when it adds a capability or changes what the product does, and has
+  no report yet. A
   capability that is not worth it gets no review until you decide. A finding
   that shows the capability gives nothing comes to you too, not as a rebuild.
 - **Less code first.** When the

@@ -171,6 +171,9 @@ These are the person's decisions, in the conversation of 2026-10-29 to
   report*: shown to the person, with no change asked.
 - The architect's own skepticism, about what the system pays for a change,
   is #216, deferred to Later.
+- At the review of #217: someone else's change of documents only, a
+  dependency bump or a move that a script or a test proves unchanged gets no
+  run. Someone else's change of code or behaviour keeps the full depth.
 
 ## When it runs
 

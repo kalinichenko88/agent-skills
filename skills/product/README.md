@@ -14,9 +14,9 @@ ADRs.
   for its users.
 - A bug fix changes business logic: a rule, a calculation, a state, a
   permission, the data.
-- A branch is reviewed: someone else's always; yours when it adds a
-  capability or changes what the product does, and has no report of its
-  worth yet.
+- A branch is reviewed: someone else's that changes code, always; yours when
+  it adds a capability or changes what the product does, and has no report
+  of its worth yet.
 - Brainstorming asks a question that chooses between ways.
 - A decision concerns the whole project: the licence, open source or not,
   distribution, pricing, the money model, the hosting.

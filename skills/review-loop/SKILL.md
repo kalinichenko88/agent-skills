@@ -5,31 +5,29 @@ description: Use when a change is reviewed, before or after its pull request ope
 
 # Review loop
 
-A review runs in rounds. Before them, `kalinichenko:product` checks whether
-a capability that the branch adds is worth it: on someone else's branch
-always, on the person's own when no report exists for it. An over-engineering
-review comes next, when its skill is installed. The first round reads the
-whole branch. Each later round reads only the fixes of the round before. The
-loop stops at the first round that confirms no defect, and at the latest
-after round 3. A defect is a wrong
-result that real use reaches, or data loss or a security hole on any input,
-also in a fix of the loop; a test, a comment or wording is a nit, fixed with
-no round. A finding that needs a particular input is counted against real
-data first, and a count of zero declines it, except for data loss or a
-security hole. When the loop had more than one round, one last pass
-reads the whole branch again, once. At `xhigh` in Claude Code, Codex reads the
-whole branch once too. At `high` and `xhigh`, and for a change to tests only,
-one review reads the tests of the whole branch once. In a project with an
-architecture file or ADRs, one review reads the branch against them once,
-beside round 1, at `high` and `xhigh` and for a change to that file or an
-ADR. A security review comes
-last. A change to documents only gets one round and no security review. In
-Claude Code, Codex reads it once when it changes the text of a skill, a
-prompt or a spec. The agent fixes and decides by itself, except for a change
-to business logic, and writes a
-summary. When the task is an issue taken into work, or the person asked for a
-pull request, the push and the pull request follow in the same turn, on the
-conditions in *The pull request*.
+A review runs in rounds. Before them, `kalinichenko:product` checks whether a
+capability that the branch adds is worth it: on someone else's branch that
+changes code always, on the person's own when no report exists for it. An
+over-engineering review comes next, when its skill is installed. The first
+round reads the whole branch. Each later round reads only the fixes of the
+round before. The loop stops at the first round that confirms no defect, and
+at the latest after round 3. A defect is a wrong result that real use reaches,
+or data loss or a security hole on any input, also in a fix of the loop; a
+test, a comment or wording is a nit, fixed with no round. A finding that needs
+a particular input is counted against real data first, and a count of zero
+declines it, except for data loss or a security hole. When the loop had more
+than one round, one last pass reads the whole branch again, once. At `xhigh`
+in Claude Code, Codex reads the whole branch once too. At `high` and `xhigh`,
+and for a change to tests only, one review reads the tests of the whole branch
+once. In a project with an architecture file or ADRs, one review reads the
+branch against them once, beside round 1, at `high` and `xhigh` and for a
+change to that file or an ADR. A security review comes last. A change to
+documents only gets one round and no security review. In Claude Code, Codex
+reads it once when it changes the text of a skill, a prompt or a spec. The
+agent fixes and decides by itself, except for a change to business logic, and
+writes a summary. When the task is an issue taken into work, or the person
+asked for a pull request, the push and the pull request follow in the same
+turn, on the conditions in *The pull request*.
 
 Why the rounds stop: on one project, nine rounds of `/code-review high`, each
 over the whole branch, gave 68 findings and 25 fixes. No fix went into the
@@ -83,20 +81,22 @@ A review subagent and Codex's `/review` have no levels.
 
 Before the over-engineering review and round 1, load `kalinichenko:product`:
 
-- on someone else's branch or pull request, always, at the full depth. Their
-  spec and description are the decisions to check;
+- on someone else's branch or pull request that changes code or behaviour,
+  always, at the full depth. Their spec and description are the decisions to
+  check;
 - on the person's own branch that adds a capability for the product's users,
   or changes what the product does for them, when no report exists for it.
   *The trace* of `kalinichenko:product` says where a report is found.
 
-On the person's own branch, skip it for documents only, for a bug fix that
-changes no business logic, and for a move that a script or a test proves
-unchanged.
+Skip it for documents only, for a dependency bump, and for a move that a
+script or a test proves unchanged; on the person's own branch, also for a bug
+fix that changes no business logic.
 
 A capability that is not worth it gets no review. A verdict other than
 `do it` goes to the person before round 1, with its options, and the review
 waits for the answer. With no person, the review goes on, and the question
-stays open in the summary and in the pull request's description. The report
+stays open in the summary, and on the person's own branch in the pull
+request's description. The report
 goes where *The trace* of `kalinichenko:product` says, so that a later review
 finds it.
 

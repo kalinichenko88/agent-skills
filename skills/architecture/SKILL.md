@@ -54,8 +54,10 @@ person only what you cannot find.
 
 Then, in the main session, load `kalinichenko:product`. Its report says
 whether the problem needs solving, and gives the simplest way first. It comes
-in the same message as the block. In a subagent, the report of the spec or of
-the brief stands.
+in the same message as the block. A subagent does not load it: the report of
+the main session, the spec, the plan or the brief stands. With none, the
+block alone is required, and the subagent's reply says that it found no
+report.
 
 The result is this block and that report. They are required: no edit of the
 feature comes before a message that holds them, at the start of the spec, or
