@@ -47,6 +47,13 @@ prompt of engineering rules, plus the skills those rules lean on.
   the code, one way to do one kind of work, a split before a file grows past
   its limit, and numbered invariants in `docs/ARCHITECTURE.md` that a script
   checks.
+- **[`kalinichenko:product`](skills/product/README.md)** — a skeptical
+  analyst before the work: whether a task is worth doing, from who gains,
+  the money, the direction, the law and the client, with Fable and Codex
+  searching the web for a new feature or someone else's branch. Another way,
+  a deferral or a close is a good answer, and you decide. Product decisions
+  go into `docs/PRODUCT.md` and `docs/pdr/`, and an accepted one is checked
+  again when a task touches it.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
