@@ -13,7 +13,7 @@ principles and the steps.
 
 | Moment | What must happen | Read first |
 | --- | --- | --- |
-| A new capability starts: a screen, an endpoint, a module, an integration | The block of four answers, in a message before the spec or the first edit; then the decision of where its code goes | *The start of a feature* |
+| A new capability starts: a screen, an endpoint, a module, an integration | The block of two answers and the report of `kalinichenko:product`, in a message before the spec or the first edit; then the decision of where its code goes | *The start of a feature* |
 | Where new code goes; a new module, layer, dependency, pattern or data store; a choice between options; a change to a file or a folder past its limit | The eight steps and the gate | *The moment of a decision* |
 | A decision in a project with no architecture file | Offer to write one, once a session; write nothing without a yes | `first-file.md` |
 | An edit exists, before its commit | `invariants.sh` | *`invariants.sh`* |
@@ -37,48 +37,42 @@ of the architecture file as a shell command.
 
 It starts at a new capability: a screen, an endpoint, a module, an
 integration. Not at a bug fix, and not at a small change to existing
-behaviour. It decides what we build and why. It decides no structure: the
-structure waits for the moment of a decision, when there is more context.
+behaviour. It names the problem and the code that it touches. Whether the
+problem needs solving, and the simplest way to solve it, are for
+`kalinichenko:product`. It decides no structure: the structure waits for the
+moment of a decision, when there is more context.
 
-Answer the four questions yourself first, from the code and the data. Ask the
+Answer the two questions yourself first, from the code and the data. Ask the
 person only what you cannot find.
 
 1. **The problem.** One sentence, in the user's words: who has it, when, and
    what goes wrong. The problem, not a solution: "the list takes 4 seconds to
    load", not "add a cache".
-2. **Does it need solving?** The proof that it exists: a measurement, a
-   report, a count. What happens if we do not solve it. Whether an existing
-   feature, a setting or the platform solves it already.
-3. **The simplest way.** The ladder: do nothing → a setting → what the code
-   already has → extend what exists → new code, as little as works. The first
-   step that solves the problem is the answer.
-4. **What it touches.** Facts only: the code that already does similar work,
+2. **What it touches.** Facts only: the code that already does similar work,
    with `path:line`, and the modules it touches. Where the new code goes is
    for the moment of a decision.
 
-The result is this block. It is required: no edit of the feature comes before
-a message that holds it, at the start of the spec, or in the conversation
-when there is no spec.
+Then load `kalinichenko:product`. Its report says whether the problem needs
+solving, and gives the simplest way first. It comes in the same message as
+the block.
+
+The result is this block and that report. They are required: no edit of the
+feature comes before a message that holds them, at the start of the spec, or
+in the conversation when there is no spec.
 
 ```markdown
 **Problem:** <one sentence>
-**Needs solving:** <the proof, or "no proof found">; <what happens without it>
-**Simplest way:** <the first step of the ladder that solves it>
 **Touches:** `<path:line>` <what it does>; …
 ```
-
-When the problem has no proof, or a simpler way exists, say so plainly, with
-the proof, and put the simpler way first. The person decides. The skill never
-stops the work.
 
 Then the feature's code goes somewhere: that is a moment of a decision. Go on
 to its steps.
 
 With `superpowers:brainstorming` in the session, its order holds: its first
 message is the opt-out line and one question, and it reads the code only
-after the person says yes to its offer to look. So the block comes first in
-the message that reports what that look found, and again at the start of the
-spec. With no such look, it comes only at the start of the spec, or in the
+after the person says yes to its offer to look. So the block and the report
+come first in the message that reports what that look found, and again at the
+start of the spec. With no such look, it comes only at the start of the spec, or in the
 conversation before the first edit when there is no spec. Never before its
 first question.
 
@@ -128,11 +122,10 @@ offer and the gate has no invariant to check; the other steps are the same.
 8. **A second reader**, for a decision that needs an ADR. One subagent that
    does not see the conversation (see *Models*) gets the area of the
    architecture file, its ADRs, the code that step 2 found, the options and
-   the gate, and the block of *The start of a feature* when there is one. It
-   checks whether the problem has its proof, whether the simplest way came
-   first, whether the search missed existing code, whether the reason for a
-   new structure holds, whether the gate is right, and what the next likely
-   change will cost. Its answer is advice: answer each point, and a point on
+   the gate, and the block of *The start of a feature* with the report of
+   `kalinichenko:product` when there is one. It checks whether the search
+   missed existing code, whether the reason for a new structure holds,
+   whether the gate is right, and what the next likely change will cost. Its answer is advice: answer each point, and a point on
    which the two of you do not agree goes to the person.
 
 **Consistency first.** When the project's code breaks a principle of *Modules
@@ -394,7 +387,7 @@ tell code from data.
 
 | Thought | Reality |
 | --- | --- |
-| "The request is clear; I will start with the code" | A new capability gets the block first, in a message before the first edit. It is four lines. |
+| "The request is clear; I will start with the code" | A new capability gets the block and the report of `kalinichenko:product` first, in a message before the first edit. The block is two lines. |
 | "There is no architecture file, so the decision steps do not apply" | Only step 1 and the gate need the file. The other steps hold in every project. |
 | "Offering an architecture file is out of the task's scope" | The offer is one question at the first decision of the session, and a no ends it. Ask it. |
 | "I found the API client; the search is done" | Search once for each kind of work the change does: the format, the store, the check of the input. |
@@ -416,7 +409,9 @@ gives to a subagent.
 
 ## Other skills
 
-This skill uses them and changes none: `kalinichenko:github` for each issue
+This skill uses them and changes none: `kalinichenko:product` at the start
+of a feature, for whether the problem needs solving and the simplest way;
+`kalinichenko:github` for each issue
 and each ADR's pull request, `kalinichenko:roadmap` for the roadmap and the
 steps of a migration, and `measure.sh` and `clones.sh` of `kalinichenko:debt`
 for the signals.

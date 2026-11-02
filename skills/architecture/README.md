@@ -16,10 +16,11 @@ checks, and an ADR for each decision that needs one.
 
 ## What you get
 
-- **The problem before the code.** At the start of a feature, four short
-  answers: the problem in one sentence, the proof that it needs solving, the
-  simplest way to solve it, and the code that already does similar work. When
-  a simpler way exists, it comes first. You decide; the work never stops.
+- **The problem before the code.** At the start of a feature, two short
+  answers: the problem in one sentence, and the code that already does
+  similar work. Beside them, [`kalinichenko:product`](../product/README.md)
+  says whether the problem needs solving, and gives the simplest way first.
+  You decide.
 - **One way to do one kind of work.** At a decision, the agent finds the code
   that already does this kind of work and extends it. A new structure needs a
   reason why the existing one cannot take the change. At most three options,
