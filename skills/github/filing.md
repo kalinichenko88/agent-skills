@@ -305,7 +305,9 @@ step is a step of the plugin. A failed call is a defect only by *Make sure the
 plugin is wrong*: a wrong call by the agent, a guard of Claude Code or a bug of
 the project is not. For each defect, go on from *Read the files on `main`*,
 and show all the drafts in one question by *Ask the person*. In a checkout of
-`craft-skills`, file each one as a finding of the sections above instead.
+`craft-skills`, file each one as a finding of the sections above instead. The
+Boy Scout check does not apply to them: the merged pull request takes no more
+fixes.
 Codex keeps its sessions as compressed files, and has no subagent with a
 model: there, take the corrections and the failed calls from your own
 context.
