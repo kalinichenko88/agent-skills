@@ -1,4 +1,4 @@
-# 0002 A defect in craft goes to its tracker at Finishing, with no tool of its own
+# 0002 A correction of a plugin step goes to the tracker at Finishing, with no tool of its own
 
 - Status: accepted
 - Level: feature
@@ -7,11 +7,12 @@
 ## Decision
 
 We will send a defect in this plugin to its tracker, not to Claude Code's
-`SendFeedback`. A step of a plugin skill that the person has to point out is
-a defect. The agent does the step at once and asks nothing. After the merge,
-*Finishing* of the github skill sends a Haiku subagent to read the session's
-transcript for the person's corrections and the failed scripts of the
-plugin. The agent shows all the drafts in one question. The plugin ships no
+`SendFeedback`. A step of the plugin that the person has to point out is a
+defect. The agent does the step at once and asks nothing. After the merge,
+*Finishing* of the github skill reads the session for the person's
+corrections and the failed scripts of the plugin: in Claude Code through a
+Haiku subagent that reads the transcript, in Codex from the agent's own
+context. The agent shows all the drafts in one question. The plugin ships no
 tool of its own for this.
 
 ## Rests on
@@ -27,15 +28,18 @@ tool of its own for this.
   a JSON-RPC runtime, and I-2 forbids `jq`.
 - Claude Code 2.1.309 keeps the transcript at
   `~/.claude/projects/*/$CLAUDE_CODE_SESSION_ID.jsonl`, also after the
-  session enters a worktree. A message sent during a turn is a record with
-  `"type":"queued_command"`.
+  session enters a worktree. A message sent during a turn is an attachment
+  with `"type":"queued_command"`.
+- On one recorded session with a correction of a plugin step, the Haiku
+  subagent found the correction and both failed calls in 3 of 3 runs.
 - In `claude -p`, Claude Code 2.1.309 gives no `SendFeedback` and no
   `AskUserQuestion`: a headless run cannot count `SendFeedback` drafts.
 
 ## Revisit when
 
-A session with a correction of a plugin step ends with no draft for this
-tracker; or a host lets a plugin ship a tool whose description always loads.
+A Claude Code session reaches *Finishing* with a correction of a plugin step
+in its transcript, and shows no draft for this tracker; or a host lets a
+plugin ship a tool whose description always loads.
 
 ## Options considered
 

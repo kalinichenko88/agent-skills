@@ -18,7 +18,7 @@ there.
 | `gh pr create` | `--assignee @me`; assign every issue it closes too; `Part of #15`: `keep-open.sh` after it; then read what it closes | *Pull requests* below |
 | Merging | `gh pr merge --squash --delete-branch --body` with one bullet list for the whole branch, run in the checkout that holds the branch; then *Finishing*, and *Cleanup* when the person asks for it | *Pull requests* below |
 | Finding something out of scope | In the task's module, clear and smaller than the task: fix it in this PR, list it in the description under **Also fixed**. Otherwise add it to an open issue on the same code with `add-finding.sh`, or file a new one | `filing.md` |
-| A rule, a skill or a script of this plugin is wrong | Search `kalinichenko88/craft-skills`; show the person the issue, with nothing from their project; file it only after a yes. A step the person had to point out: do it at once, and *Finishing* files it. In a checkout of `craft-skills`: the row above | `filing.md` |
+| A rule, a skill or a script of this plugin is wrong | Search `kalinichenko88/craft-skills`; show the person the issue, with nothing from their project; file it only after a yes. A step the person had to point out: do it at once, and *Finishing* drafts it. In a checkout of `craft-skills`: the row above | `filing.md` |
 | Filing next to an existing issue | Name the relation, and correct the other side | `filing.md` |
 | Picking an issue up — `#91` or its URL | `take-in-check.sh`; before the next step, give the issue's number, its title and two or three sentences on what it asks; on `continue #91 on <branch>`, *Continuing the work* says which of the steps below run; close its duplicates; unless told otherwise, `worktree.sh` with `fix/91-what-it-does`; read what it is wired to; re-check its `path:line`; check every open bug and debt issue in the same area first; take along settled issues on the same code, and assign each one when it joins; after the work, the check and the review, then the PR and the merge question, in the same turn, on the conditions in *The pull request* of `craft:review-loop` | `take-in.md` |
 | Writing to a repository — an issue, a comment, a PR, a branch, a commit | `gh repo view <owner/name> --json visibility` on each repository that gets it, and when it fails, take it as `PUBLIC`; `PUBLIC`: no names, numbers, titles, paths or code from a private source. Write "a private tracker with 100 open issues" | *Public repositories* below |
@@ -148,8 +148,8 @@ the open issues that have an entry in its file: `Job: citations.`, with a
 checkout of the merged code as `Tree:`. Check each citation that moved or is
 gone, and correct it.
 
-Outside a checkout of `craft-skills`, the last step reads the session for
-defects in this plugin: *The session at the end* in `filing.md`.
+The last step reads the session for defects in this plugin: *The session at
+the end* in `filing.md`.
 
 **Cleanup.** Do it when the person chose merge and clean up, after
 *Finishing*: *Finishing* can use the worktree as its checkout of the merged

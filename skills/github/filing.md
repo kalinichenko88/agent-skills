@@ -128,7 +128,9 @@ skill's base directory. Its tracker is
 its host, so the project's remote and `GH_HOST` do not matter. Only this
 section and *Public repositories* in `SKILL.md` apply: the sections above,
 `tracker.md` and its scripts work on the checkout's tracker. In a checkout of
-`craft-skills` itself, this section does not apply: the sections above apply.
+`craft-skills` itself, only the next paragraph, *Make sure the plugin is
+wrong* and *The session at the end* apply. There, a defect is a finding of the
+sections above.
 
 Claude Code's `SendFeedback` tool and its `/feedback` command send a draft to
 Anthropic, not to this tracker. Make no `SendFeedback` draft for a defect in
@@ -141,9 +143,9 @@ it. These are defects:
 - Two rules say opposite things for the same case.
 - A rule, followed as written, gives a wrong result.
 - A rule names a file, a script, a flag or a command that does not exist.
-- A step of a plugin skill that you skipped or read wrong, and the person had
-  to point out. Do the step at once, and ask nothing: *The session at the
-  end*, below, files it.
+- A step of the plugin, in the global prompt or a `craft:` skill, that you
+  skipped or read wrong, and the person had to point out. Do the step at
+  once, and ask nothing: *The session at the end*, below, drafts it.
 
 These are not defects:
 
@@ -271,8 +273,8 @@ call fails, give the person the draft and the link: for an issue,
 List the issue number in the final report.
 
 **The session at the end.** *Finishing* in `SKILL.md` runs this step after the
-merge, outside a checkout of `craft-skills`. It finds the steps that the
-person pointed out during the work, and the scripts of the plugin that failed.
+merge. It finds the steps that the person pointed out during the work, and
+the scripts of the plugin that failed.
 In Claude Code, send one `Agent` call with `subagent_type: "Explore"`,
 `model: "haiku"` and this prompt, with the plugin root and the value of
 `$CLAUDE_CODE_SESSION_ID` in it:
@@ -280,19 +282,19 @@ In Claude Code, send one `Agent` call with `subagent_type: "Explore"`,
 ```
 Read the transcript of a Claude Code session,
 ~/.claude/projects/*/<session id>.jsonl, with your file and search tools.
-Change nothing, write no file, not even in /tmp, and file nothing. Return two
-lists:
+Change nothing, and file nothing. Write no file, not even in /tmp: use pipes.
+Return two lists:
 
 1. Corrections: each message in which the person says that the agent skipped
    a step, did it wrong or did it out of order. The person's words are in the
    records with "type":"user" whose message.content is a string, in the
-   "prompt" of each record with "type":"queued_command" (a message sent
+   "prompt" of each attachment with "type":"queued_command" (a message sent
    while the agent worked), and in the tool results of AskUserQuestion.
    Search each of the three. A text that starts with <task-notification>,
    <command-, <local-command- or "This session is being continued" is not
    the person's.
-2. Failed calls: each tool result with "is_error":true for a command that
-   runs a file under <plugin root>.
+2. Failed calls: each tool result with "is_error":true whose tool_use, the
+   one with the same id, runs a file under <plugin root>.
 
 For each item: its timestamp, the person's words or the command, and the
 first three lines of the error. Write "none" for an empty list.
@@ -302,6 +304,8 @@ Each item is a candidate, not a defect. A correction is a defect only when the
 step is a step of the plugin. A failed call is a defect only by *Make sure the
 plugin is wrong*: a wrong call by the agent, a guard of Claude Code or a bug of
 the project is not. For each defect, go on from *Read the files on `main`*,
-and show all the drafts in one question by *Ask the person*. In Codex, skip
-this step and say so in the final report: Codex keeps its sessions as
-compressed files, and this step does not read them.
+and show all the drafts in one question by *Ask the person*. In a checkout of
+`craft-skills`, file each one as a finding of the sections above instead.
+Codex keeps its sessions as compressed files, and has no subagent with a
+model: there, take the corrections and the failed calls from your own
+context.
