@@ -12,7 +12,8 @@ outside development, for content and against AI slop, and the name must
 cover them too (#214).
 
 A skill call takes its prefix from the plugin name only. The marketplace
-name is a separate name: it shows only in the install and update commands.
+name is a separate name: it shows only where a person adds, installs and
+updates the plugin.
 
 ## Options considered
 

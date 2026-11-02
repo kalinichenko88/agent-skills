@@ -36,7 +36,7 @@ run() {
   printf '{"type":"module","dependencies":{%s},"devDependencies":{"typescript":"^5.9.0","@types/react":"^19.2.0"}}\n' "$deps" >"$work/package.json"
   echo '{"compilerOptions":{"strict":true,"jsx":"react-jsx","noEmit":true},"include":["src"]}' >"$work/tsconfig.json"
   (cd "$work" && claude -p --model haiku --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"craft@kalinichenko":false}}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false}}' \
     --plugin-dir "$root" --dangerously-skip-permissions \
     "Make exactly one Agent tool call: subagent_type \"general-purpose\", model \"haiku\", and as its prompt the text between the lines below, copied verbatim. Do nothing else. Then reply with what the agent returned.
 ---

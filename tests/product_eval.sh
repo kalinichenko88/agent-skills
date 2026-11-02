@@ -134,7 +134,7 @@ run() {
   case $1 in start | bug) ;; *) tools='Read Grep Glob Skill Bash' ;; esac
   # shellcheck disable=SC2086 # $tools is a list of words, or none
   (cd "$work" && claude -p --model opus --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"craft@kalinichenko":false},"language":"English"}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false},"language":"English"}' \
     --plugin-dir "$plugin" ${tools:+--tools $tools} --dangerously-skip-permissions) \
     >"$work.jsonl" 2>&1 <<<"$(prompt "$1")" || true
 }

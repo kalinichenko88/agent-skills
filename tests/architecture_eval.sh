@@ -79,7 +79,7 @@ run() {
   case $1 in none | files) plugin=$logs/no-skill ;; esac
   setup "$work" "$1"
   (cd "$work" && claude -p --model opus --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"craft@kalinichenko":false}}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false}}' \
     --plugin-dir "$plugin" --dangerously-skip-permissions "$2 $ask") >"$3" 2>&1 || true
   git -C "$work" log --reverse --format='> %s' --numstat --summary base..HEAD >"$work.commits"
 }
@@ -89,7 +89,7 @@ run() {
 search() {
   setup "${2%.json}" none
   (cd "${2%.json}" && claude -p --model "$1" --output-format json \
-    --settings '{"enabledPlugins":{"craft@kalinichenko":false}}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false}}' \
     --tools Read Grep Glob --dangerously-skip-permissions) >"$2" 2>&1 <<EOF || true
 Find the code in this project that already does each kind of work that the task below needs, and name each place with path:line. Change no file.
 The task: $call_task

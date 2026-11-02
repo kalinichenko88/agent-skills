@@ -36,37 +36,51 @@ skills load, but the rules do not.
 
 ## Your own files
 
-Your instruction files, skills and hooks can call a skill by its old name.
-Find them:
+Your instruction files, skills, hooks and memory can call a skill by its old
+name. This command lists them, in `~/.claude`, `~/.codex` and `~/.agents`,
+and in the folder where you run it. It follows links, and it skips the
+installed plugins, the worktrees and `.git`. Run it in each project where you
+use the plugin, or once in the folder that holds them all:
 
 ```sh
-grep -rln 'kalinichenko:' ~/.claude/CLAUDE.md ~/.claude/settings.json ~/.claude/skills ~/.claude/hooks ~/.codex/AGENTS.md ~/.codex/config.toml ~/.codex/skills ~/.agents CLAUDE.md AGENTS.md .claude .codex .agents 2>/dev/null
+find -L ~/.claude ~/.codex ~/.agents . \( -path "$HOME/.claude/plugins" -o -path "$HOME/.codex/plugins" -o -path "$HOME/.codex/.tmp" -o -name .git -o -name node_modules -o -name worktrees \) -prune -o -type f \( -name '*.md' -o -name '*.toml' -o -name 'settings*.json' -o -name '*.sh' \) -print0 2>/dev/null | xargs -0 grep -lE '(^|[^@])kalinichenko:' 2>/dev/null
 ```
 
-Run it in each project where you use the plugin. In each file that it lists,
-replace the old name:
+Read each file that it lists. A record of past work, as an old plan, can keep
+the old name. In each other file, replace the name. The command edits the
+file that a link points to, so a file from a dotfiles repository stays a link:
 
 ```sh
-perl -pi -e 's/kalinichenko:/craft:/g' <file>
+perl -pi -e 's/(^|[^@])kalinichenko:/$1craft:/g' "$(realpath <file>)"
 ```
+
+A project that turns the plugin on in its own `.claude/settings.json` has
+`"kalinichenko@kalinichenko": true` there. Change it to
+`"craft@kalinichenko": true`.
 
 ## Optional: the new URL
 
-To add the marketplace by its new URL, do it in place of the first command,
-before the install.
+The old URL works, so this is not needed. To add the marketplace by its new
+URL, run these commands in place of the steps for your tool above. The old
+plugin goes first, so that it does not stay behind when the marketplace is
+removed.
 
 Claude Code:
 
 ```sh
+claude plugin uninstall kalinichenko@kalinichenko
 claude plugin marketplace remove kalinichenko
 claude plugin marketplace add kalinichenko88/craft-skills
+claude plugin install craft@kalinichenko
 ```
 
 Codex:
 
 ```sh
+codex plugin remove kalinichenko@kalinichenko
 codex plugin marketplace remove kalinichenko
 codex plugin marketplace add kalinichenko88/craft-skills
+codex plugin add craft@kalinichenko
 ```
 
 ## Last

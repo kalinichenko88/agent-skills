@@ -117,7 +117,7 @@ JSON
 EOF
   chmod +x "$work.bin/codex"
   (cd "$work" && PATH="$work.bin:$PATH" CODEX_HOME="$work.codex" claude -p --output-format stream-json --verbose \
-    --settings '{"enabledPlugins":{"craft@kalinichenko":false},"language":"English"}' \
+    --settings '{"enabledPlugins":{"craft@kalinichenko":false,"kalinichenko@kalinichenko":false},"language":"English"}' \
     --plugin-dir "$root" --dangerously-skip-permissions "$task") >"$1" 2>&1
 }
 

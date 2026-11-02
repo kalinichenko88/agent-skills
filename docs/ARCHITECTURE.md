@@ -113,7 +113,10 @@ Where the split does not fit:
 
 - Most rules of the product are prose in `SKILL.md` and the `.md` files
   beside it, and the model runs them. No `Check:` line sees the prose;
-  `tests/rules_test.sh` checks a few of its sentences.
+  `tests/rules_test.sh` checks a few of its sentences. A form that no file
+  may hold, as an old skill name or a prompt in a heredoc, is one `grep`
+  in the `lint` target of the `Makefile`, as the form of a `CHANGELOG.md`
+  line is.
 - Inside a script, the roles are parts of the file, not folders. A script
   can take part of a role from a sibling in its folder, as `roadmap.sh`,
   `next.sh` and `plan.sh` take some reads from `read.sh` and the graph

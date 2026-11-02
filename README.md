@@ -56,9 +56,10 @@ pull request, and asks you whether to merge. Skills: github, review-loop.
 
 **Review a branch before the pull request.** Ask for a review, or run
 `/code-review`. The agent picks the level by the weight of the change and
-says why. Each round reads only the fixes of the round before. The loop
-stops at the first clean round, or after round 3. A security review and a
-summary follow. Skill: review-loop.
+says why. The first round reads the whole branch, and each later round reads
+only the fixes of the round before. The loop stops at the first clean round,
+or after round 3. A change to code then gets a security review, and every
+change gets a summary. Skill: review-loop.
 
 **Plan a milestone.** Ask the agent to plan the roadmap. It reads the open
 issues, proposes milestones, the order of the tasks and the links between
@@ -88,10 +89,11 @@ take next: you get one free task and the reason. Skill: roadmap.
 ### Required
 
 - **bash**: the hooks and every script. Without it, the rules do not load.
-- **git** and **awk**: the scripts of the github, roadmap, debt and
-  architecture skills.
-- **`gh`**, logged in: the github and roadmap skills. Without it, the github
-  skill skips each step on GitHub, and the roadmap skill stops. Both say so.
+- **git**: the scripts of the github, debt and architecture skills.
+- **awk**: the scripts of the github, roadmap, debt and architecture skills.
+- **`gh`**, logged in: every step on GitHub, in the github, roadmap, debt
+  and product skills. Without it, the github skill skips each such step, and
+  the roadmap skill stops. Both say so.
 
 ### Optional
 
@@ -101,8 +103,9 @@ take next: you get one free task and the reason. Skill: roadmap.
 - **`npx` or `bunx`**: the copies in the debt map (`clones.sh`), with a
   `TMPDIR` that other users cannot write, or none: then it uses `~/.cache`.
   Without them, the debt map has no copies, and the report says so.
-- **The Codex CLI**, logged in: the second reviewer of the review loop.
-  Without it, the review goes on without Codex, and the summary says why.
+- **The Codex CLI**, logged in: the second reader in the review loop, the
+  debt map and the product panel. Without it, each of them goes on with its
+  first reader, and says why.
 - **The ponytail plugin**: the over-engineering review and audit. Without
   it, those steps are skipped, and the summary says so.
 - **The superpowers plugin**: brainstorming, specs and plans. The rules work

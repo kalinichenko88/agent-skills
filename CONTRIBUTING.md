@@ -12,7 +12,10 @@ context. It checks that a checkout with `core.autocrlf=true`, the Git for
 Windows default, keeps every text file in LF, that the hook still gives the
 rules from a CRLF `rules.md`, that every script starts with
 `#!/usr/bin/env bash`, and that every `- ` line of `CHANGELOG.md` starts with
-its scope in parentheses. It also runs the github and roadmap skills' scripts
+its scope in parentheses. It fails on a skill name with the plugin's old
+prefix outside the history and the migration guide, and on a heredoc in the
+text of a skill or of `rules.md`: a prompt to Codex goes through a file. It
+also runs the github and roadmap skills' scripts
 against a fake `gh` that answers from payloads recorded
 in `tests/fixtures/github/` and `tests/fixtures/roadmap/`, all from public
 repositories, the debt skill's `measure.sh` on a repository the test builds,
