@@ -41,8 +41,9 @@ it: an invariant on it is review only.
   `tests/fixtures/<area>/` — recorded payloads and trees, for the tests
   that read them: `tests/<area>_<kind>_test.sh`, where `<kind>` is the
   last word before `_test.sh`, for example `scripts`, `checks` or
-  `fences`, and `tests/<area>_eval.sh`. So
-  `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`.
+  `fences`, and `tests/<area>_eval.sh` or `tests/<area>_<kind>_eval.sh`. So
+  `tests/review_loop_scripts_test.sh` reads `tests/fixtures/review_loop/`,
+  and `tests/github_scout_eval.sh` reads `tests/fixtures/github/`.
   A folder takes the underscores of the test's name, never the hyphen of
   a skill's name. An area whose tests read no recorded data has no folder.
 - `docs/<skill>/` — the pictures that a README links, and the brief they
@@ -68,7 +69,7 @@ Each skill is a module, by the area of work it serves.
 | Module | Folder | Its test, fixtures and pictures |
 | --- | --- | --- |
 | rules | `rules.md`, `hooks/` | `tests/rules_test.sh`, `tests/hooks_scripts_test.sh`, `tests/fixtures/hooks/` |
-| github | `skills/github/` | `tests/github_scripts_test.sh`, `tests/fixtures/github/`, `docs/github/` |
+| github | `skills/github/` | `tests/github_scripts_test.sh`, `tests/github_scout_eval.sh`, `tests/fixtures/github/`, `docs/github/` |
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
 | review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/review_loop_lens_eval.sh`, `tests/review_loop_lens_checks_test.sh`, `tests/fixtures/review_loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/debt_lens_eval.sh`, `tests/fixtures/debt/` |

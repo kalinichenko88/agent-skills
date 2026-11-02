@@ -225,8 +225,9 @@ verdict below and stays as it is. Say so.
      widened to the same area: its fix changes a file in the same module, or a
      file of the screen, window or command the task changes, or a test of that
      screen, window or command.
-   - **Stays open** — none of these. If the change moves the code it cites,
-     *Finishing* in `SKILL.md` corrects its text.
+   - **Stays open** — none of these. If it names a file that the change
+     touches, *Finishing* in `SKILL.md` checks its text against the merged
+     code and the decisions of the PR.
 4. **Check every other hit.** It rides along only if it passes all four,
    measured against the fix for the issue in hand alone:
    - **Same module** — it changes a file the task already changes, in any

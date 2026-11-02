@@ -139,21 +139,57 @@ the description says `Part of` and the merge closed anyway — `gh issue view 15
 --json state` shows it — is reopened, with a comment that names the PR; a
 duplicate still held for the reproduction is closed or commented on, by *Its
 duplicates close first* in `take-in.md`; and the same pass updates every
-sibling issue whose text the change just falsified.
+open issue on the changed code whose text the change just falsified.
 
-To find the citations that the change moved, run `collect.sh filing`
+*Finishing* reads the merged code in a new checkout, outside every checkout.
+The branch's worktree is not the merged code when the default branch moved
+after the branch's last push. Make an empty directory with `mktemp -d`, and
+give the path it prints to every command after it, as it is:
+
+```bash
+git fetch origin
+gh repo view --json defaultBranchRef --jq .defaultBranchRef.name
+git worktree add --detach <the mktemp path> origin/<the default branch>
+```
+
+Remove it when *Finishing* ends or stops, with
+`git worktree remove --force <the mktemp path>`.
+
+To find the open issues on the changed code, run `collect.sh filing`
 (`tracker.md`) with every file that `gh pr diff <PR> --name-only` prints, and
-the old path of each file the PR renamed. In Claude Code a scout then checks
-the open issues that have an entry in its file: `Job: citations.`, with a
-checkout of the merged code as `Tree:`. Check each citation that moved or is
-gone, and correct it.
+the old path of each file the PR renamed. A scout then checks the open issues
+that have an entry in the file of `collect.sh`. In Codex, the agent does this
+job itself (`tracker.md`). The job is `Job: citations.`, with that checkout as
+`Tree:`, and under it one `Decision <n>: <one line>` for each thing the PR
+decided. That is a rule, a behaviour or a contract that it changed, a
+choice that it made, a way that it rejected, a defect that it removed, and a
+number that it changed, as a count or a size that an issue can quote. Take
+them from the PR description with its `## Review`, and from each ADR or PDR
+that it adds or changes. Count again each number that the merged code holds:
+a description can be older than the last fix. When a check sets its limit,
+count it as that check counts it. For each changed file with a size limit of
+its own, as a cap on its characters that a test sets, or on the `debt` list
+of a size check, add a decision with its new size and the check's limit, also
+when the description does not give them.
+
+Check each citation that moved or is gone, and each sentence that the scout
+gives as false. Correct them by *Filing one next to an existing issue* in
+`filing.md`: the body says what was decided and in which PR, and a false title
+is rewritten too. A host's title still names every problem in it. A problem
+marked `Done in #<PR>.` needs no other correction, and an issue with a problem
+left in it stays open. A question that the PR answered is marked answered. A
+proposal that it ruled out is rewritten. An issue whose premise is gone closes
+with a comment that names the PR. A busy issue gets only the one-line comment
+and stays open, as *Filing one next to an existing issue* says. An issue that
+this task took in, took along or removes (`take-in.md`), and whose `status:`
+has no entry but `assigned to you`, is not busy here. The limit of two added
+findings does not stop a correction: it is for added findings.
 
 The last step reads the session for defects in this plugin: *The session at
 the end* in `filing.md`.
 
 **Cleanup.** Do it when the person chose merge and clean up, after
-*Finishing*: *Finishing* can use the worktree as its checkout of the merged
-code. Run in the branch's linked worktree, `gh pr merge --delete-branch`
+*Finishing*. Run in the branch's linked worktree, `gh pr merge --delete-branch`
 deletes only the remote branch: it prints `skipping local delete`, and the
 worktree and the local branch stay. Run in another checkout, `gh` 2.103
 removes that worktree with `git worktree remove` and the local branch with

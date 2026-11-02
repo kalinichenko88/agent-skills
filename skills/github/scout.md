@@ -19,7 +19,9 @@ Your prompt gives the file, the collector, and one job:
 - **citations** — the agent wants to know which `path:line` citations in
   issues still point at what the issue says. The prompt names the issues, or
   none for the open issues that have an entry (*Citations* below), and gives
-  `Tree:`, the directory with the code to check them in.
+  `Tree:`, the directory with the code to check them in. After a merge it
+  also gives `Decision <n>:` lines: then the agent also wants each sentence
+  that a decision of the merged pull request made false.
 
 ## The file
 
@@ -124,9 +126,9 @@ entry: the one under `== The issue`, or the one that starts `==> #<n>`.
 A citation is a path with a line or a range, as `src/server/log.ts:12-14`, or
 a line alone, as `:18`, after a path that its sentence names, or the line that
 opens its list. Check each one in the body; the comments are its history, and
-the agent corrects only the body. Do not check a citation that names a commit,
-as `at 3f2a1c9` or a link with a commit's hash, or one in a code block or a
-log: it tells where the code was then. Give it as `skipped`.
+the agent corrects only the title and the body. Do not check a citation that
+names a commit, as `at 3f2a1c9` or a link with a commit's hash, or one in a
+code block or a log: it tells where the code was then. Give it as `skipped`.
 
 1. Find the file in `Tree:`: the path as given, or, for a path without its
    directories, the files of that name: `git -C <tree> ls-files '*/log.ts'
@@ -140,12 +142,28 @@ log: it tells where the code was then. Give it as `skipped`.
 `git ls-files` and `git grep`, with `-C <tree>`, are the two commands this job
 adds. They only read. Run no other `git` command, and nothing else.
 
+After a merge, the prompt also gives one `Decision <n>: <one line>` for each
+thing that the merged pull request decided. Then read the title and the whole
+body of each issue against them, the sentences with no citation too. A
+sentence is false when one of these is true:
+
+- It waits on a choice or a question, and a decision made that choice or
+  answered it.
+- It proposes a way that a decision rejected, or a fix that the pull request
+  made in another way.
+- It states a rule, a behaviour or a number as true now, and a decision
+  changed it.
+- It reports a defect or a gap, and a decision removed it.
+
+A sentence that every decision leaves true is not false because it names the
+same file or the same topic.
+
 ## Return
 
 Your answer has two parts and nothing else: the groups of your job, then one
 count line. The agent that sent you makes every choice from them. For
-**citations**, the groups are one block for each issue that has a citation, in
-the shape at the end of this section. For
+**citations**, the groups are one block for each issue that has a citation or
+a false sentence, in the shape at the end of this section. For
 **filing**, the groups come under a `Finding n:` line for each finding, all
 five groups in this order, even for one finding. Put an issue under every
 finding it fits:
@@ -188,7 +206,8 @@ Each group under its name, then one entry per issue or pull request:
   only.
 - A pull request's first line is `PR #42 <title> open|merged|closed`.
 
-A block of **citations** gives each citation once, and one of four results:
+A block of **citations** gives each citation once, with one of four results,
+and each false sentence once:
 
 ```
 #41 The server's log grows without bound [enhancement] open
@@ -198,6 +217,7 @@ A block of **citations** gives each citation once, and one of four results:
   src/server/rotate.ts:5 — gone
     quote: "`rotate.ts:5` renames the log at midnight"
   src/server/log.ts:7 — skipped: names commit 3f2a1c9
+  false by decision 2: "Nothing limits the size of the log."
 ```
 
 - `moved to` gives the lines that show it now, in the form of the citation.
@@ -205,8 +225,12 @@ A block of **citations** gives each citation once, and one of four results:
 - `quote:` goes under each one that moved or is gone: the sentence that cites
   it.
 - `skipped` gives the reason: a commit, a code block or a log.
+- `false by decision <n>:` gives each false sentence once, quoted from the
+  title or the body, with the number of a decision that made it false. A
+  false sentence with a citation gets this line too.
 
-Write `none` under an empty group, or alone when no issue has a citation. End
-with one line: every `== end` line you read, and the numbers you added with
-`bodies`. For **citations**: the issues you read, and how many citations hold,
-moved, are gone and were skipped.
+Write `none` under an empty group, or alone when no issue has a citation or a
+false sentence. End with one line: every `== end` line you read, and the
+numbers you added with `bodies`. For **citations**: the issues you read, how
+many citations hold, moved, are gone and were skipped, and how many sentences
+are false.

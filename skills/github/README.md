@@ -55,8 +55,10 @@ time.
   after the merge, the drafts for the plugin's tracker.
 - **A task finishes with a true tracker.** The PR and every issue it closes
   are assigned to you. A PR that fixes only part of an issue keeps that issue
-  open. After the merge, the `path:line` citations in open issues are checked
-  against the new code.
+  open. After the merge, the open issues on the changed code are checked
+  against the new code and against what the PR decided: a moved citation, a
+  question that the PR answered, a proposal that it ruled out, a rule or a
+  count that it changed, a defect that it removed.
 - **Commits in one shape.** `type(scope): sentence`, at most five bullets
   under it, and no `Co-Authored-By:` trailer. A merge is a squash with one
   list for the whole branch.
@@ -90,7 +92,8 @@ tracker into one file, check an issue before it is taken, set up its
 worktree, add a finding to an issue, and keep an issue open when a PR fixes
 only part of it. In Claude Code a Haiku subagent reads a tracker file of
 20 KB or more, so the main model gets only the candidates. A Haiku subagent
-also checks the `path:line` citations in issues against the code.
+also checks the `path:line` citations in issues against the code, and after a
+merge, the issues' sentences against the decisions of the PR.
 
 ## Needs
 
