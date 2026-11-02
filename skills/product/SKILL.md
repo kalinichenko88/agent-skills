@@ -160,22 +160,9 @@ the **Readers disagree:** line says so, with each reader's side.
 **Fallbacks.** With no `codex` command, when `codex login status` fails, or
 when the run fails: Fable alone, and the report says so. When Codex returns
 no source URL, it had no search: the report says that its points rest on no
-web search.
-
-**Cost.** The full depth costs two readers with a web search. That is why it
-runs only at the moments of the table that say "full".
-
-## Models
-
-| Step | Who |
-| --- | --- |
-| The light depth | the main session |
-| The readers of the full depth | Fable, `model: "fable"`, and Codex |
-| The merge, the report and the store | the main session |
-
-Codex as the host has no subagent with a model and does not call itself:
-the main session does the full depth alone, with its own web search, and the
-report says so.
+web search. Codex as the host has no subagent with a model and does not call
+itself: the main session does the full depth alone, with its own web search,
+and the report says so.
 
 ## Other skills
 
