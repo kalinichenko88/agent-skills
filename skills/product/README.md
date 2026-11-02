@@ -22,9 +22,9 @@ ADRs.
   distribution, pricing, the money model, the hosting.
 
 Your own bug fix that changes no business logic gets no check, nor does
-someone else's change of documents only, a dependency bump, or a move that
-a script or a test proves unchanged. The text of a skill or a prompt counts as a change
-of behaviour.
+someone else's change of documents only, a dependency bump, or a move that a
+script or a test proves unchanged. The text of a skill or a prompt that the
+product ships or sends to a model counts as a change of behaviour.
 
 ## What you get
 

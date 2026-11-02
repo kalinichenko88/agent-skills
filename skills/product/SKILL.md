@@ -25,12 +25,13 @@ whether to build it, and what.
 
 One's own bug fix that changes no business logic gets no run, nor does someone
 else's change of documents only, a dependency bump or a move that a script or
-a test proves unchanged. The text of a skill or a prompt is no document here:
-it changes behaviour. `reader.md` and `store.md` sit next to this file, in
-this skill's base directory `<dir>`. Read `reader.md` before the first run: it
-holds the criteria, the checks and the shape of the report, for the readers of
-the panel and for the light depth. Read `store.md` before the first read or
-write of the store.
+a test proves unchanged. The text of a skill or a prompt that the product
+ships or sends to a model is no document here: it changes what the product
+does. `reader.md` and `store.md` sit next to this file, in this skill's base
+directory `<dir>`. Read `reader.md` before the first run: it holds the
+criteria, the checks and the shape of the report, for the readers of the panel
+and for the light depth. Read `store.md` before the first read or write of the
+store.
 
 **Light.** The main session alone, with no web search. It reads the index of
 `PRODUCT.md` and the PDRs that the task touches. The report has the verdict

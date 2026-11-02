@@ -30,10 +30,11 @@ each task stays as that skill sets it. In place of the final review of
 - **Worth first.** Before any round,
   [`kalinichenko:product`](../product/README.md) gives its verdict: on someone
   else's branch that changes code or behaviour, always (the text of a skill or
-  a prompt counts as behaviour); on yours when it adds a capability or changes
-  what the product does, and has no report yet. A capability that is not worth
-  it gets no review until you decide. A finding that shows the capability
-  gives nothing comes to you too, not as a rebuild.
+  a prompt that the product ships or sends to a model counts as behaviour); on
+  yours when it adds a capability or changes what the product does, and has no
+  report yet. A capability that is not worth it gets no review until you
+  decide. A finding that shows the capability gives nothing comes to you too,
+  not as a rebuild.
 - **Less code first.** When the
   [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed,
   its `ponytail-review` runs once before the first round, and its cuts are one
