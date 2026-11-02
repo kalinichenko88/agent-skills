@@ -67,6 +67,7 @@ Each skill is a module, by the area of work it serves.
 | review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/review_loop_lens_eval.sh`, `tests/review_loop_lens_checks_test.sh`, `tests/fixtures/review_loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/debt_lens_eval.sh`, `tests/fixtures/debt/` |
 | architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_since_test.sh`, `tests/architecture_fences_test.sh`, `tests/architecture_eval.sh`, `tests/architecture_checks_test.sh`, `tests/fixtures/architecture/` |
+| product | `skills/product/` | `tests/product_eval.sh`, `tests/product_checks_test.sh`, `tests/fixtures/product/` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
 | release, infographic | `.claude/skills/<name>/` | none |
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |
@@ -79,14 +80,16 @@ that another module names. One skill uses another by its name,
 a file or a section, grep the whole repository for the words of its name,
 and for a section also for its anchor, as `#the-ponytail-step`.
 
-**Direction in text.** `rules.md` names github, roadmap, review-loop and
-the two conventions. architecture names debt, github, roadmap and
+**Direction in text.** `rules.md` names github, product, roadmap, review-loop and
+the two conventions. architecture names debt, github, product, roadmap and
 react-conventions. debt names architecture, github, roadmap and
-review-loop. review-loop names architecture, debt and github. roadmap
-names github. react-conventions names typescript-conventions. architecture
-and debt name each other, and so do github and review-loop, and debt and
-review-loop. github, review-loop and the two conventions name the global
-prompt back. No cycle closes in code.
+review-loop. review-loop names architecture, debt, github and product.
+product names architecture, github, review-loop and roadmap. roadmap names
+github. react-conventions names typescript-conventions. architecture and
+debt name each other, and so do architecture and product, github and
+review-loop, debt and review-loop, and product and review-loop. github,
+review-loop and the two conventions name the global prompt back. No cycle
+closes in code.
 
 **Where a module's files are.** A module's test and fixtures are outside its
 folder, in `tests/`: the Makefile finds a test by `tests/<name>_test.sh`. So

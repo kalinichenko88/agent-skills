@@ -1,6 +1,7 @@
 # kalinichenko:review-loop
 
-A review that ends: rounds that read only the last fixes, a stop at the first
+A review that ends: a check of a capability's worth before any round, rounds
+that read only the last fixes, a stop at the first
 clean round, one last pass over the whole branch when the loop needed more
 than one round, Codex as a second reviewer for `xhigh` changes in Claude Code,
 a review of the tests for `high` and `xhigh` changes, a review against the
@@ -26,6 +27,14 @@ each task stays as that skill sets it. In place of the final review of
 
 ## What you get
 
+- **Worth first.** Before any round,
+  [`kalinichenko:product`](../product/README.md) gives its verdict: on someone
+  else's branch that changes code or behaviour, always (the text of a skill or
+  a prompt that the product ships or sends to a model counts as behaviour); on
+  yours when it adds a capability or changes what the product does, and has no
+  report yet. A capability that is not worth it gets no review until you
+  decide. A finding that shows the capability gives nothing comes to you too,
+  not as a rebuild.
 - **Less code first.** When the
   [ponytail](https://github.com/DietrichGebert/ponytail) plugin is installed,
   its `ponytail-review` runs once before the first round, and its cuts are one

@@ -10,7 +10,8 @@ prompt of engineering rules, plus the skills those rules lean on.
   acting on them and load the review loop in place of superpowers' review
   skills before the first review of a change and, in Claude Code, in place
   of the builder check of a superpowers spec and after the self-review of its
-  plan,
+  plan, load the product skill before the first edit of a feature and at a
+  fork in brainstorming,
   load the TypeScript conventions before the first write to a TypeScript file
   and the React conventions before the first write to a React component or
   hook. Outside this repository, report a defect in this plugin to its
@@ -47,6 +48,14 @@ prompt of engineering rules, plus the skills those rules lean on.
   the code, one way to do one kind of work, a split before a file grows past
   its limit, and numbered invariants in `docs/ARCHITECTURE.md` that a script
   checks.
+- **[`kalinichenko:product`](skills/product/README.md)** — a skeptical
+  analyst before the work: whether a task is worth doing, from who gains,
+  the money, the direction, the law and the client, with Fable and Codex
+  searching the web for a new feature, someone else's branch, or a decision
+  about the whole project. Another way,
+  a deferral or a close is a good answer, and you decide. Product decisions
+  go into `docs/PRODUCT.md` and `docs/pdr/`, and an accepted one is checked
+  again when a task touches it.
 - **[`kalinichenko:docker`](skills/docker/README.md)** — the newest stable
   image, pinned exactly, on the smallest base that runs the app.
 - **[`kalinichenko:typescript-conventions`](skills/typescript-conventions/README.md)**
@@ -235,9 +244,22 @@ the code that a task can use. Run it after a change to the description of
 checks in `make check`, on `tests/fixtures/architecture`: one recorded run,
 and a case for each verdict that the run does not show. It also runs the eval
 once with a stub `claude` in the place of the model.
+`tests/product_eval.sh` runs Opus on a site of 1000 brands, where a branch
+redirects 7 of them to an icon that the page's CSP blocks. It counts the
+runs that check the worth before a review, a feature, a fork in brainstorming
+and a teammate's branch, and the runs that check it again after a review
+finds that the feature shows nothing; it prints those texts, to count by hand
+the runs that rebuild the feature. Three more shapes count the runs that do
+not check it: a bug fix, a branch with a report, and a question that asks the
+person to describe. One counts the answers that record a decision in a
+project's own decisions file. The feature's shape needs a Codex login. Run it
+after a change to `skills/product`, to the start of a feature in
+`kalinichenko:architecture` or to *Worth first* of review-loop.
+`tests/product_checks_test.sh` runs its checks in `make check`, on recorded
+logs in `tests/fixtures/product/logs`.
 `tests/review_loop_lens_checks_test.sh` checks that the lens eval refuses a
 wrong call before it starts a paid run.
-The four `_eval.sh` scripts call the model, so their runs are not part of
+The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 
 The pictures in `docs/` are drawn by Codex from the brief next to them, as
