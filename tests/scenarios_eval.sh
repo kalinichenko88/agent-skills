@@ -93,7 +93,6 @@ issues() {
 value() { # value <flag>: the argument after <flag>
   for ((i = 0; i < ${#args[@]}; i++)); do [ "${args[i]}" != "$1" ] || { echo "${args[i + 1]}"; return; }; done
 }
-text() { local t f; t=$(value --body) f=$(value --body-file) c=$(value --comment); [ -z "$f" ] || t=$(cat "$f"); echo "${t:-$c}"; }
 case "$1 $2" in
   'api repos/{owner}/{repo}') out "$(jq -c '{full_name: .repo, default_branch: "main", visibility: "public"}' "$state")" ;;
   'api user') out "$(jq -c '{login: .me}' "$state")" ;;
@@ -141,14 +140,6 @@ case "$1 $2" in
       [[ $* != *--checkout* ]] || { git fetch -q origin "$b" && git checkout -q -b "$b" "origin/$b"; }
     fi
     ;;
-  'issue close')
-    dup=$(value --duplicate-of) reason=$(value --reason) c=$(text)
-    save --argjson n "$num" --arg dup "${dup#\#}" --arg reason "$reason" --arg c "$c" --arg me "$me" \
-      '(.issues[] | select(.number == $n)) |= (.state = "CLOSED" | .stateReason = (if $dup != "" then "DUPLICATE"
-        elif $reason == "not planned" then "NOT_PLANNED" else "COMPLETED" end) | .duplicateOf = ($dup | tonumber? // null)
-        | .comments += (if $c == "" then [] else [{author: $me, body: $c}] end))'
-    ;;
-  'issue comment') save --argjson n "$num" --arg c "$(text)" --arg me "$me" '(.issues[] | select(.number == $n) | .comments) += [{author: $me, body: $c}]' ;;
   'pr list') out "$(jq -c .prs "$state")" ;;
   'repo view') out "$(jq -c '{nameWithOwner: .repo, visibility: "PUBLIC", defaultBranchRef: {name: "main"}}' "$state")" ;;
   'label list') out '[{"name":"bug"},{"name":"debt"},{"name":"enhancement"}]' ;;
