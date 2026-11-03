@@ -73,8 +73,9 @@ subagent reads the code to find which tasks would change the same functions.
 ## Needs
 
 `bash`, `awk` and `gh`, authenticated against a GitHub remote. The board also
-needs the `project` scope on the `gh` token. Run once on each machine:
+needs the `project` scope on the `gh` token. Run once on each machine, in a
+terminal of your own, not through `!` in Claude Code:
 
 ```sh
-gh auth refresh -s project
+gh auth refresh -h github.com -s project
 ```

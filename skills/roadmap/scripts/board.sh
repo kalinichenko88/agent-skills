@@ -10,7 +10,8 @@
 # owner's. It takes no project of another title: views would land on a board
 # that someone else owns. Running it again only adds what is missing.
 #
-# Needs the project scope on the gh token: gh auth refresh -s project.
+# Needs the project scope on the gh token. Add it once, in a terminal of your
+# own, not through ! in Claude Code: gh auth refresh -h github.com -s project.
 # DRY_RUN=1 prints the commands that would write, and runs none.
 # Needs only bash, gh and awk: every filter of gh's JSON is gh's own --jq.
 
