@@ -107,11 +107,13 @@ EOF
 # out of the folder, as `cd /tmp && cat > a.mjs`, is in /tmp too.
 # ponytail: a Bash call is a write when one of its commands, split at `&&`,
 # `||`, `;`, `|` and a new line, has `>` (not `=>` or `->`), `tee` or
-# `tee -a`, then spaces, a quote or none, then such a path with a dot and
-# letters, as `cat > a.ts <<'EOF'`. The text of a heredoc is left out first,
-# as a brief that quotes `> src/a.ts`. A `cd` to a path that starts with `/`,
-# `~` or `$` leaves the folder for the commands after it, unless the path has
-# the folder's name. `cp`, `mv` and `sed -i` are not writes.
+# `tee -a`, then spaces or none, then such a path with a dot and letters, as
+# `cat > a.ts <<'EOF'`. The text of a heredoc is left out first. A `cd` to a
+# path that starts with `/`, `~` or `$` leaves the folder for the commands
+# after it, unless the path has the folder's name. A path in quotes, or
+# through a variable as `C=src && cat > $C/a.ts`, is out of the folder: no
+# recorded run wrote into it only so. `cp`, `mv` and `sed -i` are not writes. A Write call with no path, as the trimmed runs of the fixture have,
+# is a write into the folder.
 events() {
   jq -rR --arg name "$(basename "$1" .jsonl)" 'def here: test("/" + $name + "([/ \"'\'';&|)]|$)");
     def ours($away): if test("^([/~$]|\\.\\.)") then here else $away | not end;
@@ -121,7 +123,7 @@ events() {
           ($part | capture("cd +[\"'\'']?(?<to>[^ \"'\'')]*)").to) as $to
           | if $to | test("^[/~$]") then .away = ($to | here | not) else . end
         else . as $s | .write = ($s.write or any($part
-          | scan("(?:(?<![=-])>|\\btee(?: -a)?) *[\"'\'']?([^ ;&|<>\"'\'']*\\.[a-z]+)\\b")[0]; ours($s.away))) end)
+          | scan("(?:(?<![=-])>|\\btee(?: -a)?) *([^ ;&|<>\"'\'']*\\.[a-z]+)\\b")[0]; ours($s.away))) end)
       | .write;
     fromjson? | select(.type == "assistant") | .parent_tool_use_id as $parent
     | .message.content[]
