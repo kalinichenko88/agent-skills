@@ -19,7 +19,7 @@ Not covered yet:
 - a linked branch in another repository only, and a branch in the
   workspace that has the name of the new branch;
 - a read of the task that fails after the check, and an earlier run on the
-  same task that is still open.
+  same task that still waits.
 
 ## A free task
 
@@ -113,12 +113,13 @@ Never:
 Given:
 - task #91 is open, assigned to the person, with no linked branch and no
   pull request
-- the run asked whether the work on #91 runs somewhere else or continues in
-  this run
+- an earlier run asked whether the work on #91 runs somewhere else or
+  continues in this run
 When: the person answers that it continues in this run
 Then:
 - #91 stays assigned to the person
 - a branch for #91 exists, as in A free task
+- that branch is made from the default branch
 - that branch is linked to #91
 Never:
 - #91 gets a second linked branch
@@ -128,8 +129,8 @@ Never:
 Given:
 - task #91 is open, assigned to the person, with no linked branch and no
   pull request
-- the run asked whether the work on #91 runs somewhere else or continues in
-  this run
+- an earlier run asked whether the work on #91 runs somewhere else or
+  continues in this run
 When: the person answers that it runs somewhere else
 Then:
 - the run stops

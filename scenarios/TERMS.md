@@ -22,10 +22,10 @@ column gives the name that a person who reads Russian sees.
 | pull request | A request to merge a branch into the default branch. It closes a task when it names the task with a closing word. | pull request | merge request, PR |
 | assignee | An account that a task names as the one who does it. A task is assigned to the person when the person's account is an assignee. | исполнитель | owner |
 | busy | A task with an assignee, a linked branch or an open pull request that closes it. | занята | taken, claimed |
-| duplicate | A task that reports the same thing as another task, about the same place, in the same words or not. When it closes, it closes as a duplicate of the other task, and the other task stays open. | дубликат | copy |
+| duplicate | A task that reports the same thing as another task, about the same place, in the same words or not. When it closes, it closes as a duplicate of the other task, and the other task stays as it is. | дубликат | copy |
 | comment | A text added to a task after its own text. | комментарий | note, reply |
 | workspace | The place where the run reads and changes the code: a copy of the repository with its branches. | рабочая копия | checkout, worktree, clone |
-| the work | What a task asks for: the changes in the workspace after the run takes the task. | работа | implementation |
+| the work | What a task asks for: the changes to the code in the workspace. The check of the task, its assignee and its branch are not the work. | работа | implementation |
 | the run | The handling of one message of the person, until it waits or stops. The run that takes a task goes on into the work. | прогон | session, turn |
 | message | One text that the run gives the person. The person reads the messages of a run in their order. | сообщение | reply, output |
 | gist | What a message tells about a task: its id, its title as the task has it, and two or three sentences in the person's language on what is wanted and what must be true for the work to be done. | суть | summary |

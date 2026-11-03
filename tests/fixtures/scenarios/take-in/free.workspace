@@ -1,3 +1,6 @@
 docs/91-fix-install-command
 main
-2
+worktrees 2
+head main
+main 1
+stash 0
