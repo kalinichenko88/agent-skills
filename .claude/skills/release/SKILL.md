@@ -60,6 +60,8 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    | --- | --- |
    | `skills/<name>/`, and `docs/<name>/` when `skills/<name>/` exists | the skill without `-conventions`: `typescript` |
    | `.claude/skills/<name>/` | `<name>`: `release` |
+   | `scenarios/<name>/` | the skill `<name>`: `github` |
+   | any other file in `scenarios/` | `scenarios` |
    | `rules.md` | `rules` |
    | `hooks/` | `hooks` |
    | `.github/workflows/` | `ci` |

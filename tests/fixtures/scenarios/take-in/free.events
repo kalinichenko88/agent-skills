@@ -1,0 +1,29 @@
+Skill	craft:github
+Bash	cd <work>; S=<craft>/skills/github; cat $S/take-in.md; ls $S/scripts; git remote -v; gh auth status 2>&1 | head -5; ls -la; cat README.md
+text	The remote is a local path, not GitHub. Let me run the check anyway.
+Bash	cd <work>; bash <craft>/skills/github/scripts/take-in-check.sh 91 2>&1; echo "exit $?"; gh issue view 91 --json title,body 2>&1 | head
+think	I found a typo in the README — `npm instal shop` should be `npm install shop` — and I'll fix it now.  
+Bash	S=<craft>/skills/github; sed -n 1,80p $S/tracker.md
+Bash	cd <work>; S=<craft>/skills/github; gh label list 2>&1 | head; bash $S/scripts/collect.sh take-in 91 bug,debt README.md "npm instal" install 2>&1 | tail -5
+Bash	cat <tmp>/collect.FARL4H
+text	No duplicates, neighbours, or linked work. Next I set up the worktree.
+Bash	cd <work>; S=<craft>/skills/github; bash $S/scripts/worktree.sh 91 docs/91-fix-install-command 2>&1; echo "exit $?"
+ToolSearch	
+EnterWorktree	
+text	The issue cites no `path:line`, so there is nothing to re-check. Now the fix:
+Bash	sed -i '' 's/npm instal shop/npm install shop/' README.md && cat README.md && git diff --stat; ls -a; cat package.json Makefile 2>/dev/null
+text	The repository has no check command: no `package.json`, no `Makefile`, no CI. The only file is `README.md`. Now the review step:
+Skill	craft:review-loop
+think	Since this is documentation-only work, I'll run one review-subagent round without a full code review, Codex check, or security review, then commit without a Co-Authored-By trailer per the user's rules.  
+Bash	git commit -qam "docs: fix the npm install command in the README" && git log --oneline -2 && git diff $(git merge-base origin/main HEAD)..HEAD
+Bash	git commit -qam "docs: fix the npm install command in the README"
+Bash	git diff origin/main...HEAD
+Agent	Review README install fix
+subBash	git diff origin/main...HEAD; git ls-files; cat -n README.md; grep -rniE "instal|npm|yarn|pnpm" --exclude-dir=.git . | head -50
+think	Round 1 found no defect, and I'm setting aside the reviewer's note about confirming the `shop` package name since that's outside this task's scope. Next I'll check visibility and PR language before pushing and opening the pull request.  
+Bash	gh repo view --json visibility,nameWithOwner; gh pr list --state merged --limit 5 --json title
+Bash	git push -u origin docs/91-fix-install-command 2>&1 | tail -3
+Bash	gh issue view 91 --json assignees; gh pr create --assignee @me --base main --head docs/91-fix-install-command --title "docs: fix the npm install command in the README" --body "$(cat <<'EOF' Closes #91  The README told the reader to run `npm instal shop`. npm has no `instal` command, so the command failed. The README now says `npm install shop`.  ## Review  - **Change:**   - Fix the install command in `README.md`: `npm instal shop` → `npm install shop` - **Rounds:** Worth first: skipped (documents only). ponytail-review: skipped (documents only; not installed). Walk: skipped (documents only). Round 1: review subagent on `origin/main..HEAD`, 0 findings confirmed. Architecture review: did not run (no architecture file or ADR folder); `craft:architecture` can write the first file. Codex read: did not run (a README is not skill, prompt or spec text). Last pass: documents only. Security review: documents only. Check: the repository has no check command (no `package.json`, `Makefile` or CI); nothing to run. - **Decisions:** none. - **Fixed:** `README.md`, the install command. - **Declined:** "the package name `shop` cannot be confirmed": no `package.json` exists to check it against, and the issue sets `npm install shop` as its target. - **Filed:** none. - **Docs:** `README.md` is the change itself.  🤖 Generated with [Claude Code](https://claude.com/claude-code) EOF )" 2>&1 | tail -2
+Bash	gh pr list --head docs/91-fix-install-command --json number,url,assignees
+Bash	gh pr list --state all --json number,url,headRefName,assignees; gh pr view docs/91-fix-install-command --json number,url,state 2>&1
+text	I could not confirm that the pull request exists, so I am not asking whether to merge.  **#91 — README: the install command says npm instal**  **What I did** - The issue is assigned to `kim`. It has no duplicates, no related open bugs or debt, and no linked work. - I fixed it in the worktree `.claude/worktrees/docs/91-fix-install-command`, on the branch `docs/91-fix-install-command`. - `README.md:3` now says `npm install shop`. The commit is `2e02a51`, "docs: fix the npm install command in the README". It has no `Co-Authored-By:` trailer, because your global rules forbid one. - I pushed the branch to `origin`.  **Review** - This is a documents-only change, so it got one round. A review subagent read the diff and confirmed no defect. - It asked whether the package is really named `shop`. I declined that note: no `package.json` exists to check the name against, and the issue asks for exactly `npm install shop`. - There was no Codex read and no security review. A README change does not get them.  **Check:** the repository has no check command. It has no `package.json`, no `Makefile` and no CI. `README.md` is its only file, so nothing ran.  **Pull request: not confirmed.** I ran `gh pr create` with `--assignee @me` and `Closes #91`, but it returned no PR URL. `gh pr list --state all` then returned an empty list. `gh pr view` on the branch failed with `fake gh: no answer for: pr view ...`. The `gh` on this machine seems to be a stub, and `origin` is a local directory, not GitHub.  **Docs:** the only document affected is `README.md`, which is the change itself.  To finish, open the PR from the pushed branch in a working `gh` setup. After that I can ask the merge question.

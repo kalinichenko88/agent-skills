@@ -31,7 +31,7 @@ The first user is the author.
 ## Constraints
 
 - **Law and licence:** MIT. Recorded payloads in `tests/fixtures/` come only
-  from public repositories.
+  from public repositories, or from a fake tracker that a test builds.
 - **The hosts:** Claude Code caps hook context at 10,000 characters, and
   `rules.md` loads through a hook. Codex runs plugin hooks only after the
   person trusts them.
