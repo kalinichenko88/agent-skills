@@ -153,7 +153,8 @@ issue. Cleaner than you found it is not the same as rebuilt.
 Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
 `.cts`) in a session, invoke the `craft:typescript-conventions` skill.
 Before the first write or edit to a React component or hook, invoke
-`craft:react-conventions` too. A subagent invokes them itself.
+`craft:react-conventions` too. A subagent invokes them itself. No pattern to
+copy and no rule to keep the work short skips these calls.
 
 ## GitHub (always)
 
