@@ -99,26 +99,29 @@ EOF
 # events <log>: the Skill calls and the writes of the session and its
 # subagents in order, one a line, as the skill's name for a Skill call and
 # Write for a write, and Block for a text of the main session that holds the
-# block of *The start of a feature*. A write is a write into the session's
-# tree, its cwd: the brief
-# that craft:product writes into a scratchpad or a temporary folder before
-# its report is not one.
-# ponytail: a Bash call is a write when it has `>`, `tee` or `tee -a`, then
-# spaces or none, then a path with a dot and letters, as `cat > a.ts <<'EOF'`,
-# and it has no `cd` out of the tree. A path that starts with `/`, `$`, `~`
-# or `..` is out of the tree, unless it starts with the cwd. `cp`, `mv` and
-# `sed -i` are not writes.
+# block of *The start of a feature*. A write goes into the run's folder, as
+# in tests/product_eval.sh: it has a relative path, or a path with the
+# folder's name, as /call-line-1/. A file in a scratchpad or in /tmp, as the
+# brief that craft:product writes before its report, is no write of the work,
+# and neither is a path that starts with `..`, as `codex … > ../../out.md`. A
+# relative path after a `cd` out of the folder, as `cd /tmp && cat > a.mjs`,
+# is in /tmp too.
+# ponytail: a Bash call is a write when its first line has `>` (not `=>` or
+# `->`), `tee` or `tee -a`, then spaces, a quote or none, then such a path
+# with a dot and letters, as `cat > a.ts <<'EOF'`. The lines after the first
+# are a heredoc's text. `cp`, `mv` and `sed -i` are not writes.
 events() {
-  jq -nrR '[inputs | fromjson?] | (map(select(.type == "system" and .subtype == "init"))[0].cwd // "") as $cwd
-    | def inside: ltrimstr("\"") | (test("^([/$~]|\\.\\.)") | not) or . == $cwd or ($cwd != "" and startswith($cwd + "/"));
-    .[] | select(.type == "assistant") | .parent_tool_use_id as $parent
+  jq -rR --arg name "$(basename "$1" .jsonl)" 'def here: test("/" + $name + "([/ \"'\'';&|)]|$)");
+    def ours($away): if test("^([/~$]|\\.\\.)") then here else $away | not end;
+    fromjson? | select(.type == "assistant") | .parent_tool_use_id as $parent
     | .message.content[]
     | if .type == "tool_use" then
         if .name == "Skill" then .input.skill
-        elif (.name | test("^(Write|Edit|MultiEdit|NotebookEdit)$")) and (.input.file_path // "" | inside)
-          or (.name == "Bash"
-            and any(.input.command | scan("(?:>|\\btee(?: -a)?) *([^ ;&|<>]*\\.[a-z]+)\\b")[0]; inside)
-            and all(.input.command | scan("\\bcd +([^ ;&|)]+)")[0]; inside)) then "Write"
+        elif (.name | test("^(Write|Edit|MultiEdit|NotebookEdit)$"))
+          and ((.input.file_path // .input.notebook_path // "") | ours(false))
+          or (.name == "Bash" and (.input.command | split("\n")[0]
+            | (test("\\bcd +[\"'\'']?[/~$]") and (here | not)) as $away
+            | [scan("(?:(?<![=-])>|\\btee(?: -a)?) *[\"'\'']?([^ ;&|<>\"'\'']*\\.[a-z]+)\\b") | .[0]] | any(ours($away)))) then "Write"
         else empty end
       elif .type == "text" and $parent == null
         and (.text | contains("**Problem:**") and contains("**Touches:**")) then "Block"
