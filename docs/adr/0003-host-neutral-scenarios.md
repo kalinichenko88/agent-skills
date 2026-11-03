@@ -53,8 +53,8 @@ We will keep the scenarios in `scenarios/`, one file for each flow, at
 `scenarios/<skill>/<flow>.md`, in the shape that `scenarios/README.md` gives.
 A scenario takes the words for a thing that an implementation keeps in its
 own way from `scenarios/TERMS.md`, and names no agent host, no command and
-no subagent. craft is one implementation of
-them, and `tests/scenarios_eval.sh` checks craft against three of them. Where the
+no subagent. craft is one implementation of them, and
+`tests/scenarios_eval.sh` checks craft against three of them. Where the
 README of a skill or a picture differs from a scenario, the scenario holds.
 The conventions skills get no scenarios: their text depends on no host
 already.
@@ -67,7 +67,7 @@ tracker, the branches, the workspace, the tool calls and the messages. 15 of
 the 17 checks gave a verdict. A message that ends a run was in its log as
 text. A message that comes before a tool call can reach the log only as
 thinking in other words, without the task's id and title, as #206 found.
-Then the log cannot show what it told: the two checks of the gist of the
+In that case the log cannot show what it told: the two checks of the gist of the
 free task gave no verdict.
 
 ## Consequences

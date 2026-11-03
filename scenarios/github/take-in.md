@@ -102,7 +102,7 @@ Then:
 - the first message about #91 tells its gist
 - the person is told that #91 is assigned to the person already
 - the person is asked whether the work on #91 runs somewhere else or
-  continues in this run
+  continues here
 - the run waits
 Never:
 - a branch for #91 is created
@@ -114,8 +114,8 @@ Given:
 - task #91 is open, assigned to the person, with no linked branch and no
   pull request
 - an earlier run asked whether the work on #91 runs somewhere else or
-  continues in this run
-When: the person answers that it continues in this run
+  continues here
+When: the person answers that it continues here
 Then:
 - #91 stays assigned to the person
 - a branch for #91 exists, as in A free task
@@ -130,7 +130,7 @@ Given:
 - task #91 is open, assigned to the person, with no linked branch and no
   pull request
 - an earlier run asked whether the work on #91 runs somewhere else or
-  continues in this run
+  continues here
 When: the person answers that it runs somewhere else
 Then:
 - the run stops
@@ -184,7 +184,7 @@ Then:
 - the person is told that #91 is assigned to the person
 - the person is told that `fix/91-typo` is linked to #91
 - the person is asked whether the work on #91 runs somewhere else or
-  continues in this run
+  continues here
 - the run waits
 Never:
 - a branch for #91 is created
