@@ -186,7 +186,7 @@ check 'prose that starts with debt or in' "0 $(printf '%s\n' 'I-1 PASS' '  debt 
 # A line with no indent ends the invariant. A Check: or debt line there, or
 # a list line right after a Check: line, which Markdown reads as its wrap,
 # cuts that invariant short: the run leaves it out, and checks the next one.
-# After a blank line, such a line is prose.
+# After a blank line, a list line is prose.
 for c in 'Check: grep `fetch\(` in `src/`.|a Check: line outside an invariant, after I-1: Check: grep `fetch\(` in `src/`.' \
   '  Check: grep `fetch\(` in `src/`.;debt `src/a.ts`.|a debt line outside an invariant, after I-1: debt `src/a.ts`.' \
   '  Check: grep `fetch\(` in `src/`;`lib/`.|I-1: cannot read: `lib/`.' \
@@ -215,12 +215,12 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` except `
 run "$empty"
 check 'an except path over the whole check' '2 invariants.sh: I-1: no code file under src/' "$code $err"
 # A finding cites an invariant by its number, so the run leaves out both
-# invariants with one number.
-printf '%s\n' '- **I-1.** No fetch.' '- **I-1.** No fetch again.' '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' \
-  >"$empty/docs/ARCHITECTURE.md"
+# invariants with one number. It still names each line that it cannot read.
+printf '%s\n' '- **I-1.** No fetch.' '- **I-1.** No fetch again.' '  Check: grep fetch in src/' '- **I-2.** No fetch.' \
+  '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'two invariants with one number' "2 invariants.sh: I-1: a second invariant with this number, at line 2
-$(printf '%s\n' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
+check 'two invariants with one number' "2 $(printf '%s\n' 'invariants.sh: I-1: a second invariant with this number, at line 2' \
+  'invariants.sh: I-1: cannot read: Check: grep fetch in src/' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
 $out"
 
 # An empty code file is a code file: a files check counts it.

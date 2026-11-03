@@ -26,8 +26,8 @@
 # that cannot run, or a line that the script cannot read in the file it
 # checks, stops only its invariant: it gets no line, the causes go to stderr,
 # and the other checks run. A code fence that the script cannot read stops
-# each invariant from that fence on. Any other cause, as a wrong call, stops
-# the run before the first check, with exit 2.
+# the invariant that holds it and each one after it. Any other cause, as a
+# wrong call, stops the run before the first check, with exit 2.
 #
 # Needs only bash, git and awk, and the debt skill's data.ere beside this skill.
 

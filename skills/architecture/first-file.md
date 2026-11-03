@@ -132,8 +132,9 @@ longer, with nothing but spaces or tabs after it, at the same column as the
 opening line. A fence at column 0 also closes at such a line indented 1 to 3
 columns more. A tab moves the text to the next multiple of 4 columns.
 
-A fence stops the script there in three cases: it checks only the invariants
-before the fence. The lines that the fence hides could hold a check.
+A fence stops the script there in three cases: it does not check the
+invariant that holds the fence, or any invariant after it. The lines that
+the fence hides could hold a check.
 
 - It does not close.
 - It is indented, and a line that could close it is indented 1 to 3 columns
@@ -187,8 +188,7 @@ before the fence. The lines that the fence hides could hold a check.
   - a `Check:` or `debt` line under no `- **I-<n>.**` line, as one with no
     indent or under a `*` bullet: the invariant before it is not checked.
 
-  Two invariants with one number are not checked, both of them. A line with
-  no indent after a blank line is prose.
+  Neither of two invariants with one number is checked.
 
   Other prose under an invariant is not read. A line is a `debt` line only
   when a path in backticks comes right after `debt`, with only spaces or

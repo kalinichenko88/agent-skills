@@ -60,6 +60,11 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```te
   '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence at the start of a line' '2 invariants.sh: a debt line outside an invariant, after I-1: debt `src/a.ts`.' "$code $err$out"
+# A line after a fence does not continue the Check: line before the fence.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```text' 'x' '```' '`src/a.ts` is old.' \
+  >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'a list line after a fence' "1 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
 # A fence closes only at a line of its own character, as long or longer, with
 # nothing but spaces or tabs after it. One that never closes would hide each
 # invariant below it, so the run checks only the invariants above it.
@@ -74,8 +79,8 @@ check 'a fence that does not close' "2 invariants.sh: a code fence that does not
 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
 $out"
 # A non-blank line indented less than a fence, before its closing line, as at
-# the end of the list item that holds the fence, stops the run: the lines that
-# the fence hides could hold a check.
+# the end of the list item that holds the fence, stops the read there: the
+# lines that the fence hides could hold a check.
 printf '%s\n' '- **I-1.** No fetch. Example:' '  ```ts' '  fetch(u)' '  Check: grep `fetch\(` in `src/`.' \
   '- **I-2.** Other.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
@@ -93,7 +98,7 @@ check 'a closing line indented less than its fence' \
   '2 invariants.sh: a code fence at line 2 does not close before line 4' "$code $err"
 # A closing line closes an indented fence only at the fence's own indent;
 # one indented 4 or more past it is a line of code. One indented 1 to 3 past
-# it stops the run: Markdown counts those 3 from the margin of the list item,
+# it stops the read: Markdown counts those 3 from the margin of the list item,
 # which the script does not know.
 printf '%s\n' '- **I-1.** An example.' '  ```' '      ```' '  Check: grep `fetch\(` in `src/`.' '     ```' \
   '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"

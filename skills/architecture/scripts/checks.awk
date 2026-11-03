@@ -22,8 +22,8 @@ function stop(msg) {
   stopped = 1
   exit 2
 }
-# A line can be wrong in several places: only the first one is said.
-function bad() { if (!(id in gone)) drop(id, id ": cannot read: " line) }
+# A line can be wrong in several places: it is said once.
+function bad() { if (said != NR) drop(id, id ": cannot read: " line); said = NR }
 # Splits s into tok[1..ntok]: a `quoted` item, or a bare word. Spaces and
 # commas separate them; a last bare "." ends the line.
 function tokenize(s,   i, rest) {
@@ -103,9 +103,9 @@ fence != "" {
 # A line that starts with neither a space nor a tab ends the invariant.
 /^[^ \t]/ { flush() }
 # A run of backticks with another backtick later on the line is inline
-# code, not a fence.
+# code, not a fence. A line after a fence does not continue the line before.
 line ~ /^(```+[^`]*$|~~~)/ {
-  indent = ind; opened = NR
+  indent = ind; opened = NR; more = 0
   match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH)
   next
 }
