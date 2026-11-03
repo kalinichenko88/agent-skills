@@ -9,10 +9,8 @@ The plan lives in GitHub: milestones, "blocked by" links and sub-issues.
 Scripts read it at the moment of the question, so the answer cannot be out of
 date. Nothing is kept in the repository. Everything here needs `gh`
 authenticated against a GitHub remote; `board.sh` also needs the `project`
-scope on the token. The person adds it once, in a terminal of their own:
-`gh auth refresh -h github.com -s project`. Not through `!` in Claude Code:
-`!` runs the command with no terminal. Where `gh` does not work, say so and
-stop.
+scope on the token, as *The board* says. Where `gh` does not work, say so
+and stop.
 
 | Moment | What must happen | Read first |
 | --- | --- | --- |
@@ -179,3 +177,12 @@ of the open issues that nobody has, and *By milestone*, a table. It ends with
 two settings the API cannot make; pass them to the person. Run it again at
 any time: it only adds what is missing. The *Unassigned* view does not know
 blockers or sub-issues, so it is not the list of free tasks: `next.sh` is.
+
+When `board.sh` stops on the `project` scope, give the person this command,
+not the one in the message of `gh`. The person runs it once on each machine,
+in a terminal of their own, not through `!` in Claude Code: `!` runs it with
+no terminal. On GitHub Enterprise, its host goes in place of `github.com`.
+
+```bash
+gh auth refresh -h github.com -s project
+```

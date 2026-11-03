@@ -79,3 +79,5 @@ terminal of your own, not through `!` in Claude Code:
 ```sh
 gh auth refresh -h github.com -s project
 ```
+
+On GitHub Enterprise, its host goes in place of `github.com`.
