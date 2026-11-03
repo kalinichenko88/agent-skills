@@ -200,13 +200,16 @@ in the worktree. When the branch has no
 linked worktree, `gh` deletes the local branch itself, and nothing is left to
 clean up.
 
-First leave the worktree. In Claude Code, a session that `EnterWorktree`
-moved there leaves with `ExitWorktree` and `keep`: `remove` does not remove a
-worktree entered by its path. A session that started in the worktree, as with
-`claude --worktree` or `codex --worktree`, cannot leave it: give the person
-the two commands below, to run after the session ends. In Codex, the main
-checkout is the `workdir` of both commands. Run them from the main checkout,
-the first line of `git worktree list`:
+First leave the worktree, the way the session came in. In Claude Code, a
+session that `EnterWorktree` moved there leaves with `ExitWorktree` and
+`keep`: `remove` does not remove a worktree entered by its path.
+`ExitWorktree` does nothing for a session that moved there in any other way,
+as with `cd` after `worktree.sh`: that session runs both commands itself,
+each with `git -C <the main checkout>`. Only a session that started in the
+worktree, as with `claude --worktree` or `codex --worktree`, cannot leave it:
+give the person the two commands below, to run after the session ends. In
+Codex, the main checkout is the `workdir` of both commands. Run them from the
+main checkout, the first line of `git worktree list`:
 
 ```bash
 git worktree remove <path>
