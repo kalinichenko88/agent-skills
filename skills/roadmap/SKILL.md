@@ -178,10 +178,11 @@ two settings the API cannot make; pass them to the person. Run it again at
 any time: it only adds what is missing. The *Unassigned* view does not know
 blockers or sub-issues, so it is not the list of free tasks: `next.sh` is.
 
-When `board.sh` stops on the `project` scope, give the person this command,
-not the one in the message of `gh`. The person runs it once on each machine,
-in a terminal of their own, not through `!` in Claude Code: `!` runs it with
-no terminal. On GitHub Enterprise, its host goes in place of `github.com`.
+When `board.sh` stops on the `project` or `read:project` scope, give the
+person this command, in place of what the message of `gh` says to do. The
+person runs it once on each machine, in a terminal of their own, not through
+`!` in Claude Code: `!` runs it with no terminal. On another host, as GitHub
+Enterprise Server, that host goes in place of `github.com`.
 
 ```bash
 gh auth refresh -h github.com -s project
