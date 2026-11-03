@@ -7,8 +7,8 @@
 # src/api/client.ts read the token from localStorage. call-none-1 keeps that
 # src/api/client.ts, which calls fetch and which the wrapper check must pass.
 # The runs numbered 2 and 3 change a recorded run into a case that a check
-# must pass or must fail. An empty log is a run with no tool call: each check that reads
-# logs counts it as a run without what it counts.
+# must pass or must fail. An empty log is a run with no tool call: each check
+# that reads logs counts it as a run without what it counts.
 #   call-none-2    the block before the first write; the reports call fetch
 #   call-files-2   no tree and an empty log: a run that wrote no file
 #   call-files-3   no tree: a subagent's Bash call that runs `cd /tmp`, writes
