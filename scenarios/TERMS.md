@@ -22,7 +22,7 @@ column gives the name that a person who reads Russian sees.
 | pull request | A request to merge a branch into the default branch. It closes a task when it names the task with a closing word. | pull request | merge request, PR |
 | assignee | An account that a task names as the one who does it. A task is assigned to the person when the person's account is an assignee. | исполнитель | owner |
 | busy | A task with an assignee, a linked branch or an open pull request that closes it. | занята | taken, claimed |
-| duplicate | A task that reports the same thing as another task, about the same place, in the same words or not. It closes as a duplicate of the other task, and the other task stays. | дубликат | copy |
+| duplicate | A task that reports the same thing as another task, about the same place, in the same words or not. When it closes, it closes as a duplicate of the other task, and the other task stays open. | дубликат | copy |
 | comment | A text added to a task after its own text. | комментарий | note, reply |
 | workspace | The place where the run reads and changes the code: a copy of the repository with its branches. | рабочая копия | checkout, worktree, clone |
 | the work | What a task asks for: the changes in the workspace after the run takes the task. | работа | implementation |

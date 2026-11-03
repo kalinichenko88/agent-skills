@@ -8,7 +8,7 @@ linked to the task.
 Not covered yet:
 
 - the other tasks on the same code that the work takes along;
-- a duplicate that tells only what someone saw, which waits for a
+- a duplicate that tells only the failure that was seen, which waits for a
   reproduction of the failure;
 - the correction of the places in the code that a task names, as a file and
   a line;
@@ -17,7 +17,9 @@ Not covered yet:
 - the person's own task with an open pull request whose branch the
   workspace has;
 - a linked branch in another repository only, and a branch in the
-  workspace that has the name of the new branch.
+  workspace that has the name of the new branch;
+- a read of the task that fails after the check, and an earlier run on the
+  same task that is still open.
 
 ## A free task
 
@@ -28,8 +30,9 @@ Then:
 - the first message about #91 tells its gist
 - the gist comes before any change to the tracker or the workspace
 - #91 is assigned to the person
-- a branch `<type>/91-<two to four words>` exists, made from the default
-  branch, where `<type>` is one of feat, fix, refactor, docs, test, ci, chore
+- a branch `<type>/91-<two to four words>` exists, where `<type>` is one of
+  feat, fix, refactor, docs, test, ci, chore
+- that branch is made from the default branch
 - that branch is linked to #91
 Never:
 - #91 gets a second linked branch
@@ -44,7 +47,8 @@ Then:
 - the person is told that #91 is closed
 - the run waits
 Never:
-- the state or the assignees of #91 change
+- the state of #91 changes
+- the assignees of #91 change
 - a branch for #91 is created
 
 ## A task that another person is assigned to
@@ -114,7 +118,8 @@ Given:
 When: the person answers that it continues in this run
 Then:
 - #91 stays assigned to the person
-- a branch for #91 exists and is linked to #91, as in A free task
+- a branch for #91 exists, as in A free task
+- that branch is linked to #91
 Never:
 - #91 gets a second linked branch
 
@@ -175,8 +180,8 @@ Given:
 When: the person writes "#91"
 Then:
 - the first message about #91 tells its gist
-- the person is told that #91 is assigned to the person and that
-  `fix/91-typo` is linked to it
+- the person is told that #91 is assigned to the person
+- the person is told that `fix/91-typo` is linked to #91
 - the person is asked whether the work on #91 runs somewhere else or
   continues in this run
 - the run waits
@@ -223,7 +228,7 @@ Then:
 - a comment on #91 holds the stack trace of #95
 - #95 is closed as a duplicate of #91
 - the comment on #91 comes before #95 closes
-- #95 closes before any change to the workspace
+- #95 closes before the work starts
 - the last message names #95 as closed
 - the outcomes of A free task hold for #91
 Never:

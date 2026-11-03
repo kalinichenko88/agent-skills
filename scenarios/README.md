@@ -2,16 +2,20 @@
 
 A scenario says what a flow does, as seen from outside: the state of the
 tracker and of git after the run, and what the person was told or asked. It
-names no agent host, no tool and no subagent. Each implementation of a flow
-does it in its own way, and reads only this folder.
+names no agent host, no command and no subagent. Each implementation of a flow
+does it in its own way. craft is one of them; another one needs only this
+folder.
 
-The words of a scenario come from [`TERMS.md`](TERMS.md).
+A word for a thing that an implementation keeps in its own way comes from
+[`TERMS.md`](TERMS.md). Git words keep their git meaning, and other words
+their plain meaning.
 
 ## The layout
 
 One file for each flow, in the folder of the skill that owns it:
-`scenarios/<skill>/<flow>.md`. The file starts with a `#` title and one
-paragraph on what starts the flow.
+`scenarios/<skill>/<flow>.md`. The file starts with a `#` title, one
+paragraph on what starts the flow, and a list of what the file does not cover
+yet.
 
 | File | The flow |
 | --- | --- |
@@ -37,13 +41,14 @@ Never:
 ```
 
 - **Given** is the state before the run: the tasks, the branches, the
-  workspace. What the scenario does not name is absent: no other task, no
-  branch but the default branch.
+  workspace, and what the run said before. What the scenario does not name is
+  absent, except what a named thing needs, as the branch of a pull request:
+  no other task, no other branch but the default branch.
 - **When** is one line: the one message of the person that starts the run.
 - **Then** is what holds after the run.
 - **Never** is what no run may do, also on the way to a correct end.
 
-Each item is one fact, so that one check can test it: a state of the
+Each Then and Never item is one fact, so that one check can test it: a state of the
 tracker, a state of git, or a message to the person. A message is checked by
 what it says, not by its words. Each item that names a message says in what
 order it comes, when the order matters.

@@ -152,13 +152,14 @@ the citations job of `skills/github/scout.md` or to *Finishing*.
 assigned to, and a tracker that does not answer. Each case is one Opus run of
 `claude -p` with this checkout as the only plugin, a fake `gh` first on
 `PATH` that reads and writes a JSON tracker, and a workspace with a local
-`origin`. It checks the Then and Never items against the tracker, the
-branches and the session's messages, and prints PASS, FAIL or SKIP for each:
-SKIP where the log holds a message only as thinking (#206). Run it after a
-change to `skills/github/take-in.md` or its scripts.
+`origin`. It checks each Then and Never item of the three scenarios against
+the tracker, the branches, the workspace, and the session's messages and
+tool calls, and prints PASS, FAIL or SKIP for each: SKIP where the log holds
+a message only as thinking (#206). Run it after a change to
+`skills/github/take-in.md` or to the scripts of the github skill.
 `tests/scenarios_checks_test.sh` runs its checks in `make check`, on one
-recorded run of each case in `tests/fixtures/scenarios/`, and on copies with
-one item broken.
+recorded run of each case in `tests/fixtures/scenarios/`, and on copies that
+change the verdict of one item.
 The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 

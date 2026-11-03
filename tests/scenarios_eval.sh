@@ -52,7 +52,7 @@ setup() {
       down: ($case == "down"), prs: [],
       issues: [{number: 91, title: $title, body: $body, state: "OPEN", stateReason: null,
         assignees: (if $case == "other" then [$other] else [] end),
-        labels: [], comments: [], linked: [], duplicateOf: null}]}' >"$w.state.json"
+        labels: [], comments: [], linked: []}]}' >"$w.state.json"
   mkdir "$w.bin"
   printf '#!/usr/bin/env bash\nstate=%q\n' "$w.state.json" >"$w.bin/gh"
   cat >>"$w.bin/gh" <<'EOF'
@@ -97,7 +97,8 @@ case "$1 $2" in
   'api repos/{owner}/{repo}') out "$(jq -c '{full_name: .repo, default_branch: "main", visibility: "public"}' "$state")" ;;
   'api user') out "$(jq -c '{login: .me}' "$state")" ;;
   'api graphql')
-    if [[ $* == *'issue(number:'* ]]; then
+    [ -n "$n" ] || n=$(grep -oE 'issue\(number: *[0-9]+' <<<"$*" | grep -oE '[0-9]+$' || true)
+    if [[ $* == *'issue(number:'* ]] && [ -n "$n" ]; then
       linked=$(jq -r --argjson n "$n" '.issues[] | select(.number == $n) | .linked[]' "$state" |
         while read -r b; do
           oid=$(git -C "$origin" rev-parse "refs/heads/$b")
@@ -108,8 +109,11 @@ case "$1 $2" in
         | {data: {viewer: {login: $s.me}, repository: {nameWithOwner: $s.repo, defaultBranchRef: {name: "main"},
           issue: {state: $i.state, assignees: {nodes: [$i.assignees[] | {login: .}]}, linkedBranches: {nodes: $linked},
             closedByPullRequestsReferences: {nodes: []}}}}}' "$state")"
-    else # the entries of collect.sh: none
+    elif [[ $* == *issueOrPullRequest* ]]; then # the entries of collect.sh: none
       out "$(jq -c '{data: {viewer: {login: .me}, repository: {}}}' "$state")"
+    else
+      echo "fake gh: no answer for: $*" >&2
+      exit 1
     fi
     ;;
   'issue view')
@@ -157,7 +161,9 @@ EOF
 # reach the log only as a think line, in other words, without the task's id
 # and title (#206), with --include-partial-messages too. Paths of this machine
 # become <craft>, <work> and <tmp>. <dir>.branches holds the origin's
-# branches.
+# branches, each one that is not made from main marked so. <dir>.workspace
+# holds the changed files, the local branches and the count of worktrees of
+# the workspace.
 record() {
   jq -r 'select(.type == "assistant") | (if .parent_tool_use_id then "sub" else "" end) as $sub
     | .message.content[]
@@ -168,21 +174,32 @@ record() {
       else empty end' "$1.jsonl" |
     awk -v r="$root" -v w="$1" -v t="${TMPDIR:-/tmp}" '{ gsub(r, "<craft>"); gsub("(/private)?" w, "<work>")
       gsub("(/private)?" t, "<tmp>/"); gsub("<tmp>//", "<tmp>/"); print }' >"$1.events"
-  git -C "$1.origin" for-each-ref --format='%(refname:short)' refs/heads >"$1.branches"
+  git -C "$1.origin" for-each-ref --format='%(refname:short)' refs/heads | while read -r b; do
+    if git -C "$1.origin" merge-base --is-ancestor main "$b"; then echo "$b"; else echo "$b, not from main"; fi
+  done >"$1.branches"
+  { git -C "$1" status --porcelain
+    git -C "$1" for-each-ref --format='%(refname:short)' refs/heads
+    git -C "$1" worktree list --porcelain | grep -c '^worktree '; } >"$1.workspace"
 }
 
 # check <dir> <case>: one line for each item, PASS, FAIL or SKIP, with the scenario.
-# A message before the first change that the log can hold only as a think line
-# gives SKIP: the log cannot show whether it told the gist.
+# The gist is the first message that names #91 or its title, when it holds
+# the title. A message before the first change that the log can hold only as
+# a think line gives SKIP: the log cannot show whether it told the gist.
 # shellcheck disable=SC2034 # the items read the values through eval
 check() {
-  local d=$1 s writes first_write gist think assignees linked branch
-  # A write: an edit of a file, a commit, a new branch, or a write to the
-  # tracker. A read of a script, as `sed -n 1p worktree.sh`, is none.
-  writes=$'^(sub)?(Edit|Write|NotebookEdit)\t|^(sub)?Bash\t.*(bash [^ ]*(worktree|add-finding)\\.sh|gh issue (edit|close|comment|develop +[#0-9])|git (commit|push|checkout -b|switch -c|worktree add))'
-  first_write=$(grep -nE "$writes" "$d.events" | head -n 1 | cut -d: -f1)
-  gist=$(grep -n "^text" "$d.events" | grep -F "$title" | head -n 1 | cut -d: -f1)
+  local d=$1 s first_write named gist titled think assignees linked branch same
+  # A write: an edit of a file, a commit, a branch, a worktree, or a write to
+  # the tracker. A read of a script, as `sed -n 1p worktree.sh`, is none.
+  first_write=$(W='(^|[;&|(] *)(bash |sh )?[^ ;&|]*(worktree|add-finding)\.sh|gh issue (edit|close|comment|create|reopen)|gh pr (create|merge|edit|close|comment)|gh api .*(-X|--method) *(POST|PATCH|PUT|DELETE)|gh api graphql.*mutation|git (commit|push|switch|checkout|branch [^-]|worktree add|merge|rebase|reset|stash)|sed -i|perl -[a-z]*i' \
+    awk -F'\t' '$1 ~ /^(sub)?(Edit|Write|NotebookEdit|EnterWorktree)$/ ||
+      $1 ~ /^(sub)?Bash$/ && ($2 ~ ENVIRON["W"] || $2 ~ /gh issue develop/ && $2 !~ /--(list|help)/) { print NR; exit }' "$d.events")
+  named=$(grep -n "^text" "$d.events" | grep -F -e '#91' -e "$title" | head -n 1)
+  gist=$(grep -F "$title" <<<"$named" | cut -d: -f1 || true)
+  titled=$(grep -n "^text" "$d.events" | grep -F "$title" | head -n 1 | cut -d: -f1)
   think=$(grep -n "^think" "$d.events" | head -n 1 | cut -d: -f1)
+  # The workspace as setup leaves it: no changed file, main, one worktree.
+  same='[ "$(cat "$d.workspace")" = "$(printf "main\n1")" ]'
   assignees=$(jq -c '.issues[] | select(.number == 91) | .assignees' "$d.state.json")
   linked=$(jq -c '.issues[] | select(.number == 91) | .linked' "$d.state.json")
   branch=$(jq -r '.[0] // empty' <<<"$linked")
@@ -192,26 +209,27 @@ check() {
     free) s='A free task'
       before() { [ -n "$1" ] && { [ -z "$first_write" ] || [ "$1" -lt "$first_write" ]; }; }
       if ! before "$gist" && before "$think"; then
-        echo "SKIP $s: the gist of #91 comes before any change: only a think line comes before it"
+        echo "SKIP $s: the first message about #91 tells its gist, before any change: only a think line comes before the change"
       else
-        item 'the gist of #91 comes before any change' 'before "$gist"'
+        item 'the first message about #91 tells its gist, before any change' 'before "$gist"'
       fi
       item '#91 is assigned to the person' '[ "$assignees" = "[\"$me\"]" ]'
-      item 'a branch <type>/91-<two to four words> exists' 'grep -qE "^(feat|fix|refactor|docs|test|ci|chore)/91-[a-z0-9]+(-[a-z0-9]+){1,3}\$" "$d.branches"'
-      item 'that branch is linked to #91' '[ -n "$branch" ] && grep -qxF "$branch" "$d.branches"'
+      item 'a branch <type>/91-<two to four words> exists' 'grep -qE "^(feat|fix|refactor|docs|test|ci|chore)/91-[a-z0-9]+(-[a-z0-9]+){1,3}(, not from main)?\$" "$d.branches"'
+      item 'that branch is made from the default branch' 'grep -qE "^[a-z]+/91-[a-z0-9-]+\$" "$d.branches"'
+      item 'that branch is linked to #91' '[ -n "$branch" ] && cut -d, -f1 "$d.branches" | grep -qxF "$branch"'
       item 'never: #91 gets a second linked branch' '[ "$(jq length <<<"$linked")" -le 1 ]'
       ;;
     other) s='A task that another person is assigned to'
-      item 'the gist of #91 comes first' '[ -n "$gist" ]'
+      item 'the first message about #91 tells its gist' '[ -n "$gist" ]'
       item 'the person is told that #91 is assigned to another person' 'told "$other"'
-      item 'the run waits: no change' '[ -z "$first_write" ]'
+      item 'the run waits: no change' '[ -z "$first_write" ] && eval "$same"'
       item 'never: the assignees of #91 change' '[ "$assignees" = "[\"$other\"]" ]'
       item 'never: a branch for #91 is created' '[ "$(cat "$d.branches")" = main ] && [ "$linked" = "[]" ]'
       ;;
     down) s='The tracker does not answer'
       item 'the person is told the error of the tracker' 'told 502'
-      item 'the run stops: no change' '[ -z "$first_write" ]'
-      item 'never: a gist of #91 that the run did not read' '[ -z "$gist" ]'
+      item 'the run stops: no change' '[ -z "$first_write" ] && eval "$same"'
+      item 'never: a gist of #91 that the run did not read' '[ -z "$titled" ]'
       item 'never: the assignees of #91 change' '[ "$assignees" = "[]" ]'
       item 'never: a branch for #91 is created' '[ "$(cat "$d.branches")" = main ] && [ "$linked" = "[]" ]'
       ;;
@@ -245,7 +263,11 @@ runs=$(mktemp -d)
 for c in $cases; do run "$c" & done
 wait
 for c in $cases; do
-  printf '%s: $%s\n' "$c" "$(jq -r 'select(.type == "result") | .total_cost_usd' "$runs/$c.jsonl")"
-  check "$runs/$c" "$c"
+  if [ -f "$runs/$c.events" ]; then
+    printf '%s: %s\n' "$c" "$(jq -r 'select(.type == "result") | "\(.subtype), $\(.total_cost_usd)"' "$runs/$c.jsonl")"
+    check "$runs/$c" "$c"
+  else
+    echo "$c: no run; its setup failed"
+  fi
 done
 echo "runs: $runs"

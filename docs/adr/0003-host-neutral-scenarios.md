@@ -53,18 +53,20 @@ We will keep the scenarios in `scenarios/`, one file for each flow, at
 `scenarios/<skill>/<flow>.md`, in the shape that `scenarios/README.md` gives.
 A scenario uses only the terms of `scenarios/TERMS.md` and plain words, and
 names no agent host, no tool and no subagent. craft is one implementation of
-them, and `tests/scenarios_eval.sh` checks craft against them. Where the
+them, and `tests/scenarios_eval.sh` checks craft against three of them. Where the
 README of a skill or a picture differs from a scenario, the scenario holds.
 The conventions skills get no scenarios: their text depends on no host
 already.
 
 A probe ran on 2026-11-03, before this decision: three take-in scenarios,
 one `claude -p` run each, with a fake `gh` over a JSON tracker. Each run
-cost $0.28 to $0.80. The fake reached the session, and the end state of the
-tracker and the branches gave 14 of the 15 items. A message that ends a run
-was in its log as text. A message that comes before a tool call was not:
-the log holds it only as thinking in other words, without the task's id and
-title, as #206 found. So that item gives no verdict.
+cost $0.28 to $0.80. The fake reached the session. The eval checks each of
+the 17 Then and Never items of the three scenarios, from the tracker, the
+branches, the workspace, the tool calls and the messages, and each check
+gave a verdict but one. A message that ends a run was in its log as text. A
+message that comes before a tool call was not: the log holds it only as
+thinking in other words, without the task's id and title, as #206 found. So
+the check of the gist before the first change gives no verdict.
 
 ## Consequences
 
@@ -92,4 +94,7 @@ None. `scenarios/` holds Markdown, which the checks read as data.
 
 `tests/scenarios_checks_test.sh` checks that each scenario that the eval
 names is a heading of `scenarios/github/take-in.md`. The rest is review
-only.
+only. A grep in the `lint` target of the `Makefile` is the place for the
+rule that a scenario names no agent host, as for the other forms that a set
+of files may not hold. The person chose no check of the words of a scenario
+for now (#231): it comes with the check of the shape.

@@ -23,8 +23,8 @@ fail() {
 checks() { "$root/tests/scenarios_eval.sh" --check "$1"; }
 
 out=$(checks "$fixtures")
-[ "$(grep -c '^PASS ' <<<"$out")" = 14 ] || fail 'the recorded runs do not pass 14 items' "$out"
-[ "$(grep -v '^PASS ' <<<"$out")" = 'SKIP A free task: the gist of #91 comes before any change: only a think line comes before it' ] ||
+[ "$(grep -c '^PASS ' <<<"$out")" = 15 ] || fail 'the recorded runs do not pass 15 items' "$out"
+[ "$(grep -v '^PASS ' <<<"$out")" = 'SKIP A free task: the first message about #91 tells its gist, before any change: only a think line comes before the change' ] ||
   fail 'the recorded runs do not skip only the gist of the free task' "$out"
 
 while IFS= read -r scenario; do
@@ -53,12 +53,12 @@ state() { jq "$2" "$tmp/$n/$1.state.json" >"$tmp/state" && mv "$tmp/state" "$tmp
 copy
 { printf 'text\t#91: README: the install command says npm instal. The README has a wrong command.\n'
   cat "$fixtures/free.events"; } >"$tmp/$n/free.events"
-flips free 'the gist of #91 comes before any change'
+flips free 'the first message about #91 tells its gist, before any change'
 
 # No gist and no think line before the branch: FAIL.
 copy
 grep -v '^think' "$fixtures/free.events" >"$tmp/$n/free.events"
-flips free 'the gist of #91 comes before any change'
+flips free 'the first message about #91 tells its gist, before any change'
 
 # The person added to another person's task.
 copy
@@ -69,6 +69,28 @@ flips other 'never: the assignees of #91 change'
 copy
 printf 'Bash\tgh issue edit 91 --add-assignee @me\n' >>"$tmp/$n/other.events"
 flips other 'the run waits: no change'
+
+# An edit in the shell on another person's task.
+copy
+printf "Bash\tsed -i '' s/instal/install/ README.md\n" >>"$tmp/$n/other.events"
+flips other 'the run waits: no change'
+
+# A changed file in the workspace, by a call that the log does not show.
+copy
+{ echo ' M README.md'; cat "$fixtures/other.workspace"; } >"$tmp/$n/other.workspace"
+flips other 'the run waits: no change'
+
+# A message about #91 before its gist, on another person's task.
+copy
+{ head -n 4 "$fixtures/other.events"
+  printf 'text\t#91 belongs to rivera, so I stop.\n'
+  tail -n +5 "$fixtures/other.events"; } >"$tmp/$n/other.events"
+flips other 'the first message about #91 tells its gist'
+
+# A branch of the free task that is not made from main.
+copy
+sed -i.bak 's#^docs/91-fix-install-command$#&, not from main#' "$tmp/$n/free.branches"
+flips free 'that branch is made from the default branch'
 
 # A second linked branch on the free task.
 copy

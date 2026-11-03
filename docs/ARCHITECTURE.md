@@ -88,7 +88,7 @@ module too: the text that the flows are checked against.
 | architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_since_test.sh`, `tests/architecture_fences_test.sh`, `tests/architecture_eval.sh`, `tests/architecture_checks_test.sh`, `tests/fixtures/architecture/` |
 | product | `skills/product/` | `tests/product_eval.sh`, `tests/product_checks_test.sh`, `tests/fixtures/product/` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
-| scenarios | `scenarios/` | `tests/scenarios_eval.sh`, which runs craft on the take-in scenarios with a fake `gh` over a JSON tracker; `tests/scenarios_checks_test.sh`, which also reads the headings of `scenarios/github/take-in.md`; `tests/fixtures/scenarios/` |
+| scenarios | `scenarios/` | `tests/scenarios_eval.sh`, which runs craft on three take-in scenarios with a fake `gh` over a JSON tracker; `tests/scenarios_checks_test.sh`, which also reads the headings of `scenarios/github/take-in.md`; `tests/fixtures/scenarios/` |
 | release, infographic | `.claude/skills/<name>/` | none |
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |
 
