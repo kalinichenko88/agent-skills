@@ -1,0 +1,25 @@
+{
+  "me": "kim",
+  "repo": "acme/shop",
+  "origin": "<work>.origin",
+  "down": false,
+  "prs": [],
+  "issues": [
+    {
+      "number": 91,
+      "title": "README: the install command says npm instal",
+      "body": "The README tells the reader to run `npm instal shop`. npm has no instal command, so the command fails. Done when the README says `npm install shop`.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [
+        "kim"
+      ],
+      "labels": [],
+      "comments": [],
+      "linked": [
+        "docs/91-fix-install-command"
+      ],
+      "duplicateOf": null
+    }
+  ]
+}

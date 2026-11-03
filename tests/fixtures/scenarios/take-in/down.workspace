@@ -1,0 +1,5 @@
+main
+worktrees 1
+head main
+main 1
+stash 0

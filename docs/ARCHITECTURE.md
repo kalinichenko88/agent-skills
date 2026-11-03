@@ -21,6 +21,11 @@ is the issue alone. A skill loads when its
 `description` matches the moment. The plugin installs as a copy of the whole
 repository.
 
+`scenarios/` says what the flows do as seen from outside, with no word of an
+agent host (ADR 0003). No skill reads it: it is the text that craft and any
+other implementation of the flows are checked against. It installs with the
+copy too.
+
 To the checks, the files that `skills/debt/scripts/data.ere` matches are
 data, as Markdown, JSON, YAML and everything under `fixtures/`. The code
 they see is the other text files: the bash and awk under `skills/`,
@@ -35,6 +40,12 @@ it: an invariant on it is review only.
   issue.
 - `skills/<name>/` — one skill: `SKILL.md`, `README.md`, its other `.md`
   files, and `scripts/`.
+- `scenarios/` — what the flows do, as seen from outside, with no word of an
+  agent host (ADR 0003): `scenarios/<skill>/<flow>.md`, the shape in its
+  `README.md`, and the terms in `TERMS.md`. craft is one implementation of
+  them. The pictures of `docs/<skill>/` and the scenario sections of a
+  skill's `README.md` show the same flows to a reader; where they differ,
+  the file in `scenarios/` holds.
 - `tests/<name>_test.sh` — the tests that `make check` runs.
   `tests/<name>_eval.sh` — the evals. They call the model, except in the
   runs that I-7 describes.
@@ -64,7 +75,8 @@ it: an invariant on it is review only.
 
 ## Modules
 
-Each skill is a module, by the area of work it serves.
+Each skill is a module, by the area of work it serves. `scenarios/` is a
+module too: the text that the flows are checked against.
 
 | Module | Folder | Its test, fixtures and pictures |
 | --- | --- | --- |
@@ -76,6 +88,7 @@ Each skill is a module, by the area of work it serves.
 | architecture | `skills/architecture/` | `tests/architecture_scripts_test.sh`, `tests/architecture_since_test.sh`, `tests/architecture_fences_test.sh`, `tests/architecture_eval.sh`, `tests/architecture_checks_test.sh`, `tests/fixtures/architecture/` |
 | product | `skills/product/` | `tests/product_eval.sh`, `tests/product_checks_test.sh`, `tests/fixtures/product/` |
 | docker, typescript-conventions, react-conventions | `skills/<name>/` | text only; `tests/skill_load_eval.sh`, `tests/skill_load_checks_test.sh` and `tests/fixtures/skill_load/` count the loads of the two conventions |
+| scenarios | `scenarios/` | `tests/scenarios_eval.sh`, which runs craft on three take-in scenarios with a fake `gh` over a JSON tracker; `tests/scenarios_checks_test.sh`, which also reads the headings of `scenarios/github/take-in.md`; `tests/fixtures/scenarios/` |
 | release, infographic | `.claude/skills/<name>/` | none |
 | plugin | `.claude-plugin/`, `.codex-plugin/`, `Makefile`, `.github/` | `tests/makefile_test.sh` |
 
@@ -234,3 +247,4 @@ An accepted ADR goes in `docs/adr/NNNN-title.md` and on this list.
 
 - [0001 Each script prints its usage from its header](adr/0001-usage-from-the-header.md)
 - [0002 The plugin is named craft](adr/0002-plugin-name-craft.md)
+- [0003 The flows are specified as host-neutral scenarios in scenarios/](adr/0003-host-neutral-scenarios.md)

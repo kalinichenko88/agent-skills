@@ -1,0 +1,5 @@
+Skill	craft:github
+Bash	cat <craft>/skills/github/take-in.md; cd <work> && git remote -v; gh auth status 2>&1 | head -5; ls
+Bash	bash <craft>/skills/github/scripts/take-in-check.sh 91 2>&1; echo "exit=$?"; cat README.md
+Bash	gh issue view 91 --json title,body,assignees,state 2>&1
+text	I did not start work on #91, because it is assigned to someone else.  **#91 — "README: the install command says npm instal"**  The README tells readers to run `npm instal shop`. npm has no `instal` command, so the command fails. The issue is done when the README says `npm install shop`. I checked `README.md`, and it still has the typo.  The issue is still open and assigned to **rivera**, so the work is theirs. I made no branch and did not assign the issue to you.  Tell me how to go on: - If rivera agrees to hand it over, or the assignment is out of date, I will assign it to you and make the one-word fix with a pull request. - If it stays with rivera, I will leave it alone.
