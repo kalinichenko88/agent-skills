@@ -96,21 +96,43 @@ The task: $call_task
 EOF
 }
 
-# events <log>: the tool calls of the session and its subagents in order, one
-# a line, as the skill's name for a Skill call and Write for a write, and Block
-# for a text of the main session that holds the block of *The start of a
-# feature*.
-# ponytail: a Bash call is a write when it has `>`, `tee` or `tee -a`, then
-# spaces or none, then a path with a dot and letters, as `cat > a.ts <<'EOF'`.
-# `cp`, `mv` and `sed -i` are not writes.
+# events <log>: the Skill calls and the writes of the session and its
+# subagents in order, one a line, as the skill's name for a Skill call and
+# Write for a write, and Block for a text of the main session that holds the
+# block of *The start of a feature*. A write goes into the run's folder: it
+# has a relative path, or a path with the folder's name, as /call-line-1/. A
+# file in a scratchpad or in /tmp, as the brief that craft:product writes
+# before its report, is no write of the work, and neither is a path that
+# starts with `..`, as `codex … > ../../out.md`. A relative path after a `cd`
+# out of the folder, as `cd /tmp && cat > a.mjs`, is in /tmp too.
+# ponytail: a Bash call is a write when one of its commands, split at `&&`,
+# `||`, `;`, `|` and a new line, has `>` (not `=>` or `->`), `tee` or
+# `tee -a`, then spaces or none, then such a path with a dot and letters, as
+# `cat > a.ts <<'EOF'`. The text of a heredoc is left out first. A `cd` to a
+# path that starts with `/`, `~` or `$` leaves the folder for the commands
+# after it, unless the path has the folder's name. A path in quotes, or
+# through a variable as `C=src && cat > $C/a.ts`, is out of the folder: no
+# recorded run wrote into it only so. `cp`, `mv` and `sed -i` are not writes. A Write call with no path, as the trimmed runs of the fixture have,
+# is a write into the folder.
 events() {
-  jq -rR 'fromjson? | select(.type == "assistant") | .parent_tool_use_id as $parent
+  jq -rR --arg name "$(basename "$1" .jsonl)" 'def here: test("/" + $name + "([/ \"'\'';&|)]|$)");
+    def ours($away): if test("^([/~$]|\\.\\.)") then here else $away | not end;
+    def writes: gsub("<<-? *[\"'\'']?(?<t>[A-Za-z_]+)[\"'\'']?(?<rest>[^\n]*)\n([^\n]*\n)*?\\k<t>(?=\n|$)"; .rest)
+      | reduce splits("&&|\\|\\||[;|\n]") as $part ({away: false, write: false};
+        if $part | test("^[ (]*cd ") then
+          ($part | capture("cd +[\"'\'']?(?<to>[^ \"'\'')]*)").to) as $to
+          | if $to | test("^[/~$]") then .away = ($to | here | not) else . end
+        else . as $s | .write = ($s.write or any($part
+          | scan("(?:(?<![=-])>|\\btee(?: -a)?) *([^ ;&|<>\"'\'']*\\.[a-z]+)\\b")[0]; ours($s.away))) end)
+      | .write;
+    fromjson? | select(.type == "assistant") | .parent_tool_use_id as $parent
     | .message.content[]
     | if .type == "tool_use" then
         if .name == "Skill" then .input.skill
         elif (.name | test("^(Write|Edit|MultiEdit|NotebookEdit)$"))
-          or (.name == "Bash" and (.input.command | test("(>|\\btee( -a)?) *[^ ;&|<>]*\\.[a-z]+\\b"))) then "Write"
-        else .name end
+          and ((.input.file_path // .input.notebook_path // "") | ours(false))
+          or (.name == "Bash" and (.input.command | writes)) then "Write"
+        else empty end
       elif .type == "text" and $parent == null
         and (.text | contains("**Problem:**") and contains("**Touches:**")) then "Block"
       else empty end' "$1"

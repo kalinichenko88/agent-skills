@@ -3,15 +3,32 @@
 # tests/fixtures/architecture: the sessions' tool calls, the files they wrote
 # and their commits, in the layout an eval run leaves. The runs numbered 1 are
 # one recorded run, trimmed to what the checks read, with its absolute paths
-# replaced. Its call, split and search runs ran on an earlier repo/, whose
-# src/api/client.ts read the token from localStorage. call-none-1 keeps that
-# src/api/client.ts, which calls fetch and which the wrapper check must pass.
-# The runs numbered 2 change a recorded run into a case that a check must pass
-# or must fail. An empty log is a run with no tool call: each check that reads
-# logs counts it as a run without what it counts.
+# replaced. Its Write calls keep no path, and the checks take such a call as a
+# write into the run's folder. Its call, split and search runs ran on an
+# earlier repo/, whose src/api/client.ts read the token from localStorage.
+# call-none-1 keeps that src/api/client.ts, which calls fetch and which the
+# wrapper check must pass.
+# The runs numbered 2 and 3 change a recorded run into a case that a check
+# must pass or must fail. An empty log is a run with no tool call: each check
+# that reads logs counts it as a run without what it counts.
 #   call-none-2    the block before the first write; the reports call fetch
+#   call-none-3    no tree: three recorded Bash calls that write nothing into
+#                  the folder (a brief in a heredoc whose text has `<img …>`,
+#                  `=>` in `node -e`, and `; cd $T` before a write), then the
+#                  block, then the first write
 #   call-files-2   no tree and an empty log: a run that wrote no file
+#   call-files-3   no tree: a subagent's Bash call that runs `cd /tmp`, writes
+#                  there, and names the run's folder later on its line, then
+#                  the block, then the first write in the folder
 #   call-line-2    only the Skill call: a run that stopped before a write
+#   call-skill-2   a recorded run of another task, with no tree: the brief of
+#                  craft:product written outside the tree, then the block,
+#                  then the first write in the tree
+#   call-skill-3   no tree: a recorded `cd` into the folder by its absolute
+#                  path, then a write there, then the block, then a write
+#   call-line-3   no tree: a Bash call whose first line runs a python
+#                  heredoc and whose next command writes an ADR in the
+#                  folder, then the block
 #   store-none-2   an ADR with two options and a Confirmation
 #   store-files-2  the same ADR with one option
 #   store-line-2   the same ADR with no Confirmation
@@ -38,33 +55,38 @@ cd "$root"
 expected() {
   cat <<'EOF'
 tests/fixtures/architecture/call-none-2/src/features/reports/index.ts
-call none: 1 of 2 runs use request() and no second client
-block in call none: 1 of 2 runs before the first write
+no import of api/client: tests/fixtures/architecture/call-none-3/src/features/reports
+call none: 1 of 3 runs use request() and no second client
+block in call none: 2 of 3 runs before the first write
 tests/fixtures/architecture/store-none-1: 0 ADRs
 store none: 1 of 2 runs write one ADR with two options and a Confirmation
 split none: 0 of 1 runs split the file in a commit before the feature
 no import of api/client: tests/fixtures/architecture/call-files-2/src/features/reports
-call files: 1 of 2 runs use request() and no second client
-block in call files: 0 of 2 runs before the first write
+no import of api/client: tests/fixtures/architecture/call-files-3/src/features/reports
+call files: 1 of 3 runs use request() and no second client
+block in call files: 1 of 3 runs before the first write
 tests/fixtures/architecture/store-files-1: 0 ADRs
 tests/fixtures/architecture/store-files-2/docs/adr/0001-recent-orders-in-local-storage.md: no two options or no Confirmation
 store files: 0 of 2 runs write one ADR with two options and a Confirmation
 split files: 0 of 2 runs split the file in a commit before the feature
-call skill: 1 of 1 runs use request() and no second client
-block in call skill: 0 of 1 runs before the first write
+no import of api/client: tests/fixtures/architecture/call-skill-2/src/features/reports
+no import of api/client: tests/fixtures/architecture/call-skill-3/src/features/reports
+call skill: 1 of 3 runs use request() and no second client
+block in call skill: 1 of 3 runs before the first write
 tests/fixtures/architecture/store-skill-1: 0 ADRs
 tests/fixtures/architecture/store-skill-2: 0 ADRs
 store skill: 0 of 2 runs write one ADR with two options and a Confirmation
 split skill: 1 of 1 runs split the file in a commit before the feature
-skill in skill: 3 of 4 runs before the first write
+skill in skill: 4 of 6 runs before the first write
 no import of api/client: tests/fixtures/architecture/call-line-2/src/features/reports
-call line: 1 of 2 runs use request() and no second client
-block in call line: 0 of 2 runs before the first write
+no import of api/client: tests/fixtures/architecture/call-line-3/src/features/reports
+call line: 1 of 3 runs use request() and no second client
+block in call line: 0 of 3 runs before the first write
 tests/fixtures/architecture/store-line-1: 0 ADRs
 tests/fixtures/architecture/store-line-2/docs/adr/0001-recent-orders-in-local-storage.md: no two options or no Confirmation
 store line: 0 of 2 runs write one ADR with two options and a Confirmation
 split line: 1 of 2 runs split the file in a commit before the feature
-skill in line: 3 of 6 runs before the first write
+skill in line: 3 of 7 runs before the first write
 search haiku: 1 of 2 answers name src/api/client.ts and src/lib/money.ts
 search sonnet: 1 of 2 answers name src/api/client.ts and src/lib/money.ts
 logs: tests/fixtures/architecture
