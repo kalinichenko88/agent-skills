@@ -32,17 +32,17 @@ and run no code of the project.
    and its line numbers are those of the file at `<head>`. A cause in the
    architecture file, or in a path that it names, is an Outside finding when
    the base has the same fault in the same place: in the invariant that the
-   cause names, or, when it names none, in the text that it names.
+   cause names or between it and the next invariant, or, when it names
+   none, in the text that it names.
    Otherwise it is a False doc finding. Read the base's architecture file
    with `git show <base>:<file>`, and the files under a path with
    `git ls-tree -r --name-only <base> -- <path>`. Do not run the script at
-   `<base>`: at a fault in the base's file, as a line that it cannot read,
-   it stops before the first check. Give any other cause in your last
-   lines. An invariant with no line on stdout did not run: its own check
-   has a cause, `no code file` or `git grep failed`, or another cause
-   stopped every check. Read the code against the statement of each such
-   invariant, as for one that is review only, and name those invariants in
-   your last lines.
+   `<base>`: a code fence that it cannot read hides each fault after it.
+   Give any other cause in your last lines. An invariant with no line on
+   stdout did not run: a cause names it, a code fence in it or before it
+   stopped the read, or another cause stopped every check. Read the code
+   against the statement of each such invariant, as for one that is review
+   only, and name those invariants in your last lines.
 4. When `npx` or `bunx` is on `PATH`, run
    `bash <skills>/debt/scripts/clones.sh <tree>`, and keep the rows that name
    a file the range changes. With neither, or when it fails, say so in your

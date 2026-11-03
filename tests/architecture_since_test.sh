@@ -130,12 +130,12 @@ check 'changed rules' "1 $(printf '%s\n' 'I-1 FAIL' \
   'I-4 FAIL' '  new src/api/client.ts:1:export const get = (u) => fetch(u);' \
   '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
 
-# A base file whose I-1 has a pattern that git rejects and whose I-3 the
-# script cannot read: I-2 is compared as before, each hit of I-1 and I-3 is
-# new, and stderr says why, at the base.
+# A base file whose I-1 has a pattern that git rejects and whose I-2 the
+# script cannot read: each hit of I-1 and I-2 is new, I-3 after them is
+# compared as before, and stderr says why, at the base.
 printf '%s\n' '- **I-1.** a' '  Check: grep `fetch(u` in `src/feature/`.' \
-  '- **I-2.** b' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
-  '- **I-3.** c' '  Check: grep const in src/' >"$repo3/docs/ARCHITECTURE.md"
+  '- **I-2.** b' '  Check: grep fetch in src/' \
+  '- **I-3.** c' '  Check: grep `const` in `src/feature/`.' >"$repo3/docs/ARCHITECTURE.md"
 commit "$repo3" 'break the rules'
 printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' \
   '- **I-2.** b' '  Check: grep `fetch\(v\)` in `src/feature/`.' \
@@ -143,8 +143,8 @@ printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' \
 run "$repo3" --new-since HEAD
 check 'a base file it cannot read' "1 $(printf '%s\n' 'I-1 FAIL' \
   '  new src/feature/a.ts:2:fetch(u);' '  new src/feature/a.ts:3:fetch(u);' \
-  'I-2 FAIL' '  src/feature/b.ts:1:fetch(v);' 'I-3 FAIL' '  new src/feature/a.ts:1:const x = 1;')" "$code $out"
-for line in 'invariants.sh: at HEAD: I-3: cannot read: Check: grep const in src/' \
+  'I-2 FAIL' '  new src/feature/b.ts:1:fetch(v);' 'I-3 FAIL' '  src/feature/a.ts:1:const x = 1;')" "$code $out"
+for line in 'invariants.sh: at HEAD: I-2: cannot read: Check: grep fetch in src/' \
   'invariants.sh: at HEAD: each hit of an invariant that the script did not read whole there is new' \
   'invariants.sh: at HEAD: I-1: git grep failed' 'invariants.sh: at HEAD: each hit of I-1 is new'; do
   grep -qxF "$line" <<<"$err" || fail "no line on stderr: $line" "$err"
@@ -166,14 +166,6 @@ check 'a base fence that does not close' "1 $(printf '%s\n' 'I-1 FAIL' \
 grep -qxF 'invariants.sh: at HEAD: a code fence at line 5 does not close before line 6' <<<"$err" ||
   fail 'no line on stderr for the fence' "$err"
 
-# A debt line with no indent in the base's file ends I-1 there: the base's
-# I-1 has no debt list, so the hits under it are new debt.
-printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' 'debt `src/feature/a.ts`.' >"$repo3/docs/ARCHITECTURE.md"
-commit "$repo3" 'unindent a debt line'
-printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' '  debt `src/feature/a.ts`.' >"$repo3/docs/ARCHITECTURE.md"
-run "$repo3" --new-since HEAD
-check 'a base debt line with no indent' "0 $(printf '%s\n' 'I-1 PASS' \
-  '  new debt src/feature/a.ts:2:fetch(u);' '  new debt src/feature/a.ts:3:fetch(u);')" "$code $out"
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 

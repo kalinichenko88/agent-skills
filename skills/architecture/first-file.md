@@ -132,8 +132,9 @@ longer, with nothing but spaces or tabs after it, at the same column as the
 opening line. A fence at column 0 also closes at such a line indented 1 to 3
 columns more. A tab moves the text to the next multiple of 4 columns.
 
-A fence stops the script in three cases. The lines that it hides could hold
-a check.
+A fence stops the script there in three cases: it does not check the
+invariant that holds the fence, or any invariant after it. The lines that
+the fence hides could hold a check.
 
 - It does not close.
 - It is indented, and a line that could close it is indented 1 to 3 columns
@@ -174,18 +175,22 @@ a check.
 - A path of `in` with no code file under it outside the `except` paths is an
   error, so a typo cannot pass forever.
 - An invariant with no `Check:` line is review only. Any other text after
-  `Check:` is a line that the script cannot read.
+  `Check:` is a line that the script cannot read. At each line that it
+  cannot read, the script says why, does not check the invariant of the
+  line, and checks the others.
 - A `Check:` line and a `debt` line are one line each: do not wrap them. The
-  script stops, and does not drop the line, at:
+  script does not drop such a line. It cannot read:
   - a line right after one of them that starts with an item in backticks, or
-    with `in` or `except` and an item in backticks;
+    with `in` or `except` and an item in backticks, also with no indent, as
+    Markdown wraps a line;
   - a `debt` line with a word that is not a path;
   - a `debt` line before the `Check:` line of its invariant, or in an
     invariant with no `Check:` line;
-  - a `Check:` or `debt` line under no `- **I-<n>.**` line, as under a `*`
-    bullet.
+  - a `Check:` or `debt` line under no `- **I-<n>.**` line, as one with no
+    indent or under a `*` bullet: the invariant before it is not checked.
 
   Other prose under an invariant is not read. A line is a `debt` line only
   when a path in backticks comes right after `debt`, with only spaces or
   commas between them: `debt:` or `debt of` starts prose.
 - Empty code files count as code files of 0 lines.
+- Neither of two invariants with one number is checked.

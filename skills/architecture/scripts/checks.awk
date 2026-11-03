@@ -1,18 +1,29 @@
 # Reads an architecture file and prints one record per invariant, its fields
 # separated by \036 and the items of a list by \037: id, kind (grep, lines,
-# files or review), arg, in, except, debt. On a line that it cannot read, it
-# prints the cause on stderr, after the text of AT when it is set, and exits 2.
-# Each record that it printed before is whole, except one that a Check: or
-# debt line with no indent ended: it holds only the lines before that line.
+# files or review), arg, in, except, debt. It prints only the invariants that
+# it reads whole. At a fault in a line, it prints the cause on stderr, after
+# the text of AT when it is set, leaves out each invariant of the fault, and
+# reads on. At a code fence that it cannot read, it stops there. After
+# either, it exits 2.
 #
 #   AT=<where> awk -f checks.awk
 
-function stop(msg) {
+function say(msg) {
   print "invariants.sh: " ENVIRON["AT"] msg > "/dev/stderr"
   failed = 1
+}
+# drop: leaves out the invariant who, when there is one, and says why.
+function drop(who, msg) {
+  if (who != "") gone[who] = 1
+  say(msg)
+}
+function stop(msg) {
+  say(msg)
+  stopped = 1
   exit 2
 }
-function bad() { stop(id ": cannot read: " line) }
+# A line can be wrong in several places: it is said once.
+function bad() { if (said != NR) drop(id, id ": cannot read: " line); said = NR }
 # Splits s into tok[1..ntok]: a `quoted` item, or a bare word. Spaces and
 # commas separate them; a last bare "." ends the line.
 function tokenize(s,   i, rest) {
@@ -57,8 +68,13 @@ function check(   t) {
   if (t <= ntok && !quoted[t] && tok[t] == "debt") t = items(t + 1, "debt")
   if (t <= ntok) bad()
 }
+# flush: keeps the record of the invariant until the end, when the script
+# knows which invariants it left out. last: the id of the invariant.
 function flush() {
-  if (id != "") printf "%s\036%s\036%s\036%s\036%s\036%s\n", id, kind, arg, list["in"], list["except"], list["debt"]
+  if (id != "") {
+    rec[++nrec] = id "\036" kind "\036" arg "\036" list["in"] "\036" list["except"] "\036" list["debt"]
+    rid[nrec] = last = id
+  }
   id = ""
 }
 # ind: the column where the text starts. A tab moves to the next multiple
@@ -87,17 +103,17 @@ fence != "" {
 # A line that starts with neither a space nor a tab ends the invariant.
 /^[^ \t]/ { flush() }
 # A run of backticks with another backtick later on the line is inline
-# code, not a fence.
+# code, not a fence. A line after a fence does not continue the line before.
 line ~ /^(```+[^`]*$|~~~)/ {
-  indent = ind; opened = NR
+  indent = ind; opened = NR; more = 0
   match(line, /^(`+|~+)/); fence = substr(line, 1, RLENGTH)
   next
 }
 /^- \*\*I-[0-9]+\.\*\*/ {
   id = $0; sub(/^- \*\*/, "", id); sub(/\.\*\*.*/, "", id)
   # A finding cites an invariant by its number, and --new-since finds the
-  # invariant at the base by it.
-  if (id in ids) stop(id ": a second invariant with this number, at line " NR)
+  # invariant at the base by it, so two with one number are both left out.
+  if (id in ids) drop(id, id ": a second invariant with this number, at line " NR)
   ids[id] = 1
   kind = "review"; arg = ""; split("", list); seen = more = 0
   next
@@ -106,10 +122,16 @@ line ~ /^(```+[^`]*$|~~~)/ {
 # an `item`: a debt line, or the rest of a Check: line. Prose that starts
 # with one of these words is not one.
 { listed = line ~ /^((in|except|debt)[ \t,]*)?`/ }
+# A Check: or debt line that no invariant holds would never be read. It can
+# belong to the invariant before it, so that one is left out too. So is an
+# invariant whose last Check: or debt line goes on in a list line with no
+# indent: Markdown reads that line as a wrap.
 id == "" {
-  # A Check: or debt line that no invariant holds would never be read.
-  if (line ~ /^Check:[ \t]*(grep|lines|files)([ \t]|$)/) stop("a Check: line outside an invariant: " line)
-  if (listed && line ~ /^debt/) stop("a debt line outside an invariant: " line)
+  after = last != "" ? ", after " last : ""
+  if (line ~ /^Check:[ \t]*(grep|lines|files)([ \t]|$)/) drop(last, "a Check: line outside an invariant" after ": " line)
+  else if (listed && line ~ /^debt/) drop(last, "a debt line outside an invariant" after ": " line)
+  else if (more && listed) drop(last, last ": cannot read: " line)
+  more = 0
   next
 }
 {
@@ -130,7 +152,8 @@ id == "" {
 }
 END {
   # A fence that does not close would hide each invariant below it.
-  if (!failed && fence != "") stop("a code fence that does not close, at line " opened)
-  if (failed) exit 2
-  flush()
+  if (!stopped && fence != "") say("a code fence that does not close, at line " opened)
+  else if (!stopped) flush()
+  for (i = 1; i <= nrec; i++) if (!(rid[i] in gone)) print rec[i]
+  exit failed ? 2 : 0
 }
