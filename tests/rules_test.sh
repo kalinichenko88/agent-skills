@@ -114,6 +114,11 @@ done
 #   and its local branch at the merge, with no check of Cleanup. The merge
 #   runs in the checkout that holds the branch, and review-loop asks that
 #   checkout, not the session's directory, whether there is a worktree (#176).
+#   18 of 19 recorded sessions that moved into a worktree from the main
+#   checkout did it with cd, and #173's session then read itself as one that
+#   started there: it gave the person the commands of Cleanup. A session
+#   leaves the way it came in, and only one that started there hands them
+#   over (#195).
 # - After a merge, #117, #205 and #213 still quoted the room left in rules.md,
 #   and no citation of theirs showed it. *Finishing* gives the scout a
 #   Decision line for each number that the PR changed, counted again in the
@@ -155,6 +160,7 @@ skills/review-loop/SKILL.md|A zero count does not decline a finding of data loss
 rules.md|With no real source to sample, the count stops nothing, and the test uses the input of the report.
 skills/review-loop/SKILL.md|With no real source to sample, the count declines nothing, and the test of the fix uses the input of the finding.
 skills/github/SKILL.md|Run the merge in the checkout that holds the branch, whatever directory the session is in: `(cd <path> && gh pr merge …)`, where `<path>` is what `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints.
+skills/github/SKILL.md|`ExitWorktree` does nothing for a session that moved there in any other way, as with `cd` after `worktree.sh`: that session runs both commands itself, each with `git -C <the main checkout>`. Only a session that started in the worktree,
 skills/review-loop/SKILL.md|When `git for-each-ref --format='%(worktreepath)' refs/heads/<branch>` prints nothing or the first path of `git worktree list`, the branch has no linked worktree
 skills/github/SKILL.md|and a number that it changed, as a count or a size that an issue can quote.
 skills/github/SKILL.md|Count again each number that the merged code holds: a description can be older than the last fix. When a check sets its limit, count it as that check counts it.
