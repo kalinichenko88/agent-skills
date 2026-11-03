@@ -353,11 +353,11 @@ Five cases mark hits `new` that are not the branch's. Read the diff for them:
   the hit is not the branch's.
 - With no architecture file at the base, each hit is `new`, as for a branch
   that adds the first one.
-- When the script cannot read a line of the base's file, each hit of the
-  invariant of that line is `new`, as `first-file.md` names it. At a code
-  fence that it cannot read, so is each hit of the invariant that holds the
-  fence and of each one after it. When the base's check of one invariant
-  cannot run, each hit of that invariant is `new`.
+- At a fault in a line of the base's file, each hit of each invariant that
+  the script leaves out there is `new`: `first-file.md` names them. At a
+  code fence that it cannot read, so is each hit of the invariant that
+  holds the fence and of each one after it. When the base's check of one
+  invariant cannot run, each hit of that invariant is `new`.
 
 In the last two cases, lines on stderr after `at <base>:` say so.
 
@@ -378,13 +378,12 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   no code file, or a pattern or a path that git rejects, stops only the
   check of its own invariant: that invariant gets no line on stdout, and
   the other checks run. A fault in the architecture file stops only the
-  checks of the invariants that `first-file.md` names for it; a code fence
-  that it cannot read stops those of the invariant that holds it and of
-  each one after it. Each other cause stops the run before the first check.
-  The lines of the invariants that ran count as for exit 0 and 1: a hit of
-  the change under a FAIL is a defect. In the base's file, or in a check
-  that cannot run at the base, these causes give no exit 2: see the cases
-  above.
+  checks of the invariants that `first-file.md` names for it, also at a
+  code fence that the script cannot read. Each other cause stops the run
+  before the first check. The lines of the invariants that ran count as
+  for exit 0 and 1: a hit of the change under a FAIL is a defect. In the
+  base's file, or in a check that cannot run at the base, these causes give
+  no exit 2: see the cases above.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to

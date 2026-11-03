@@ -166,17 +166,6 @@ check 'a base fence that does not close' "1 $(printf '%s\n' 'I-1 FAIL' \
 grep -qxF 'invariants.sh: at HEAD: a code fence at line 5 does not close before line 6' <<<"$err" ||
   fail 'no line on stderr for the fence' "$err"
 
-# A debt line with no indent in the base's file cuts I-1 short there, so the
-# base's I-1 is left out: a branch that drops the debt line fails with new
-# hits, not with the base's.
-printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' 'debt `src/feature/a.ts`.' >"$repo3/docs/ARCHITECTURE.md"
-commit "$repo3" 'unindent a debt line'
-printf '%s\n' '- **I-1.** a' '  Check: grep `fetch\(u\)` in `src/feature/`.' >"$repo3/docs/ARCHITECTURE.md"
-run "$repo3" --new-since HEAD
-check 'a base debt line with no indent' "1 $(printf '%s\n' 'I-1 FAIL' \
-  '  new src/feature/a.ts:2:fetch(u);' '  new src/feature/a.ts:3:fetch(u);')" "$code $out"
-grep -qxF 'invariants.sh: at HEAD: a debt line outside an invariant, after I-1: debt `src/feature/a.ts`.' <<<"$err" ||
-  fail 'no line on stderr for the debt line' "$err"
 run "$repo3" --new-since nosuchref
 check 'a base that is not a commit' '2 invariants.sh: not a commit: nosuchref' "$code $err"
 

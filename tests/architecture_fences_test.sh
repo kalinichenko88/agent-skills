@@ -81,6 +81,13 @@ run "$empty"
 check 'a fence that does not close' "2 invariants.sh: a code fence that does not close, at line 3
 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
 $out"
+# An indented fence that does not close leaves out the invariant that holds it.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '- **I-2.** No fetch.' \
+  '  Check: grep `fetch\(` in `src/`.' '  ```' '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'an indented fence that does not close' "2 invariants.sh: a code fence that does not close, at line 5
+$(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
+$out"
 # A non-blank line indented less than a fence, before its closing line, as at
 # the end of the list item that holds the fence, stops the read there: the
 # lines that the fence hides could hold a check.

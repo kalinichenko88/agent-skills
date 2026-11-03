@@ -37,13 +37,12 @@ and run no code of the project.
    Otherwise it is a False doc finding. Read the base's architecture file
    with `git show <base>:<file>`, and the files under a path with
    `git ls-tree -r --name-only <base> -- <path>`. Do not run the script at
-   `<base>`: a fault in the base's file leaves out invariants there, and a
-   code fence that it cannot read hides each fault after it. Give any other cause in your last
-   lines. An invariant with no line on stdout did not run: a cause names
-   it, a code fence in it or before it stopped the read, or another cause
-   stopped every check. Read the code against the statement of each such
-   invariant, as for one that is review only, and name those invariants in
-   your last lines.
+   `<base>`: a code fence that it cannot read hides each fault after it.
+   Give any other cause in your last lines. An invariant with no line on
+   stdout did not run: a cause names it, a code fence in it or before it
+   stopped the read, or another cause stopped every check. Read the code
+   against the statement of each such invariant, as for one that is review
+   only, and name those invariants in your last lines.
 4. When `npx` or `bunx` is on `PATH`, run
    `bash <skills>/debt/scripts/clones.sh <tree>`, and keep the rows that name
    a file the range changes. With neither, or when it fails, say so in your

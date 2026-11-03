@@ -1,10 +1,10 @@
 # Reads an architecture file and prints one record per invariant, its fields
 # separated by \036 and the items of a list by \037: id, kind (grep, lines,
 # files or review), arg, in, except, debt. It prints only the invariants that
-# it reads whole. At a line that it cannot read, it prints the cause on
-# stderr, after the text of AT when it is set, leaves out the invariant that
-# the line belongs to, and reads on. At a code fence that it cannot read, it
-# stops there. After either, it exits 2.
+# it reads whole. At a fault in a line, it prints the cause on stderr, after
+# the text of AT when it is set, leaves out each invariant of the fault, and
+# reads on. At a code fence that it cannot read, it stops there. After
+# either, it exits 2.
 #
 #   AT=<where> awk -f checks.awk
 

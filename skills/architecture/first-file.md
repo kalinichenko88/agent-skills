@@ -175,10 +175,11 @@ the fence hides could hold a check.
 - A path of `in` with no code file under it outside the `except` paths is an
   error, so a typo cannot pass forever.
 - An invariant with no `Check:` line is review only. Any other text after
-  `Check:` is a line that the script cannot read.
+  `Check:` is a line that the script cannot read. At each line that it
+  cannot read, the script says why, does not check the invariant of the
+  line, and checks the others.
 - A `Check:` line and a `debt` line are one line each: do not wrap them. The
-  script does not drop such a line. It says why, does not check the
-  invariant of the line, and checks the others, at:
+  script does not drop such a line. It cannot read:
   - a line right after one of them that starts with an item in backticks, or
     with `in` or `except` and an item in backticks, also with no indent, as
     Markdown wraps a line;

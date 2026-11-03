@@ -23,10 +23,10 @@
 #
 # Exit 0 when no invariant fails, 1 when one fails, and 2 when a check of the
 # ref or the working tree cannot run, also when an invariant fails. A check
-# that cannot run, or a line that the script cannot read in the file it
-# checks, stops only its invariant: it gets no line, the causes go to stderr,
-# and the other checks run. A code fence that the script cannot read stops
-# the invariant that holds it and each one after it. Any other cause, as a
+# that cannot run, or a fault in a line of the file it checks, stops only the
+# invariants of the cause: they get no line, the causes go to stderr, and the
+# other checks run. A code fence that the script cannot read stops the
+# invariant that holds it and each one after it. Any other cause, as a
 # wrong call, stops the run before the first check, with exit 2.
 #
 # Needs only bash, git and awk, and the debt skill's data.ere beside this skill.
