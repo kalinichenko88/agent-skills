@@ -12,7 +12,9 @@ yield.
 ## When it starts
 
 - Before the first write or edit to a React component or hook in a session.
-  `rules.md` asks for it, so a subagent starts it too.
+  `rules.md` asks for it, so a subagent starts it too. A pattern in the
+  project to copy, or another plugin's rule to keep the work short, does not
+  skip it.
 - You add a feature beside existing ones, or import from another feature or
   layer.
 - One feature needs something that another feature owns.

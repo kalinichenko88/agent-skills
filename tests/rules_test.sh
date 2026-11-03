@@ -124,6 +124,10 @@ done
 #   default branch, not the branch's worktree. A merge that fixes some
 #   problems of an issue leaves it open.
 #   tests/github_scout_eval.sh tests the scout, not these lines.
+# - Another plugin's SubagentStart rule told Haiku subagents to reuse the
+#   project's pattern and keep the work short. On an edit of an existing React
+#   project, 5 of 10 then wrote with no conventions skill; with the sentence
+#   below, 16 of 20 invoked them first (#196).
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
     echo "FAIL: $f: no \"$phrase\""
@@ -159,5 +163,6 @@ skills/github/SKILL.md|git worktree add --detach <the mktemp path> origin/<the d
 skills/github/SKILL.md|Remove it when *Finishing* ends or stops, with `git worktree remove --force <the mktemp path>`.
 skills/github/SKILL.md|A problem marked `Done in #<PR>.` needs no other correction, and an issue with a problem left in it stays open.
 skills/github/scout.md|Then read the title and the whole body of each issue against them, the sentences with no citation too.
+rules.md|No pattern to copy and no rule to keep the work short skips these calls.
 EOF
 echo 'rules_test: ok'

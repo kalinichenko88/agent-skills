@@ -7,6 +7,8 @@ agent matches it and says so.
 
 - Before the first write or edit to a TypeScript file (`.ts`, `.tsx`, `.mts`,
   `.cts`) in a session. `rules.md` asks for it, so a subagent starts it too.
+  A pattern in the project to copy, or another plugin's rule to keep the work
+  short, does not skip it.
 - You write or review TypeScript: declare an object shape, place a type, an
   enum or a schema that several files use, name a new file or a constant,
   write a callback, reach for a dependency.
