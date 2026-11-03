@@ -60,11 +60,14 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```te
   '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence at the start of a line' '2 invariants.sh: a debt line outside an invariant, after I-1: debt `src/a.ts`.' "$code $err$out"
-# A line after a fence does not continue the Check: line before the fence.
-printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```text' 'x' '```' '`src/a.ts` is old.' \
-  >"$empty/docs/ARCHITECTURE.md"
-run "$empty"
-check 'a list line after a fence' "1 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
+# A line after a fence does not continue the Check: line before the fence,
+# with no indent or in the invariant.
+for i in '' '  '; do
+  printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' "$i\`\`\`text" "${i}x" "$i\`\`\`" \
+    "$i\`src/a.ts\` is old." >"$empty/docs/ARCHITECTURE.md"
+  run "$empty"
+  check "a list line after a fence indented by '$i'" "1 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
+done
 # A fence closes only at a line of its own character, as long or longer, with
 # nothing but spaces or tabs after it. One that never closes would hide each
 # invariant below it, so the run checks only the invariants above it.

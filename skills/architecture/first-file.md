@@ -188,9 +188,8 @@ the fence hides could hold a check.
   - a `Check:` or `debt` line under no `- **I-<n>.**` line, as one with no
     indent or under a `*` bullet: the invariant before it is not checked.
 
-  Neither of two invariants with one number is checked.
-
   Other prose under an invariant is not read. A line is a `debt` line only
   when a path in backticks comes right after `debt`, with only spaces or
   commas between them: `debt:` or `debt of` starts prose.
 - Empty code files count as code files of 0 lines.
+- Neither of two invariants with one number is checked.

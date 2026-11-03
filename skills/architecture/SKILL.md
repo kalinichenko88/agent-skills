@@ -379,12 +379,12 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   check of its own invariant: that invariant gets no line on stdout, and
   the other checks run. A fault in the architecture file stops only the
   checks of the invariants that `first-file.md` names for it; a code fence
-  stops those of the invariant that holds it and of each one after it. A
-  wrong call, no git repository, no `checks.awk` or no debt skill stops the
-  run before the first check. The lines of the invariants that ran count as
-  for exit 0 and 1: a hit of the change under a FAIL is a defect. In the
-  base's file, or in a check that cannot run at the base, these causes give
-  no exit 2: see the cases above.
+  that it cannot read stops those of the invariant that holds it and of
+  each one after it. Each other cause stops the run before the first check.
+  The lines of the invariants that ran count as for exit 0 and 1: a hit of
+  the change under a FAIL is a defect. In the base's file, or in a check
+  that cannot run at the base, these causes give no exit 2: see the cases
+  above.
 - `No architecture file …`, exit 0: see `first-file.md`.
 
 It needs bash, git and awk, and reads `<skills>/debt/scripts/data.ere` to
