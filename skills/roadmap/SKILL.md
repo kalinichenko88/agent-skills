@@ -181,8 +181,8 @@ blockers or sub-issues, so it is not the list of free tasks: `next.sh` is.
 When `board.sh` stops on the `project` or `read:project` scope, give the
 person this command, in place of what the message of `gh` says to do. The
 person runs it once on each machine, in a terminal of their own, not through
-`!` in Claude Code: `!` runs it with no terminal. On another host, as GitHub
-Enterprise Server, that host goes in place of `github.com`.
+`!` in Claude Code. On another host, as GitHub Enterprise Server, that host
+goes in place of `github.com`.
 
 ```bash
 gh auth refresh -h github.com -s project
