@@ -353,11 +353,11 @@ Five cases mark hits `new` that are not the branch's. Read the diff for them:
   the hit is not the branch's.
 - With no architecture file at the base, each hit is `new`, as for a branch
   that adds the first one.
-- When the script cannot read the base's file past a line, each hit of an
-  invariant that it did not read whole there is `new`. A `Check:` or `debt`
-  line with no indent ends the invariant above it: that invariant is
-  compared with only the lines before it. When the base's check of one
-  invariant cannot run, each hit of that invariant is `new`.
+- When the script cannot read a line of the base's file, each hit of the
+  invariant of that line is `new`, as `first-file.md` names it. At a code
+  fence that it cannot read, so is each hit of each invariant from that
+  fence on. When the base's check of one invariant cannot run, each hit of
+  that invariant is `new`.
 
 In the last two cases, lines on stderr after `at <base>:` say so.
 
@@ -377,8 +377,10 @@ In the last two cases, lines on stderr after `at <base>:` say so.
   the call, the line in the architecture file, or the install. A path with
   no code file, or a pattern or a path that git rejects, stops only the
   check of its own invariant: that invariant gets no line on stdout, and
-  the other checks run. Each other cause stops the run before the first
-  check. The lines of the invariants that ran count as for exit 0 and 1: a
+  the other checks run. So does a line in the architecture file: see
+  `first-file.md` for the invariant of each such line. A code fence stops
+  the check of each invariant from that fence on. Each other cause stops
+  the run before the first check. The lines of the invariants that ran count as for exit 0 and 1: a
   hit of the change under a FAIL is a defect. In the base's file, or in a
   check that cannot run at the base, these causes give no exit 2: see the
   cases above.

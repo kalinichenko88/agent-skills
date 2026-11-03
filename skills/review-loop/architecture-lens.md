@@ -37,10 +37,10 @@ and run no code of the project.
    with `git show <base>:<file>`, and the files under a path with
    `git ls-tree -r --name-only <base> -- <path>`. Do not run the script at
    `<base>`: at a fault in the base's file, as a line that it cannot read,
-   it stops before the first check. Give any other cause in your last
-   lines. An invariant with no line on stdout did not run: its own check
-   has a cause, `no code file` or `git grep failed`, or another cause
-   stopped every check. Read the code against the statement of each such
+   it does not check the invariant of that line. Give any other cause in
+   your last lines. An invariant with no line on stdout did not run: a
+   cause names it, a code fence in it or before it stopped the read, or
+   another cause stopped every check. Read the code against the statement of each such
    invariant, as for one that is review only, and name those invariants in
    your last lines.
 4. When `npx` or `bunx` is on `PATH`, run

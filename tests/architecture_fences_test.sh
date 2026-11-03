@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs the architecture skill's invariants.sh on architecture files with code
 # fences: the lines inside a fence are skipped, as Markdown shows them as code,
-# and a fence that the script cannot read as Markdown does stops the run.
+# and a fence that the script cannot read as Markdown stops the read there.
 
 # shellcheck disable=SC2016 # the backticks are Markdown's
 set -eu
@@ -54,21 +54,25 @@ printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` debt `sr
 run "$empty"
 check 'an indented and a tilde fence' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
 # A fence at the start of a line ends the invariant, as any such line does, so
-# a debt line after it is outside the invariant.
+# a debt line after it is outside the invariant, and the invariant before it
+# is left out.
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```text' '```' \
   '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'a fence at the start of a line' '2 invariants.sh: a debt line outside an invariant: debt `src/a.ts`.' "$code $err"
+check 'a fence at the start of a line' '2 invariants.sh: a debt line outside an invariant, after I-1: debt `src/a.ts`.' "$code $err$out"
 # A fence closes only at a line of its own character, as long or longer, with
 # nothing but spaces or tabs after it. One that never closes would hide each
-# invariant below it.
+# invariant below it, so the run checks only the invariants above it.
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` debt `src/a.ts`.' '````markdown' \
   '- **I-2.** An example.' '  ```ts' '  Check: grep `x` in `nope/`.' '  ```' '````' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a fence that holds a shorter one' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
-printf '%s\n' '```' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '```' '- **I-2.** No fetch.' \
+  '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'a fence that does not close' '2 invariants.sh: a code fence that does not close, at line 1' "$code $err"
+check 'a fence that does not close' "2 invariants.sh: a code fence that does not close, at line 3
+$(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
+$out"
 # A non-blank line indented less than a fence, before its closing line, as at
 # the end of the list item that holds the fence, stops the run: the lines that
 # the fence hides could hold a check.

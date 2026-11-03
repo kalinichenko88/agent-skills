@@ -132,8 +132,8 @@ longer, with nothing but spaces or tabs after it, at the same column as the
 opening line. A fence at column 0 also closes at such a line indented 1 to 3
 columns more. A tab moves the text to the next multiple of 4 columns.
 
-A fence stops the script in three cases. The lines that it hides could hold
-a check.
+A fence stops the script there in three cases: it checks only the invariants
+before the fence. The lines that the fence hides could hold a check.
 
 - It does not close.
 - It is indented, and a line that could close it is indented 1 to 3 columns
@@ -176,14 +176,19 @@ a check.
 - An invariant with no `Check:` line is review only. Any other text after
   `Check:` is a line that the script cannot read.
 - A `Check:` line and a `debt` line are one line each: do not wrap them. The
-  script stops, and does not drop the line, at:
+  script does not drop such a line. It says why, does not check the
+  invariant of the line, and checks the others, at:
   - a line right after one of them that starts with an item in backticks, or
-    with `in` or `except` and an item in backticks;
+    with `in` or `except` and an item in backticks, also with no indent, as
+    Markdown wraps a line;
   - a `debt` line with a word that is not a path;
   - a `debt` line before the `Check:` line of its invariant, or in an
     invariant with no `Check:` line;
-  - a `Check:` or `debt` line under no `- **I-<n>.**` line, as under a `*`
-    bullet.
+  - a `Check:` or `debt` line under no `- **I-<n>.**` line, as one with no
+    indent or under a `*` bullet: the invariant before it is not checked.
+
+  Two invariants with one number are not checked, both of them. A line with
+  no indent after a blank line is prose.
 
   Other prose under an invariant is not read. A line is a `debt` line only
   when a path in backticks comes right after `debt`, with only spaces or

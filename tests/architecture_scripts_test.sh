@@ -121,13 +121,15 @@ run "$empty" HEAD
 check 'no file at a ref' '0 No architecture file at HEAD.' "$code $out"
 
 mkdir "$empty/docs"
-# A line that the script cannot read stops every check, also of the whole
-# invariants above it.
-printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' \
-  '- **I-3.** No fetch.' '  Check: grep fetch in src/' >"$empty/docs/ARCHITECTURE.md"
+# A line that the script cannot read leaves out only its own invariant: the
+# run says why once, checks the invariants above and below it, and exits 2.
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '- **I-2.** No fetch.' '  Check: grep fetch in src/' \
+  '- **I-3.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
 # An AT of the person's environment does not reach the message.
 AT='leak: ' run "$empty"
-check 'a line it cannot read' '2 invariants.sh: I-3: cannot read: Check: grep fetch in src/' "$code $err$out"
+check 'a line it cannot read' "2 invariants.sh: I-2: cannot read: Check: grep fetch in src/
+$(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);' 'I-3 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
+$out"
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `srcx/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'a typo in a path' '2 invariants.sh: I-1: no code file under srcx/' "$code $err"
@@ -151,7 +153,8 @@ $out"
 
 # A debt line belongs to the Check: line of its invariant wherever it stands
 # in the block after it. A line that the script would drop changes what a
-# check means, so it stops the run: a debt line with no Check: line, and a
+# check means, so the run leaves its invariant out: a debt line with no
+# Check: line, and a
 # Check: line that a person or a formatter wrapped.
 printf '%s\n' '- **I-1.** No code file in `src/` has a line.' '  Check: lines 0 in `src/`.' \
   '  ADR: 0001.' '' '  debt `src/a.ts`.' >"$empty/docs/ARCHITECTURE.md"
@@ -180,6 +183,25 @@ printf '%s\n' '- **I-1.** No fetch, and the' '  debt is described in prose.' \
 run "$empty"
 check 'prose that starts with debt or in' "0 $(printf '%s\n' 'I-1 PASS' '  debt src/a.ts:1:fetch(u);')" "$code $out"
 
+# A line with no indent ends the invariant. A Check: or debt line there, or
+# a list line right after a Check: line, which Markdown reads as its wrap,
+# cuts that invariant short: the run leaves it out, and checks the next one.
+# After a blank line, such a line is prose.
+for c in 'Check: grep `fetch\(` in `src/`.|a Check: line outside an invariant, after I-1: Check: grep `fetch\(` in `src/`.' \
+  '  Check: grep `fetch\(` in `src/`.;debt `src/a.ts`.|a debt line outside an invariant, after I-1: debt `src/a.ts`.' \
+  '  Check: grep `fetch\(` in `src/`;`lib/`.|I-1: cannot read: `lib/`.' \
+  '  Check: grep `fetch\(` in `src/`;except `src/a.ts`.|I-1: cannot read: except `src/a.ts`.'; do
+  IFS=';' read -r -a lines <<<"${c%%|*}"
+  printf '%s\n' '- **I-1.** No fetch.' "${lines[@]}" '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
+  run "$empty"
+  check "a line with no indent: ${c%%|*}" "2 invariants.sh: ${c#*|}
+$(printf '%s\n' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
+$out"
+done
+printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' '' '`src/a.ts` is the old client.' >"$empty/docs/ARCHITECTURE.md"
+run "$empty"
+check 'prose with no indent after a blank line' "1 $(printf '%s\n' 'I-1 FAIL' '  src/a.ts:1:fetch(u);')" "$code $out"
+
 # A Check: line with no invariant above it would never run: a * bullet, or the
 # period outside the bold.
 printf '%s\n' '* **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/`.' >"$empty/docs/ARCHITECTURE.md"
@@ -192,9 +214,14 @@ check 'a Check: line outside an invariant' \
 printf '%s\n' '- **I-1.** No fetch.' '  Check: grep `fetch\(` in `src/` except `src/`.' >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
 check 'an except path over the whole check' '2 invariants.sh: I-1: no code file under src/' "$code $err"
-printf '%s\n' '- **I-1.** No fetch.' '- **I-1.** No fetch again.' >"$empty/docs/ARCHITECTURE.md"
+# A finding cites an invariant by its number, so the run leaves out both
+# invariants with one number.
+printf '%s\n' '- **I-1.** No fetch.' '- **I-1.** No fetch again.' '- **I-2.** No fetch.' '  Check: grep `fetch\(` in `src/`.' \
+  >"$empty/docs/ARCHITECTURE.md"
 run "$empty"
-check 'two invariants with one number' '2 invariants.sh: I-1: a second invariant with this number, at line 2' "$code $err"
+check 'two invariants with one number' "2 invariants.sh: I-1: a second invariant with this number, at line 2
+$(printf '%s\n' 'I-2 FAIL' '  src/a.ts:1:fetch(u);')" "$code $err
+$out"
 
 # An empty code file is a code file: a files check counts it.
 : >"$empty/src/b.ts"
