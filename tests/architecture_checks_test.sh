@@ -12,6 +12,9 @@
 #   call-none-2    the block before the first write; the reports call fetch
 #   call-files-2   no tree and an empty log: a run that wrote no file
 #   call-line-2    only the Skill call: a run that stopped before a write
+#   call-skill-2   a recorded run of another task, with no tree: the brief of
+#                  craft:product written outside the tree, then the block,
+#                  then the first write in the tree
 #   store-none-2   an ADR with two options and a Confirmation
 #   store-files-2  the same ADR with one option
 #   store-line-2   the same ADR with no Confirmation
@@ -50,13 +53,14 @@ tests/fixtures/architecture/store-files-1: 0 ADRs
 tests/fixtures/architecture/store-files-2/docs/adr/0001-recent-orders-in-local-storage.md: no two options or no Confirmation
 store files: 0 of 2 runs write one ADR with two options and a Confirmation
 split files: 0 of 2 runs split the file in a commit before the feature
-call skill: 1 of 1 runs use request() and no second client
-block in call skill: 0 of 1 runs before the first write
+no import of api/client: tests/fixtures/architecture/call-skill-2/src/features/reports
+call skill: 1 of 2 runs use request() and no second client
+block in call skill: 1 of 2 runs before the first write
 tests/fixtures/architecture/store-skill-1: 0 ADRs
 tests/fixtures/architecture/store-skill-2: 0 ADRs
 store skill: 0 of 2 runs write one ADR with two options and a Confirmation
 split skill: 1 of 1 runs split the file in a commit before the feature
-skill in skill: 3 of 4 runs before the first write
+skill in skill: 4 of 5 runs before the first write
 no import of api/client: tests/fixtures/architecture/call-line-2/src/features/reports
 call line: 1 of 2 runs use request() and no second client
 block in call line: 0 of 2 runs before the first write

@@ -96,21 +96,30 @@ The task: $call_task
 EOF
 }
 
-# events <log>: the tool calls of the session and its subagents in order, one
-# a line, as the skill's name for a Skill call and Write for a write, and Block
-# for a text of the main session that holds the block of *The start of a
-# feature*.
+# events <log>: the Skill calls and the writes of the session and its
+# subagents in order, one a line, as the skill's name for a Skill call and
+# Write for a write, and Block for a text of the main session that holds the
+# block of *The start of a feature*. A write is a write into the session's
+# tree, its cwd: the brief
+# that craft:product writes into a scratchpad or a temporary folder before
+# its report is not one.
 # ponytail: a Bash call is a write when it has `>`, `tee` or `tee -a`, then
-# spaces or none, then a path with a dot and letters, as `cat > a.ts <<'EOF'`.
-# `cp`, `mv` and `sed -i` are not writes.
+# spaces or none, then a path with a dot and letters, as `cat > a.ts <<'EOF'`,
+# and it has no `cd` out of the tree. A path that starts with `/`, `$`, `~`
+# or `..` is out of the tree, unless it starts with the cwd. `cp`, `mv` and
+# `sed -i` are not writes.
 events() {
-  jq -rR 'fromjson? | select(.type == "assistant") | .parent_tool_use_id as $parent
+  jq -nrR '[inputs | fromjson?] | (map(select(.type == "system" and .subtype == "init"))[0].cwd // "") as $cwd
+    | def inside: ltrimstr("\"") | (test("^([/$~]|\\.\\.)") | not) or . == $cwd or ($cwd != "" and startswith($cwd + "/"));
+    .[] | select(.type == "assistant") | .parent_tool_use_id as $parent
     | .message.content[]
     | if .type == "tool_use" then
         if .name == "Skill" then .input.skill
-        elif (.name | test("^(Write|Edit|MultiEdit|NotebookEdit)$"))
-          or (.name == "Bash" and (.input.command | test("(>|\\btee( -a)?) *[^ ;&|<>]*\\.[a-z]+\\b"))) then "Write"
-        else .name end
+        elif (.name | test("^(Write|Edit|MultiEdit|NotebookEdit)$")) and (.input.file_path // "" | inside)
+          or (.name == "Bash"
+            and any(.input.command | scan("(?:>|\\btee(?: -a)?) *([^ ;&|<>]*\\.[a-z]+)\\b")[0]; inside)
+            and all(.input.command | scan("\\bcd +([^ ;&|)]+)")[0]; inside)) then "Write"
+        else empty end
       elif .type == "text" and $parent == null
         and (.text | contains("**Problem:**") and contains("**Touches:**")) then "Block"
       else empty end' "$1"
