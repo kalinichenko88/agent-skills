@@ -13,6 +13,7 @@ lint:
 	! grep -n '^- ' CHANGELOG.md | grep -v '^[0-9]*:- ([a-z][a-z, -]*) '
 	! git grep -n 'kalinichenko[:]' -- . ':!docs/superpowers' ':!CHANGELOG.md' ':!docs/migrating-from-kalinichenko.md'
 	! git grep -nE "(^|[^<])<<-?[[:space:]]*[^[:space:]<0-9]" -- 'skills/*.md' rules.md
+	! git grep -n 'gh auth refresh' -- . ':!docs/superpowers' ':!CHANGELOG.md' ':!Makefile' | grep -vE -- '(-h|--hostname)[ =]github\.com'
 	shellcheck hooks/*.sh tests/*.sh skills/github/scripts/*.sh skills/roadmap/scripts/*.sh skills/debt/scripts/*.sh skills/review-loop/scripts/*.sh skills/architecture/scripts/*.sh tests/fixtures/debt/*.sh
 
 # A test passes only when it exits 0 and its last non-empty line on stdout is

@@ -103,8 +103,10 @@ take next: you get one free task and the reason. Skill: roadmap.
 ### Optional
 
 - **The `project` scope on the `gh` token**: the board of the roadmap
-  skill. Run once on each machine: `gh auth refresh -s project`. Without it,
-  the roadmap has no board.
+  skill. Run once on each machine, in a terminal of your own, not through `!`
+  in Claude Code: `gh auth refresh -h github.com -s project`. On another
+  host, as GitHub Enterprise Server, that host goes in place of `github.com`.
+  Without it, the roadmap has no board.
 - **`npx` or `bunx`**: the copies in the debt map (`clones.sh`), with a
   `TMPDIR` that other users cannot write, or none: then it uses `~/.cache`.
   Without them, the debt map has no copies, and the report says so.
