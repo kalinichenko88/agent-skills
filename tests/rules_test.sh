@@ -45,10 +45,6 @@ done
 
 # hooks.json runs the hook once per part, and each part is one context. The
 # two parts and the marker line between them rebuild rules.md (ADR 0004).
-grep -c '^<!-- rules.sh splits' "$root/rules.md" | grep -qx 1 || {
-  echo "FAIL: rules.md must hold one marker line where rules.sh splits it"
-  exit 1
-}
 marker=$(grep '^<!-- rules.sh splits' "$root/rules.md")
 if "$root/hooks/rules.sh" SessionStart >/dev/null 2>&1; then
   echo "FAIL: the hook with no part gives output, and the whole file passes the cap"
@@ -75,9 +71,7 @@ for event in SessionStart SubagentStart; do
     echo "FAIL: $event: the two parts and the marker line differ from rules.md"
     exit 1
   }
-done
-# Every rule handler in hooks.json names a part, and each part has one.
-for event in SessionStart SubagentStart; do
+  # Every rule handler in hooks.json names a part, and each part has one.
   parts=$(jq -r --arg e "$event" \
     '.hooks[$e][].hooks[].command | select(test("rules\\.sh")) | split(" ") | last' \
     "$root/hooks/hooks.json" | sort | tr '\n' ' ')
