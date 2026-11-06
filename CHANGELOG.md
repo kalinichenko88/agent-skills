@@ -5,6 +5,32 @@ Every release of this plugin, newest first. A line is one commit on
 type, and the PR number when it has one. The `/release` skill writes the
 section; pull requests leave this file alone.
 
+## 2.1.0 - 2026-11-06
+
+### Added
+
+- (scenarios) specify the take-in flow with no host word, and probe craft against it (#234)
+- (review-loop) walk a changed screen by eye before round 1 (#223)
+
+### Changed
+
+- (rules) give rules.md to the session in two hook outputs, each under the cap (#256) (breaking)
+- (plugin) ignore the .playwright-mcp folder that the Playwright MCP server writes (#233)
+- (product) add the product store, with PDR 0001 to stay on GitHub only (#221)
+
+### Fixed
+
+- (rules) correct an open issue at once when the person's decision makes it false (#259)
+- (release) pick the level from commit types only, as Codex asks for hook trust at each update (#258)
+- (github) search the repository that collect.sh resolved, not the remote's old name (#257)
+- (roadmap) run the project scope command with -h github.com, in a terminal of your own (#232)
+- (github) let a session that moved into its worktree with cd remove it itself at Cleanup (#229)
+- (rules) keep the conventions calls when another plugin says to reuse the pattern (#228)
+- (architecture) leave out only the invariant of a line the parser cannot read (#226)
+- (architecture) count only writes into the run's folder before the block of a feature start (#225)
+- (github) check open issues against a merged PR's decisions, not only its citations (#224)
+- (github) file a corrected plugin step at Finishing, not in SendFeedback (#222)
+
 ## 2.0.0 - 2026-11-02
 
 ### Added
