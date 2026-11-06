@@ -25,7 +25,7 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    --ff-only origin/main`. Stop if that fails, or if `HEAD` is still not
    `origin/main` — local commits the remote does not have.
 2. **Read what is unreleased.** `last=$(git describe --tags --abbrev=0 --match 'v[0-9]*')`, then
-   `git log --format='%h %s' "$last"..HEAD` and `git diff --name-only "$last"..HEAD`.
+   `git log --format='%h %s' "$last"..HEAD`.
    A log line is the short hash, a space and the subject; steps 3 and 4 read
    the subject. No commits since the tag: stop, there is nothing to release. If
    `jq -r .version .codex-plugin/plugin.json` is not `${last#v}`, stop: the field
@@ -39,7 +39,7 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
 
    | Level | When |
    | --- | --- |
-   | major | a type ends in `!`, or `hooks/hooks.json` changed — Codex users must trust the hooks again in `/hooks` |
+   | major | a type ends in `!` |
    | minor | a type is `feat` |
    | patch | anything else, reverts included |
 
@@ -74,9 +74,7 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    that only lists a new skill gives no area too. The scope is the areas in
    alphabetical order, comma-separated: `(react, typescript)`. Four or more
    areas, or none, give `(plugin)`. Breaking subjects (`!`) get `(breaking)` at
-   the end of the line. When `hooks/hooks.json` changed, the first line under `### Changed`
-   is `- (codex) trust the hooks again in /hooks (breaking)`, so the reader
-   sees why the bump is major.
+   the end of the line.
 5. **Bump and check.**
    `tmp=$(mktemp) && jq --arg v "$version" '.version = $v' .codex-plugin/plugin.json >"$tmp" && mv "$tmp" .codex-plugin/plugin.json`,
    then `make check`. If the check fails, restore both files and stop.
@@ -109,5 +107,5 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    and publishes the release there. With it, `gh` stops: run the push from step 6,
    then run this again. A failed `gh release create` leaves nothing to
    undo: fix the cause and run it again.
-8. **Report** the new tag, the release URL and the update commands from the
-   README's *Update* section.
+8. **Report** the new tag, the release URL and the update steps from the
+   README's *Update* section, the trust in `/hooks` included.
