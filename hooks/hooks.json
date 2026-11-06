@@ -6,7 +6,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh\" SessionStart",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh\" SessionStart 1",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh\" SessionStart 2",
             "timeout": 5
           }
         ]
@@ -17,7 +22,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh\" SubagentStart",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh\" SubagentStart 1",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh\" SubagentStart 2",
             "timeout": 5
           }
         ]

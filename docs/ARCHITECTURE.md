@@ -15,7 +15,8 @@ run the checks. The model does the rest.
 
 Both hosts read the same skills and `rules.md`; each host has its own
 `plugin.json`. `hooks/rules.sh` injects `rules.md` at the
-start of each session and each subagent. In Claude Code,
+start of each session and each subagent, in two parts split at its marker
+line (ADR 0004). In Claude Code,
 `hooks/session-title.sh` names the session after an issue when the prompt
 is the issue alone. A skill loads when its
 `description` matches the moment. The plugin installs as a copy of the whole
@@ -229,9 +230,12 @@ hold 10. A new number needs an ADR.
   Windows, NixOS with no `/bin/bash`: every script starts with
   `#!/usr/bin/env bash`, and every file is LF (`.gitattributes`).
   `tests/rules_test.sh` checks both.
-- **Size.** `rules.md` stays under 10,000 characters, Claude Code's cap on
-  hook context; `tests/rules_test.sh` checks it. Pictures are WebP, since
-  the plugin installs as a copy of the repository.
+- **Size.** Each of the two parts of `rules.md` stays under 10,000
+  characters, Claude Code's cap on one hook context; `tests/rules_test.sh`
+  checks it. A host runs the two hooks of an event in parallel and gives
+  no order, so no text points across the marker line with "above" or
+  "below" (ADR 0004): review only. Pictures are WebP, since the plugin installs as a
+  copy of the repository.
 - **Safety.** No step of the debt and architecture skills runs the code of
   the project it reads. Nothing from a private source goes into a public
   repository (`craft:github`).
@@ -248,3 +252,4 @@ An accepted ADR goes in `docs/adr/NNNN-title.md` and on this list.
 - [0001 Each script prints its usage from its header](adr/0001-usage-from-the-header.md)
 - [0002 The plugin is named craft](adr/0002-plugin-name-craft.md)
 - [0003 The flows are specified as host-neutral scenarios in scenarios/](adr/0003-host-neutral-scenarios.md)
+- [0004 rules.md reaches the session in two hook outputs](adr/0004-rules-in-two-hook-outputs.md)

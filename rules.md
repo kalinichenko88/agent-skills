@@ -1,4 +1,4 @@
-# Global instructions
+# Global instructions, part 1 of 2
 
 ## The repository's own gate (always)
 
@@ -104,6 +104,10 @@ ones now say something false.
 - A follow-up is allowed only for a broader sweep the change merely brushes
   against — never for the document that describes the very behaviour changed.
 
+<!-- rules.sh splits the rules here: each part stays under 10,000 characters -->
+
+# Global instructions, part 2 of 2
+
 ## Code review (always)
 
 Before the first review of a change — `/code-review` or `/security-review` in
@@ -161,8 +165,8 @@ copy and no rule to keep the work short skips these calls.
 A commit message, a pull request, an issue, a workflow file — anything that
 touches a repository's GitHub surface goes through the `craft:github`
 skill. Invoke it before the first `git commit`, `gh` call or workflow edit, not
-after. A read-only subagent, as a review or a Haiku subagent above, files
-nothing, whatever the rules below say. It does not load the skill. It names
+after. A read-only subagent, as a review or an `Explore` subagent,
+files nothing, whatever the rules below say. It does not load the skill. It names
 each finding in its report, and the agent that sent it decides on each one.
 One sent with the skill's `scout.md`, or with the roadmap skill's `lanes.md`,
 follows that file instead.
@@ -177,7 +181,8 @@ there is no GitHub remote or `gh auth status` fails, name the finding in the
 final report instead of filing it.
 
 **A defect in this plugin goes to its tracker, after the person says yes.**
-These rules, the hooks, a `craft:` skill and its scripts are the plugin.
+Both parts of these rules, the hooks, a `craft:` skill and its scripts are
+the plugin.
 A defect in one of them is an issue for `kalinichenko88/craft-skills`, not for
 the project you work in. In a checkout of `craft-skills`, the rule above
 applies instead. Do not derail the task. Unlike the rule above, ask the person

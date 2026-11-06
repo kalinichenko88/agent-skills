@@ -20,10 +20,12 @@ fi
 # only the files it changes. The hook must still give the rules.
 cp "$root/hooks/rules.sh" "$crlf/hooks/"
 sed 's/$/\r/' "$root/rules.md" >"$crlf/rules.md"
-[ "$("$crlf/hooks/rules.sh" SessionStart)" = "$("$root/hooks/rules.sh" SessionStart)" ] || {
-  echo "FAIL: the hook does not give the rules from a CRLF rules.md"
-  exit 1
-}
+for part in 1 2; do
+  [ "$("$crlf/hooks/rules.sh" SessionStart $part)" = "$("$root/hooks/rules.sh" SessionStart $part)" ] || {
+    echo "FAIL: the hook does not give part $part of the rules from a CRLF rules.md"
+    exit 1
+  }
+done
 # NixOS has no /bin/bash: every script must find bash on PATH.
 for script in $(git -C "$root" ls-files '*.sh'); do
   [ "$(head -1 "$root/$script")" = '#!/usr/bin/env bash' ] || {
@@ -41,22 +43,52 @@ for script in $(git -C "$root" ls-files 'skills/*/scripts/*.sh'); do
   fi
 done
 
+# hooks.json runs the hook once per part, and each part is one context. The
+# two parts and the marker line between them rebuild rules.md (ADR 0004).
+marker=$(grep '^<!-- rules.sh splits' "$root/rules.md") || {
+  echo "FAIL: rules.md has no marker line where rules.sh splits it"
+  exit 1
+}
+if "$root/hooks/rules.sh" SessionStart >/dev/null 2>&1; then
+  echo "FAIL: the hook with no part gives output, not an error"
+  exit 1
+fi
 for event in SessionStart SubagentStart; do
-  output=$("$root/hooks/rules.sh" "$event")
-  [ "$(jq -r .hookSpecificOutput.hookEventName <<<"$output")" = "$event" ] || {
-    echo "FAIL: $event: wrong hookEventName"
-    exit 1
-  }
-  diff <(jq -r .hookSpecificOutput.additionalContext <<<"$output") \
+  for part in 1 2; do
+    output=$("$root/hooks/rules.sh" "$event" $part)
+    [ "$(jq -r .hookSpecificOutput.hookEventName <<<"$output")" = "$event" ] || {
+      echo "FAIL: $event $part: wrong hookEventName"
+      exit 1
+    }
+    # Claude Code moves additionalContext over 10,000 characters to a file and
+    # shows only a 2,000-character preview.
+    chars=$(jq -r '.hookSpecificOutput.additionalContext | length' <<<"$output")
+    [ "$chars" -le 10000 ] || {
+      echo "FAIL: $event $part: context is $chars characters, the cap is 10000"
+      exit 1
+    }
+    jq -r .hookSpecificOutput.additionalContext <<<"$output" >"$crlf/part$part"
+    # Each part is read on its own, after another plugin's context too.
+    [ "$(head -1 "$crlf/part$part")" = "# Global instructions, part $part of 2" ] || {
+      echo "FAIL: $event $part: the part does not start with its own heading"
+      exit 1
+    }
+  done
+  diff <(printf '%s\n\n%s\n\n%s\n' "$(<"$crlf/part1")" "$marker" "$(<"$crlf/part2")") \
     "$root/rules.md" || {
-    echo "FAIL: $event: context differs from rules.md"
+    echo "FAIL: $event: the two parts and the marker line differ from rules.md"
     exit 1
   }
-  # Claude Code moves additionalContext over 10,000 characters to a file and
-  # shows only a 2,000-character preview.
-  chars=$(jq -r '.hookSpecificOutput.additionalContext | length' <<<"$output")
-  [ "$chars" -le 10000 ] || {
-    echo "FAIL: $event: context is $chars characters, the cap is 10000"
+  # hooks.json runs both parts under each event, from one group, so one
+  # matcher gives both. The path is quoted: the plugin root can hold a space.
+  cmds=$(jq -r --arg e "$event" '[.hooks[$e][] | [.hooks[].command |
+    select(test("rules\\.sh"))] | select(length > 0)] |
+    if length == 1 then .[0][] else "rules.sh in \(length) groups" end' \
+    "$root/hooks/hooks.json" | sort | tr '\n' ',')
+  # shellcheck disable=SC2016 # the variable as hooks.json holds it
+  want=$(printf '"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh" %s %s,' "$event" 1 "$event" 2)
+  [ "$cmds" = "$want" ] || {
+    echo "FAIL: hooks.json: $event runs '$cmds', not '$want'"
     exit 1
   }
 done
@@ -134,6 +166,10 @@ done
 #   project, 5 of 10 invoked the conventions skills before the first write;
 #   with "No pattern to copy …" after the conventions rule, 16 of 20 did. The
 #   runs and their fixture are in the description of the PR that closes #196.
+# - rules.md reaches the model in two parts, in either order (ADR 0004). The
+#   read-only subagent of GitHub once pointed "above" to the Haiku subagents
+#   of part 1, and without that word it read as every Haiku subagent. It
+#   names the Explore subagent of part 1 instead.
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
     echo "FAIL: $f: no \"$phrase\""
@@ -171,5 +207,6 @@ skills/github/SKILL.md|Remove it when *Finishing* ends or stops, with `git workt
 skills/github/SKILL.md|A problem marked `Done in #<PR>.` needs no other correction, and an issue with a problem left in it stays open.
 skills/github/scout.md|Then read the title and the whole body of each issue against them, the sentences with no citation too.
 rules.md|`craft:react-conventions` too. A subagent invokes them itself. No pattern to copy and no rule to keep the work short skips these calls.
+rules.md|A read-only subagent, as a review or an `Explore` subagent, files nothing, whatever the rules below say.
 EOF
 echo 'rules_test: ok'
