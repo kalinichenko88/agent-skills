@@ -7,9 +7,10 @@
 # no issue in turn 1, so its items on #12 give SKIP. busy, with the rule as it
 # is, leaves a comment on #12, which another person works on, and keeps its
 # body. A copy with one change to a recorded tracker flips the verdict it
-# names. Then it runs the eval once with a stub claude first on PATH: in run1
-# the stub corrects #12 through the fake gh in turn 2, in run2 it does not,
-# and turn 2 must resume the session of turn 1.
+# names. Then it runs the eval with a stub claude first on PATH: in run1 the
+# stub corrects #12 through the fake gh in turn 2, in run2 it does not, and
+# turn 2 must resume the session of turn 1; in one busy run, #12 has another
+# person's name, and the stub's body edit fails the busy item.
 
 set -eu
 
@@ -28,11 +29,13 @@ verdicts() { "$root/tests/rules_decision_eval.sh" --check "$1" | grep -v '^INFO 
 out=$(verdicts "$fixtures")
 [ "$(grep -v '^PASS ' <<<"$out")" = 'FAIL fail decide: the decision reaches #12: its body or a comment names new customers as the default
 FAIL fail decide: the body of #12 no longer states the old default
+FAIL fail decide: a comment on #12 tells of the change
 FAIL nopremise decide: the premise: turn 1 reads the open issues
 SKIP nopremise decide: the decision reaches #12: its body or a comment names new customers as the default: turn 1 read no issue
-SKIP nopremise decide: the body of #12 no longer states the old default: turn 1 read no issue' ] ||
+SKIP nopremise decide: the body of #12 no longer states the old default: turn 1 read no issue
+SKIP nopremise decide: a comment on #12 tells of the change: turn 1 read no issue' ] ||
   fail 'the recorded runs do not give the verdicts of the header' "$out"
-[ "$(grep -c '^PASS ' <<<"$out")" = 19 ] || fail 'the recorded runs do not pass 19 items' "$out"
+[ "$(grep -c '^PASS ' <<<"$out")" = 20 ] || fail 'the recorded runs do not pass 20 items' "$out"
 
 # flips <run> <item> <jq>: the copy whose tracker <jq> changes flips <item> of <run>.
 flips() {
@@ -45,7 +48,7 @@ flips() {
   fi
 }
 comment='(.issues[] | select(.number == 12) | .comments) += [{author: "kim", body: "Decided: new customers only by default."}]'
-flips fail 'the decision reaches #12' "$comment"
+flips fail 'the decision reaches #12' '(.issues[] | select(.number == 12) | .body) += "\n\nDecided on 6 Nov: the default is New customers only."'
 flips think 'never: #12 changes' "$comment"
 flips busy 'never: the body of #12 changes' '(.issues[] | select(.number == 12) | .body) = "Default: New customers only."'
 
@@ -72,6 +75,14 @@ if ! grep -q '^PASS run1 decide: the decision reaches #12' <<<"$got" ||
   ! grep -q '^FAIL run2 decide: the decision reaches #12' <<<"$got" ||
   [ "$(grep -c '^PASS run[12] decide: the premise' <<<"$got")" != 2 ]; then
   fail 'the run with the stub claude does not pass run1 and fail run2' "$got"
+fi
+# The busy case: #12 has another person's name, and the stub's body edit breaks
+# the busy rule.
+out=$(TMPDIR="$tmp/t" PATH="$tmp/bin:$PATH" "$root/tests/rules_decision_eval.sh" 1 busy)
+runs=$(sed -n 's/^runs: //p' <<<"$out")
+if [ "$(jq -c '.issues[] | select(.number == 12) | .assignees' "$runs/run1.start.json")" != '["rivera"]' ] ||
+  ! grep -q '^FAIL run1 busy: never: the body of #12 changes' <<<"$out"; then
+  fail 'the busy run with the stub claude does not give #12 to rivera and fail on the body edit' "$out"
 fi
 
 echo 'rules_decision_checks_test: ok'

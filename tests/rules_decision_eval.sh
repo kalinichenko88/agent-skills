@@ -197,6 +197,8 @@ check() {
     item 'the decision reaches #12: its body or a comment names new customers as the default' \
       '{ [ "$body12" != "$start12" ] && grep -qiE "$default_b" <<<"$body12"; } || grep -qiE "$default_b" <<<"$notes12"' premise
     item 'the body of #12 no longer states the old default' '! grep -qF "$default_a" <<<"$body12"' premise
+    # filing.md: a body edit notifies nobody, so a one-line comment goes with it.
+    item 'a comment on #12 tells of the change' '[ -n "$notes12" ]' premise
   fi
   item 'the reply paragraph of turn 2 gives the new rule' \
     'said 2 | grep -qiE "new(ly)? (customers|clients)|after the change|from now on|neue[nr]? Kunden"'

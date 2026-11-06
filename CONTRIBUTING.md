@@ -174,11 +174,15 @@ the items on #12 when it does not hold. It checks that the decision reaches
 the reply of turn 2 gives the new rule, and that no other issue changes. With
 `think` after the count of runs, the person is not sure yet, and #12 must
 stay as it is. With `busy`, another person works on #12: a comment carries
-the decision, and the body stays, as `skills/github/filing.md` says. With `--check <runs folder>` it runs only the checks. Run it
-after a change to *Docs move with the change* or *GitHub* in `rules.md`.
+the decision, and the body stays, as `skills/github/filing.md` says. With
+`--check <runs folder>` it runs only the checks. Run it after a change to
+*Docs move with the change* or *GitHub* in `rules.md`, to *Filing one next to
+an existing issue* in `skills/github/filing.md`, or to what
+`skills/github/tracker.md` calls busy.
 `tests/rules_decision_checks_test.sh` runs its checks in `make check`, on
 five recorded runs in `tests/fixtures/rules_decision/`, and runs the eval
-once with a stub `claude` in the place of the model.
+with a stub `claude` in the place of the model, in the decide and the busy
+case.
 The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 
