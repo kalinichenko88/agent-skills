@@ -1,6 +1,7 @@
 # Filing an issue
 
-The global prompt says when a finding becomes an issue; this file says how.
+The global prompt says when a finding becomes an issue; this file says how,
+and which nit gets none.
 Read `tracker.md`, next to this file, before the search below: it runs the
 scripts and reads the tracker. `<dir>` is this skill's base directory.
 
@@ -29,17 +30,18 @@ another module, a bug that shows outside the module too, a design choice, a
 question on business logic (what the product should do where its docs, tests
 and names do not say it; a bug is code that crashes or does not do what they
 say), a change that code outside the module relies on — and it is an issue,
-however small it looks.
+however small it looks, unless it is a nit, below.
 
 **A nit is not worth an issue.** A finding that the Boy Scout check leaves,
 and that is a nit, is not filed and goes into no host. A nit here is a
 name, a wording or a style that no rule of the project asks for, or an edge
-case whose count on real data is zero, and a test of it, except data loss
-or a security hole. These are no nits here, also when `craft:review-loop` calls
-them nits, and they are filed: a comment or a doc line that says something
-false, a command in the docs that fails, and a missing or redundant test of
-what real use reaches. Give each nit one line in the final report instead,
-so that the person can file it.
+case whose count on real data is zero, and a test of it. An edge case of
+data loss or of a security hole is no nit, whatever its count. These are no
+nits here, also when `craft:review-loop` calls them nits, and they are
+filed: a comment or a doc line that says something false, a command in the
+docs that fails, and a missing or redundant test of what real use reaches.
+Give each nit one line in the final report instead, so that the person can
+file it.
 
 **Search by identifier, not by your title.** A search for the symbol finds
 every issue that names it; the prose you were about to write finds only issues

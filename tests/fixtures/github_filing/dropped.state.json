@@ -1,0 +1,56 @@
+{
+  "me": "kim",
+  "repo": "acme/shop",
+  "issues": [
+    {
+      "number": 14,
+      "title": "Order total is off by a cent on some orders",
+      "body": "`orders/total.py` sums floats and rounds with `round`, so 3 × 0.35 gives 1.05 on one order and 1.04 on another. Done when the total rounds half up, in Decimal.",
+      "state": "OPEN",
+      "assignees": [
+        "kim"
+      ],
+      "labels": [
+        "bug"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": []
+    },
+    {
+      "number": 15,
+      "title": "Export the orders of a month as CSV",
+      "body": "The shop owner needs the orders of a month as a CSV file: order, customer, total.",
+      "state": "OPEN",
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": []
+    },
+    {
+      "number": 16,
+      "title": "Dark mode for the admin pages",
+      "body": "The admin pages have only a light theme.",
+      "state": "OPEN",
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "Later",
+      "comments": []
+    },
+    {
+      "number": 17,
+      "title": "Sign-up treats emails that differ only in case as different accounts",
+      "body": "`accounts/signup.py:4`: `sign_up` checks and stores the email exactly as typed. Two emails that differ only in letter case sign up as two accounts.\n\nReproduction:\n\n```python\nfrom accounts.signup import sign_up\nsign_up(\"Bob@shop.test\", \"h\")\nsign_up(\"bob@shop.test\", \"h\")  # expected ValueError(\"this email has an account\"); it returns a second account\n```\n\nA fix must normalize the email (for example `strip().lower()`) before the lookup and before the store, with a test that signs up `Bob@shop.test` and then `bob@shop.test`. Decide if the account keeps the email as typed for display.\n\nOut of scope here: found in the review of the branch for #14, which changes only `orders/`.",
+      "state": "OPEN",
+      "labels": [
+        "bug"
+      ],
+      "comments": [],
+      "assignees": [],
+      "milestone": null
+    }
+  ]
+}

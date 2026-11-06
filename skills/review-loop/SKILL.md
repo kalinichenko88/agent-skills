@@ -439,7 +439,7 @@ a real defect on two, in 53 to 204 seconds.
    shared token, fix it there, and count the places.
 6. **A finding outside the task is an issue**, through the
    `craft:github` skill, unless the Boy Scout Rule takes it into this
-   change.
+   change, or that skill gives it no issue as a nit.
 
 ## The security review
 

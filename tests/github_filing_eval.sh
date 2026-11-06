@@ -20,18 +20,23 @@
 # --max-budget-usd caps each run. A failing check is a result, not an error:
 # it exits 0. The run folder keeps each run's log, events and tracker.
 #
+# With `labelled` after the count of runs, each finding carries the class
+# that a review-loop round gives it: there the docstring is a nit, as a
+# comment. On filing.md before its list of no-nits, 9 of 10 such runs left
+# the low finding off the tracker.
+#
 # With --check, it runs only the checks, on the folder of an earlier run.
 # `make check` runs them so on tests/fixtures/github_filing, through
 # tests/github_filing_checks_test.sh.
 #
-# Usage: tests/github_filing_eval.sh [runs]
+# Usage: tests/github_filing_eval.sh [runs] [plain|labelled]
 #        tests/github_filing_eval.sh --check <runs folder>
 
 # shellcheck disable=SC2016 # Markdown's backticks, and jq runs later
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-usage() { echo "usage: $0 [runs] | --check <runs folder>" >&2; exit 2; }
+usage() { echo "usage: $0 [runs] [plain|labelled] | --check <runs folder>" >&2; exit 2; }
 me=kim
 ask='I am on the branch fix/14-order-total-rounding for #14, and the fix is committed. The review of the branch confirmed no defect in the task. It also returned three findings outside the module of the task:
 
@@ -217,7 +222,7 @@ check() {
   defect=$(grep -ciE 'sign_?up|two accounts|differ only in case' <<<"$added" || true)
   # The new name, not get_invoice_total: the text of the low finding can
   # name the caller of vat.
-  nit=$(grep -ciE '(^|[^_[:alnum:]])invoice_total|get_ prefix' <<<"$added" || true)
+  nit=$(grep -ciE '(^|[^_[:alnum:]])invoice_total|get_`? prefix' <<<"$added" || true)
   low=$(grep -ciE 'cents' <<<"$added" || true)
   said=$(awk -F'\t' '$1 == "text" { last = $2 } END { print last }' "$d.events")
   item() {
@@ -240,6 +245,11 @@ if [ "${1:-}" = --check ]; then
 fi
 n=${1:-10}
 case $n in '' | *[!0-9]*) usage ;; esac
+case ${2:-plain} in
+  plain) ;;
+  labelled) ask=$(sed -e 's/^1\. /1. (nit) /' -e 's/^2\. /2. (nit) /' -e 's/^3\. /3. (defect) /' <<<"$ask") ;;
+  *) usage ;;
+esac
 command -v claude >/dev/null || { echo "$0: no claude command" >&2; exit 2; }
 command -v jq >/dev/null || { echo "$0: no jq command" >&2; exit 2; }
 
