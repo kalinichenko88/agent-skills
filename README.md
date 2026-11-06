@@ -147,8 +147,7 @@ codex plugin add craft@kalinichenko
 
 Then run `codex`, open `/hooks` and trust the plugin's five hooks. Codex skips
 plugin hooks until you do, so without that the skills load but the rules do
-not. Codex 0.164.0 and later checks every file of the plugin, so after each
-update it asks you to trust the hooks again.
+not.
 
 The hooks are plain bash. The four that inject the rules, two parts of
 `rules.md` at the start of a session and of a subagent, have no other
@@ -173,8 +172,9 @@ the background at startup; to upgrade now:
 codex plugin marketplace upgrade kalinichenko
 ```
 
-Then open `/hooks` and trust the hooks again: each release changes files of
-the plugin, and Codex skips the hooks until you do.
+Then open `/hooks` and trust the hooks again. Codex 0.164.0 and later binds
+the trust to every file of the plugin, and each release changes files of the
+plugin, so Codex skips the hooks until you do.
 
 ## Contributing
 
