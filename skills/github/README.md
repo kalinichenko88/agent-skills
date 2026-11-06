@@ -32,6 +32,8 @@ time.
   module that needs no decision and is smaller than the task goes into the
   current PR. Anything else joins an open issue on the same code, up to two
   added findings per issue. Only when no issue can take it is a new one filed.
+  A nit, as a name or a wording that no rule of the project asks for, gets no
+  issue: the final report names it, so that you can file it.
 - **A defect in the plugin reaches its tracker.** When the agent finds that
   a rule, a skill or a script of this plugin is wrong, it writes an issue for
   `kalinichenko88/craft-skills`: the plugin version, the file and line, and

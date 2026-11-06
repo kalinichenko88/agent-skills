@@ -1,0 +1,92 @@
+{
+  "me": "kim",
+  "repo": "acme/shop",
+  "milestones": [
+    {
+      "number": 1,
+      "title": "M1 · Checkout",
+      "state": "open"
+    },
+    {
+      "number": 2,
+      "title": "Later",
+      "state": "open"
+    }
+  ],
+  "issues": [
+    {
+      "number": 14,
+      "title": "Order total is off by a cent on some orders",
+      "body": "`orders/total.py` sums floats and rounds with `round`, so 3 × 0.35 gives 1.05 on one order and 1.04 on another. Done when the total rounds half up, in Decimal.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [
+        "kim"
+      ],
+      "labels": [
+        "bug"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": [],
+      "linked": [
+        "fix/14-order-total-rounding"
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Export the orders of a month as CSV",
+      "body": "The shop owner needs the orders of a month as a CSV file: order, customer, total.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": [],
+      "linked": []
+    },
+    {
+      "number": 16,
+      "title": "Dark mode for the admin pages",
+      "body": "The admin pages have only a light theme.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "Later",
+      "comments": [],
+      "linked": []
+    },
+    {
+      "number": 17,
+      "title": "billing: docstring of vat says cents, but it returns euros",
+      "body": "`billing/tax.py:4`: the docstring of `vat` says that it returns the VAT \"in cents\". The function returns euros, as a `Decimal` quantized to `0.01`. Its only caller, `get_invoice_total` in `billing/invoice.py:5`, adds the result to an order total in euros.\n\nA reader who trusts the docstring can divide the result by 100, or multiply a euro amount by 100 before the call. The docstring must say euros.\n\nOut of scope for #14: found by the review of the branch for #14, which changes only the `orders` module.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "documentation"
+      ],
+      "milestone": null,
+      "comments": [],
+      "linked": []
+    },
+    {
+      "number": 18,
+      "title": "accounts: sign_up treats emails that differ only in case as two accounts",
+      "body": "`accounts/signup.py:4`: `sign_up` stores the email as typed and checks for duplicates with an exact match. So `Bob@shop.test` and `bob@shop.test` sign up as two accounts.\n\nTo decide: normalize the email before the check and the store (for example `strip()` and lowercase the domain or the whole address), and say how existing accounts that differ only in case are handled.\n\nOut of scope for #14: found by the review of the branch for #14, which changes only the `orders` module.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "bug"
+      ],
+      "milestone": null,
+      "comments": [],
+      "linked": []
+    }
+  ]
+}
