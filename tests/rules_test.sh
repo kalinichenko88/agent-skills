@@ -20,10 +20,12 @@ fi
 # only the files it changes. The hook must still give the rules.
 cp "$root/hooks/rules.sh" "$crlf/hooks/"
 sed 's/$/\r/' "$root/rules.md" >"$crlf/rules.md"
-[ "$("$crlf/hooks/rules.sh" SessionStart)" = "$("$root/hooks/rules.sh" SessionStart)" ] || {
-  echo "FAIL: the hook does not give the rules from a CRLF rules.md"
-  exit 1
-}
+for part in 1 2; do
+  [ "$("$crlf/hooks/rules.sh" SessionStart $part)" = "$("$root/hooks/rules.sh" SessionStart $part)" ] || {
+    echo "FAIL: the hook does not give part $part of the rules from a CRLF rules.md"
+    exit 1
+  }
+done
 # NixOS has no /bin/bash: every script must find bash on PATH.
 for script in $(git -C "$root" ls-files '*.sh'); do
   [ "$(head -1 "$root/$script")" = '#!/usr/bin/env bash' ] || {
@@ -41,22 +43,46 @@ for script in $(git -C "$root" ls-files 'skills/*/scripts/*.sh'); do
   fi
 done
 
+# hooks.json runs the hook once per part, and each part is one context. The
+# two parts and the marker line between them rebuild rules.md (ADR 0004).
+grep -c '^<!-- rules.sh splits' "$root/rules.md" | grep -qx 1 || {
+  echo "FAIL: rules.md must hold one marker line where rules.sh splits it"
+  exit 1
+}
+marker=$(grep '^<!-- rules.sh splits' "$root/rules.md")
+if "$root/hooks/rules.sh" SessionStart >/dev/null 2>&1; then
+  echo "FAIL: the hook with no part gives output, and the whole file passes the cap"
+  exit 1
+fi
 for event in SessionStart SubagentStart; do
-  output=$("$root/hooks/rules.sh" "$event")
-  [ "$(jq -r .hookSpecificOutput.hookEventName <<<"$output")" = "$event" ] || {
-    echo "FAIL: $event: wrong hookEventName"
-    exit 1
-  }
-  diff <(jq -r .hookSpecificOutput.additionalContext <<<"$output") \
+  for part in 1 2; do
+    output=$("$root/hooks/rules.sh" "$event" $part)
+    [ "$(jq -r .hookSpecificOutput.hookEventName <<<"$output")" = "$event" ] || {
+      echo "FAIL: $event $part: wrong hookEventName"
+      exit 1
+    }
+    # Claude Code moves additionalContext over 10,000 characters to a file and
+    # shows only a 2,000-character preview.
+    chars=$(jq -r '.hookSpecificOutput.additionalContext | length' <<<"$output")
+    [ "$chars" -le 10000 ] || {
+      echo "FAIL: $event $part: context is $chars characters, the cap is 10000"
+      exit 1
+    }
+    jq -r .hookSpecificOutput.additionalContext <<<"$output" >"$crlf/part$part"
+  done
+  diff <(printf '%s\n\n%s\n\n%s\n' "$(<"$crlf/part1")" "$marker" "$(<"$crlf/part2")") \
     "$root/rules.md" || {
-    echo "FAIL: $event: context differs from rules.md"
+    echo "FAIL: $event: the two parts and the marker line differ from rules.md"
     exit 1
   }
-  # Claude Code moves additionalContext over 10,000 characters to a file and
-  # shows only a 2,000-character preview.
-  chars=$(jq -r '.hookSpecificOutput.additionalContext | length' <<<"$output")
-  [ "$chars" -le 10000 ] || {
-    echo "FAIL: $event: context is $chars characters, the cap is 10000"
+done
+# Every rule handler in hooks.json names a part, and each part has one.
+for event in SessionStart SubagentStart; do
+  parts=$(jq -r --arg e "$event" \
+    '.hooks[$e][].hooks[].command | select(test("rules\\.sh")) | split(" ") | last' \
+    "$root/hooks/hooks.json" | sort | tr '\n' ' ')
+  [ "$parts" = "1 2 " ] || {
+    echo "FAIL: hooks.json: $event runs rules.sh with parts '$parts', not '1 2 '"
     exit 1
   }
 done

@@ -30,7 +30,7 @@ codex plugin remove kalinichenko@kalinichenko
 codex plugin add craft@kalinichenko
 ```
 
-Then run `codex`, open `/hooks`, and trust the three hooks of `craft`. Codex
+Then run `codex`, open `/hooks`, and trust the five hooks of `craft`. Codex
 skips the hooks of a plugin until you trust them. Without this step, the
 skills load, but the rules do not.
 
@@ -94,7 +94,7 @@ codex plugin marketplace add kalinichenko88/craft-skills
 codex plugin add craft@kalinichenko
 ```
 
-In Codex, then trust the three hooks of `craft` in `/hooks`, as above.
+In Codex, then trust the five hooks of `craft` in `/hooks`, as above.
 
 ## Last
 

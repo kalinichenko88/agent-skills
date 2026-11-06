@@ -32,9 +32,9 @@ The first user is the author.
 
 - **Law and licence:** MIT. Recorded payloads in `tests/fixtures/` come only
   from public repositories, or from a fake tracker that a test builds.
-- **The hosts:** Claude Code caps hook context at 10,000 characters, and
-  `rules.md` loads through a hook. Codex runs plugin hooks only after the
-  person trusts them.
+- **The hosts:** Claude Code caps the context of one hook at 10,000
+  characters, and `rules.md` loads through two hooks, one for each part.
+  Codex runs plugin hooks only after the person trusts them.
 - **Money:** the plugin is free and earns nothing. Its cost is the user's
   tokens: the panel, the second reviewer, the walk of a screen and the evals
   call models.

@@ -145,13 +145,14 @@ codex plugin marketplace add kalinichenko88/craft-skills
 codex plugin add craft@kalinichenko
 ```
 
-Then run `codex`, open `/hooks` and trust the plugin's three hooks. Codex skips
+Then run `codex`, open `/hooks` and trust the plugin's five hooks. Codex skips
 plugin hooks until you do, so without that the skills load but the rules do
 not. Editing `rules.md` does not need a new trust; changing `hooks/hooks.json`
-does.
+or a script in `hooks/` does.
 
-The hooks are plain bash. The two that inject the rules have no other
-dependency. The third names a Claude Code session after an issue: it calls
+The hooks are plain bash. The four that inject the rules, two parts of
+`rules.md` at the start of a session and of a subagent, have no other
+dependency. The fifth names a Claude Code session after an issue: it calls
 `gh`, and in Codex it does nothing.
 
 ## Update
