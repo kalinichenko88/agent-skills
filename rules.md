@@ -93,7 +93,8 @@ issues. The same rules apply in other languages.
 A change that alters user-visible behaviour, a public contract, or how the thing
 is installed updates the documents that describe it — in the same change, not a
 follow-up. README, the project's instruction file, API docs, ADRs: whichever
-ones now say something false.
+ones now say something false. A decision in talk edits each issue it falsifies,
+unasked.
 
 - Before finishing, name the docs the change touched, or say "docs impact: none"
   with a one-line why. Saying nothing is not an answer.
