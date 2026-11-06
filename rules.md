@@ -181,7 +181,8 @@ there is no GitHub remote or `gh auth status` fails, name the finding in the
 final report instead of filing it.
 
 **A defect in this plugin goes to its tracker, after the person says yes.**
-These rules, the hooks, a `craft:` skill and its scripts are the plugin.
+Both parts of these rules, the hooks, a `craft:` skill and its scripts are
+the plugin.
 A defect in one of them is an issue for `kalinichenko88/craft-skills`, not for
 the project you work in. In a checkout of `craft-skills`, the rule above
 applies instead. Do not derail the task. Unlike the rule above, ask the person

@@ -79,12 +79,16 @@ for event in SessionStart SubagentStart; do
     echo "FAIL: $event: the two parts and the marker line differ from rules.md"
     exit 1
   }
-  # hooks.json runs rules.sh under each event with that event and each part.
-  args=$(jq -r --arg e "$event" \
-    '.hooks[$e][].hooks[].command | select(test("rules\\.sh")) | split(" ") | .[-2:] | join(" ")' \
+  # hooks.json runs both parts under each event, from one group, so one
+  # matcher gives both. The path is quoted: the plugin root can hold a space.
+  cmds=$(jq -r --arg e "$event" '[.hooks[$e][] | [.hooks[].command |
+    select(test("rules\\.sh"))] | select(length > 0)] |
+    if length == 1 then .[0][] else "rules.sh in \(length) groups" end' \
     "$root/hooks/hooks.json" | sort | tr '\n' ',')
-  [ "$args" = "$event 1,$event 2," ] || {
-    echo "FAIL: hooks.json: $event runs rules.sh with '$args', not '$event 1,$event 2,'"
+  # shellcheck disable=SC2016 # the variable as hooks.json holds it
+  want=$(printf '"${CLAUDE_PLUGIN_ROOT}/hooks/rules.sh" %s %s,' "$event" 1 "$event" 2)
+  [ "$cmds" = "$want" ] || {
+    echo "FAIL: hooks.json: $event runs '$cmds', not '$want'"
     exit 1
   }
 done
@@ -162,6 +166,10 @@ done
 #   project, 5 of 10 invoked the conventions skills before the first write;
 #   with "No pattern to copy …" after the conventions rule, 16 of 20 did. The
 #   runs and their fixture are in the description of the PR that closes #196.
+# - rules.md reaches the model in two parts, in either order (ADR 0004). The
+#   read-only subagent of GitHub once pointed "above" to the Haiku subagents
+#   of part 1, and without that word it read as every Haiku subagent. It
+#   names the Explore subagent of part 1 instead.
 while IFS='|' read -r f phrase; do
   sed 's/^#//' "$root/$f" | tr -s '[:space:]' ' ' | grep -qF "$phrase" || {
     echo "FAIL: $f: no \"$phrase\""
@@ -199,5 +207,6 @@ skills/github/SKILL.md|Remove it when *Finishing* ends or stops, with `git workt
 skills/github/SKILL.md|A problem marked `Done in #<PR>.` needs no other correction, and an issue with a problem left in it stays open.
 skills/github/scout.md|Then read the title and the whole body of each issue against them, the sentences with no citation too.
 rules.md|`craft:react-conventions` too. A subagent invokes them itself. No pattern to copy and no rule to keep the work short skips these calls.
+rules.md|A read-only subagent, as a review or an `Explore` subagent, files nothing, whatever the rules below say.
 EOF
 echo 'rules_test: ok'

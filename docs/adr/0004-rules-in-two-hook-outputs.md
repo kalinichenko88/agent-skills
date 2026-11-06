@@ -54,7 +54,7 @@ marker with "above" or "below".
 
 ## Consequences
 
-Good: part 1 has 5,416 and part 2 has 4,571 of 10,000 characters, so a new
+Good: part 1 has 5,416 and part 2 has 4,585 of 10,000 characters, so a new
 rule has room in either part. No rule leaves the always-on prompt. Each part
 is far under the Codex limit of about 2,500 tokens: about 1,300 and 1,100.
 

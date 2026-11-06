@@ -234,7 +234,7 @@ hold 10. A new number needs an ADR.
   characters, Claude Code's cap on one hook context; `tests/rules_test.sh`
   checks it. A host runs the two hooks of an event in parallel and gives
   no order, so no text points across the marker line with "above" or
-  "below" (ADR 0004). Pictures are WebP, since the plugin installs as a
+  "below" (ADR 0004): review only. Pictures are WebP, since the plugin installs as a
   copy of the repository.
 - **Safety.** No step of the debt and architecture skills runs the code of
   the project it reads. Nothing from a private source goes into a public
