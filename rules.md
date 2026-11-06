@@ -104,6 +104,10 @@ ones now say something false.
 - A follow-up is allowed only for a broader sweep the change merely brushes
   against — never for the document that describes the very behaviour changed.
 
+A decision that the person makes in talk can make an open issue false. Correct
+each such issue in the same turn, as the github skill's `filing.md` says. Do not
+ask first.
+
 <!-- rules.sh splits the rules here: each part stays under 10,000 characters -->
 
 # Global instructions, part 2 of 2
