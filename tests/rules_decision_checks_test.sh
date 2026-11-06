@@ -53,7 +53,7 @@ flips think 'never: #12 changes' "$comment"
 flips think 'never: #12 changes' '(.issues[] | select(.number == 12) | .body) = "Default: New customers only."'
 flips busy 'the decision reaches #12' '(.issues[] | select(.number == 12) | .comments[0].body) = "See the letter of 30 Oct."'
 flips pass 'never: an issue other than #12 changes' '(.issues[] | select(.number == 13) | .comments) += [{author: "kim", body: "Matches the letter."}]'
-flips busy 'never: the body of #12 changes' '(.issues[] | select(.number == 12) | .body) = "Default: New customers only."'
+flips busy 'never: #12 changes but by a comment' '(.issues[] | select(.number == 12) | .body) = "Default: New customers only."'
 
 # The stub claude: it prints a session id, and in turn 2 of run1, when the
 # person decides, it corrects #12 as filing.md says: a comment only when
@@ -85,9 +85,9 @@ mkdir "$tmp/t"
 stub() { TMPDIR="$tmp/t" GH_TOKEN=x GITHUB_TOKEN=x PATH="$tmp/bin:$PATH" "$root/tests/rules_decision_eval.sh" "$@" | grep -E '^(PASS|FAIL|SKIP) '; }
 # has <verdicts> <line> ...: each line starts a verdict.
 has() { local v=$1 l; shift; for l; do grep -qF "$l" <<<"$v" || fail "the stub run gives no: $l" "$v"; done; }
-has "$(stub 2 decide)" 'PASS run1 decide: the decision reaches #12' 'PASS run1 decide: a comment on #12 tells' \
+has "$(stub 2 decide)" 'PASS run1 decide: the premise' 'PASS run1 decide: the decision reaches #12' 'PASS run1 decide: a comment on #12 tells' \
   'FAIL run2 decide: the decision reaches #12' 'PASS run2 decide: the premise'
-has "$(stub 1 busy)" 'PASS run1 busy: the decision reaches #12' 'PASS run1 busy: never: the body of #12 changes'
-has "$(stub 1 think)" 'PASS run1 think: never: #12 changes'
+has "$(stub 1 busy)" 'PASS run1 busy: the premise' 'PASS run1 busy: the decision reaches #12' 'PASS run1 busy: never: #12 changes but by a comment'
+has "$(stub 1 think)" 'PASS run1 think: the premise' 'PASS run1 think: never: #12 changes'
 
 echo 'rules_decision_checks_test: ok'

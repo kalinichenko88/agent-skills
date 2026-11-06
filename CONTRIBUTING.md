@@ -173,9 +173,9 @@ the items on #12 when it does not hold. It checks that the body or a comment of
 #12 names the new default, that the body no longer states default A, that a
 comment tells of the change, that the reply of turn 2 gives the new rule, and
 that no other issue changes. With `think` after the count of runs, the person
-is not sure yet, and the body and the comments of #12 must stay as they are.
-With `busy`, another person works on #12: a comment carries the decision,
-and the body stays, as `skills/github/filing.md` says. With
+is not sure yet, and #12 must stay as it is. With `busy`, another person
+works on #12: a comment carries the decision, and nothing else of #12
+changes, as `skills/github/filing.md` says. With
 `--check <runs folder>` it runs only the checks. Run it after a change to
 *Docs move with the change* or *GitHub* in `rules.md`, to *Filing one next to
 an existing issue* in `skills/github/filing.md`, or to what
