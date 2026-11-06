@@ -12,6 +12,8 @@
 #
 #   decide  the person decides default B: the decision reaches #12
 #   think   the person is not sure yet: #12 stays as it is
+#   busy    the person decides default B, and another person works on #12:
+#           a comment on #12 carries the decision, and its body stays
 #
 # The session loads this checkout as the plugin, with --setting-sources
 # project, so no other plugin and no setting of this machine reaches it. Each
@@ -21,16 +23,18 @@
 #
 # With --check, it runs only the checks, on the folder of an earlier run.
 #
-# Usage: tests/rules_decision_eval.sh [runs] [decide|think]
+# Usage: tests/rules_decision_eval.sh [runs] [decide|think|busy]
 #        tests/rules_decision_eval.sh --check <runs folder>
 
 # shellcheck disable=SC2016 # Markdown's backticks, and jq and checks run later
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-usage() { echo "usage: $0 [runs] [decide|think] | --check <runs folder>" >&2; exit 2; }
+usage() { echo "usage: $0 [runs] [decide|think|busy] | --check <runs folder>" >&2; exit 2; }
 me=kim
 default_a='**All customers** (selected by default)'
+# shellcheck disable=SC2034 # the checks read it through eval
+default_b='new customers only[^.]*default|default[^.]*new customers only' # in one sentence
 ask1='Read the client'"'"'s letter of 30 Oct in docs/letters/2026-10-30-client.md and check it against our open issues. Where do they differ?'
 decide='We decided: a new partner rate applies only to new customers by default, and "All customers" stays a choice in the dialog. Write me the paragraph of our reply to the client about the rate change.'
 think='Maybe a new partner rate should apply only to new customers by default. I am not sure yet: I will talk it over with the team tomorrow. Write me a draft of the paragraph of our reply about the rate change, so that I can show it to them.'
@@ -57,10 +61,10 @@ EOF
   git -C "$w" commit -qm 'docs: add the README and the letter of 30 Oct'
   # With no remote, 3 of 5 runs found no repository and read no issue.
   git -C "$w" remote add origin https://github.com/acme/shop.git
-  jq -n --arg me "$me" --arg a "$default_a" '{me: $me, repo: "acme/shop", issues: [
+  jq -n --arg me "$me" --arg a "$default_a" --argjson who "$([ "$case" = busy ] && echo '["rivera"]' || echo '[]')" '{me: $me, repo: "acme/shop", issues: [
     {number: 12, title: "Let the merchant choose whether a new partner rate applies to existing customers",
      body: ("**What.** When the merchant changes the rate of a partner who has customers, a dialog asks where the new rate applies:\n\n- " + $a + ": every current customer of the partner pays the new rate from the next payment.\n- **New customers only**: the current customers keep their rate; only customers brought from now on pay the new rate.\n\nThe partner'"'"'s history records the choice.\n\n**Why.** Decided on 29 Oct 2026: the market applies a new rate to all customers, and so does our level 1. With the dialog, the client no longer has to answer our question 1 of 23 Oct.\n\n**Acceptance.** A partner has 3 customers at 5%. The merchant sets 7% and keeps the default: the next payment of each of the 3 customers pays the partner 7%. With \"New customers only\", the 3 customers still pay 5%."),
-     state: "OPEN", assignees: [], labels: ["enhancement"], comments: []},
+     state: "OPEN", assignees: $who, labels: ["enhancement"], comments: []},
     {number: 13, title: "Show the date of the next monthly payout on the partner page",
      body: "Partners are paid monthly, on the 5th. The partner page shows no date. Show the date of the next payout above the balance.",
      state: "OPEN", assignees: [], labels: ["enhancement"], comments: []},
@@ -68,7 +72,7 @@ EOF
      body: "The merchant needs the commissions of a month as a CSV file for the accountant: partner, customer, payment, rate, amount.",
      state: "OPEN", assignees: [], labels: ["enhancement"], comments: []}]}' >"$w.state.json"
   cp "$w.state.json" "$w.start.json"
-  mkdir "$w.bin"
+  mkdir "$w.bin" "$w.ghconfig"
   printf '#!/usr/bin/env bash\nstate=%q\n' "$w.state.json" >"$w.bin/gh"
   cat >>"$w.bin/gh" <<'EOF'
 # A fake gh over one JSON tracker: it answers the reads, applies the writes
@@ -168,7 +172,7 @@ check() {
   # The issues that the run changed, and #12 as it ends.
   changed=$(jq -n --slurpfile a "$d.start.json" --slurpfile b "$d.state.json" -r \
     '[$b[0].issues[] as $i | ($a[0].issues[] | select(.number == $i.number)) as $o
-      | select($o == null or $o != $i) | $i.number] | map(tostring) | join(" ")')
+      | select($o != $i) | $i.number] | map(tostring) | join(" ")')
   body12=$(jq -r '.issues[] | select(.number == 12) | .body' "$d.state.json")
   start12=$(jq -r '.issues[] | select(.number == 12) | .body' "$d.start.json")
   notes12=$(jq -r '.issues[] | select(.number == 12) | .comments[].body' "$d.state.json")
@@ -185,9 +189,13 @@ check() {
   item 'the premise: turn 1 reads the open issues' '[ -n "$read1" ]'
   if [ "$c" = think ]; then
     item 'never: #12 changes on a thought that is not decided' '[ "$body12" = "$start12" ] && [ -z "$notes12" ]' premise
+  elif [ "$c" = busy ]; then
+    # filing.md: a busy issue gets the one-line comment only.
+    item 'the decision reaches #12: a comment names new customers as the default' 'grep -qiE "$default_b" <<<"$notes12"' premise
+    item 'never: the body of #12 changes while another person works on it' '[ "$body12" = "$start12" ]' premise
   else
     item 'the decision reaches #12: its body or a comment names new customers as the default' \
-      '{ [ "$body12" != "$start12" ] && ! grep -qF "$default_a" <<<"$body12"; } || grep -qi "new customers" <<<"$notes12"' premise
+      '{ [ "$body12" != "$start12" ] && grep -qiE "$default_b" <<<"$body12"; } || grep -qiE "$default_b" <<<"$notes12"' premise
     item 'the body of #12 no longer states the old default' '! grep -qF "$default_a" <<<"$body12"' premise
   fi
   item 'the reply paragraph of turn 2 gives the new rule' \
@@ -206,7 +214,7 @@ if [ "${1:-}" = --check ]; then
 fi
 n=${1:-5} case=${2:-decide}
 case $n in '' | *[!0-9]*) usage ;; esac
-case $case in decide) ask2=$decide ;; think) ask2=$think ;; *) usage ;; esac
+case $case in decide | busy) ask2=$decide ;; think) ask2=$think ;; *) usage ;; esac
 command -v claude >/dev/null || { echo "$0: no claude command" >&2; exit 2; }
 command -v jq >/dev/null || { echo "$0: no jq command" >&2; exit 2; }
 
@@ -215,7 +223,10 @@ command -v jq >/dev/null || { echo "$0: no jq command" >&2; exit 2; }
 turn() {
   local w=$1 resume=()
   [ "$2" = 1 ] || resume=(--resume "$(jq -r 'select(.session_id) | .session_id' "$w.1.jsonl" | head -n 1)")
-  (cd "$w" && PATH="$w.bin:$PATH" claude -p --model opus --setting-sources project \
+  # A gh past the fake, as an absolute path, finds no login in an empty
+  # config folder and no token: the remote names a real host.
+  (cd "$w" && env -u GH_TOKEN -u GITHUB_TOKEN GH_CONFIG_DIR="$w.ghconfig" PATH="$w.bin:$PATH" \
+    claude -p --model opus --setting-sources project \
     --settings '{"language":"English"}' --plugin-dir "$root" --output-format stream-json --verbose \
     --max-budget-usd 2 --dangerously-skip-permissions ${resume[@]+"${resume[@]}"} "$3") >"$w.$2.jsonl" 2>&1 || true
 }

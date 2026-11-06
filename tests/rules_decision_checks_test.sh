@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Runs the checks of tests/rules_decision_eval.sh with no model. On
-# tests/fixtures/rules_decision/, four Opus runs of 2026-11-06 (#253): pass,
-# with the candidate sentence in rules.md, corrects #12; fail, with rules.md
-# as it was, offers to correct #12 and does not; nopremise read no issue in
-# turn 1, so its items on #12 give SKIP; think, with the candidate, leaves
-# #12 alone on a thought that the person did not decide. A copy with one
-# change to a recorded tracker flips the verdict it names. Then it runs the
-# eval once with a stub claude first on PATH: in run1 the stub corrects #12
-# through the fake gh in turn 2, in run2 it does not, and turn 2 must resume
-# the session of turn 1.
+# tests/fixtures/rules_decision/, five Opus runs of 2026-11-06 (#253). pass and
+# think have a first wording of the rule in rules.md: pass corrects #12, and
+# think leaves #12 alone on a thought that the person did not decide. fail,
+# with rules.md as it was, offers to correct #12 and does not. nopremise read
+# no issue in turn 1, so its items on #12 give SKIP. busy, with the rule as it
+# is, leaves a comment on #12, which another person works on, and keeps its
+# body. A copy with one change to a recorded tracker flips the verdict it
+# names. Then it runs the eval once with a stub claude first on PATH: in run1
+# the stub corrects #12 through the fake gh in turn 2, in run2 it does not,
+# and turn 2 must resume the session of turn 1.
 
 set -eu
 
@@ -31,7 +32,7 @@ FAIL nopremise decide: the premise: turn 1 reads the open issues
 SKIP nopremise decide: the decision reaches #12: its body or a comment names new customers as the default: turn 1 read no issue
 SKIP nopremise decide: the body of #12 no longer states the old default: turn 1 read no issue' ] ||
   fail 'the recorded runs do not give the verdicts of the header' "$out"
-[ "$(grep -c '^PASS ' <<<"$out")" = 14 ] || fail 'the recorded runs do not pass 14 items' "$out"
+[ "$(grep -c '^PASS ' <<<"$out")" = 19 ] || fail 'the recorded runs do not pass 19 items' "$out"
 
 # flips <run> <item> <jq>: the copy whose tracker <jq> changes flips <item> of <run>.
 flips() {
@@ -46,6 +47,7 @@ flips() {
 comment='(.issues[] | select(.number == 12) | .comments) += [{author: "kim", body: "Decided: new customers only by default."}]'
 flips fail 'the decision reaches #12' "$comment"
 flips think 'never: #12 changes' "$comment"
+flips busy 'never: the body of #12 changes' '(.issues[] | select(.number == 12) | .body) = "Default: New customers only."'
 
 # The stub claude: it prints a session id, and in turn 2 of run1 it corrects
 # #12 with the fake gh. Turn 2 without --resume of that id writes no event.

@@ -1,0 +1,41 @@
+{
+  "me": "kim",
+  "repo": "acme/shop",
+  "issues": [
+    {
+      "number": 12,
+      "title": "Let the merchant choose whether a new partner rate applies to existing customers",
+      "body": "**What.** When the merchant changes the rate of a partner who has customers, a dialog asks where the new rate applies:\n\n- **All customers** (selected by default): every current customer of the partner pays the new rate from the next payment.\n- **New customers only**: the current customers keep their rate; only customers brought from now on pay the new rate.\n\nThe partner's history records the choice.\n\n**Why.** Decided on 29 Oct 2026: the market applies a new rate to all customers, and so does our level 1. With the dialog, the client no longer has to answer our question 1 of 23 Oct.\n\n**Acceptance.** A partner has 3 customers at 5%. The merchant sets 7% and keeps the default: the next payment of each of the 3 customers pays the partner 7%. With \"New customers only\", the 3 customers still pay 5%.",
+      "state": "OPEN",
+      "assignees": [
+        "rivera"
+      ],
+      "labels": [
+        "enhancement"
+      ],
+      "comments": []
+    },
+    {
+      "number": 13,
+      "title": "Show the date of the next monthly payout on the partner page",
+      "body": "Partners are paid monthly, on the 5th. The partner page shows no date. Show the date of the next payout above the balance.",
+      "state": "OPEN",
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "comments": []
+    },
+    {
+      "number": 14,
+      "title": "Export the commissions of a month as CSV",
+      "body": "The merchant needs the commissions of a month as a CSV file for the accountant: partner, customer, payment, rate, amount.",
+      "state": "OPEN",
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "comments": []
+    }
+  ]
+}

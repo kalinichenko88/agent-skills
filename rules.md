@@ -93,8 +93,7 @@ issues. The same rules apply in other languages.
 A change that alters user-visible behaviour, a public contract, or how the thing
 is installed updates the documents that describe it — in the same change, not a
 follow-up. README, the project's instruction file, API docs, ADRs: whichever
-ones now say something false. A decision in talk edits each issue it falsifies,
-unasked.
+ones now say something false.
 
 - Before finishing, name the docs the change touched, or say "docs impact: none"
   with a one-line why. Saying nothing is not an answer.
@@ -104,6 +103,10 @@ unasked.
   sentence and why, or "none" with the files it read. The edits are yours.
 - A follow-up is allowed only for a broader sweep the change merely brushes
   against — never for the document that describes the very behaviour changed.
+
+A decision that the person makes in talk can make an open issue false. Correct
+each such issue in the same turn, as the github skill's `filing.md` says. Do not
+ask first.
 
 <!-- rules.sh splits the rules here: each part stays under 10,000 characters -->
 
