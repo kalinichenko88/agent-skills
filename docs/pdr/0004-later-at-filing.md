@@ -9,8 +9,8 @@
 We will not give an out-of-scope finding a class of its own for low
 severity. Filing sets no `Later` milestone and no priority label: a low
 finding is filed as any other finding that is not a nit, and triage gives
-it its milestone. A comment that says something false, or working code
-with no test, is filed (`skills/github/filing.md`).
+it its milestone. A comment that says something false, or code that real
+use runs with no test, is filed (`skills/github/filing.md`).
 
 ## Rests on
 

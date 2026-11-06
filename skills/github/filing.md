@@ -34,8 +34,8 @@ however small it looks.
 **A nit is not worth an issue.** A finding that the Boy Scout check leaves,
 and that is a nit, is not filed and goes into no host. A nit here is a
 name, a wording or a style that no rule of the project asks for, or an edge
-case whose count on real data is zero, with its test, except data loss or a
-security hole. These are no nits here, also when `craft:review-loop` calls
+case whose count on real data is zero, and a test of it, except data loss
+or a security hole. These are no nits here, also when `craft:review-loop` calls
 them nits, and they are filed: a comment or a doc line that says something
 false, a command in the docs that fails, and a missing or redundant test of
 what real use reaches. Give each nit one line in the final report instead,

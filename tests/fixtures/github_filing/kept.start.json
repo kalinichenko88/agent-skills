@@ -1,25 +1,12 @@
 {
   "me": "kim",
   "repo": "acme/shop",
-  "milestones": [
-    {
-      "number": 1,
-      "title": "M1 · Checkout",
-      "state": "open"
-    },
-    {
-      "number": 2,
-      "title": "Later",
-      "state": "open"
-    }
-  ],
   "issues": [
     {
       "number": 14,
       "title": "Order total is off by a cent on some orders",
       "body": "`orders/total.py` sums floats and rounds with `round`, so 3 × 0.35 gives 1.05 on one order and 1.04 on another. Done when the total rounds half up, in Decimal.",
       "state": "OPEN",
-      "stateReason": null,
       "assignees": [
         "kim"
       ],
@@ -27,38 +14,31 @@
         "bug"
       ],
       "milestone": "M1 · Checkout",
-      "comments": [],
-      "linked": [
-        "fix/14-order-total-rounding"
-      ]
+      "comments": []
     },
     {
       "number": 15,
       "title": "Export the orders of a month as CSV",
       "body": "The shop owner needs the orders of a month as a CSV file: order, customer, total.",
       "state": "OPEN",
-      "stateReason": null,
       "assignees": [],
       "labels": [
         "enhancement"
       ],
       "milestone": "M1 · Checkout",
-      "comments": [],
-      "linked": []
+      "comments": []
     },
     {
       "number": 16,
       "title": "Dark mode for the admin pages",
       "body": "The admin pages have only a light theme.",
       "state": "OPEN",
-      "stateReason": null,
       "assignees": [],
       "labels": [
         "enhancement"
       ],
       "milestone": "Later",
-      "comments": [],
-      "linked": []
+      "comments": []
     }
   ]
 }
