@@ -173,10 +173,12 @@ titles_and_searches() {
   printf '%s\n' "$@" | sed 's:/*$::' |
     awk -F/ 'NF && !seen[$0]++ { print } NF > 1 && !seen[$NF]++ { print $NF }' |
     while IFS= read -r name; do
-      issues=$(gh issue list --state all --limit 1000 --search "$name" \
+      # The search takes the repository from --repo: from the remote, it sends
+      # the old name of a renamed repository, and the search finds nothing.
+      issues=$(gh issue list --repo "$repo" --state all --limit 1000 --search "$name" \
         --json number,title,labels,state,stateReason --jq "$defs"'.[] | line')
-      prs=$(gh pr list --state all --limit 1000 --search "$name" --json number,title,state \
-        --jq '.[] | "PR #\(.number) \(.title) \(.state | ascii_downcase)"')
+      prs=$(gh pr list --repo "$repo" --state all --limit 1000 --search "$name" \
+        --json number,title,state --jq '.[] | "PR #\(.number) \(.title) \(.state | ascii_downcase)"')
       {
         echo
         echo "== Search: $name"
