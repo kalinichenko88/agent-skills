@@ -220,12 +220,14 @@ hold 10. A new number needs an ADR.
 ## Cross-cutting concerns
 
 - **Two hosts.** A step that one host cannot do names the other way: Codex
-  has no subagent with a model, so it does each such step itself. A change
-  to `hooks/hooks.json` is a major release: Codex users must trust the
-  hooks again. Both hosts run every hook, but Codex fails a hook run whose
-  output has a field that Codex does not know, as `sessionTitle`. Such a
-  hook prints only for a Claude Code input: one with `prompt_id`, which
-  Claude Code sends, and with no `turn_id`, which only Codex sends.
+  has no subagent with a model, so it does each such step itself. Codex
+  0.164.0 and later binds the trust of the hooks to every file of the
+  plugin, so Codex users trust the hooks again after each release, and the
+  release level does not depend on `hooks/`. Both hosts run every hook, but
+  Codex fails a hook run whose output has a field that Codex does not know,
+  as `sessionTitle`. Such a hook prints only for a Claude Code input: one
+  with `prompt_id`, which Claude Code sends, and with no `turn_id`, which
+  only Codex sends.
 - **Portability.** bash 3.2 on macOS, three kinds of awk, Git Bash on
   Windows, NixOS with no `/bin/bash`: every script starts with
   `#!/usr/bin/env bash`, and every file is LF (`.gitattributes`).

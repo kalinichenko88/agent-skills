@@ -39,7 +39,7 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
 
    | Level | When |
    | --- | --- |
-   | major | a type ends in `!`, or `hooks/hooks.json` changed — Codex users must trust the hooks again in `/hooks` |
+   | major | a type ends in `!` |
    | minor | a type is `feat` |
    | patch | anything else, reverts included |
 
@@ -74,9 +74,7 @@ values: write the real ones (`v0.1.0`, `0.2.0`) into every later command.
    that only lists a new skill gives no area too. The scope is the areas in
    alphabetical order, comma-separated: `(react, typescript)`. Four or more
    areas, or none, give `(plugin)`. Breaking subjects (`!`) get `(breaking)` at
-   the end of the line. When `hooks/hooks.json` changed, the first line under `### Changed`
-   is `- (codex) trust the hooks again in /hooks (breaking)`, so the reader
-   sees why the bump is major.
+   the end of the line.
 5. **Bump and check.**
    `tmp=$(mktemp) && jq --arg v "$version" '.version = $v' .codex-plugin/plugin.json >"$tmp" && mv "$tmp" .codex-plugin/plugin.json`,
    then `make check`. If the check fails, restore both files and stop.
