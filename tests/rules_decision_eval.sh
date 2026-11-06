@@ -61,6 +61,7 @@ EOF
   git -C "$w" commit -qm 'docs: add the README and the letter of 30 Oct'
   # With no remote, 3 of 5 runs found no repository and read no issue.
   git -C "$w" remote add origin https://github.com/acme/shop.git
+  git -C "$w" config credential.helper '' # git asks no helper for a login to that host
   jq -n --arg me "$me" --arg a "$default_a" --argjson who "$([ "$case" = busy ] && echo '["rivera"]' || echo '[]')" '{me: $me, repo: "acme/shop", issues: [
     {number: 12, title: "Let the merchant choose whether a new partner rate applies to existing customers",
      body: ("**What.** When the merchant changes the rate of a partner who has customers, a dialog asks where the new rate applies:\n\n- " + $a + ": every current customer of the partner pays the new rate from the next payment.\n- **New customers only**: the current customers keep their rate; only customers brought from now on pay the new rate.\n\nThe partner'"'"'s history records the choice.\n\n**Why.** Decided on 29 Oct 2026: the market applies a new rate to all customers, and so does our level 1. With the dialog, the client no longer has to answer our question 1 of 23 Oct.\n\n**Acceptance.** A partner has 3 customers at 5%. The merchant sets 7% and keeps the default: the next payment of each of the 3 customers pays the partner 7%. With \"New customers only\", the 3 customers still pay 5%."),
@@ -229,8 +230,10 @@ command -v jq >/dev/null || { echo "$0: no jq command" >&2; exit 2; }
 turn() {
   local w=$1 resume=()
   [ "$2" = 1 ] || resume=(--resume "$(jq -r 'select(.session_id) | .session_id' "$w.1.jsonl" | head -n 1)")
-  # A gh past the fake, as an absolute path, finds no login in an empty
-  # config folder and no token: the remote names a real host.
+  # The remote names a real host. A gh past the fake, as an absolute path,
+  # finds no login in an empty config folder and no token, and git asks no
+  # credential helper. A session that reads the keychain on purpose, as with
+  # `gh auth token`, still can: --dangerously-skip-permissions lets it.
   (cd "$w" && env -u GH_TOKEN -u GITHUB_TOKEN GH_CONFIG_DIR="$w.ghconfig" PATH="$w.bin:$PATH" \
     claude -p --model opus --setting-sources project \
     --settings '{"language":"English"}' --plugin-dir "$root" --output-format stream-json --verbose \
