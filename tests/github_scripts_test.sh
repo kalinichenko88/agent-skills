@@ -16,16 +16,18 @@ cat >"$tmp/bin/gh" <<'EOF'
 #!/usr/bin/env bash
 echo "$*" >>"$FAKE/calls"
 case "$*" in *"${FAKE_FAIL:-no failure asked}"*) echo 'gh: HTTP 502' >&2; exit 1 ;; esac
-filter=. search=''
+filter=. search='' repo=''
 for ((i = 1; i <= $#; i++)); do
   j=$((i + 1))
-  case ${!i} in --jq) filter=${!j} ;; --search) search=${!j} ;; --silent) exec >/dev/null ;; esac
+  case ${!i} in --jq) filter=${!j} ;; --search) search=${!j} ;; --repo) repo=${!j} ;; --silent) exec >/dev/null ;; esac
 done
 # A list answers from issues-<search>.json or prs-<search>.json, and the open
-# issues from open-issues.json, in $FAKE first.
+# issues from open-issues.json, in $FAKE first. As GitHub's search, which does
+# not follow a rename, a search finds nothing without the resolved --repo.
 list() {
   local f=$1-$search.json
   [ -n "$search" ] || f=open-issues.json
+  [ -z "$search" ] || [ "$repo" = kalinichenko88/agent-skills ] || f=none
   if [ -f "$FAKE/$f" ]; then f=$FAKE/$f; else f=$FIXTURES/$f; fi
   if [ -f "$f" ]; then jq -r "$filter" "$f"; else echo '[]' | jq -r "$filter"; fi
 }
@@ -135,6 +137,7 @@ done
 out=$(bash "$scripts/collect.sh" filing scout.md)
 collected=${out%%: *}
 check 'filing lists every open issue' 5 "$(sed -n '/^== Open issues/,/^== Search/p' "$collected" | grep -c ' open$')"
+check 'filing finds the hits when the remote holds the old name of the repository' 0 "$(grep -c '^none$' "$collected" || true)"
 check 'filing gives a body to each open hit' \
   "$(printf '==> #5 \n==> #8 \n==> PR #9 \n==> #10 \n== end: 4 entries')" \
   "$(grep -E '^==> |^== end' "$collected" | sed -E 's/^(==> (PR )?#[0-9]+ ).*/\1/')"
@@ -163,7 +166,7 @@ rm "$tmp/issues-sheet.json"
 bash "$scripts/collect.sh" filing '' skills/github/scout.md/ >/dev/null
 check 'filing searches each name and base name once' \
   "$(printf 'skills/github/scout.md\nscout.md')" \
-  "$(sed -n 's/^issue list --state all --limit 1000 --search \(.*\) --json.*/\1/p' "$tmp/calls")"
+  "$(sed -n 's/^issue list .* --search \(.*\) --json.*/\1/p' "$tmp/calls")"
 
 # A failed query leaves no file behind.
 collects() { find "$tmp" -maxdepth 1 -name 'collect.*' | wc -l | tr -d ' '; }
