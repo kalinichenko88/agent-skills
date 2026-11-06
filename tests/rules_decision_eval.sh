@@ -135,6 +135,7 @@ case "$1 $2" in
     save --argjson n "$num" --arg me "$me" --arg b "$(text)" '(.issues[] | select(.number == $n) | .comments) += [{author: $me, body: $b}]'
     echo "https://github.com/$repo/issues/$num#issuecomment-1"
     ;;
+  'api user') out "$(jq -c '{login: .me}' "$state")" ;; # worktree.sh and runs ask who is logged in
   'pr list') out '[]' ;;
   'repo view') out "$(jq -c '{nameWithOwner: .repo, visibility: "PRIVATE", defaultBranchRef: {name: "main"}}' "$state")" ;;
   'label list') out '[{"name":"bug"},{"name":"enhancement"}]' ;;
@@ -211,7 +212,7 @@ check() {
 
 if [ "${1:-}" = --check ]; then
   [ $# -eq 2 ] && [ -d "$2" ] || usage
-  for f in "$2"/*.events; do check "${f%.events}"; done
+  for f in "$2"/*.events; do [ -e "$f" ] || usage; check "${f%.events}"; done
   exit 0
 fi
 n=${1:-5} case=${2:-decide}

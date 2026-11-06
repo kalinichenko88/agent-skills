@@ -169,20 +169,20 @@ of `claude -p` in two turns, with a fake `gh` over a JSON tracker. Open issue
 B. In turn 1 the person asks to check the letter against the open issues; in
 turn 2 the person decides default B and asks for the paragraph of the reply.
 It checks the premise, that turn 1 reads the open issues, and gives SKIP on
-the items on #12 when it does not hold. It checks that the decision reaches
-#12 in its body or a comment, that the body no longer states default A, that
-the reply of turn 2 gives the new rule, and that no other issue changes. With
-`think` after the count of runs, the person is not sure yet, and #12 must
-stay as it is. With `busy`, another person works on #12: a comment carries
-the decision, and the body stays, as `skills/github/filing.md` says. With
+the items on #12 when it does not hold. It checks that the body or a comment of
+#12 names the new default, that the body no longer states default A, that a
+comment tells of the change, that the reply of turn 2 gives the new rule, and
+that no other issue changes. With `think` after the count of runs, the person
+is not sure yet, and the body and the comments of #12 must stay as they are.
+With `busy`, another person works on #12: a comment carries the decision,
+and the body stays, as `skills/github/filing.md` says. With
 `--check <runs folder>` it runs only the checks. Run it after a change to
 *Docs move with the change* or *GitHub* in `rules.md`, to *Filing one next to
 an existing issue* in `skills/github/filing.md`, or to what
 `skills/github/tracker.md` calls busy.
 `tests/rules_decision_checks_test.sh` runs its checks in `make check`, on
 five recorded runs in `tests/fixtures/rules_decision/`, and runs the eval
-with a stub `claude` in the place of the model, in the decide and the busy
-case.
+with a stub `claude` in the place of the model, in each case.
 The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 

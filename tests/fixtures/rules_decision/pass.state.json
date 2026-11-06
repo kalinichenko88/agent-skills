@@ -4,8 +4,8 @@
   "issues": [
     {
       "number": 12,
-      "title": "Let the merchant choose whether a new partner rate applies to existing customers",
-      "body": "**What.** When the merchant changes the rate of a partner who has customers, a dialog asks where the new rate applies:\n\n- **New customers only** (selected by default): the current customers keep their rate; only customers brought from now on pay the new rate.\n- **All customers**: every current customer of the partner pays the new rate from the next payment.\n\nThe partner's history records the choice.\n\n**Why.** The client answered our question 1 of 23 Oct in the letter of 30 Oct (`docs/letters/2026-10-30-client.md`): a new rate applies only to customers brought after the change, and the commissions on current customers stay as they are. On 6 Nov 2026 we decided to make that the default and to keep \"All customers\" as a choice in the dialog. This replaces the decision of 29 Oct, which made \"All customers\" the default.\n\n**Acceptance.** A partner has 3 customers at 5%. The merchant sets 7% and keeps the default: the 3 customers still pay the partner 5%, and a new customer brought after the change pays 7%. With \"All customers\", the next payment of each of the 3 customers pays the partner 7%.",
+      "title": "Let the merchant choose whether a new partner rate applies to existing customers (default: new customers only)",
+      "body": "**What.** When the merchant changes the rate of a partner who has customers, a dialog asks where the new rate applies:\n\n- **New customers only** (selected by default): the current customers keep their rate; only customers brought from now on pay the new rate.\n- **All customers**: every current customer of the partner pays the new rate from the next payment.\n\nThe partner's history records the choice.\n\n**Why.** The client answered our question 1 of 23 Oct in the letter of 30 Oct (`docs/letters/2026-10-30-client.md`): a new rate applies only to customers that the partner brings after the change. Decided on 6 Nov 2026: \"New customers only\" is the default, and \"All customers\" stays a choice in the dialog. This replaces the decision of 29 Oct, which made \"All customers\" the default.\n\n**Acceptance.** A partner has 3 customers at 5%. The merchant sets 7% and keeps the default: the 3 customers still pay the partner 5%, and a customer brought after the change pays 7%. With \"All customers\", the next payment of each of the 3 customers pays the partner 7%.",
       "state": "OPEN",
       "assignees": [],
       "labels": [
@@ -14,7 +14,7 @@
       "comments": [
         {
           "author": "kim",
-          "body": "Default changed to \"New customers only\" after the client's letter of 30 Oct; \"All customers\" stays a choice (decided 6 Nov 2026)."
+          "body": "Default changed to \"New customers only\", after the client's letter of 30 Oct; \"All customers\" stays a choice in the dialog (decided 6 Nov 2026)."
         }
       ]
     },
