@@ -11,7 +11,8 @@
 #
 # The checks read the end state of the JSON and the session's messages. The
 # defect reaching the tracker is the premise: a run that files nothing
-# measures the remote or the question, not the nit, and its items give SKIP.
+# measures the remote or the question, not the nit: the premise fails, and
+# the other items give SKIP.
 #
 # The session loads this checkout as the plugin, with --setting-sources
 # project, so no other plugin and no setting of this machine reaches it. Each
@@ -218,7 +219,7 @@ check() {
   # name the caller of vat.
   nit=$(grep -ciE '(^|[^_[:alnum:]])invoice_total|get_ prefix' <<<"$added" || true)
   low=$(grep -ciE 'cents' <<<"$added" || true)
-  said=$(awk -F'\t' '$1 == "text" { print $2 }' "$d.events")
+  said=$(awk -F'\t' '$1 == "text" { last = $2 } END { print last }' "$d.events")
   item() {
     if [ "$3" = premise ] && [ "$defect" -eq 0 ]; then echo "SKIP $s: $1: the defect reaches no issue"
     elif eval "$2"; then echo "PASS $s: $1"; else echo "FAIL $s: $1"; fi

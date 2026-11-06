@@ -8,7 +8,9 @@
 
 We will not give an out-of-scope finding a class of its own for low
 severity. Filing sets no `Later` milestone and no priority label: a low
-finding is filed as any other finding, and triage gives it its milestone.
+finding is filed as any other finding that is not a nit, and triage gives
+it its milestone. A low finding is no nit: a comment that says something
+false, or working code with no test, is filed (`skills/github/filing.md`).
 
 ## Rests on
 
@@ -18,7 +20,7 @@ finding is filed as any other finding, and triage gives it its milestone.
   approval for each low finding.
 - An open issue with a label and a milestone is not in the list that triage
   reads (`skills/roadmap/triage.md:35-38`). A low finding filed into
-  `Later` would never be triaged.
+  `Later` with a label would never be triaged.
 - A task goes into `Later` only after the person says so
   (`skills/roadmap/SKILL.md:151`, `skills/roadmap/README.md:40`). The
   milestone is the importance, and no priority labels (PR #110).
@@ -36,7 +38,8 @@ than one triage approval can take.
 - `--milestone Later` at filing, and a low label where there is no `Later`
   (#260): one triage row less for each low finding, against two decisions
   of roadmap and an issue that triage never lists.
-- Filing as now, with triage placing each finding: no change.
+- Filing as before, with triage placing each finding: no change for a low
+  finding.
 
 ## Links
 

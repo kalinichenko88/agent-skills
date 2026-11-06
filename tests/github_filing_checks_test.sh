@@ -3,7 +3,8 @@
 # tests/fixtures/github_filing/, three Opus runs of 2026-11-06 (#260): filed,
 # with filing.md before the nit rule, files the nit; kept, with the rule,
 # files the low finding and the defect and names the nit in its message;
-# noremote, with a local origin, files nothing, so its items give SKIP. A
+# noremote, with a local origin, files nothing, so its premise fails and its
+# other items give SKIP. A last message that names no nit fails that item. A
 # copy with one change to a recorded tracker flips the verdict it names.
 # Then it runs the eval with a stub claude first on PATH, which files
 # through the fake gh: run1 the defect and the nit, run2 the defect only.
@@ -42,6 +43,10 @@ flips() {
 }
 flips kept 'never: the nit reaches the tracker' '(.issues[] | select(.number == 14) | .comments) += [{author: "kim", body: "Also: rename get_invoice_total to invoice_total."}]'
 flips kept 'the low finding reaches the tracker' 'del(.issues[] | select(.title | test("cents")))'
+rm -rf "$tmp/copy" && cp -R "$fixtures" "$tmp/copy"
+printf 'text\tDone.\n' >>"$tmp/copy/kept.events"
+d=$(diff <(echo "$out") <(verdicts "$tmp/copy") | grep '^>' || true)
+[ "$d" = '> FAIL kept: the final message names the nit' ] || fail 'a last message with no nit does not flip only: the final message names the nit' "$d"
 
 # The stub claude: run1 files the defect and the nit, run2 the defect
 # only. It exits 1 when a gh past the fake could log in.

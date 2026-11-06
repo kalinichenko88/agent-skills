@@ -183,6 +183,18 @@ an existing issue* in `skills/github/filing.md`, or to what
 `tests/rules_decision_checks_test.sh` runs its checks in `make check`, on
 five recorded runs in `tests/fixtures/rules_decision/`, and runs the eval
 with a stub `claude` in the place of the model, in each case.
+`tests/github_filing_eval.sh` runs craft on three review findings outside the
+task (#260): a nit (a name), a low one (a docstring that says something
+false) and a defect. Each run is one Opus session of `claude -p` with a fake
+`gh` over a JSON tracker. It checks the premise, that the defect reaches the
+tracker, and gives SKIP on the other items when it does not hold. It checks
+that the nit does not reach the tracker, that the low finding does, and that
+the final message names the nit. With `--check <runs folder>` it runs only
+the checks. Run it after a change to *A nit is not worth an issue* in
+`skills/github/filing.md`, or to *Out-of-scope findings become issues* in
+`rules.md`. `tests/github_filing_checks_test.sh` runs its checks in
+`make check`, on three recorded runs in `tests/fixtures/github_filing/`, and
+runs the eval with a stub `claude`.
 The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 
