@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Probes #260: does an agent file a nit that a review found outside the
 # task? Each run builds a Python workspace on the branch of a task, #14, a
-# tracker as JSON with a `Later` milestone, and a fake gh first on PATH that
-# reads and writes that JSON. One opus session of `claude -p` gets three
-# review findings outside the module of the task, `orders/`:
+# tracker as JSON, and a fake gh first on PATH that reads and writes that
+# JSON. One opus session of `claude -p` gets three review findings outside
+# the module of the task, `orders/`:
 #
 #   nit     `get_invoice_total` could be `invoice_total`: taste, no rule
 #   low     the docstring of `vat` says cents, and it returns euros
@@ -79,14 +79,13 @@ setup() {
   git -C "$w" remote set-url origin https://github.com/acme/shop.git
   git -C "$w" config credential.helper ''
   jq -n --arg me "$me" '{me: $me, repo: "acme/shop",
-    milestones: [{number: 1, title: "M1 · Checkout", state: "open"}, {number: 2, title: "Later", state: "open"}],
     issues: [
       {number: 14, title: "Order total is off by a cent on some orders", body: "`orders/total.py` sums floats and rounds with `round`, so 3 × 0.35 gives 1.05 on one order and 1.04 on another. Done when the total rounds half up, in Decimal.",
-       state: "OPEN", assignees: [$me], labels: ["bug"], milestone: "M1 · Checkout", comments: [], linked: ["fix/14-order-total-rounding"]},
+       state: "OPEN", assignees: [$me], labels: ["bug"], milestone: "M1 · Checkout", comments: []},
       {number: 15, title: "Export the orders of a month as CSV", body: "The shop owner needs the orders of a month as a CSV file: order, customer, total.",
-       state: "OPEN", assignees: [], labels: ["enhancement"], milestone: "M1 · Checkout", comments: [], linked: []},
+       state: "OPEN", assignees: [], labels: ["enhancement"], milestone: "M1 · Checkout", comments: []},
       {number: 16, title: "Dark mode for the admin pages", body: "The admin pages have only a light theme.",
-       state: "OPEN", assignees: [], labels: ["enhancement"], milestone: "Later", comments: [], linked: []}]}' >"$w.state.json"
+       state: "OPEN", assignees: [], labels: ["enhancement"], milestone: "Later", comments: []}]}' >"$w.state.json"
   cp "$w.state.json" "$w.start.json"
   mkdir "$w.bin" "$w.ghconfig"
   printf '#!/usr/bin/env bash\nstate=%q\n' "$w.state.json" >"$w.bin/gh"
@@ -109,7 +108,6 @@ for a in "${args[@]:2}"; do
     \#[0-9]* | [0-9]*) num=${a#\#} && break ;;
   esac
 done
-case $* in --version | *' --help' | *' -h') echo 'gh version 2.98.0'; exit 0 ;; esac
 me=$(jq -r .me "$state") repo=$(jq -r .repo "$state")
 out() { if [ -n "$jqf" ]; then jq -r "$jqf" <<<"$1"; else printf '%s\n' "$1"; fi; }
 pick() { jq -c --arg f "$fields" "$1"' | . as $i | if $f == "" then . else reduce ($f | split(","))[] as $k ({}; .[$k] = $i[$k]) end'; }
@@ -137,7 +135,6 @@ text() { # text: the body that --body or --body-file gives
 }
 case "$1 $2" in
   'api repos/{owner}/{repo}') out "$(jq -c '{full_name: .repo, default_branch: "main", visibility: "public"}' "$state")" ;;
-  'api user') out "$(jq -c '{login: .me}' "$state")" ;;
   'api graphql')
     if [[ $* == *issueOrPullRequest* ]]; then # the entries of collect.sh: none
       out "$(jq -c '{data: {viewer: {login: .me}, repository: {}}}' "$state")"
@@ -146,7 +143,6 @@ case "$1 $2" in
       exit 1
     fi
     ;;
-  'api '*milestones*) out "$(jq -c '[.milestones[] | . + {open_issues: 0, closed_issues: 0}]' "$state")" ;;
   'issue view')
     if [ -n "$fields" ]; then
       out "$(issues | jq -c --argjson n "$num" '.[] | select(.number == $n)' | pick .)"
@@ -163,16 +159,15 @@ case "$1 $2" in
     n=$(jq '[.issues[].number] | max + 1' "$state")
     save --argjson n "$n" --arg t "$(value --title -t)" --arg b "$(text)" --arg m "$(value --milestone -m)" \
       --argjson l "$(labels --label -l)" --arg me "$me" --arg a "$(value --assignee -a)" \
-      '.issues += [{number: $n, title: $t, body: $b, state: "OPEN", labels: $l, comments: [], linked: [],
+      '.issues += [{number: $n, title: $t, body: $b, state: "OPEN", labels: $l, comments: [],
         assignees: (if $a == "" then [] elif $a == "@me" then [$me] else [$a] end),
         milestone: (if $m == "" then null else $m end)}]'
     echo "https://github.com/$repo/issues/$n"
     ;;
   'issue edit')
-    t=$(value --title -t) b=$(text) m=$(value --milestone -m)
+    t=$(value --title -t) b=$(text)
     [ -z "$t" ] || save --argjson n "$num" --arg t "$t" '(.issues[] | select(.number == $n) | .title) = $t'
     [ -z "$b" ] || save --argjson n "$num" --arg b "$b" '(.issues[] | select(.number == $n) | .body) = $b'
-    [ -z "$m" ] || save --argjson n "$num" --arg m "$m" '(.issues[] | select(.number == $n) | .milestone) = $m'
     save --argjson n "$num" --argjson l "$(labels --add-label)" '(.issues[] | select(.number == $n) | .labels) |= (. + $l | unique)'
     echo "https://github.com/$repo/issues/$num"
     ;;
@@ -180,7 +175,6 @@ case "$1 $2" in
     save --argjson n "$num" --arg me "$me" --arg b "$(text)" '(.issues[] | select(.number == $n) | .comments) += [{author: $me, body: $b}]'
     echo "https://github.com/$repo/issues/$num#issuecomment-1"
     ;;
-  'issue develop') jq -r --argjson n "$num" --arg repo "$repo" '.issues[] | select(.number == $n) | .linked[] | "\(.)\thttps://github.com/\($repo)/tree/\(.)"' "$state" ;;
   'pr list') out '[]' ;;
   'repo view') out "$(jq -c '{nameWithOwner: .repo, visibility: "PUBLIC", defaultBranchRef: {name: "main"}}' "$state")" ;;
   'label list') out '[{"name":"bug"},{"name":"debt"},{"name":"documentation"},{"name":"enhancement"}]' ;;

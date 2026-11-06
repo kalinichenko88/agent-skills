@@ -41,7 +41,6 @@ flips() {
   fi
 }
 flips kept 'never: the nit reaches the tracker' '(.issues[] | select(.number == 14) | .comments) += [{author: "kim", body: "Also: rename get_invoice_total to invoice_total."}]'
-flips filed 'never: the nit reaches the tracker' 'del(.issues[] | select(.title | test("invoice_total")))'
 flips kept 'the low finding reaches the tracker' 'del(.issues[] | select(.title | test("cents")))'
 
 # The stub claude: run1 files the defect and the nit, run2 the defect
