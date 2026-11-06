@@ -50,7 +50,7 @@ marker=$(grep '^<!-- rules.sh splits' "$root/rules.md") || {
   exit 1
 }
 if "$root/hooks/rules.sh" SessionStart >/dev/null 2>&1; then
-  echo "FAIL: the hook with no part gives output, and the whole file is over the cap"
+  echo "FAIL: the hook with no part gives output, not an error"
   exit 1
 fi
 for event in SessionStart SubagentStart; do
@@ -68,6 +68,11 @@ for event in SessionStart SubagentStart; do
       exit 1
     }
     jq -r .hookSpecificOutput.additionalContext <<<"$output" >"$crlf/part$part"
+    # Each part is read on its own, after another plugin's context too.
+    [ "$(head -1 "$crlf/part$part")" = "# Global instructions, part $part of 2" ] || {
+      echo "FAIL: $event $part: the part does not start with its own heading"
+      exit 1
+    }
   done
   diff <(printf '%s\n\n%s\n\n%s\n' "$(<"$crlf/part1")" "$marker" "$(<"$crlf/part2")") \
     "$root/rules.md" || {
@@ -76,7 +81,7 @@ for event in SessionStart SubagentStart; do
   }
   # hooks.json runs rules.sh under each event with that event and each part.
   args=$(jq -r --arg e "$event" \
-    '.hooks[$e][].hooks[].command | select(test("rules\\.sh")) | sub(".*rules\\.sh\" "; "")' \
+    '.hooks[$e][].hooks[].command | select(test("rules\\.sh")) | split(" ") | .[-2:] | join(" ")' \
     "$root/hooks/hooks.json" | sort | tr '\n' ',')
   [ "$args" = "$event 1,$event 2," ] || {
     echo "FAIL: hooks.json: $event runs rules.sh with '$args', not '$event 1,$event 2,'"

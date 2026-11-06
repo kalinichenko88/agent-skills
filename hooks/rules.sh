@@ -13,7 +13,7 @@ marker=$'\n\n<!-- rules.sh splits the rules here: each part stays under 10,000 c
 case ${2:-} in
 1) rules=${rules%%"$marker"*} ;;
 2) rules=${rules#*"$marker"} ;;
-*) echo "usage: rules.sh <event> 1|2" >&2; exit 1 ;; # the whole file is over the cap
+*) echo "usage: rules.sh <event> 1|2" >&2; exit 1 ;; # hooks.json names a part
 esac
 rules=${rules//\\/\\\\}
 rules=${rules//\"/\\\"}

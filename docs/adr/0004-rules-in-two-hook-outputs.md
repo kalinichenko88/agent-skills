@@ -44,9 +44,9 @@ and `rules.sh <event> 2` the text after it. `hooks/hooks.json` runs both for
 SessionStart and for SubagentStart. The marker stands before *Code review*:
 part 1 holds the general habits from the gate to the docs, and part 2 the
 calls of the plugin's skills, the Boy Scout Rule and the trailer rule. Each
-part starts with a heading of its own, as "# Global instructions, part 2 of
-2", so that a part that comes after the context of another plugin is not
-read as a part of it.
+part starts with a heading of its own, as
+"# Global instructions, part 2 of 2", so that a part that comes after the
+context of another plugin is not read as a part of it.
 
 A host runs the hooks of one event in parallel and gives no order: in two
 runs of Claude Code 2.1.319, part 2 came first. So no text points across the
@@ -75,5 +75,6 @@ each part.
 
 `tests/rules_test.sh`: for each event, each part stays under 10,000
 characters, the two parts and the marker line rebuild `rules.md` byte for
-byte, and `hooks/hooks.json` runs `rules.sh` with parts 1 and 2. With no
-part, `rules.sh` stops with an error, not with the whole file.
+byte, each part starts with its own heading, and `hooks/hooks.json` runs
+`rules.sh` under each event with that event and parts 1 and 2. With no part,
+`rules.sh` stops with an error, not with the whole file.
