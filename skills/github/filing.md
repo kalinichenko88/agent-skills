@@ -33,12 +33,13 @@ however small it looks.
 
 **A nit is not worth an issue.** A finding that the Boy Scout check leaves,
 and that is a nit, is not filed and goes into no host. A nit here is a
-matter of taste: a name, a wording or a style that no rule of the project
-asks for, or an edge case whose count on real data is zero, except data
-loss or a security hole. A comment or a doc line that says something false,
-a command in the docs that fails, and a missing test are no nits here, also
-when `craft:review-loop` calls them nits: they are filed. Give each nit one
-line in the final report instead, so that the person can file it.
+name, a wording or a style that no rule of the project asks for, or an edge
+case whose count on real data is zero, with its test, except data loss or a
+security hole. These are no nits here, also when `craft:review-loop` calls
+them nits, and they are filed: a comment or a doc line that says something
+false, a command in the docs that fails, and a missing or redundant test of
+what real use reaches. Give each nit one line in the final report instead,
+so that the person can file it.
 
 **Search by identifier, not by your title.** A search for the symbol finds
 every issue that names it; the prose you were about to write finds only issues
