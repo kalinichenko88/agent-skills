@@ -82,7 +82,7 @@ module too: the text that the flows are checked against.
 | Module | Folder | Its test, fixtures and pictures |
 | --- | --- | --- |
 | rules | `rules.md`, `hooks/` | `tests/rules_test.sh`, `tests/hooks_scripts_test.sh`, `tests/rules_decision_eval.sh`, `tests/rules_decision_checks_test.sh`, `tests/fixtures/hooks/`, `tests/fixtures/rules_decision/` |
-| github | `skills/github/` | `tests/github_scripts_test.sh`, `tests/github_scout_eval.sh`, `tests/fixtures/github/`, `docs/github/` |
+| github | `skills/github/` | `tests/github_scripts_test.sh`, `tests/github_scout_eval.sh`, `tests/github_filing_eval.sh`, `tests/github_filing_checks_test.sh`, `tests/fixtures/github/`, `tests/fixtures/github_filing/`, `docs/github/` |
 | roadmap | `skills/roadmap/` | `tests/roadmap_scripts_test.sh`, `tests/fixtures/roadmap/`, `docs/roadmap/` |
 | review-loop | `skills/review-loop/` | `tests/review_loop_scripts_test.sh`, `tests/review_loop_eval.sh`, `tests/review_loop_lens_eval.sh`, `tests/review_loop_lens_checks_test.sh`, `tests/fixtures/review_loop/` |
 | debt | `skills/debt/` | `tests/debt_scripts_test.sh`, `tests/debt_lens_eval.sh`, `tests/fixtures/debt/` |

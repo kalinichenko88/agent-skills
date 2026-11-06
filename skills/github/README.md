@@ -28,10 +28,14 @@ time.
   branch it has on GitHub is here with its last commit, the work goes on
   there, with no question. In Claude Code, the agent first looks for a session
   still open under the issue's name, and stops when it finds one.
-- **A finding goes to the tracker, not to the chat.** A fix in the task's
-  module that needs no decision and is smaller than the task goes into the
-  current PR. Anything else joins an open issue on the same code, up to two
-  added findings per issue. Only when no issue can take it is a new one filed.
+- **A finding goes to the tracker, a nit to the report.** A fix in the
+  task's module that needs no decision and is smaller than the task goes into
+  the current PR. Anything else joins an open issue on the same code, up to
+  two added findings per issue. Only when no issue can take it is a new one
+  filed. A nit, as a name or a wording that no rule of the project asks for,
+  gets no issue: the final report names it, so that you can file it. A false
+  comment, a failing command in the docs or a missing test of what real use
+  reaches is no nit.
 - **A defect in the plugin reaches its tracker.** When the agent finds that
   a rule, a skill or a script of this plugin is wrong, it writes an issue for
   `kalinichenko88/craft-skills`: the plugin version, the file and line, and

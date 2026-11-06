@@ -1,0 +1,104 @@
+{
+  "me": "kim",
+  "repo": "acme/shop",
+  "milestones": [
+    {
+      "number": 1,
+      "title": "M1 · Checkout",
+      "state": "open"
+    },
+    {
+      "number": 2,
+      "title": "Later",
+      "state": "open"
+    }
+  ],
+  "issues": [
+    {
+      "number": 14,
+      "title": "Order total is off by a cent on some orders",
+      "body": "`orders/total.py` sums floats and rounds with `round`, so 3 × 0.35 gives 1.05 on one order and 1.04 on another. Done when the total rounds half up, in Decimal.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [
+        "kim"
+      ],
+      "labels": [
+        "bug"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": [],
+      "linked": [
+        "fix/14-order-total-rounding"
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Export the orders of a month as CSV",
+      "body": "The shop owner needs the orders of a month as a CSV file: order, customer, total.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": [],
+      "linked": []
+    },
+    {
+      "number": 16,
+      "title": "Dark mode for the admin pages",
+      "body": "The admin pages have only a light theme.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "Later",
+      "comments": [],
+      "linked": []
+    },
+    {
+      "number": 17,
+      "title": "Rename get_invoice_total to invoice_total",
+      "body": "`billing/invoice.py:4`: the function `get_invoice_total` computes a value. It does not get one. The `get_` prefix adds no information. The name `invoice_total` says the same thing in fewer words.\n\nHow it shows: only in the name. No behaviour changes.\n\nFix: rename `get_invoice_total` to `invoice_total`, and update each caller. Today the repository has no callers.\n\nOut of scope for #14: the finding is in `billing`, and #14 changes only `orders`. Found in the review of the branch for #14.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [],
+      "milestone": null,
+      "comments": [],
+      "linked": []
+    },
+    {
+      "number": 18,
+      "title": "Docstring of vat says cents, but it returns euros",
+      "body": "`billing/tax.py:4`: the docstring of `vat` says \"Returns the VAT on amount, in cents.\" The function returns euros, as a `Decimal` quantized to `0.01`. Its only caller, `get_invoice_total` in `billing/invoice.py:5`, adds the result to an order total in euros.\n\nHow it shows: a reader who trusts the docstring can divide the result by 100, or multiply an input by 100. Either gives a total that is wrong by a factor of 100.\n\nFix: change the docstring to say that `vat` returns the VAT on `amount`, in euros, rounded to the cent.\n\nOut of scope for #14: the finding is in `billing`, and #14 changes only `orders`. Found in the review of the branch for #14.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "documentation"
+      ],
+      "milestone": null,
+      "comments": [],
+      "linked": []
+    },
+    {
+      "number": 19,
+      "title": "sign_up treats emails that differ only in case as different accounts",
+      "body": "`accounts/signup.py:4`: `sign_up` stores the email as the user typed it, and checks for an existing account with the same exact string. So `Bob@shop.test` and `bob@shop.test` sign up as two accounts.\n\nHow it shows:\n\n```python\nsign_up(\"Bob@shop.test\", \"h1\")\nsign_up(\"bob@shop.test\", \"h2\")  # no ValueError: a second account\n```\n\nOpen question before the fix: normalize the whole address (`strip()` and `lower()`), or only the domain part? RFC 5321 lets the local part be case-sensitive, but most services treat it as case-insensitive. The fix needs a test with the two addresses above.\n\nOut of scope for #14: the finding is in `accounts`, and #14 changes only `orders`. Found in the review of the branch for #14.",
+      "state": "OPEN",
+      "stateReason": null,
+      "assignees": [],
+      "labels": [
+        "bug"
+      ],
+      "milestone": null,
+      "comments": [],
+      "linked": []
+    }
+  ]
+}

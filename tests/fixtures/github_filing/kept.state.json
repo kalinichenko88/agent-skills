@@ -1,0 +1,68 @@
+{
+  "me": "kim",
+  "repo": "acme/shop",
+  "issues": [
+    {
+      "number": 14,
+      "title": "Order total is off by a cent on some orders",
+      "body": "`orders/total.py` sums floats and rounds with `round`, so 3 × 0.35 gives 1.05 on one order and 1.04 on another. Done when the total rounds half up, in Decimal.",
+      "state": "OPEN",
+      "assignees": [
+        "kim"
+      ],
+      "labels": [
+        "bug"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": []
+    },
+    {
+      "number": 15,
+      "title": "Export the orders of a month as CSV",
+      "body": "The shop owner needs the orders of a month as a CSV file: order, customer, total.",
+      "state": "OPEN",
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "M1 · Checkout",
+      "comments": []
+    },
+    {
+      "number": 16,
+      "title": "Dark mode for the admin pages",
+      "body": "The admin pages have only a light theme.",
+      "state": "OPEN",
+      "assignees": [],
+      "labels": [
+        "enhancement"
+      ],
+      "milestone": "Later",
+      "comments": []
+    },
+    {
+      "number": 17,
+      "title": "The docstring of `vat` says cents, but it returns euros",
+      "body": "## Where\n\n`billing/tax.py:4`: the docstring of `vat` says \"Returns the VAT on amount, in cents.\"\n\n## How it shows up\n\n`vat` returns `amount * 0.20`, quantized to `0.01`, as a `Decimal` in euros. Its only caller, `get_invoice_total` in `billing/invoice.py:5`, adds it to an order total in euros. A reader who trusts the docstring can divide the result by 100, or multiply the input by 100, and get a wrong invoice total.\n\n## Fix\n\nChange the docstring to say that the result is in euros, as a `Decimal` rounded to the cent.\n\n## Why it was out of scope\n\nFound in the review of the fix for #14, which changes only `orders/`. This file is in another module.",
+      "state": "OPEN",
+      "labels": [
+        "documentation"
+      ],
+      "comments": [],
+      "assignees": [],
+      "milestone": null
+    },
+    {
+      "number": 18,
+      "title": "sign_up treats emails that differ only in case as two accounts",
+      "body": "## Where\n\n`accounts/signup.py:4`: `sign_up` checks and stores the email as typed.\n\n## How it shows up\n\n`sign_up(\"Bob@shop.test\", h)` and then `sign_up(\"bob@shop.test\", h)` both succeed. One person gets two accounts, and the check `if email in USERS` does not stop the second one.\n\n## Fix to decide\n\nNormalize the email before the check and the store, for example with `email.strip().lower()`, and add a test for the case above. Decide if the stored value keeps the case as typed, and what happens to accounts that exist already with mixed case.\n\n## Why it was out of scope\n\nFound in the review of the fix for #14, which changes only `orders/`. This file is in another module.",
+      "state": "OPEN",
+      "labels": [
+        "bug"
+      ],
+      "comments": [],
+      "assignees": [],
+      "milestone": null
+    }
+  ]
+}
