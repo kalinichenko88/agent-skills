@@ -42,7 +42,11 @@ We will keep `rules.md` one file and give it in two parts. The line
 stands between two sections. `rules.sh <event> 1` gives the text before it,
 and `rules.sh <event> 2` the text after it. `hooks/hooks.json` runs both for
 SessionStart and for SubagentStart. The marker stands before *Code review*:
-part 1 holds the general habits, and part 2 the calls of the plugin's skills.
+part 1 holds the general habits from the gate to the docs, and part 2 the
+calls of the plugin's skills, the Boy Scout Rule and the trailer rule. Each
+part starts with a heading of its own, as "# Global instructions, part 2 of
+2", so that a part that comes after the context of another plugin is not
+read as a part of it.
 
 A host runs the hooks of one event in parallel and gives no order: in two
 runs of Claude Code 2.1.319, part 2 came first. So no text points across the
@@ -50,7 +54,7 @@ marker with "above" or "below".
 
 ## Consequences
 
-Good: part 1 has 5,403 and part 2 has 4,530 of 10,000 characters, so a new
+Good: part 1 has 5,416 and part 2 has 4,571 of 10,000 characters, so a new
 rule has room in either part. No rule leaves the always-on prompt. Each part
 is far under the Codex limit of about 2,500 tokens: about 1,300 and 1,100.
 

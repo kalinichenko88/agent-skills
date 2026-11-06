@@ -232,9 +232,10 @@ hold 10. A new number needs an ADR.
   `tests/rules_test.sh` checks both.
 - **Size.** Each of the two parts of `rules.md` stays under 10,000
   characters, Claude Code's cap on one hook context; `tests/rules_test.sh`
-  checks it. A host runs the two hooks in parallel and gives no order, so
-  no text points across the marker line with "above" or "below" (ADR 0004). Pictures are WebP, since
-  the plugin installs as a copy of the repository.
+  checks it. A host runs the two hooks of an event in parallel and gives
+  no order, so no text points across the marker line with "above" or
+  "below" (ADR 0004). Pictures are WebP, since the plugin installs as a
+  copy of the repository.
 - **Safety.** No step of the debt and architecture skills runs the code of
   the project it reads. Nothing from a private source goes into a public
   repository (`craft:github`).

@@ -45,9 +45,12 @@ done
 
 # hooks.json runs the hook once per part, and each part is one context. The
 # two parts and the marker line between them rebuild rules.md (ADR 0004).
-marker=$(grep '^<!-- rules.sh splits' "$root/rules.md")
+marker=$(grep '^<!-- rules.sh splits' "$root/rules.md") || {
+  echo "FAIL: rules.md has no marker line where rules.sh splits it"
+  exit 1
+}
 if "$root/hooks/rules.sh" SessionStart >/dev/null 2>&1; then
-  echo "FAIL: the hook with no part gives output, and the whole file passes the cap"
+  echo "FAIL: the hook with no part gives output, and the whole file is over the cap"
   exit 1
 fi
 for event in SessionStart SubagentStart; do
@@ -71,12 +74,12 @@ for event in SessionStart SubagentStart; do
     echo "FAIL: $event: the two parts and the marker line differ from rules.md"
     exit 1
   }
-  # Every rule handler in hooks.json names a part, and each part has one.
-  parts=$(jq -r --arg e "$event" \
-    '.hooks[$e][].hooks[].command | select(test("rules\\.sh")) | split(" ") | last' \
-    "$root/hooks/hooks.json" | sort | tr '\n' ' ')
-  [ "$parts" = "1 2 " ] || {
-    echo "FAIL: hooks.json: $event runs rules.sh with parts '$parts', not '1 2 '"
+  # hooks.json runs rules.sh under each event with that event and each part.
+  args=$(jq -r --arg e "$event" \
+    '.hooks[$e][].hooks[].command | select(test("rules\\.sh")) | sub(".*rules\\.sh\" "; "")' \
+    "$root/hooks/hooks.json" | sort | tr '\n' ',')
+  [ "$args" = "$event 1,$event 2," ] || {
+    echo "FAIL: hooks.json: $event runs rules.sh with '$args', not '$event 1,$event 2,'"
     exit 1
   }
 done

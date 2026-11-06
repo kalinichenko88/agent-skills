@@ -8,8 +8,9 @@ How to work on the `craft` plugin itself. For how to use it, see the [README](RE
 `docs/ARCHITECTURE.md` with the architecture skill's `invariants.sh`, and
 replays `rules.md` through the hook, part by part, to prove that the two parts
 and the marker line between them rebuild the file byte for byte, and that each
-part stays within Claude Code's 10,000-character cap on one hook context. It checks that a checkout with `core.autocrlf=true`, the Git for
-Windows default, keeps every text file in LF, that the hook still gives the
+part stays within Claude Code's 10,000-character cap on one hook context. It
+checks that a checkout with `core.autocrlf=true`, the Git for Windows
+default, keeps every text file in LF, that the hook still gives the
 rules from a CRLF `rules.md`, that every script starts with
 `#!/usr/bin/env bash`, and that every `- ` line of `CHANGELOG.md` starts with
 its scope in parentheses. It fails on a skill name with the plugin's old

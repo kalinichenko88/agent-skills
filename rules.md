@@ -1,4 +1,4 @@
-# Global instructions
+# Global instructions, part 1 of 2
 
 ## The repository's own gate (always)
 
@@ -106,6 +106,8 @@ ones now say something false.
 
 <!-- rules.sh splits the rules here: each part stays under 10,000 characters -->
 
+# Global instructions, part 2 of 2
+
 ## Code review (always)
 
 Before the first review of a change — `/code-review` or `/security-review` in
@@ -163,8 +165,8 @@ copy and no rule to keep the work short skips these calls.
 A commit message, a pull request, an issue, a workflow file — anything that
 touches a repository's GitHub surface goes through the `craft:github`
 skill. Invoke it before the first `git commit`, `gh` call or workflow edit, not
-after. A read-only subagent, as a review or a Haiku subagent, files
-nothing, whatever the rules below say. It does not load the skill. It names
+after. A read-only subagent, as a review or an `Explore` subagent,
+files nothing, whatever the rules below say. It does not load the skill. It names
 each finding in its report, and the agent that sent it decides on each one.
 One sent with the skill's `scout.md`, or with the roadmap skill's `lanes.md`,
 follows that file instead.
