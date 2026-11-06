@@ -162,6 +162,21 @@ a message only as thinking (#206). Run it after a change to
 `tests/scenarios_checks_test.sh` runs its checks in `make check`, on one
 recorded run of each case in `tests/fixtures/scenarios/`, and on copies that
 change the verdict of one item.
+`tests/rules_decision_eval.sh` runs craft on a decision that the person makes
+in a conversation, with no pull request (#253). Each run is one Opus session
+of `claude -p` in two turns, with a fake `gh` over a JSON tracker. Open issue
+#12 states default A, and a client letter in the workspace asks for default
+B. In turn 1 the person asks to check the letter against the open issues; in
+turn 2 the person decides default B and asks for the paragraph of the reply.
+It checks that the decision reaches #12 in its body or a comment, that the
+body no longer states default A, that the reply is given, and that no other
+issue changes. A run whose turn 1 reads no issue gives SKIP on #12. With
+`think` after the count of runs, the person is not sure yet, and #12 must
+stay as it is. With `--check <runs folder>` it runs only the checks. Run it
+after a change to *Docs move with the change* or *GitHub* in `rules.md`.
+`tests/rules_decision_checks_test.sh` runs its checks in `make check`, on
+four recorded runs in `tests/fixtures/rules_decision/`, and runs the eval
+once with a stub `claude` in the place of the model.
 The `_eval.sh` scripts call the model, so their runs are not part of
 `make check`.
 
