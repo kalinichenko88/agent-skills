@@ -15,8 +15,9 @@ It is for a solo developer or a small team that keeps its work on GitHub.
 **The rules.** [`rules.md`](rules.md) loads at the start of every session and
 every subagent. It tells the agent to run the project's own check before it
 calls work done, to ship each bug fix with its test, to use the platform
-before a new dependency, to move the docs with the change, and to load the
-right skill at the right moment.
+before a new dependency, to move the docs with the change, to correct an
+open issue at once when the person decides something that makes it false,
+and to load the right skill at the right moment.
 
 **The skills.** Each one loads when its moment comes. Its README says when it
 starts and what you get.
